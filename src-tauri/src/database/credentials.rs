@@ -1,14 +1,16 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct DSN {
+pub struct DSN {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Credentials {
     pub scheme: String,
     pub username: String,
     pub password: Option<String>,
     pub host: String,
-    pub port: u8,
+    pub port: u16,
     pub dbname: String,
-    pub params: Vec<String>,
+    pub params: Option<Vec<String>>,
 }
 
 pub struct Connection {
