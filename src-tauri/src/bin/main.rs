@@ -24,7 +24,6 @@ fn main() {
         .manage(AppState {
             db: Default::default(),
         })
-        .invoke_handler(tauri::generate_handler![greet])
         .setup(|app| {
             let handle = app.handle();
 

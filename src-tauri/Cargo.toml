@@ -21,6 +21,7 @@ simplecrypt = "1.0.2"
 anyhow = "1.0.71"
 log = "0.4.19"
 env_logger = "0.10.0"
+rand = "0.8.5"
 
 
 [features]

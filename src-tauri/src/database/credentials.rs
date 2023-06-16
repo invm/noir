@@ -14,9 +14,11 @@ pub struct Credentials {
 }
 
 pub struct Connection {
+    pub id: u32,
     pub name: String,
     pub color: String,
     pub credentials: DSN,
     pub default_db: String,
     pub save_password: bool,
+    pub metadata: Option<String>,
 }
