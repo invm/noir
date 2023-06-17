@@ -1,7 +1,10 @@
 'use client';
-// import { useState } from "react";
+import { useState, useEffect } from "react";
 // import { invoke } from "@tauri-apps/api/tauri";
-import { DarkThemeToggle, Flowbite } from 'flowbite-react';
+import { Flowbite, DarkThemeToggle, useThemeMode } from 'flowbite-react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import Tabs from './pages/Tabs';
 
 
 function App() {
@@ -13,15 +16,33 @@ function App() {
   //   setGreetMsg(await invoke("greet", { name }));
   // }
 
+  const [mode, setMode, toggleMode] = useThemeMode();
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    let dark =
+      localStorage.getItem("theme") === "dark"
+    setDark(dark);
+  }, [])
+
   return (
-    <Flowbite>
-      <div className="bg-white dark:bg-gray-800 h-full w-full flex flex-col justify-center items-center">
-        <h1 className="text-black dark:text-white">Welcome to Query Noir!</h1>
-        <div>
-          <DarkThemeToggle />
-        </div>
+    <Flowbite theme={{ dark }}>
+      <div className="bg h-full w-full flex">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" Component={Home} />
+            <Route path="/tabs" Component={Tabs} />
+          </Routes>
+        </BrowserRouter>
+        {/**
+        <DarkThemeToggle onClick={() => {
+          toggleMode();
+          let newMode = mode == "dark" ? "light" : "dark";
+          localStorage.setItem("theme", newMode);
+        }} />
+        */}
       </div>
-    </Flowbite>
+    </Flowbite >
   );
 }
 
