@@ -1,9 +1,8 @@
 use anyhow::Result;
-use query_noir::utils::fs;
+use query_noir::utils::init;
 
 fn main() -> Result<()> {
-    env_logger::init();
-    fs::init_app()?;
+    init::init_app()?;
 
     // let mut colors = conn.prepare("select id, name from cat_colors")?;
     //
