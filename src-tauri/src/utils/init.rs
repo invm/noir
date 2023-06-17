@@ -1,5 +1,6 @@
+use crate::database::database::create_app_db;
 use anyhow::Result;
-use crate::database::app::create_app_db;
+
 use super::{
     crypto::create_app_key,
     fs::{check_if_app_dir_exists, create_app_config, create_app_dir, get_app_path},
