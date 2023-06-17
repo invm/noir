@@ -1,16 +1,14 @@
 use crate::database::app::create_app_db;
 use anyhow::Result;
-use log::info;
 use std::fs;
 
 use super::crypto::create_app_key;
 
 pub fn init_app() -> Result<()> {
     let app_path = get_app_path();
-    info!("App path: {}", app_path);
     if !check_if_app_dir_exists(&app_path) {
-        create_app_key()?;
         create_app_dir(&app_path)?;
+        create_app_key()?;
         create_app_config(&app_path)?;
         create_app_db(&app_path)?;
     }
@@ -45,4 +43,3 @@ fn create_app_config(app_path: &String) -> Result<()> {
     let config = r#""#;
     Ok(fs::write(config_path, config)?)
 }
-
