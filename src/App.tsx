@@ -16,17 +16,11 @@ function App() {
   //   setGreetMsg(await invoke("greet", { name }));
   // }
 
-  // const [mode, setMode, toggleMode] = useThemeMode();
-  // const [dark, setDark] = useState(true);
-
-  // useEffect(() => {
-  //   let dark =
-  //     localStorage.getItem("theme") === "dark"
-  //   // setDark(dark);
-  // }, [])
+  const [mode] = useThemeMode();
 
   return (
-    <Flowbite>
+    // <Flowbite theme={{ dark: true }}>
+    <Flowbite theme={{ dark: mode === 'dark' }}>
       <div className="bg h-full w-full flex">
         <BrowserRouter>
           <Routes>
@@ -34,13 +28,6 @@ function App() {
             <Route path="/tabs" Component={Tabs} />
           </Routes>
         </BrowserRouter>
-        {/**
-        <DarkThemeToggle onClick={() => {
-          toggleMode();
-          let newMode = mode == "dark" ? "light" : "dark";
-          localStorage.setItem("theme", newMode);
-        }} />
-        */}
       </div>
     </Flowbite >
   );
