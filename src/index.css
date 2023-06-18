@@ -33,5 +33,9 @@ body {
 }
 
 .bg {
-  @apply bg-white dark:bg-gray-800;
+  @apply bg-white dark:bg-slate-800;
+}
+
+.primary {
+  @apply dark:bg-red-500 dark:hover:bg-red-600;
 }
