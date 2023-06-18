@@ -16,17 +16,17 @@ function App() {
   //   setGreetMsg(await invoke("greet", { name }));
   // }
 
-  const [mode, setMode, toggleMode] = useThemeMode();
-  const [dark, setDark] = useState(false);
+  // const [mode, setMode, toggleMode] = useThemeMode();
+  // const [dark, setDark] = useState(true);
 
-  useEffect(() => {
-    let dark =
-      localStorage.getItem("theme") === "dark"
-    setDark(dark);
-  }, [])
+  // useEffect(() => {
+  //   let dark =
+  //     localStorage.getItem("theme") === "dark"
+  //   // setDark(dark);
+  // }, [])
 
   return (
-    <Flowbite theme={{ dark }}>
+    <Flowbite>
       <div className="bg h-full w-full flex">
         <BrowserRouter>
           <Routes>

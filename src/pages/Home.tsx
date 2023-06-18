@@ -1,12 +1,14 @@
 // import { Link } from "react-router-dom"
-import { Navbar, Card } from 'flowbite-react';
+import { Navbar, Card, Button } from 'flowbite-react';
 import { useTranslation } from "react-i18next";
 
 const Home = () => {
   const { t } = useTranslation();
   const connections = [
     { name: "Local", address: "127.0.0.1:5432", default_db: "example", color: 'orange' },
-    { name: "Staging", address: "https://asd.com/", default_db: "example", color: 'red' },
+    { name: "Staging", address: "https://staging.com/", default_db: "example", color: 'red' },
+    { name: "QaStaging", address: "https://qastaging.com/", default_db: "example", color: 'red' },
+    { name: "QaStaging", address: "https://qastaging.com/", default_db: "example", color: 'red' },
   ]
   return (
     <div className="flex-1">
@@ -33,13 +35,15 @@ const Home = () => {
         <div className="flex-1 p-3">
           <div className="grid grid-cols-3 gap-4">
             {connections.map((conn) => (
-              <Card className="gap-1 border-2">
+              <a href="#" className="block max-w-sm p-3 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+
                 <h5 className="text">{conn.name}</h5>
                 <div>
-                  <p className="text my-0">{conn.address}</p>
-                  <p className="text">{conn.default_db}</p>
+                  <p className="text my-0 font-bold">{conn.address}</p>
+                  <p className="text ">{conn.default_db}</p>
                 </div>
-              </Card>
+                <Button className="bg-orange-500 hover:bg-red-600">Click me</Button>
+              </a>
             ))}
           </div>
         </div>
