@@ -10,7 +10,7 @@ pub struct Credentials {
     pub host: String,
     pub port: u16,
     pub dbname: String,
-    pub params: Option<Vec<String>>,
+    pub params: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

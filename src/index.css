@@ -18,6 +18,12 @@
   -webkit-text-size-adjust: 100%;
 }
 
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   width: 100vw;
   height: 100vh;

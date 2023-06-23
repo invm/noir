@@ -3,6 +3,15 @@
     "query_noir_titlecase": "Query Noir",
     "home": {
       "add_connection": "Add Connection"
+    },
+    "components": {
+      "add_connection_form": {
+        "validations":{
+          "name_length": "Name must be between 2 and 255 characters",
+          "password_length": "Password must be between 2 and 255 characters"
+        },
+        "save_password": "Save password"
+      }
     }
   }
 }
