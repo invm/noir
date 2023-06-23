@@ -15,6 +15,7 @@ const Home = () => {
     <div className="flex-1 flex flex-col">
       <HomeNavbar />
       <div className="w-full flex flex-1 flex-col">
+        {/*
         <div className="flex-2 p-3">
           <div className="grid grid-cols-3 xl:grid-cols-4 gap-4 ">
             {connections.map((conn) => (
@@ -29,6 +30,7 @@ const Home = () => {
             ))}
           </div>
         </div>
+        */}
         <div className="flex justify-center items-start flex-1 py-10">
           <div className="w-80">
             <AddConnectionForm />
