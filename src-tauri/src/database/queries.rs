@@ -3,8 +3,15 @@ use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+pub enum Scheme {
+    Mysql,
+    Postgres,
+    Sqlite,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Credentials {
-    pub scheme: String,
+    pub scheme: Scheme,
     pub username: String,
     pub password: Option<String>,
     pub host: String,
@@ -16,7 +23,7 @@ pub struct Credentials {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DBConnection {
     pub id: u32,
-    pub name: String,
+    pub connection_name: String,
     pub color: String,
     pub credentials: Credentials,
     pub default_db: String,
@@ -25,11 +32,11 @@ pub struct DBConnection {
 }
 
 pub fn add_connection(conn: &DBConnection, db: &Connection) -> Result<()> {
-    let mut statement = db.prepare("INSERT INTO connections (name, color, credentials, default_db, save_password, metadata) VALUES (:name, :color, :credentials, :default_db, :save_password, :metadata)")?;
+    let mut statement = db.prepare("INSERT INTO connections (connection_name, color, credentials, default_db, save_password, metadata) VALUES (:connection_name, :color, :credentials, :default_db, :save_password, :metadata)")?;
     let credentials = serde_json::to_string(&conn.credentials)?;
     let metadata = serde_json::to_string(&conn.metadata)?;
     statement.execute(named_params! {
-        ":name": conn.name,
+        ":connection_name": conn.connection_name,
         ":color": conn.color,
         ":credentials": credentials,
         ":default_db": conn.default_db,
@@ -41,11 +48,11 @@ pub fn add_connection(conn: &DBConnection, db: &Connection) -> Result<()> {
 }
 
 pub fn update_connection(db: &Connection, conn: &DBConnection) -> Result<()> {
-    let mut statement = db.prepare("INSERT INTO connections (name, color, credentials, default_db, save_password, metadata) VALUES (:name, :color, :credentials, :default_db, :save_password, :metadata) where id = :id")?;
+    let mut statement = db.prepare("INSERT INTO connections (connection_name, color, credentials, default_db, save_password, metadata) VALUES (:connection_name, :color, :credentials, :default_db, :save_password, :metadata) where id = :id")?;
     let credentials = serde_json::to_string(&conn.credentials)?;
     let metadata = serde_json::to_string(&conn.metadata)?;
     statement.execute(named_params! {
-        ":name": conn.name,
+        ":connection_name": conn.connection_name,
         ":color": conn.color,
         ":credentials": credentials,
         ":default_db": conn.default_db,
@@ -80,7 +87,7 @@ pub fn get_all_connections(
 
         items.push(DBConnection {
             id: row.get("id")?,
-            name: row.get("name")?,
+            connection_name: row.get("name")?,
             color: row.get("color")?,
             credentials,
             default_db: row.get("default_db")?,
@@ -104,7 +111,7 @@ pub fn get_connection_by_id(db: &Connection, id: u32) -> Result<DBConnection> {
 
     return Ok(DBConnection {
         id: row.get("id")?,
-        name: row.get("name")?,
+        connection_name: row.get("name")?,
         color: row.get("color")?,
         credentials,
         default_db: row.get("default_db")?,

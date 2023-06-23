@@ -1,6 +1,6 @@
 // import { Link } from "react-router-dom"
 import { Navbar, Button } from 'flowbite-react';
-import AddConnectionForm from '../components/AddConnectionForm';
+import AddConnectionForm from '../components/AddConnectionsForm/AddConnectionForm';
 import Card from '../components/Card';
 import HomeNavbar from '../components/HomeNavbar';
 
@@ -31,11 +31,7 @@ const Home = () => {
           </div>
         </div>
         */}
-        <div className="flex justify-center items-start flex-1 py-10">
-          <div className="w-80">
-            <AddConnectionForm />
-          </div>
-        </div>
+        <AddConnectionForm  />
       </div>
       {/*
       <div>
