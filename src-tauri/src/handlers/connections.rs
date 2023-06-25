@@ -7,6 +7,7 @@ use tauri::{command, AppHandle};
 
 #[command]
 pub fn add_connection(app_handle: AppHandle, conn: DBConnection) -> CommandResult<()> {
+    // let conn: DBConnection = conn.try_into()?;
     return app_handle
         .db(|db| queries::add_connection(&conn, db))
         .map_err(Error::from);
@@ -33,9 +34,9 @@ pub fn get_all_connections(app_handle: AppHandle) -> CommandResult<Vec<DBConnect
         .map_err(Error::from);
 }
 
-#[command]
-pub fn get_connection_by_id(app_handle: AppHandle, id: u32) -> CommandResult<DBConnection> {
-    return app_handle
-        .db(|db| queries::get_connection_by_id(db, id))
-        .map_err(Error::from);
-}
+// #[command]
+// pub fn get_connection_by_id(app_handle: AppHandle, id: u32) -> CommandResult<DBConnection> {
+//     return app_handle
+//         .db(|db| queries::get_connection_by_id(db, id))
+//         .map_err(Error::from);
+// }
