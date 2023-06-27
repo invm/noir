@@ -8,6 +8,8 @@ pub enum Error {
     Utf8(#[from] std::string::FromUtf8Error),
     #[error("General error")]
     General(#[from] anyhow::Error),
+    #[error("Uuid parse error")]
+    UUIDError(#[from] uuid::Error),
 }
 
 // we must also implement serde::Serialize
