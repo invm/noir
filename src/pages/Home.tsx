@@ -1,8 +1,7 @@
-// import { Link } from "react-router-dom"
-import { Navbar, Button } from 'flowbite-react';
 import AddConnectionForm from '../components/AddConnectionForm';
-import Card from '../components/Card';
 import HomeNavbar from '../components/HomeNavbar';
+import Button from '../components/UI/Button';
+import Card from '../components/UI/Card';
 
 const Home = () => {
   const connections = [
@@ -12,25 +11,25 @@ const Home = () => {
     { name: "QaStaging", address: "https://qastaging.com/", default_db: "example", color: 'blue' },
   ]
   return (
-    <div className="flex-1 flex flex-col">
-      <HomeNavbar />
-      <div className="w-full flex flex-1 flex-col">
-        <div className="flex-2 p-3">
-          <div className="grid grid-cols-3 xl:grid-cols-4 gap-4 ">
+    <div class="flex-1 flex flex-col">
+      {/* <HomeNavbar /> */}
+      <div class="w-full flex flex-1 flex-col">
+        <div class="flex-2 p-3">
+          <div class="grid grid-cols-3 xl:grid-cols-4 gap-4 ">
             {connections.map((conn) => (
-              <Card key={conn.name + conn.address} style={{ borderColor: conn.color }}>
-                <h5 className="text text-2xl font-bold">{conn.name}</h5>
+              <Card style={{ borderColor: conn.color }}>
+                <h5 class="text text-2xl font-bold">{conn.name}</h5>
                 <div>
-                  <p className="text my-0 ">{conn.address}</p>
-                  <p className="text ">{conn.default_db}</p>
+                  <p class="text my-0 ">{conn.address}</p>
+                  <p class="text ">{conn.default_db}</p>
                 </div>
-                <Button className="bg-sky-600 hover:bg-sky-800 dark:bg-lime-600 dark:hover:bg-lime-700" >Click me</Button>
+                <Button class="bg-sky-600 hover:bg-sky-800 dark:bg-lime-600 dark:hover:bg-lime-700" >Click me</Button>
               </Card>
             ))}
           </div>
         </div>
-        <div className="flex justify-center items-start flex-1 py-10">
-          <div className="w-80">
+        <div class="flex justify-center items-start flex-1 py-10">
+          <div class="w-80">
             <AddConnectionForm />
           </div>
         </div>
