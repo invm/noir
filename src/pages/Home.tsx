@@ -1,7 +1,6 @@
-import AddConnectionForm from '../components/AddConnectionForm';
-import HomeNavbar from '../components/HomeNavbar';
-import Button from '../components/UI/Button';
-import Card from '../components/UI/Card';
+import { A } from '@solidjs/router';
+import { AddConnectionForm } from '../components/AddConnectionsForm';
+import { Button, Card } from '../components/UI';
 
 const Home = () => {
   const connections = [
@@ -12,7 +11,6 @@ const Home = () => {
   ]
   return (
     <div class="flex-1 flex flex-col">
-      {/* <HomeNavbar /> */}
       <div class="w-full flex flex-1 flex-col">
         <div class="flex-2 p-3">
           <div class="grid grid-cols-3 xl:grid-cols-4 gap-4 ">
@@ -28,14 +26,9 @@ const Home = () => {
             ))}
           </div>
         </div>
-        */}
-        <AddConnectionForm  />
+        <AddConnectionForm />
+        <A href="/connection">Connection</A>
       </div>
-      {/*
-      <div>
-        <Link to="/tabs" className="text">Tabs</Link>
-      </div>
-      */}
     </div>
   )
 }

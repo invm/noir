@@ -8,4 +8,5 @@ const Card = ({ children, style = {} }: UIProps) => {
   )
 }
 
-export default Card
+export { Card }
+

@@ -1,9 +1,10 @@
-import { Link } from "react-router-dom"
+import { A } from "@solidjs/router"
 
 const Tabs = () => {
   return (
     <div>
-      <Link to="/">Home</Link>
+      <h1>Tabs</h1>
+      <A href="/">Home</A>
     </div>
   )
 }
