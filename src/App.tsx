@@ -5,16 +5,13 @@ import { Route, Router, Routes } from "@solidjs/router"; // 👈 Import the rout
 import Tabs from './pages/Tabs';
 
 function App() {
-  document.documentElement.classList.add('dark');
   return (
-    <div class="background h-full w-full">
-      <Router>
-        <Routes>
-          <Route path="/" component={Home} />
-          <Route path="/connection" component={Tabs} />
-        </Routes>
-      </Router>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" component={Home} />
+        <Route path="/connection" component={Tabs} />
+      </Routes>
+    </Router>
   );
 }
 
