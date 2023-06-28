@@ -1,9 +1,39 @@
-const TextInput = (props: { id: string }) => {
+import { FieldProps, Field } from 'solid-form-handler';
+import { Component, JSX, Show, splitProps } from 'solid-js';
+import { Label } from '.';
+
+export type TextInputProps = JSX.InputHTMLAttributes<HTMLInputElement> &
+  FieldProps & { label?: string };
+
+export const TextInput: Component<TextInputProps> = (props) => {
+  const [local, rest] = splitProps(props, [
+    'classList',
+    'label',
+    'formHandler',
+  ]);
+
   return (
-    <input type="text" id={props.id} class="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 sm:text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-  )
-}
-
-export default TextInput
-
+    <Field
+      {...props}
+      mode="input"
+      render={(field) => (
+        <div classList={local.classList}>
+          <Show when={local.label}>
+            <div class="my-1 block">
+              <Label for={field.props.id ?? ''} value={local.label} />
+            </div>
+          </Show>
+          <input type={props.type ?? 'text'} class="app-input"
+            {...rest}
+            {...field.props}
+            classList={{
+              'is-invalid': field.helpers.error,
+              'form-control': true,
+            }}
+          />
+        </div>
+      )}
+    />
+  );
+};
 

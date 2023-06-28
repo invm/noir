@@ -1,9 +1,58 @@
-const Checkbox = (props: { checked: boolean, id: string }) => {
+import { FieldProps, Field } from 'solid-form-handler';
+import { Component, JSX, Show, splitProps } from 'solid-js';
+import { Label } from '.';
+
+export type CheckboxProps = Omit<
+  JSX.InputHTMLAttributes<HTMLInputElement>,
+  'type'
+> &
+  FieldProps & {
+    label?: string;
+    display?: 'switch';
+    uncheckedValue?: string | number;
+  };
+
+export const Checkbox: Component<CheckboxProps> = (props) => {
+  const [local, rest] = splitProps(props, [
+    'classList',
+    'label',
+    'display',
+    'uncheckedValue',
+    'formHandler',
+  ]);
+
   return (
-    <input checked={props.checked} id={props.id} type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-  )
-}
-
-export default Checkbox
-
+    <Field
+      {...props}
+      mode="checkbox"
+      render={(field) => (
+        <div classList={local.classList}>
+          <div
+            classList={{
+              'is-invalid': field.helpers.error,
+              'form-check': true,
+              'form-switch': local.display === 'switch',
+            }}
+          >
+            <input
+              {...rest}
+              {...field.props}
+              type="checkbox"
+              class="app-checkbox"
+              classList={{
+                'is-invalid': field.helpers.error,
+                'form-check-input': true,
+              }}
+            />
+            <Show when={local.label}>
+              <div class="my-1 inline">
+                <Label for={field.props.id ?? ''} value={local.label} />
+              </div>
+            </Show>
+          </div>
+        </div>
+      )}
+    />
+  );
+};
 

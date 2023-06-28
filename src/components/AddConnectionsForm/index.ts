@@ -23,5 +23,4 @@ export const ConnectionFormSchema = z.object({
   params: z.string().optional(),
 });
 
-export type ConnectionFormInput = z.infer<typeof ConnectionFormSchema>;
-
+export * from './AddConnectionForm'
