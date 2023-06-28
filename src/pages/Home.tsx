@@ -28,11 +28,8 @@ const Home = () => {
             ))}
           </div>
         </div>
-        <div class="flex justify-center items-start flex-1 py-10">
-          <div class="w-80">
-            <AddConnectionForm />
-          </div>
-        </div>
+        */}
+        <AddConnectionForm  />
       </div>
       {/*
       <div>
