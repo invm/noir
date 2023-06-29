@@ -1,6 +1,7 @@
 const Button = (props: any) => {
+  const width = props.width || 'w-full'
   return (
-    <button type="button" class="app-btn" {...props}>{props.children}</button>
+    <button type="button" class={`app-btn ${width}`} {...props}>{props.children}</button>
   )
 }
 

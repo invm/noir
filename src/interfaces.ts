@@ -14,16 +14,6 @@ export const PORTS_MAP: Record<SchemeType, number> = {
 
 export const schemes = [Schemes.MySQL, Schemes.PostgreSQL, Schemes.SQLite] as const;
 
-export interface Scheme {
-  scheme: typeof Schemes[keyof typeof Schemes];
-  username: string;
-  password: string | undefined;
-  host: string;
-  port: number;
-  dbname: string;
-  params: string | undefined;
-};
-
 type HostCredentials = {
   username: string;
   password: string;
@@ -43,17 +33,31 @@ type FileCredentials = {
   path: string;
 }
 
-type SchemeCredentialsMap = {
-  [Schemes.MySQL]: HostCredentials | SocketCredentials;
-  [Schemes.PostgreSQL]: HostCredentials | SocketCredentials;
-  [Schemes.SQLite]: FileCredentials;
-}
-
-const ConnectionModes = {
+export const ConnectionModes = {
   Host: 'Host',
   Socket: 'Socket',
   File: 'File',
 } as const;
+
+export type SchemeCredentialsMap = {
+  [Schemes.MySQL]: {
+    [ConnectionModes.Host]: HostCredentials;
+    [ConnectionModes.Socket]: SocketCredentials;
+  },
+  [Schemes.PostgreSQL]: {
+    [ConnectionModes.Host]: HostCredentials;
+    [ConnectionModes.Socket]: SocketCredentials;
+  }
+  [Schemes.SQLite]: {
+    [ConnectionModes.File]: FileCredentials;
+  }
+}
+
+export type ConnectionModeToCredentialsMap = {
+  [ConnectionModes.Host]: HostCredentials;
+  [ConnectionModes.Socket]: SocketCredentials;
+  [ConnectionModes.File]: FileCredentials;
+}
 
 export type ConnectionMode = typeof ConnectionModes[keyof typeof ConnectionModes];
 
@@ -68,11 +72,8 @@ export const AvailableConnectionModes = {
 export interface ConnectionConfig<T extends SchemeType> {
   id: string;
   scheme: SchemeCredentialsMap[T];
-  connection_name: string;
+  name: string;
   color: string;
-  default_db: string;
-  save_password: boolean;
-  metadata: Record<string, any> | undefined;
 };
 
 export const connectionColors = [
