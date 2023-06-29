@@ -10,11 +10,10 @@ pub fn add_connection(
     app_handle: AppHandle,
     name: &str,
     scheme: String,
-    save_password: bool,
     color: &str,
 ) -> CommandResult<()> {
     let scheme = Scheme::try_from(scheme.as_str())?;
-    let conn = ConnectionConfig::new(name, scheme, save_password, color)?;
+    let conn = ConnectionConfig::new(name, scheme, color)?;
     return app_handle
         .db(|db| connections::add_connection(db, &conn))
         .map_err(Error::from);

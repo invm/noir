@@ -43,11 +43,8 @@ pub struct HostCredentials {
 pub struct ConnectionConfig {
     pub id: Uuid,
     pub scheme: Scheme,
-    pub connection_name: String,
+    pub name: String,
     pub color: String,
-    pub default_db: String,
-    pub save_password: bool,
-    pub metadata: Option<String>,
 }
 
 impl TryFrom<&str> for Scheme {
@@ -63,7 +60,7 @@ impl TryFrom<&str> for Scheme {
 }
 
 impl ConnectionConfig {
-    pub fn new(name: &str, scheme: Scheme, save_password: bool, color: &str) -> Result<Self> {
+    pub fn new(name: &str, scheme: Scheme, color: &str) -> Result<Self> {
         if name.len() == 0 {
             return Err(anyhow::anyhow!("Connection name cannot be empty"));
         }
@@ -74,27 +71,11 @@ impl ConnectionConfig {
             return Err(anyhow::anyhow!("Sqlite connection must have a path"));
         }
         let id = Uuid::new_v4();
-        let default_db = match &scheme {
-            Scheme::Mysql(mysql) => match mysql {
-                BaseConnectionMode::Host(host) => host.dbname.clone(),
-                BaseConnectionMode::Socket(socket) => socket.dbname.clone(),
-            },
-            Scheme::Postgres(postgres) => match postgres {
-                BaseConnectionMode::Host(host) => host.dbname.clone(),
-                BaseConnectionMode::Socket(socket) => socket.dbname.clone(),
-            },
-            Scheme::Sqlite(path) => match path {
-                FileConnectionMode::File(path) => path.to_str().unwrap().to_string(),
-            },
-        };
         return Ok(ConnectionConfig {
             id,
             scheme,
-            connection_name: name.to_string(),
+            name: name.to_string(),
             color: color.to_string(),
-            default_db,
-            save_password,
-            metadata: None,
         });
     }
 }
@@ -104,31 +85,21 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
         "INSERT INTO connections (
             id,
             scheme,
-            connection_name,
-            color,
-            default_db,
-            save_password,
-            metadata
+            name,
+            color
             ) VALUES (
                 :id,
-                :connection_name,
+                :name,
                 :scheme,
-                :color,
-                :default_db,
-                :save_password,
-                :metadata
+                :color
                 )",
     )?;
     let scheme = serde_json::to_string(&conn.scheme)?;
-    let metadata = serde_json::to_string(&conn.metadata)?;
     statement.execute(named_params! {
         ":id": conn.id,
-        ":connection_name": conn.connection_name,
+        ":name": conn.name,
         ":scheme": scheme,
         ":color": conn.color,
-        ":default_db": conn.default_db,
-        ":save_password": conn.save_password,
-        ":metadata": metadata,
     })?;
 
     Ok(())
@@ -137,30 +108,20 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
 pub fn update_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
     let mut statement = db.prepare(
         "INSERT INTO connections (
-            connection_name,
+            name,
             color,
-            credentials,
-            default_db,
-            save_password,
-            metadata
+            scheme,
             ) VALUES (
-                :connection_name,
+                :name,
                 :color,
-                :credentials,
-                :default_db,
-                :save_password,
-                :metadata
+                :scheme,
                 ) where id = :id",
     )?;
     let scheme = serde_json::to_string(&conn.scheme)?;
-    let metadata = serde_json::to_string(&conn.metadata)?;
     statement.execute(named_params! {
-        ":connection_name": conn.connection_name,
+        ":name": conn.name,
         ":color": conn.color,
         ":scheme": scheme,
-        ":default_db": conn.default_db,
-        ":save_password": conn.save_password,
-        ":metadata": metadata,
         ":id": conn.id,
     })?;
 
@@ -184,17 +145,12 @@ pub fn get_all_connections(
     while let Some(row) = rows.next()? {
         let scheme: String = row.get("scheme")?;
         let scheme: Scheme = serde_json::from_str(&scheme)?;
-        let metadata: String = row.get("metadata")?;
-        let metadata: Option<String> = serde_json::from_str(&metadata).ok();
 
         items.push(ConnectionConfig {
             id: row.get("id")?,
-            connection_name: row.get("name")?,
+            name: row.get("name")?,
             color: row.get("color")?,
             scheme,
-            default_db: row.get("default_db")?,
-            save_password: row.get("save_password")?,
-            metadata,
         });
     }
 
@@ -208,17 +164,12 @@ pub fn get_connection_by_id(db: &Connection, id: Uuid) -> Result<ConnectionConfi
     let row = row.ok_or(anyhow::anyhow!("No connection found"))?;
     let scheme: String = row.get("scheme")?;
     let scheme: Scheme = serde_json::from_str(&scheme)?;
-    let metadata: String = row.get("metadata")?;
-    let metadata: Option<String> = serde_json::from_str(&metadata).ok();
 
     return Ok(ConnectionConfig {
         id: row.get("id")?,
-        connection_name: row.get("name")?,
+        name: row.get("name")?,
         color: row.get("color")?,
         scheme,
-        default_db: row.get("default_db")?,
-        save_password: row.get("save_password")?,
-        metadata,
     });
 }
 
@@ -385,9 +336,8 @@ mod test {
         let expected = Scheme::Sqlite(creds);
         assert_eq!(scheme, expected);
         let conn_name = "sqlite";
-        let conn = ConnectionConfig::new(conn_name, scheme, false, "red")?;
-        assert_eq!(conn.connection_name, conn_name);
-        assert_eq!(conn.save_password, false);
+        let conn = ConnectionConfig::new(conn_name, scheme, "red")?;
+        assert_eq!(conn.name, conn_name);
         assert_eq!(conn.color, "red");
         match conn.scheme {
             Scheme::Sqlite(_) => (),
@@ -410,9 +360,8 @@ mod test {
         let expected = Scheme::Mysql(BaseConnectionMode::Host(creds));
         assert_eq!(scheme, expected);
         let conn_name = "mysql";
-        let conn = ConnectionConfig::new(conn_name, scheme, true, "sky")?;
-        assert_eq!(conn.connection_name, conn_name);
-        assert_eq!(conn.save_password, true);
+        let conn = ConnectionConfig::new(conn_name, scheme, "sky")?;
+        assert_eq!(conn.name, conn_name);
         assert_eq!(conn.color, "sky");
         match conn.scheme {
             Scheme::Mysql(conn_type) => match conn_type {
@@ -444,9 +393,8 @@ mod test {
         let expected = Scheme::Postgres(BaseConnectionMode::Socket(creds));
         assert_eq!(scheme, expected);
         let conn_name = "psql";
-        let conn = ConnectionConfig::new(conn_name, scheme, true, "yellow")?;
-        assert_eq!(conn.connection_name, conn_name);
-        assert_eq!(conn.save_password, true);
+        let conn = ConnectionConfig::new(conn_name, scheme, "yellow")?;
+        assert_eq!(conn.name, conn_name);
         assert_eq!(conn.color, "yellow");
         match conn.scheme {
             Scheme::Postgres(conn_type) => match conn_type {
