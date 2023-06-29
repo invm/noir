@@ -1,11 +1,11 @@
-import { Alert, Button, Checkbox, Label, TextInput, Select } from '../UI';
+import { Alert, Button, Checkbox, TextInput, Select } from '../UI';
 import { ConnectionFormSchema } from '.';
-import { ConnectionColor, connectionColors, Scheme, schemes } from '../../interfaces';
+import { ConnectionColor, connectionColors, PORTS_MAP, Schemes, SchemeType, schemes } from '../../interfaces';
 import { titleCase } from '../../utils/formatters';
 import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
-import { onMount } from 'solid-js';
+import { onMount, Show } from 'solid-js';
 
 const ColorCircle = (props: { color: ConnectionColor }) => {
   return <span class={`min-w-[20px] min-h-[20px] mb-1 rounded-full border-2 bg-${props.color}-500`}></span>
@@ -13,7 +13,7 @@ const ColorCircle = (props: { color: ConnectionColor }) => {
 
 const defaultValues = {
   connection_name: '',
-  scheme: Scheme.MySQL,
+  scheme: Schemes.MySQL,
   port: 3306,
   color: 'orange',
   host: '',
@@ -28,7 +28,7 @@ const AddConnectionForm = () => {
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema), {
     delay: 300,
   });
-  const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
+  const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue, formHasChanges } = formHandler;
 
   onMount(() => {
     for (const key in defaultValues) {
@@ -53,20 +53,21 @@ const AddConnectionForm = () => {
         <div>
           <h2 class="text-2xl font-bold text">{t('components.add_connection_form.title')}</h2>
         </div>
-        <div class='flex gap-3'>
-          <div class='w-full'>
+        <div class='grid grid-cols-5 gap-3'>
+          <div class='col-span-3'>
             <TextInput
               label={t('components.add_connection_form.labels.connection_name')}
               name="connection_name" formHandler={formHandler}
               id="connection_name" minLength={2} maxLength={255} />
           </div>
-          <div class="w-2/5">
+          <div class="col-span-2">
             <div class='w-full flex flex-col justify-stretch items-stretch'>
               <div class="flex items-end gap-3">
                 <ColorCircle color={formData().color} />
                 <Select
                   label={t('components.add_connection_form.labels.color')}
                   name="color"
+                  class="w-full"
                   options={connectionColors.map((color) => ({ value: color, label: titleCase(color) }))}
                   formHandler={formHandler}
                 />
@@ -81,6 +82,9 @@ const AddConnectionForm = () => {
               label={t('components.add_connection_form.labels.scheme')}
               options={schemes.map((sc) => ({ value: sc, label: titleCase(sc) }))}
               formHandler={formHandler}
+              onChange={(e) => {
+                setFieldValue('port', PORTS_MAP[e.target.value as SchemeType] || 3306)
+              }}
             />
           </div>
           <div class='w-1/4'>
@@ -124,18 +128,16 @@ const AddConnectionForm = () => {
         <div class="flex items-center gap-2 my-2">
           <Checkbox label={t('components.add_connection_form.labels.save_password')} id="save_password" formHandler={formHandler} />
         </div>
-        <div>
+        <Show when={Object.keys(getFormErrors()).length}>
           <Alert color="error">
-            <>
-              {getFormErrors().map((error) => (
-                <p class="text-bold">
-                  {t(`components.add_connection_form.labels.${error.path}`)}: {error.message}
-                </p>
-              ))}
-            </>
+            {getFormErrors().map((error) => (
+              <p class="text-bold">
+                {t(`components.add_connection_form.labels.${error.path}`)}: {error.message}
+              </p>
+            ))}
           </Alert>
-        </div>
-        <Button disabled={!isFormInvalid} type="submit" >{t('components.add_connection_form.title')}</Button>
+        </Show>
+        <Button disabled={isFormInvalid || !formHasChanges} type="submit" >{t('components.add_connection_form.title')}</Button>
       </form>
     </div>
   )

@@ -12,6 +12,7 @@ const Home = () => {
   return (
     <div class="flex-1 flex flex-col">
       <div class="w-full flex flex-1 flex-col">
+        {/*
         <div class="flex-2 p-3">
           <div class="grid grid-cols-3 xl:grid-cols-4 gap-4 ">
             {connections.map((conn) => (
@@ -26,6 +27,7 @@ const Home = () => {
             ))}
           </div>
         </div>
+        */}
         <AddConnectionForm />
         <A href="/connection">Connection</A>
       </div>

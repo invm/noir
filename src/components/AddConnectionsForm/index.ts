@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { connectionColors, schemes } from '../../interfaces';
+import { connectionColors, connectionModes, schemes } from '../../interfaces';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -14,6 +14,7 @@ export const ConnectionFormSchema = z.object({
   connection_name: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   color: z.enum(connectionColors),
   scheme: z.enum(schemes),
+  type: z.enum(connectionModes),
   username: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   password: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   save_password: z.boolean().default(false),
