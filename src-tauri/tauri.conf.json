@@ -37,7 +37,9 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "query-noir",
+        "title": "Query Noir",
+        "minHeight": 600,
+        "minWidth": 800,
         "width": 800,
         "height": 600
       }
