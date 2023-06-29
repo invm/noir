@@ -1,6 +1,6 @@
-import { Alert, Button, Checkbox, TextInput, Select } from '../UI';
-import { ConnectionFormSchema } from '.';
-import { ConnectionColor, connectionColors, PORTS_MAP, Schemes, SchemeType, schemes, connectionModes, AvailableConnectionModes } from '../../interfaces';
+import { Alert, Button, TextInput, Select } from '../UI';
+import { ConnectionFormSchema, formToConnectionStruct } from '.';
+import { ConnectionColor, connectionColors, PORTS_MAP, Schemes, SchemeType, schemes, AvailableConnectionModes } from '../../interfaces';
 import { titleCase } from '../../utils/formatters';
 import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
@@ -13,24 +13,23 @@ const ColorCircle = (props: { color: ConnectionColor }) => {
 }
 
 const defaultValues = {
-  connection_name: '',
+  name: 'My Connection',
   scheme: Schemes.MySQL,
   port: 3306,
   color: 'orange',
   mode: AvailableConnectionModes[Schemes.MySQL][0],
-  host: '',
-  username: '',
-  password: '',
-  save_password: false,
-  dbname: '',
-  params: '',
+  file: '',
+  host: 'localhost',
+  username: 'root',
+  password: 'noir',
+  dbname: 'noir',
 }
 
 const AddConnectionForm = () => {
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema), {
     delay: 300,
   });
-  const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue, formHasChanges } = formHandler;
+  const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
 
   onMount(() => {
     for (const key in defaultValues) {
@@ -39,10 +38,12 @@ const AddConnectionForm = () => {
   });
 
   const submit = async (event: Event) => {
-    console.log(formData())
+    console.log(JSON.stringify(formData()))
     event.preventDefault();
     try {
       await formHandler.validateForm();
+      const scheme = formToConnectionStruct(formData());
+      console.log(scheme)
       alert('Data sent with success: ' + JSON.stringify(formData()));
       formHandler.resetForm();
     } catch (error) {
@@ -52,6 +53,8 @@ const AddConnectionForm = () => {
 
   createEffect(() => {
     console.log("scheme changed", formData().scheme)
+    console.log({ valid: isFormInvalid() })
+
   })
 
   return (
@@ -63,9 +66,9 @@ const AddConnectionForm = () => {
         <div class='grid grid-cols-5 gap-3'>
           <div class='col-span-3'>
             <TextInput
-              label={t('components.add_connection_form.labels.connection_name')}
-              name="connection_name" formHandler={formHandler}
-              id="connection_name" minLength={2} maxLength={255} />
+              label={t('components.add_connection_form.labels.name')}
+              name="name" formHandler={formHandler}
+              id="name" minLength={2} maxLength={255} />
           </div>
           <div class="col-span-2">
             <div class='w-full flex flex-col justify-stretch items-stretch'>
@@ -83,7 +86,7 @@ const AddConnectionForm = () => {
           </div>
         </div>
         <div class="grid grid-cols-6 gap-3">
-          <div class={formData().scheme === Schemes.SQLite ? 'col-span-6' : 'col-span-2'}>
+          <div class={formData().scheme === Schemes.SQLite ? 'col-span-4' : 'col-span-2'}>
             <Select
               id="scheme"
               name="scheme"
@@ -103,64 +106,56 @@ const AddConnectionForm = () => {
                 label={t('components.add_connection_form.labels.mode')}
                 options={AvailableConnectionModes[formData().scheme].map((md) => ({ value: md, label: titleCase(md) }))}
                 formHandler={formHandler}
-                onChange={(e) => {
-                  setFieldValue('port', PORTS_MAP[e.target.value as SchemeType] || 3306)
-                }}
               />
             </div>
           </Show>
-          <Show when={formData().scheme !== Schemes.SQLite}>
-            <div class='col-span-2'>
-              <TextInput
-                label={t('components.add_connection_form.labels.dbname')}
-                min={1} max={255}
-                name="dbname" id="dbname" formHandler={formHandler} />
-            </div>
-          </Show>
-        </div>
-        <div class="grid grid-cols-6 gap-3">
-          <div class='col-span-4'>
+          <div class='col-span-2'>
             <Switch fallback={<div>Not Found</div>}>
               <Match when={formData().scheme === Schemes.SQLite}>
                 <FileInput label={t('components.add_connection_form.labels.file')} formHandler={formHandler} name="file" />
               </Match>
               <Match when={formData().scheme !== Schemes.SQLite}>
                 <TextInput
-                  label={t('components.add_connection_form.labels.host')}
+                  label={t('components.add_connection_form.labels.dbname')}
                   min={1} max={255}
-                  name="host" id="host" formHandler={formHandler}
-                />
+                  name="dbname" id="dbname" formHandler={formHandler} />
               </Match>
             </Switch>
           </div>
-          <Show when={formData().scheme !== Schemes.SQLite}>
+        </div>
+        <Show when={formData().scheme !== Schemes.SQLite}>
+          <div class="grid grid-cols-6 gap-3">
+            <div class='col-span-4'>
+              <TextInput
+                label={t('components.add_connection_form.labels.host')}
+                min={1} max={255}
+                name="host" id="host" formHandler={formHandler}
+              />
+            </div>
             <div class='col-span-2'>
               <TextInput
                 label={t('components.add_connection_form.labels.port')}
                 name="port" id="port" formHandler={formHandler} type="number"
                 min={1} max={65335} />
             </div>
-          </Show>
-        </div>
+          </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class='w-full'>
-            <TextInput
-              label={t('components.add_connection_form.labels.username')}
-              min={1} max={255}
-              name="username" id="username" formHandler={formHandler} />
+          <div class="grid grid-cols-2 gap-3">
+            <div class='w-full'>
+              <TextInput
+                label={t('components.add_connection_form.labels.username')}
+                min={1} max={255}
+                name="username" id="username" formHandler={formHandler} />
+            </div>
+            <div class='w-full'>
+              <TextInput
+                label={t('components.add_connection_form.labels.password')}
+                name="password" id="password"
+                min={1} max={255}
+                formHandler={formHandler} type="password" />
+            </div>
           </div>
-          <div class='w-full'>
-            <TextInput
-              label={t('components.add_connection_form.labels.password')}
-              name="password" id="password"
-              min={1} max={255}
-              formHandler={formHandler} type="password" />
-          </div>
-        </div>
-        <div class="flex items-center gap-2 my-2">
-          <Checkbox name="save_password" label={t('components.add_connection_form.labels.save_password')} id="save_password" formHandler={formHandler} />
-        </div>
+        </Show>
         <Show when={Object.keys(getFormErrors()).length}>
           <Alert color="error">
             {getFormErrors().map((error) => (
@@ -170,7 +165,9 @@ const AddConnectionForm = () => {
             ))}
           </Alert>
         </Show>
-        <Button type="submit" >{t('components.add_connection_form.title')}</Button>
+        <div class="py-4">
+          <Button disabled={isFormInvalid()} type="submit" >{t('components.add_connection_form.title')}</Button>
+        </div>
       </form >
     </div >
   )
