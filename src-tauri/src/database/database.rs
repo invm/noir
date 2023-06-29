@@ -1,7 +1,7 @@
-use rusqlite::Connection;
+use crate::utils::fs::get_app_path;
 use anyhow::Result;
 use log::info;
-use crate::utils::fs::get_app_path;
+use rusqlite::Connection;
 
 const CURRENT_DB_VERSION: u32 = 1;
 
@@ -45,8 +45,6 @@ pub fn upgrade_database_if_needed(
     Ok(())
 }
 
-
-
 pub fn get_db_path() -> String {
     let app_path = get_app_path();
     return format!("{}/.app.db", app_path);
@@ -61,11 +59,8 @@ pub fn create_app_db(app_path: &str) -> Result<()> {
         "create table `connections` (
           `id` integer not null primary key autoincrement,
           `scheme` TEXT not null,
-          `connection_name` varchar(255) not null,
-          `color` varchar(255) not null,
-          `default_db` VARCHAR(255) not null,
-          `save_password` TINYINT not null,
-          `metadata` TEXT null
+          `name` varchar(255) not null,
+          `color` varchar(255) not null
         )",
         [],
     )?;
