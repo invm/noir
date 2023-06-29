@@ -9,6 +9,7 @@
         "title": "Add Connection",
         "labels": {
           "connection_name": "Connection name",
+          "mode": "Mode",
           "color": "Color",
           "default_db": "Default DB",
           "save_password": "Save password",
@@ -16,6 +17,7 @@
           "username": "Username",
           "password": "Password",
           "host": "Host",
+          "file": "Database file",
           "dbname": "Database name",
           "port": "Port",
           "params": "Params (as command line arguments)"

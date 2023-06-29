@@ -14,7 +14,6 @@ export const ConnectionFormSchema = z.object({
   connection_name: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   color: z.enum(connectionColors),
   scheme: z.enum(schemes),
-  type: z.enum(connectionModes),
   username: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   password: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   save_password: z.boolean().default(false),
