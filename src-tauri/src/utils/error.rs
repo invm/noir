@@ -6,7 +6,7 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("File is not valid utf8: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
-    #[error("General error")]
+    #[error("General error occurred: {0}")]
     General(#[from] anyhow::Error),
     #[error("Uuid parse error")]
     UUIDError(#[from] uuid::Error),

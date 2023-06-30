@@ -1,20 +1,20 @@
 export const Schemes = {
-  MySQL: 'MySQL',
-  PostgreSQL: 'PostgreSQL',
-  SQLite: 'SQLite',
+  Mysql: 'Mysql',
+  Postgres: 'Postgres',
+  Sqlite: 'Sqlite',
 } as const;
 
-export type SchemeType = typeof Schemes[keyof typeof Schemes];
+export type SchemeType = keyof typeof Schemes;
 
 export const PORTS_MAP: Record<SchemeType, number> = {
-  [Schemes.MySQL]: 3306,
-  [Schemes.PostgreSQL]: 5432,
-  [Schemes.SQLite]: 0,
+  [Schemes.Mysql]: 3306,
+  [Schemes.Postgres]: 5432,
+  [Schemes.Sqlite]: 0,
 } as const;
 
-export const schemes = [Schemes.MySQL, Schemes.PostgreSQL, Schemes.SQLite] as const;
+export const schemes = [Schemes.Mysql, Schemes.Postgres, Schemes.Sqlite] as const;
 
-type HostCredentials = {
+export type HostCredentials = {
   username: string;
   password: string;
   host: string;
@@ -22,59 +22,36 @@ type HostCredentials = {
   dbname: string;
 }
 
-type SocketCredentials = {
+export type SocketCredentials = {
   username: string;
   password: string;
   path: string;
   dbname: string;
 }
 
-type FileCredentials = {
+export type FileCredentials = {
   path: string;
 }
 
-export const ConnectionModes = {
+export const ConnectionMode = {
   Host: 'Host',
   Socket: 'Socket',
   File: 'File',
 } as const;
 
-export type SchemeCredentialsMap = {
-  [Schemes.MySQL]: {
-    [ConnectionModes.Host]: HostCredentials;
-    [ConnectionModes.Socket]: SocketCredentials;
-  },
-  [Schemes.PostgreSQL]: {
-    [ConnectionModes.Host]: HostCredentials;
-    [ConnectionModes.Socket]: SocketCredentials;
-  }
-  [Schemes.SQLite]: {
-    [ConnectionModes.File]: FileCredentials;
-  }
-}
-
-export type ConnectionModeToCredentialsMap = {
-  [ConnectionModes.Host]: HostCredentials;
-  [ConnectionModes.Socket]: SocketCredentials;
-  [ConnectionModes.File]: FileCredentials;
-}
-
-export type ConnectionMode = typeof ConnectionModes[keyof typeof ConnectionModes];
-
-export const connectionModes = [ConnectionModes.Host, ConnectionModes.Socket, ConnectionModes.File] as const;
-
-export const AvailableConnectionModes = {
-  [Schemes.MySQL]: [ConnectionModes.Host, ConnectionModes.Socket],
-  [Schemes.PostgreSQL]: [ConnectionModes.Host, ConnectionModes.Socket],
-  [Schemes.SQLite]: [ConnectionModes.File],
+export const SocketPathDefaults = {
+  [Schemes.Mysql]: '/var/run/mysqld/mysqld.sock',
+  [Schemes.Postgres]: '/var/run/postgresql/.s.PGSQL.5432',
+  [Schemes.Sqlite]: '',
 } as const;
 
-export interface ConnectionConfig<T extends SchemeType> {
-  id: string;
-  scheme: SchemeCredentialsMap[T];
-  name: string;
-  color: string;
-};
+export const AvailableConnectionModes = {
+  [Schemes.Mysql]: [ConnectionMode.Host, ConnectionMode.Socket],
+  [Schemes.Postgres]: [ConnectionMode.Host, ConnectionMode.Socket],
+  [Schemes.Sqlite]: [ConnectionMode.File],
+} as const;
+
+export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, ConnectionMode.File] as const;
 
 export const connectionColors = [
   "slate",
