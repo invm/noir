@@ -57,7 +57,7 @@ pub fn create_app_db(app_path: &str) -> Result<()> {
 
     db.execute(
         "create table `connections` (
-          `id` integer not null primary key autoincrement,
+          `id`TEXT not null,
           `scheme` TEXT not null,
           `name` varchar(255) not null,
           `color` varchar(255) not null

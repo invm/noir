@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { connectionColors, ConnectionModes, ConnectionConfig, connectionModes, schemes, SchemeType, SchemeCredentialsMap, ConnectionMode, ConnectionModeToCredentialsMap } from '../../interfaces';
+import { connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials } from '../../interfaces';
 import { omit } from '../../utils/utils';
 
 const MIN_LENGTH_STR = 2;
@@ -25,23 +25,26 @@ export const ConnectionFormSchema = z.object({
   dbname: z.string().optional(),
 });
 
-export const formToConnectionStruct = (form: z.infer<typeof ConnectionFormSchema>) => {
-  const { name, color, scheme: scheme_type, mode, ...rest } = form;
-  let scheme = { [scheme_type]: { [mode]: rest } };
+
+type ConnectionForm = z.infer<typeof ConnectionFormSchema>;
+
+export const formToConnectionStruct = (form: ConnectionForm) => {
+  const { name, color, scheme, mode, ...rest } = form;
 
   switch (mode) {
-    case ConnectionModes.Host:
-      scheme[scheme_type][mode] = omit(scheme[scheme_type][mode], 'socket_path', 'file');
-      break;
-    case ConnectionModes.Socket:
-      scheme[scheme_type][mode] = omit(scheme[scheme_type][mode], 'host', 'port', 'file');
-      break;
-    case ConnectionModes.File:
-      scheme[scheme_type][mode] = omit(scheme[scheme_type][mode], 'host', 'port', 'socket_path');
-      break;
+    case ConnectionMode.Host: {
+      const creds: HostCredentials = omit(rest, 'socket_path', 'file');
+      return { name, color, scheme: { [scheme]: { [mode]: creds } } }
+    }
+    case ConnectionMode.Socket: {
+      const creds: SocketCredentials = omit(rest, 'host', 'port', 'file');
+      return { name, color, scheme: { [scheme]: { [mode]: creds } } }
+    }
+    case ConnectionMode.File: {
+      const creds: FileCredentials = omit(rest, 'host', 'port', 'socket_path');
+      return { name, color, scheme: { [scheme]: { [mode]: creds } } }
+    }
   }
-
-  return { name, color, scheme }
 }
 
 export * from './AddConnectionForm'

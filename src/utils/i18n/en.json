@@ -15,6 +15,7 @@
           "username": "Username",
           "password": "Password",
           "host": "Host",
+          "socket_path": "Socket path",
           "file": "Database file",
           "dbname": "Database name",
           "port": "Port"
