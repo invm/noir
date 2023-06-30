@@ -89,8 +89,8 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
             color
             ) VALUES (
                 :id,
-                :name,
                 :scheme,
+                :name,
                 :color
                 )",
     )?;
@@ -105,42 +105,15 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
     Ok(())
 }
 
-pub fn update_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
-    let mut statement = db.prepare(
-        "INSERT INTO connections (
-            name,
-            color,
-            scheme,
-            ) VALUES (
-                :name,
-                :color,
-                :scheme,
-                ) where id = :id",
-    )?;
-    let scheme = serde_json::to_string(&conn.scheme)?;
-    statement.execute(named_params! {
-        ":name": conn.name,
-        ":color": conn.color,
-        ":scheme": scheme,
-        ":id": conn.id,
-    })?;
-
-    Ok(())
-}
-
 pub fn delete_connection(db: &Connection, id: &Uuid) -> Result<()> {
     let mut statement = db.prepare("DELETE FROM connections where id = :id")?;
     statement.execute(named_params! {":id": id})?;
     Ok(())
 }
 
-pub fn get_all_connections(
-    db: &Connection,
-    limit: usize,
-    offset: usize,
-) -> Result<Vec<ConnectionConfig>> {
-    let mut statement = db.prepare("SELECT * FROM connections LIMIT ? OFFSET ?")?;
-    let mut rows = statement.query([limit, offset])?;
+pub fn get_all_connections(db: &Connection) -> Result<Vec<ConnectionConfig>> {
+    let mut statement = db.prepare("SELECT * FROM connections")?;
+    let mut rows = statement.query([])?;
     let mut items = Vec::new();
     while let Some(row) = rows.next()? {
         let scheme: String = row.get("scheme")?;
@@ -154,23 +127,7 @@ pub fn get_all_connections(
         });
     }
 
-    Ok(vec![])
-}
-
-pub fn get_connection_by_id(db: &Connection, id: Uuid) -> Result<ConnectionConfig> {
-    let mut statement = db.prepare("SELECT * FROM connections WHERE id = ?")?;
-    let mut rows = statement.query([id])?;
-    let row = rows.next()?;
-    let row = row.ok_or(anyhow::anyhow!("No connection found"))?;
-    let scheme: String = row.get("scheme")?;
-    let scheme: Scheme = serde_json::from_str(&scheme)?;
-
-    return Ok(ConnectionConfig {
-        id: row.get("id")?,
-        name: row.get("name")?,
-        color: row.get("color")?,
-        scheme,
-    });
+    Ok(items)
 }
 
 #[cfg(test)]

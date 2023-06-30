@@ -27,21 +27,10 @@ pub fn upgrade_database_if_needed(
 ) -> Result<(), rusqlite::Error> {
     if existing_version < CURRENT_DB_VERSION {
         db.pragma_update(None, "journal_mode", "WAL")?;
-
         let tx = db.transaction()?;
-
         tx.pragma_update(None, "user_version", CURRENT_DB_VERSION)?;
-
-        tx.execute_batch(
-            "
-      CREATE TABLE items (
-        title TEXT NOT NULL
-      );",
-        )?;
-
         tx.commit()?;
     }
-
     Ok(())
 }
 
