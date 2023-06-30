@@ -1,13 +1,65 @@
-import { Alert, Button, TextInput, Select } from '../UI';
-import { ConnectionFormSchema, formToConnectionStruct } from '.';
-import { ConnectionColor, connectionColors, PORTS_MAP, Schemes, SchemeType, schemes, AvailableConnectionModes, ConnectionMode, SocketPathDefaults } from '../../interfaces';
-import { titleCase } from '../../utils/formatters';
+import * as z from 'zod';
 import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
-import { FileInput } from '../UI/FileInput';
 import { invoke } from '@tauri-apps/api';
+
+import { Alert, Button, TextInput, Select } from './UI';
+import {
+  ConnectionColor, PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
+  connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials
+} from '../interfaces';
+import { titleCase } from '../utils/formatters';
+import { FileInput } from './UI/FileInput';
+import { omit } from '../utils/utils';
+
+const MIN_LENGTH_STR = 2;
+const MAX_LENGTH_STR = 255;
+const MAX_PORT = 65535;
+const MIN_PORT = 1;
+
+const messages = {
+  length: 'Must be between 2 and 255 characters',
+}
+
+export const ConnectionFormSchema = z.object({
+  name: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
+  scheme: z.enum(schemes),
+  mode: z.enum(connectionModes),
+  username: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
+  password: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
+  host: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
+  file: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
+  socket_path: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
+  port: z.number().min(MIN_PORT).max(MAX_PORT).optional(),
+  dbname: z.string().optional(),
+  color: z.enum(connectionColors),
+});
+
+
+type ConnectionForm = z.infer<typeof ConnectionFormSchema>;
+
+export const formToConnectionStruct = (form: ConnectionForm) => {
+  const { name, color, scheme, mode, ...rest } = form;
+
+  switch (mode) {
+    case ConnectionMode.Host: {
+      const creds: HostCredentials = omit(rest, 'socket_path', 'file');
+      return { name, scheme: { [scheme]: { [mode]: creds } }, color }
+    }
+    case ConnectionMode.Socket: {
+      const creds: SocketCredentials = omit(rest, 'host', 'port', 'file');
+      return { name, scheme: { [scheme]: { [mode]: creds } }, color }
+    }
+    case ConnectionMode.File: {
+      const creds: FileCredentials = omit(rest, 'host', 'port', 'socket_path');
+      return { name, scheme: { [scheme]: { [mode]: creds } }, color }
+    }
+  }
+}
+
+export * from './AddConnectionForm'
 
 const ColorCircle = (props: { color: ConnectionColor }) => {
   return <span class={`min-w-[20px] min-h-[20px] mb-1 rounded-full border-2 bg-${props.color}-500`}></span>
@@ -37,14 +89,11 @@ const AddConnectionForm = () => {
   });
 
   const submit = async (event: Event) => {
-    console.log(JSON.stringify(formData()))
     event.preventDefault();
     try {
       await formHandler.validateForm();
-      const {name, color, scheme} = formToConnectionStruct(formData());
-      await invoke('add_connection', { name, color, scheme });
-      alert('Data sent with success: ' + JSON.stringify(formData()));
-      formHandler.resetForm();
+      const { name, color, scheme } = formToConnectionStruct(formData());
+      await invoke('add_connection', { name, color, scheme })
     } catch (error) {
       console.error(error);
     }

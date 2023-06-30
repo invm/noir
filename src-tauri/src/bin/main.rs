@@ -22,9 +22,8 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             connections::add_connection,
-            // connections::get_all_connections,
-            // connections::delete_connection,
-            // connections::update_connection,
+            connections::delete_connection,
+            connections::get_connections,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

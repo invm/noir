@@ -39,6 +39,8 @@ export const ConnectionMode = {
   File: 'File',
 } as const;
 
+export type ConnectionModeType = keyof typeof ConnectionMode;
+
 export const SocketPathDefaults = {
   [Schemes.Mysql]: '/var/run/mysqld/mysqld.sock',
   [Schemes.Postgres]: '/var/run/postgresql/.s.PGSQL.5432',
@@ -52,6 +54,13 @@ export const AvailableConnectionModes = {
 } as const;
 
 export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, ConnectionMode.File] as const;
+
+export type ConnectionConfig = {
+  id?: string;
+  name: string;
+  scheme: { [T in SchemeType]: { [C in ConnectionModeType]: HostCredentials | SocketCredentials | FileCredentials; } }
+  color: ConnectionColor;
+}
 
 export const connectionColors = [
   "slate",
