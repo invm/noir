@@ -58,7 +58,7 @@ export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, Conn
 export type ConnectionConfig = {
   id?: string;
   name: string;
-  scheme: { [T in SchemeType]: { [C in ConnectionModeType]: HostCredentials | SocketCredentials | FileCredentials; } }
+  scheme: Record<SchemeType, Record<ConnectionModeType, Record<string, string>>>;
   color: ConnectionColor;
 }
 

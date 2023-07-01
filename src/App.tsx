@@ -2,14 +2,14 @@ import 'flowbite';
 import './utils/i18n';
 import Home from './pages/Home';
 import { Route, Router, Routes } from "@solidjs/router"; // 👈 Import the router
-import Tabs from './pages/Tabs';
+import Connection from './pages/Connection';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" component={Home} />
-        <Route path="/connection" component={Tabs} />
+        <Route path="/connection" component={Connection} />
       </Routes>
     </Router>
   );

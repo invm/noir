@@ -4,3 +4,7 @@ export const omit = (obj: any, ...keys: string[]) => {
   return copy;
 }
 
+export const firstKey = (obj: Record<string, any>) => {
+  for (const key in obj) return key;
+}
+
