@@ -7,12 +7,13 @@ import { invoke } from '@tauri-apps/api';
 
 import { Alert, Button, TextInput, Select, ColorCircle } from './UI';
 import {
-  ConnectionColor, PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
+  PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
   connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials
 } from '../interfaces';
 import { titleCase } from '../utils/formatters';
 import { FileInput } from './UI/FileInput';
 import { omit } from '../utils/utils';
+import { useAppSelector } from '../services/Context';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -75,6 +76,7 @@ const defaultValues = {
 }
 
 const AddConnectionForm = () => {
+  const { errorService: { addError } } = useAppSelector()
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema));
   const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
 
@@ -92,6 +94,7 @@ const AddConnectionForm = () => {
       await invoke('add_connection', { name, color, scheme })
     } catch (error) {
       console.error(error);
+      addError((error as any).message);
     }
   };
 

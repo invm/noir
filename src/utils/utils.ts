@@ -8,3 +8,5 @@ export const firstKey = (obj: Record<string, any>) => {
   for (const key in obj) return key;
 }
 
+export const randomId = () => Math.random().toString(36).substring(12);
+
