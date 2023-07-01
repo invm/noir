@@ -1,13 +1,11 @@
 import { AddConnectionForm } from '../components/AddConnectionForm';
-import { ConnectionsList } from '../components/ConnectionsList';
+import { ConnectionsList } from '../components/ConnectionsList/ConnectionsList';
 
 const Home = () => {
   return (
-    <div class="flex-1 flex flex-col">
-      <div class="w-full flex flex-1 flex-col">
-        <ConnectionsList />
-        {/* <AddConnectionForm /> */}
-      </div>
+    <div class="grid grid-cols-2">
+      <ConnectionsList />
+      <AddConnectionForm />
     </div>
   )
 }
