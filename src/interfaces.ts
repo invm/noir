@@ -55,10 +55,12 @@ export const AvailableConnectionModes = {
 
 export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, ConnectionMode.File] as const;
 
+export type Scheme = Partial<Record<SchemeType, Record<ConnectionModeType, Record<string, string>>>>
+
 export type ConnectionConfig = {
   id?: string;
   name: string;
-  scheme: Record<SchemeType, Record<ConnectionModeType, Record<string, string>>>;
+  scheme: Scheme;
   color: ConnectionColor;
 }
 
