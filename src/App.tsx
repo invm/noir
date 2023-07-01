@@ -1,4 +1,3 @@
-import 'flowbite';
 import './utils/i18n';
 import Home from './pages/Home';
 import { Route, Router, Routes } from "@solidjs/router"; // 👈 Import the router

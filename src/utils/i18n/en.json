@@ -7,6 +7,7 @@
     "components": {
       "add_connection_form": {
         "title": "Add Connection",
+        "length_validation": "Must be between 2 and 255 characters",
         "labels": {
           "name": "Connection name",
           "mode": "Mode",
@@ -19,6 +20,15 @@
           "file": "Database file",
           "dbname": "Database name",
           "port": "Port"
+        }
+      },
+      "connections_list": {
+        "actions": {
+          "delete": "Delete",
+          "confirm_action": "Confirm action",
+          "confirm_delete": "Are you sure you want to delete this connection?",
+          "yes": "Yes",
+          "cancel": "Cancel"
         }
       }
     }

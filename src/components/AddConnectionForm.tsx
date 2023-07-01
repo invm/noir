@@ -5,7 +5,7 @@ import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
 import { invoke } from '@tauri-apps/api';
 
-import { Alert, Button, TextInput, Select } from './UI';
+import { Alert, Button, TextInput, Select, ColorCircle } from './UI';
 import {
   ConnectionColor, PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
   connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials
@@ -20,7 +20,7 @@ const MAX_PORT = 65535;
 const MIN_PORT = 1;
 
 const messages = {
-  length: 'Must be between 2 and 255 characters',
+  length: t('components.add_connection_form.length_validation')
 }
 
 export const ConnectionFormSchema = z.object({
@@ -60,10 +60,6 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
 }
 
 export * from './AddConnectionForm'
-
-const ColorCircle = (props: { color: ConnectionColor }) => {
-  return <span class={`min-w-[20px] min-h-[20px] mb-1 rounded-full border-2 bg-${props.color}-500`}></span>
-}
 
 const defaultValues = {
   name: 'My Connection',
