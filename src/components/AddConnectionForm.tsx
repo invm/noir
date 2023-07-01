@@ -3,12 +3,11 @@ import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
-import { invoke } from '@tauri-apps/api';
 
 import { Alert, Button, TextInput, Select, ColorCircle } from './UI';
 import {
   PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
-  connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials
+  connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials, ConnectionConfig, Scheme
 } from '../interfaces';
 import { titleCase } from '../utils/formatters';
 import { FileInput } from './UI/FileInput';
@@ -28,13 +27,13 @@ export const ConnectionFormSchema = z.object({
   name: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
   scheme: z.enum(schemes),
   mode: z.enum(connectionModes),
-  username: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
-  password: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
-  host: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
-  file: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
-  socket_path: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional(),
-  port: z.number().min(MIN_PORT).max(MAX_PORT).optional(),
-  dbname: z.string().optional(),
+  username: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional().or(z.literal('')),
+  password: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional().or(z.literal('')),
+  host: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional().or(z.literal('')),
+  file: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional().or(z.literal('')),
+  socket_path: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length).optional().or(z.literal('')),
+  port: z.coerce.number().min(MIN_PORT).max(MAX_PORT).optional().or(z.literal(0)),
+  dbname: z.string().optional().or(z.literal('')),
   color: z.enum(connectionColors),
 });
 
@@ -55,7 +54,7 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
     }
     case ConnectionMode.File: {
       const creds: FileCredentials = omit(rest, 'host', 'port', 'socket_path');
-      return { name, scheme: { [scheme]: { [mode]: creds } }, color }
+      return { name, scheme: { [scheme]: { [mode]: creds } } as Partial<Scheme>, color }
     }
   }
 }
@@ -75,10 +74,10 @@ const defaultValues = {
   dbname: 'noir',
 }
 
-const AddConnectionForm = () => {
+const AddConnectionForm = (props: { addConnection: ({ name, scheme, color }: { name: string, scheme: Scheme, color: string }) => Promise<void> }) => {
   const { errorService: { addError } } = useAppSelector()
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema));
-  const { formData, isFormInvalid, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
+  const { formData, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
 
   onMount(() => {
     for (const key in defaultValues) {
@@ -88,10 +87,10 @@ const AddConnectionForm = () => {
 
   const submit = async (event: Event) => {
     event.preventDefault();
+    await formHandler.validateForm().catch(() => { });
     try {
-      await formHandler.validateForm();
-      const { name, color, scheme } = formToConnectionStruct(formData());
-      await invoke('add_connection', { name, color, scheme })
+      const { name, scheme, color } = formToConnectionStruct(formData());
+      await props.addConnection({ name, scheme, color });
     } catch (error) {
       console.error(error);
       addError((error as any).message);
@@ -99,8 +98,8 @@ const AddConnectionForm = () => {
   };
 
   return (
-    <div class="flex-2 p-3 max-w-lg">
-      <form class="flex w-full flex-col gap-1" autocomplete="off" onSubmit={submit}>
+    <div class="p-3 w-full flex justify-center items-around pt-20">
+      <form class="flex max-w-lg flex-col gap-1" autocomplete="off" onSubmit={submit}>
         <div>
           <h2 class="text-2xl font-bold text">{t('components.add_connection_form.title')}</h2>
         </div>
@@ -218,17 +217,19 @@ const AddConnectionForm = () => {
             </div>
           </div>
         </Show>
-        <Show when={Object.keys(getFormErrors()).length}>
-          <Alert color="error">
-            {getFormErrors().map((error) => (
-              <p class="text-bold">
-                {t(`components.add_connection_form.labels.${error.path}`)}: {error.message}
-              </p>
-            ))}
-          </Alert>
-        </Show>
+        <div class="py-3">
+          <Show when={Object.keys(getFormErrors()).length}>
+            <Alert color="error">
+              {getFormErrors().map((error) => (
+                <p class="text-bold">
+                  {t(`components.add_connection_form.labels.${error.path}`)}: {error.message}
+                </p>
+              ))}
+            </Alert>
+          </Show>
+        </div>
         <div class="py-4">
-          <Button disabled={isFormInvalid()} type="submit" >{t('components.add_connection_form.title')}</Button>
+          <Button disabled={Object.keys(getFormErrors()).length} type="submit" >{t('components.add_connection_form.title')}</Button>
         </div>
       </form >
     </div >
