@@ -1,6 +1,6 @@
 import { Field, FieldProps } from 'solid-form-handler';
 import { Component, JSX, Show, splitProps } from 'solid-js';
-import { Button, Label } from '.';
+import { Label } from '.';
 
 export type FileInputProps = Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value'> &
   FieldProps & { label?: string } & ({ multiple?: false; value?: File } | { multiple?: true; value?: File[] });
@@ -27,14 +27,14 @@ export const FileInput: Component<FileInputProps> = (props) => {
             classList={{ 'hidden': true }}
             onChange={field.props.onChange}
           />
-          <Button
+          <button
             onBlur={field.props.onBlur}
             classList={{ 'is-invalid': field.helpers.error }}
             type="button"
             onClick={() => fileInput?.click()}
           >
             <span class="p-2 border-end">Choose File</span>
-          </Button>
+          </button>
         </div>
       )}
     />

@@ -12,11 +12,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@solidjs/router": "^0.8.2",
     "@tauri-apps/api": "^1.4.0",
     "i18next": "^23.1.0",
     "solid-form-handler": "^1.2.0",
     "solid-js": "^1.7.7",
+    "split.js": "^1.6.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {

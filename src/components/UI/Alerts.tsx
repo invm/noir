@@ -1,5 +1,5 @@
 import { For } from "solid-js"
-import { useAppSelector } from "../services/Context"
+import { useAppSelector } from "../../services/Context"
 
 export const Alerts = () => {
   const { errorService: { errors } } = useAppSelector()

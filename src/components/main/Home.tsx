@@ -1,9 +1,9 @@
-import { AddConnectionForm } from '../components/AddConnectionForm';
-import { ConnectionsList } from '../components/ConnectionsList/ConnectionsList';
 import { invoke } from '@tauri-apps/api';
-import { ConnectionConfig, Scheme } from '../interfaces';
 import { createStore } from 'solid-js/store';
 import { onMount } from 'solid-js';
+import { ConnectionConfig, Scheme } from '../../interfaces';
+import { ConnectionsList } from '../Connections/ConnectionsList/ConnectionsList';
+import { AddConnectionForm } from '../Connections/AddConnectionForm';
 
 const Home = () => {
   const addConnection = async (conn: { name: string, scheme: Scheme, color: string }) => {
