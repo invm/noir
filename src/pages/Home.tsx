@@ -6,8 +6,8 @@ import { createStore } from 'solid-js/store';
 import { onMount } from 'solid-js';
 
 const Home = () => {
-  const addConnection = async ({ name, scheme, color }: { name: string, scheme: Scheme, color: string }) => {
-    await invoke('add_connection', { name, scheme, color })
+  const addConnection = async (conn: { name: string, scheme: Scheme, color: string }) => {
+    await invoke('add_connection', conn)
     const res = await invoke('get_connections', {})
     setConnections(res as ConnectionConfig[]);
   }
