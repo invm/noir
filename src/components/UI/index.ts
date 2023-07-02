@@ -1,5 +1,5 @@
 export * from './Alert'
-export * from './Button'
+export * from './Alerts'
 export * from './Card'
 export * from './Checkbox'
 export * from './ColorCircle'

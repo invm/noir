@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api';
 import { For } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
-import { ConnectionConfig } from '../../interfaces';
+import { ConnectionConfig } from '../../../interfaces';
 import { ConnectionItem } from './ConnectionItem/ConnectionItem';
 
 export const ConnectionsList = (props: { connections: ConnectionConfig[], setConnections: SetStoreFunction<ConnectionConfig[]> }) => {
@@ -12,7 +12,7 @@ export const ConnectionsList = (props: { connections: ConnectionConfig[], setCon
   }
 
   return (
-    <div class="p-2 pt-5 bg-gray-900">
+    <div class="h-full p-2 pt-5 bg-gray-900">
       <h3 class="text px-2 text-xl font-bold">Saved Connections</h3>
       <div class="divider my-0"></div>
       <ul class="grid grid-cols-1 gap-1">

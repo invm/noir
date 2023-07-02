@@ -7,10 +7,6 @@
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
-
-  color: #0f0f0f;
-  background-color: #f6f6f6;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -39,14 +35,6 @@ body {
 
 .text {
   @apply text-black dark:text-white;
-}
-
-.bg {
-  @apply bg-white dark:bg-slate-800;
-}
-
-.primary {
-  @apply dark:bg-red-500 dark:hover:bg-red-600;
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -87,18 +75,11 @@ input[type=number] {
  @apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600;
 }
 
-.app-select-label {
-  @apply block mb-2 text-sm font-medium text-gray-900 dark:text-white;
-}
-
 .app-select {
   @apply bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base sm:text-sm py-0.5;
 }
 
-.background {
+.background-gradient {
   @apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-black via-slate-900 to-black;
 }
 
-.app-btn {
-  @apply disabled:dark:bg-slate-700 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800;
-}

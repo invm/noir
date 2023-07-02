@@ -4,15 +4,15 @@ import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
 
-import { Alert, Button, TextInput, Select, ColorCircle } from './UI';
+import { Alert, TextInput, Select, ColorCircle } from '../UI';
 import {
   PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
-  connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials, ConnectionConfig, Scheme
-} from '../interfaces';
-import { titleCase } from '../utils/formatters';
-import { FileInput } from './UI/FileInput';
-import { omit } from '../utils/utils';
-import { useAppSelector } from '../services/Context';
+  connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials, Scheme
+} from '../../interfaces';
+import { titleCase } from '../../utils/formatters';
+import { FileInput } from './../UI/FileInput';
+import { omit } from '../../utils/utils';
+import { useAppSelector } from '../../services/Context';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -229,7 +229,9 @@ const AddConnectionForm = (props: { addConnection: ({ name, scheme, color }: { n
           </Show>
         </div>
         <div class="py-4">
-          <Button disabled={Object.keys(getFormErrors()).length} type="submit" >{t('components.add_connection_form.title')}</Button>
+          <button disabled={!!Object.keys(getFormErrors()).length} class="btn
+            btn-primary btn-md btn-block" type="submit"
+          >{t('components.add_connection_form.title')}</button>
         </div>
       </form >
     </div >

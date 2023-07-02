@@ -1,12 +1,12 @@
-import { ConnectionConfig, ConnectionModeType, SchemeType } from '../../../interfaces';
-import { firstKey } from '../../../utils/utils';
-import { ColorCircle } from '../../UI';
+import { ConnectionConfig, ConnectionModeType, SchemeType } from '../../../../interfaces';
+import { firstKey } from '../../../../utils/utils';
+import { ColorCircle } from '../../../UI';
 import { ActionsMenu } from './ActionsMenu';
 
 export const ConnectionItem = (props: { connection: ConnectionConfig, deleteConnection: (id: string) => Promise<void> }) => {
   const scheme = firstKey(props.connection.scheme) as SchemeType;
-  const mode = firstKey(props.connection.scheme[scheme]) as ConnectionModeType;
-  const creds = props.connection.scheme[scheme][mode];
+  const mode = firstKey(props.connection.scheme[scheme]!) as ConnectionModeType;
+  const creds = props.connection.scheme[scheme]![mode];
   const connectionString = mode === 'Host' ? creds.host : mode === 'File' ? creds.file : creds.sockets_path
 
   const deleteConnection = async () => {
@@ -26,7 +26,7 @@ export const ConnectionItem = (props: { connection: ConnectionConfig, deleteConn
         <p class="text text-sm dark:text-slate-500">{connectionString}</p>
       </div>
       <div class="hidden group-hover:block">
-        <ActionsMenu {...{ deleteConnection, id: props.connection.id! }} />
+        <ActionsMenu {...{ deleteConnection, connection: props.connection! }} />
       </div>
     </div>
   )
