@@ -1,15 +1,10 @@
 import './utils/i18n';
 import { useAppSelector } from './services/Context';
 import { Alerts } from './components/UI';
-import { For, onMount } from 'solid-js';
-import { register } from '@tauri-apps/api/globalShortcut';
+import { For } from 'solid-js';
 
 function App() {
   const { tabsService: { tabsStore, setActiveTab, removeTab } } = useAppSelector()
-
-  onMount(async () => {
-    await register('CommandOrControl+1', () => { setActiveTab(1) });
-  });
 
   const closeTab = async (id: string) => {
     await removeTab(id)

@@ -5,7 +5,7 @@ import { ConnectionConfig, Scheme } from '../../interfaces';
 import { ConnectionsList } from '../Connections/ConnectionsList/ConnectionsList';
 import { AddConnectionForm } from '../Connections/AddConnectionForm';
 
-const Home = () => {
+export const Home = () => {
   const addConnection = async (conn: { name: string, scheme: Scheme, color: string }) => {
     await invoke('add_connection', conn)
     const res = await invoke('get_connections', {})
@@ -27,4 +27,3 @@ const Home = () => {
   )
 }
 
-export default Home
