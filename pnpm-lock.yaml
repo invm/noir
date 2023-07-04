@@ -14,6 +14,9 @@ dependencies:
   i18next:
     specifier: ^23.1.0
     version: 23.1.0
+  solid-contextmenu:
+    specifier: ^0.0.2
+    version: 0.0.2(solid-js@1.7.7)(solid-transition-group@0.0.10)
   solid-form-handler:
     specifier: ^1.2.0
     version: 1.2.0(solid-js@1.7.7)
@@ -948,6 +951,11 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /clsx@1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+    dev: false
+
   /color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}
     dependencies:
@@ -1296,6 +1304,10 @@ packages:
       brace-expansion: 1.1.11
     dev: true
 
+  /mitt@3.0.1:
+    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+    dev: false
+
   /moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
     dev: false
@@ -1531,6 +1543,18 @@ packages:
     resolution: {integrity: sha512-ZfhQVB59hmIauJG5Ydynupy8KHyr5imGNtdDhbZG68Ufh1Ynkv9KOYOAABf71oVbQxJ8VkWnMHAjEHE7fWkH5g==}
     engines: {node: '>=10'}
 
+  /solid-contextmenu@0.0.2(solid-js@1.7.7)(solid-transition-group@0.0.10):
+    resolution: {integrity: sha512-TmOhIvVpZmQdoiydSP07d9rT0xu/wvRSH6TJqbGPd+2XZz0wOualbm5CvLiHbOGnOU5tBrbe4q0cU/EMvG7u+w==}
+    peerDependencies:
+      solid-js: ^1.4.8
+      solid-transition-group: ^0.0.10
+    dependencies:
+      clsx: 1.2.1
+      mitt: 3.0.1
+      solid-js: 1.7.7
+      solid-transition-group: 0.0.10(solid-js@1.7.7)
+    dev: false
+
   /solid-form-handler@1.2.0(solid-js@1.7.7):
     resolution: {integrity: sha512-T+bIzu9xJgfuZUrN1w7zhl8Dy8FYHZQ+iqtmmfO0dE5qerPbSRWDhSK3tykpfC7cEbW4Ts+ZfNM5IKyqiAALsg==}
     peerDependencies:
@@ -1555,6 +1579,14 @@ packages:
       '@babel/types': 7.22.5
       solid-js: 1.7.7
     dev: true
+
+  /solid-transition-group@0.0.10(solid-js@1.7.7):
+    resolution: {integrity: sha512-b3O9z6BUP60CG1WnTdqFuvHms0reDNYwQF+eAEEaSaoDEmiOu9+Lu7zQgWGySJjaAdSAClhmFCmx/eAjQgfIoA==}
+    peerDependencies:
+      solid-js: ^1.0.0
+    dependencies:
+      solid-js: 1.7.7
+    dev: false
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

@@ -3,15 +3,11 @@ import { firstKey } from '../../../../utils/utils';
 import { ColorCircle } from '../../../UI';
 import { ActionsMenu } from './ActionsMenu';
 
-export const ConnectionItem = (props: { connection: ConnectionConfig, deleteConnection: (id: string) => Promise<void> }) => {
+export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
   const scheme = firstKey(props.connection.scheme) as SchemeType;
   const mode = firstKey(props.connection.scheme[scheme]!) as ConnectionModeType;
   const creds = props.connection.scheme[scheme]![mode];
   const connectionString = mode === 'Host' ? creds.host : mode === 'File' ? creds.file : creds.sockets_path
-
-  const deleteConnection = async () => {
-    await props.deleteConnection(props.connection.id!);
-  }
 
   return (
     <div
@@ -26,7 +22,7 @@ export const ConnectionItem = (props: { connection: ConnectionConfig, deleteConn
         <p class="text text-sm dark:text-slate-500">{connectionString}</p>
       </div>
       <div class="hidden group-hover:block">
-        <ActionsMenu {...{ deleteConnection, connection: props.connection! }} />
+        <ActionsMenu {...{ connection: props.connection! }} />
       </div>
     </div>
   )
