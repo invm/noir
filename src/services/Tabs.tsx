@@ -5,18 +5,19 @@ import { Console } from "../components/main/Console";
 import { ConnectionConfig } from "../interfaces";
 
 type Tab = {
-  component?: () => JSX.Element
+  component?: (props: any) => JSX.Element
   label: string
   id?: string,
-  connection?: ConnectionConfig;
-  removable?: boolean
+  props?: {
+    connection?: ConnectionConfig
+  }
 }
 
 const _tabsStore = createStore<{
   tabs: Tab[],
   activeTab: number,
 }>({
-  tabs: [{ label: '🏠', component: Home, removable: false }],
+  tabs: [{ label: '🏠', component: Home }],
   activeTab: 1
 });
 
@@ -26,7 +27,6 @@ export const TabsService = () => {
   const addTab = async (tab: Tab) => {
     if (tabsStore.tabs.find(t => t.id === tab.id)) return;
     tab.component = Console;
-    tab.removable = true;
     const idx = tabsStore.tabs.length + 1
     setTabsStore('tabs', tabsStore.tabs.concat(tab))
     setTabsStore('activeTab', idx)
