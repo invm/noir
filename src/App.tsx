@@ -8,13 +8,13 @@ function App() {
   const { tabsService: { tabsStore, setActiveTab, removeTab } } = useAppSelector()
 
   const closeTab = async (id: string) => {
-    await removeTab(id)
+    removeTab(id)
     setActiveTab(1)
   }
 
   return (
     <div class="w-full h-full flex flex-col">
-      <div class="px-2 bg-base-300 tabs tabs-boxed rounded-none gap-2">
+      <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2">
         <For each={tabsStore.tabs}>
           {(tab, idx) =>
             <div class="group flex items-center">

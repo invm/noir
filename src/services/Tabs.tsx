@@ -32,7 +32,7 @@ export const TabsService = () => {
     setTabsStore('activeTab', idx)
   }
 
-  const removeTab = async (id: string) => {
+  const removeTab = (id: string) => {
     const idx = tabsStore.tabs.findIndex(t => t.id === id)
     if (idx <= 0) return;
     setTabsStore('tabs', tabsStore.tabs.filter((_t, i) => i !== idx));
