@@ -30,6 +30,9 @@
           "yes": "Yes",
           "cancel": "Cancel"
         }
+      },
+      "console":{
+        "query": "Query"
       }
     }
   }

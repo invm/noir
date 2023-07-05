@@ -1,9 +1,12 @@
 import Split from 'split.js'
-import { createEffect, onCleanup, onMount } from "solid-js"
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js"
 import { ConnectionConfig } from '../../interfaces'
 import { Sidebar } from '../Connections/Console/Sidebar'
 import { QueryTextArea } from '../Connections/Console/QueryTextArea'
 import { ResultsArea } from '../Connections/Console/ResultsArea'
+import { AddIcon, CloseIcon } from '../UI/Icons'
+import { createStore } from 'solid-js/store'
+import { t } from '../../utils/i18n'
 
 export const Console = (_props: { connection: ConnectionConfig }) => {
   createEffect(() => {
@@ -25,6 +28,38 @@ export const Console = (_props: { connection: ConnectionConfig }) => {
     })
   })
 
+  const [activeTab, setActiveTab] = createSignal(0)
+  const [tabs, setTabs] = createStore([
+    { query: 'select 1 + 1' },
+    { query: 'select * from users;' },
+  ])
+
+  const addTab = () => {
+    setTabs([...tabs, { query: '' }])
+    setActiveTab(tabs.length - 1)
+  }
+
+  const updateQueryText = (query: string) => {
+    setTabs([...tabs.map((t, i) => i === activeTab() ? { ...t, query } : t)])
+  }
+
+  const removeTab = (idx: number) => {
+    if (idx <= 0) return;
+    setActiveTab(0)
+    setTabs(tabs.filter((_t, i) => i !== idx));
+  }
+
+  const closeTab = async (id: number) => {
+    if (!id) return;
+    removeTab(id)
+    setActiveTab(0)
+  }
+
+  createEffect(() => {
+    console.log(tabs, activeTab());
+    console.log(tabs[activeTab()]?.query);
+  })
+
 
   return (
     <div class="w-full h-full bg-base-300">
@@ -36,8 +71,24 @@ export const Console = (_props: { connection: ConnectionConfig }) => {
         </div>
         <div id="main" class="flex flex-col h-full">
           <div id="query" class="bg-base-300 rounded-bl-lg">
-            <div class="bg-base-100 w-full h-full rounded-l-lg">
-              <QueryTextArea />
+            <div class="bg-base-100 w-full h-full flex flex-col rounded-l-lg">
+              <div class="bg-base-300 tabs rounded-none gap-1">
+                <For each={tabs}>
+                  {(_tab, idx) =>
+                    <div onClick={() => setActiveTab(idx())} class="tab py-2 tab-md tab-lifted"
+                      classList={{ 'tab-active': activeTab() === idx() }}
+                    >{t('components.console.query')} #{idx() + 1}
+                      <Show when={idx() > 0}>
+                        <button onClick={() => closeTab(idx())} class="pl-2 mb-1">
+                          <CloseIcon />
+                        </button>
+                      </Show>
+                    </div>
+                  }
+                </For>
+                <div onClick={() => addTab()} class="tab py-2 tab-sm tab-lifted tab-active" ><AddIcon /></div>
+              </div>
+              <QueryTextArea query={tabs[activeTab()]?.query} {...{ updateQueryText }} />
             </div>
           </div>
           <div id="results" class="bg-base-200 rounded-tl-lg p-3">
