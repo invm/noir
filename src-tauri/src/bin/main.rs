@@ -1,12 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use query_noir::{database::database, handlers::connections, state, utils::init};
+use tauri_plugin_log::LogTarget;
 
 use state::AppState;
 use tauri::{Manager, State};
 
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    args: Vec<String>,
+    cwd: String,
+}
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::default().targets([ LogTarget::Stdout, ]).build())
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            println!("{}, {argv:?}, {cwd}", app.package_info().name);
+
+            app.emit_all("single-instance", Payload { args: argv, cwd })
+                .unwrap();
+        }))
         .manage(AppState {
             db: Default::default(),
         })

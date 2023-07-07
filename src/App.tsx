@@ -8,7 +8,7 @@ function App() {
   const { tabsService: { tabsStore, setActiveTab, removeTab } } = useAppSelector()
 
   const closeTab = async (id: string) => {
-    removeTab(id)
+    await removeTab(id)
     setActiveTab(1)
   }
 

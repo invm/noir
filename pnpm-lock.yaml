@@ -32,6 +32,12 @@ dependencies:
   tabulator-tables:
     specifier: ^5.5.0
     version: 5.5.0
+  tauri-plugin-store-api:
+    specifier: github:tauri-apps/tauri-plugin-store#v1
+    version: github.com/tauri-apps/tauri-plugin-store/96e2eb3971c981ece96f0a9e47dad14a2d1d2539
+  tauri-plugin-window-state-api:
+    specifier: github:tauri-apps/tauri-plugin-window-state#v1
+    version: github.com/tauri-apps/tauri-plugin-window-state/ec0bddd3774ca60896fd03f8cd93ef77db162047
   zod:
     specifier: ^3.21.4
     version: 3.21.4
@@ -1799,4 +1805,20 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false
+
+  github.com/tauri-apps/tauri-plugin-store/96e2eb3971c981ece96f0a9e47dad14a2d1d2539:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/96e2eb3971c981ece96f0a9e47dad14a2d1d2539}
+    name: tauri-plugin-store-api
+    version: 0.0.0
+    dependencies:
+      '@tauri-apps/api': 1.4.0
+    dev: false
+
+  github.com/tauri-apps/tauri-plugin-window-state/ec0bddd3774ca60896fd03f8cd93ef77db162047:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/ec0bddd3774ca60896fd03f8cd93ef77db162047}
+    name: tauri-plugin-window-state-api
+    version: 0.0.0
+    dependencies:
+      '@tauri-apps/api': 1.4.0
     dev: false
