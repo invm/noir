@@ -1,5 +1,5 @@
 import Split from 'split.js'
-import { createEffect, createSignal, For, onCleanup, Show } from "solid-js"
+import { createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import { ConnectionConfig } from '../../interfaces'
 import { Sidebar } from '../Connections/Console/Sidebar'
 import { QueryTextArea } from '../Connections/Console/QueryTextArea'
@@ -8,7 +8,24 @@ import { AddIcon, CloseIcon } from '../UI/Icons'
 import { createStore } from 'solid-js/store'
 import { t } from '../../utils/i18n'
 
-export const Console = (_props: { connection: ConnectionConfig }) => {
+let TIMEOUT: NodeJS.Timeout | null = null
+
+export const Console = (props: { connection: ConnectionConfig }) => {
+  // TODO: remove from local storage when parent tab is deleted
+  const CONNECTION_STORE_STORAGE_KEY = '_connection:' + props.connection.id
+  const [activeTab, setActiveTab] = createSignal(0)
+  const [tabs, setTabs] = createStore([
+    { query: 'select 1 + 1' },
+    { query: 'select * from users;' },
+  ])
+
+  onMount(() => {
+    const tabStr = localStorage.getItem(CONNECTION_STORE_STORAGE_KEY)
+    if (!tabStr) return
+    const res = JSON.parse(tabStr)
+    setTabs(() => res)
+  })
+
   createEffect(() => {
     const s = Split(['#sidebar', '#main'], {
       sizes: [20, 80],
@@ -28,11 +45,13 @@ export const Console = (_props: { connection: ConnectionConfig }) => {
     })
   })
 
-  const [activeTab, setActiveTab] = createSignal(0)
-  const [tabs, setTabs] = createStore([
-    { query: 'select 1 + 1' },
-    { query: 'select * from users;' },
-  ])
+  const updateLocalStorageTimeout = () => {
+    TIMEOUT && clearTimeout(TIMEOUT)
+    TIMEOUT = setTimeout(() => {
+      console.log('updateLocalStorageTimeout');
+      localStorage.setItem(CONNECTION_STORE_STORAGE_KEY, JSON.stringify(tabs))
+    }, 2000)
+  }
 
   const addTab = () => {
     setTabs([...tabs, { query: '' }])
@@ -41,6 +60,7 @@ export const Console = (_props: { connection: ConnectionConfig }) => {
 
   const updateQueryText = (query: string) => {
     setTabs([...tabs.map((t, i) => i === activeTab() ? { ...t, query } : t)])
+    updateLocalStorageTimeout()
   }
 
   const removeTab = (idx: number) => {

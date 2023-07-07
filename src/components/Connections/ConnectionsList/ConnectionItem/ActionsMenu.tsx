@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { ConnectionConfig } from '../../../../interfaces';
 import { useAppSelector } from '../../../../services/Context';
 
@@ -10,6 +9,7 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
     await addTab({
       id: props.connection.id,
       label: props.connection.name,
+      key: 'Console',
       props: {
         connection: props.connection
       }
