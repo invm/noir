@@ -1,7 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use query_noir::{database::database, handlers::connections, state, utils::init};
-use tauri_plugin_log::LogTarget;
+use query_noir::{
+    database::database,
+    handlers::{connections, queries},
+    state,
+    utils::init,
+};
 
 use state::AppState;
 use tauri::{Manager, State};
@@ -14,7 +18,6 @@ struct Payload {
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_log::Builder::default().targets([ LogTarget::Stdout, ]).build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
@@ -40,6 +43,7 @@ fn main() {
             connections::add_connection,
             connections::delete_connection,
             connections::get_connections,
+            queries::test_query,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
