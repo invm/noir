@@ -11,16 +11,15 @@ pub fn encrypt_data(data: &str, key: &str) -> Vec<u8> {
 
 pub fn decrypt_data(data: &Vec<u8>, key: &str) -> Result<Vec<u8>> {
     let decrypted = decrypt(data, key.as_bytes())?;
-    return Ok(decrypted);
+    Ok(decrypted)
 }
 
 fn random_key_generator() -> String {
-    return rand::thread_rng()
+    rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(32)
         .map(char::from)
-        .into_iter()
-        .collect();
+        .collect()
 }
 
 pub fn create_app_key() -> Result<()> {
@@ -32,7 +31,7 @@ pub fn get_app_key() -> Result<String> {
     let key_path = format!("{}/.key", get_app_path());
     let key = fs::read(key_path)?;
     let key = String::from_utf8_lossy(&key).to_string();
-    return Ok(key);
+    Ok(key)
 }
 
 #[cfg(test)]
