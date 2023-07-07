@@ -4,6 +4,10 @@ import { Home } from "../components/main/Home";
 import { Console } from "../components/main/Console";
 import { ConnectionConfig } from "../interfaces";
 import { onMount } from "solid-js";
+import { Store } from "tauri-plugin-store-api";
+
+const store = new Store(".tabs.dat");
+
 
 type Tab = {
   key: keyof typeof ComponentsMap,
@@ -35,10 +39,11 @@ const TAB_STORE_STORAGE_KEY = '_tabs'
 export const TabsService = () => {
   const [tabsStore, setTabsStore] = _tabsStore
 
-  onMount(() => {
-    const tabStr = localStorage.getItem(TAB_STORE_STORAGE_KEY)
+  onMount(async () => {
+    const tabStr = await store.get(TAB_STORE_STORAGE_KEY);
+    console.log("Loaded tabStr", tabStr)
     if (!tabStr) return
-    const res = JSON.parse(tabStr)
+    const res = JSON.parse(tabStr as string)
     res.tabs = res.tabs.map((t: Tab) => {
       t.component = ComponentsMap[t.key]
       return t
@@ -46,8 +51,9 @@ export const TabsService = () => {
     setTabsStore(() => res as unknown as TabStore)
   })
 
-  const updateStore = (store: TabStore) => {
-    localStorage.setItem(TAB_STORE_STORAGE_KEY, JSON.stringify(store))
+  const updateStore = async (newStore: TabStore) => {
+    await store.set(TAB_STORE_STORAGE_KEY, JSON.stringify(newStore));
+    await store.save();
   }
 
   const addTab = async (tab: Tab) => {
@@ -56,14 +62,14 @@ export const TabsService = () => {
     const idx = tabsStore.tabs.length + 1
     setTabsStore('tabs', tabsStore.tabs.concat(tab))
     setTabsStore('activeTab', idx)
-    updateStore(tabsStore)
+    await updateStore(tabsStore)
   }
 
-  const removeTab = (id: string) => {
+  const removeTab = async (id: string) => {
     const idx = tabsStore.tabs.findIndex(t => t.id === id)
     if (idx <= 0) return;
     setTabsStore('tabs', tabsStore.tabs.filter((_t, i) => i !== idx));
-    updateStore(tabsStore)
+    await updateStore(tabsStore)
   }
 
   const setActiveTab = (idx: number) => {

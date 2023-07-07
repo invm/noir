@@ -7,6 +7,9 @@ import { ResultsArea } from '../Connections/Console/ResultsArea'
 import { AddIcon, CloseIcon } from '../UI/Icons'
 import { createStore } from 'solid-js/store'
 import { t } from '../../utils/i18n'
+import { Store } from "tauri-plugin-store-api";
+
+const store = new Store(".console.dat");
 
 let TIMEOUT: NodeJS.Timeout | null = null
 
@@ -45,11 +48,12 @@ export const Console = (props: { connection: ConnectionConfig }) => {
     })
   })
 
-  const updateLocalStorageTimeout = () => {
+  const persistState = () => {
     TIMEOUT && clearTimeout(TIMEOUT)
-    TIMEOUT = setTimeout(() => {
+    TIMEOUT = setTimeout(async () => {
       console.log('updateLocalStorageTimeout');
-      localStorage.setItem(CONNECTION_STORE_STORAGE_KEY, JSON.stringify(tabs))
+      await store.set(CONNECTION_STORE_STORAGE_KEY, JSON.stringify(tabs));
+      await store.save();
     }, 2000)
   }
 
@@ -60,7 +64,7 @@ export const Console = (props: { connection: ConnectionConfig }) => {
 
   const updateQueryText = (query: string) => {
     setTabs([...tabs.map((t, i) => i === activeTab() ? { ...t, query } : t)])
-    updateLocalStorageTimeout()
+    persistState()
   }
 
   const removeTab = (idx: number) => {
