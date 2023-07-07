@@ -8,6 +8,7 @@ import { AddIcon, CloseIcon } from '../UI/Icons'
 import { createStore } from 'solid-js/store'
 import { t } from '../../utils/i18n'
 import { Store } from "tauri-plugin-store-api";
+import { invoke } from '@tauri-apps/api';
 
 const store = new Store(".console.dat");
 
@@ -28,6 +29,10 @@ export const Console = (props: { connection: ConnectionConfig }) => {
     const res = JSON.parse(tabStr)
     setTabs(() => res)
   })
+
+  const onClick = async () => {
+    await invoke('test_query', { query: 'Select 1+1; drop table users;' })
+  }
 
   createEffect(() => {
     const s = Split(['#sidebar', '#main'], {
@@ -91,6 +96,7 @@ export const Console = (props: { connection: ConnectionConfig }) => {
         <div id="sidebar" class="h-full">
           <div class="bg-base-100 w-full h-full rounded-tr-lg">
             <Sidebar />
+            <button onClick={onClick}>Test</button>
           </div>
         </div>
         <div id="main" class="flex flex-col h-full">

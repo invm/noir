@@ -32,4 +32,3 @@ pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionCon
         .db(connections::get_all_connections)
         .map_err(Error::from)
 }
-
