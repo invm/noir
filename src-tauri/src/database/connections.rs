@@ -51,32 +51,32 @@ impl TryFrom<&str> for Scheme {
     type Error = anyhow::Error;
 
     fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
-        if value.len() == 0 {
+        if value.is_empty() {
             return Err(anyhow::anyhow!("Scheme cannot be empty"));
         }
         let object: Scheme = serde_json::from_str(value)?;
-        return Ok(object);
+        Ok(object)
     }
 }
 
 impl ConnectionConfig {
     pub fn new(name: &str, scheme: Scheme, color: &str) -> Result<Self> {
-        if name.len() == 0 {
+        if name.is_empty() {
             return Err(anyhow::anyhow!("Connection name cannot be empty"));
         }
-        if color.len() == 0 {
+        if color.is_empty() {
             return Err(anyhow::anyhow!("Color cannot be empty"));
         }
         if scheme == Scheme::Sqlite(FileConnectionMode::File(PathBuf::new())) {
             return Err(anyhow::anyhow!("Sqlite connection must have a path"));
         }
         let id = Uuid::new_v4();
-        return Ok(ConnectionConfig {
+        Ok(ConnectionConfig {
             id,
             scheme,
             name: name.to_string(),
             color: color.to_string(),
-        });
+        })
     }
 }
 

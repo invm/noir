@@ -12,7 +12,7 @@ pub fn initialize_database() -> Result<Connection, rusqlite::Error> {
     let mut db = Connection::open(db_path)?;
 
     let mut user_pragma = db.prepare("PRAGMA user_version")?;
-    let existing_user_version: u32 = user_pragma.query_row([], |row| Ok(row.get(0)?))?;
+    let existing_user_version: u32 = user_pragma.query_row([], |row| row.get(0))?;
     drop(user_pragma);
 
     upgrade_database_if_needed(&mut db, existing_user_version)?;
@@ -36,7 +36,7 @@ pub fn upgrade_database_if_needed(
 
 pub fn get_db_path() -> String {
     let app_path = get_app_path();
-    return format!("{}/.app.db", app_path);
+    format!("{}/.app.db", app_path)
 }
 
 pub fn create_app_db(app_path: &str) -> Result<()> {

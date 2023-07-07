@@ -7,7 +7,6 @@ use super::{
 };
 
 pub fn init_app() -> Result<()> {
-    env_logger::init();
     let app_path = get_app_path();
     if !check_if_app_dir_exists(&app_path) {
         create_app_dir(&app_path)?;
