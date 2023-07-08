@@ -31,8 +31,12 @@
           "cancel": "Cancel"
         }
       },
-      "console":{
-        "query": "Query"
+      "console": {
+        "query": "Query",
+        "actions": {
+          "format": "Format",
+          "execute": "Execute"
+        }
       }
     }
   }
