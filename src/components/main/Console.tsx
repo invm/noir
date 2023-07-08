@@ -8,31 +8,26 @@ import { AddIcon, CloseIcon } from '../UI/Icons'
 import { createStore } from 'solid-js/store'
 import { t } from '../../utils/i18n'
 import { Store } from "tauri-plugin-store-api";
-import { invoke } from '@tauri-apps/api';
 
 const store = new Store(".console.dat");
 
 let TIMEOUT: NodeJS.Timeout | null = null
 
+type QueryTab = {
+  query: string
+}
+
 export const Console = (props: { connection: ConnectionConfig }) => {
   // TODO: remove from local storage when parent tab is deleted
   const CONNECTION_STORE_STORAGE_KEY = '_connection:' + props.connection.id
   const [activeTab, setActiveTab] = createSignal(0)
-  const [tabs, setTabs] = createStore([
-    { query: 'select 1 + 1' },
-    { query: 'select * from users;' },
-  ])
+  const [tabs, setTabs] = createStore<QueryTab[]>([])
 
-  onMount(() => {
-    const tabStr = localStorage.getItem(CONNECTION_STORE_STORAGE_KEY)
+  onMount(async () => {
+    const tabStr = await store.get(CONNECTION_STORE_STORAGE_KEY)
     if (!tabStr) return
-    const res = JSON.parse(tabStr)
-    setTabs(() => res)
+    setTabs(() => tabStr as QueryTab[])
   })
-
-  const onClick = async () => {
-    await invoke('test_query', { query: 'Select 1+1; drop table users;' })
-  }
 
   createEffect(() => {
     const s = Split(['#sidebar', '#main'], {
@@ -53,23 +48,20 @@ export const Console = (props: { connection: ConnectionConfig }) => {
     })
   })
 
-  const persistState = () => {
-    TIMEOUT && clearTimeout(TIMEOUT)
-    TIMEOUT = setTimeout(async () => {
-      console.log('updateLocalStorageTimeout');
-      await store.set(CONNECTION_STORE_STORAGE_KEY, JSON.stringify(tabs));
-      await store.save();
-    }, 2000)
+  const persistState = async () => {
+    await store.set(CONNECTION_STORE_STORAGE_KEY, tabs);
+    await store.save();
   }
 
-  const addTab = () => {
+  const addTab = async () => {
     setTabs([...tabs, { query: '' }])
     setActiveTab(tabs.length - 1)
+    await persistState()
   }
 
-  const updateQueryText = (query: string) => {
+  const updateQueryText = async (query: string) => {
     setTabs([...tabs.map((t, i) => i === activeTab() ? { ...t, query } : t)])
-    persistState()
+    await persistState()
   }
 
   const removeTab = (idx: number) => {
@@ -96,7 +88,6 @@ export const Console = (props: { connection: ConnectionConfig }) => {
         <div id="sidebar" class="h-full">
           <div class="bg-base-100 w-full h-full rounded-tr-lg">
             <Sidebar />
-            <button onClick={onClick}>Test</button>
           </div>
         </div>
         <div id="main" class="flex flex-col h-full">
@@ -118,7 +109,7 @@ export const Console = (props: { connection: ConnectionConfig }) => {
                 </For>
                 <div onClick={() => addTab()} class="tab py-2 tab-sm tab-lifted tab-active" ><AddIcon /></div>
               </div>
-              <QueryTextArea query={tabs[activeTab()]?.query} {...{ updateQueryText }} />
+              <QueryTextArea query={""} {...{ updateQueryText }} />
             </div>
           </div>
           <div id="results" class="bg-base-200 rounded-tl-lg p-3">

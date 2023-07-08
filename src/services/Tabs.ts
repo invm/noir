@@ -41,7 +41,6 @@ export const TabsService = () => {
 
   onMount(async () => {
     const tabStr = await store.get(TAB_STORE_STORAGE_KEY);
-    console.log("Loaded tabStr", tabStr)
     if (!tabStr) return
     const res = JSON.parse(tabStr as string)
     res.tabs = res.tabs.map((t: Tab) => {

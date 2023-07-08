@@ -43,7 +43,7 @@ fn main() {
             connections::add_connection,
             connections::delete_connection,
             connections::get_connections,
-            queries::test_query,
+            queries::execute_query,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
