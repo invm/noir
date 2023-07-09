@@ -11,8 +11,6 @@ import { Store } from "tauri-plugin-store-api";
 
 const store = new Store(".console.dat");
 
-let TIMEOUT: NodeJS.Timeout | null = null
-
 type QueryTab = {
   query: string
 }
@@ -25,7 +23,10 @@ export const Console = (props: { connection: ConnectionConfig }) => {
 
   onMount(async () => {
     const tabStr = await store.get(CONNECTION_STORE_STORAGE_KEY)
-    if (!tabStr) return
+    if (!tabStr) {
+      setTabs(() => [{ query: '' }])
+      return;
+    }
     setTabs(() => tabStr as QueryTab[])
   })
 
@@ -109,7 +110,7 @@ export const Console = (props: { connection: ConnectionConfig }) => {
                 </For>
                 <div onClick={() => addTab()} class="tab py-2 tab-sm tab-lifted tab-active" ><AddIcon /></div>
               </div>
-              <QueryTextArea query={""} {...{ updateQueryText }} />
+              <QueryTextArea query={tabs[activeTab()]?.query} {...{ updateQueryText }} />
             </div>
           </div>
           <div id="results" class="bg-base-200 rounded-tl-lg p-3">
