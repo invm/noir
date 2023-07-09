@@ -28,6 +28,7 @@ fn main() {
         }))
         .manage(AppState {
             db: Default::default(),
+            connections: Default::default(),
         })
         .setup(|app| {
             init::init_app()?;
