@@ -1,26 +1,27 @@
 volumes:
-  psql15:
-  mysql8:
+  mysql:
+  # psql:
 
 services:
-  psql15:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: noir
-    volumes:
-      - psql15:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
-  mysql8:
+  mysql:
     image: mysql:8.0.33
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: noir
-      MYSQL_DATABASE: noir
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: world_x
     ports:
       - 3306:3306
     volumes:
-      - mysql8:/var/lib/mysql
+      - mysql:/var/lib/mysql
+      - ./dev/:/docker-entrypoint-initdb.d
+  # psql:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: example
+  #     POSTGRES_DB: noir
+  #   volumes:
+  #     - psql:/var/lib/postgresql/data
+  #   ports:
+  #     - 5432:5432

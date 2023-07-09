@@ -1,28 +1,29 @@
 use anyhow::Result;
 use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
+use sqlx::mysql::MySqlPoolOptions;
 use std::path::PathBuf;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum BaseConnectionMode {
     Host(HostCredentials),
     Socket(SocketCredentials),
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum FileConnectionMode {
     File(PathBuf),
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum Scheme {
     Mysql(BaseConnectionMode),
     Postgres(BaseConnectionMode),
     Sqlite(FileConnectionMode),
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct SocketCredentials {
     pub username: String,
     pub password: Option<String>,
@@ -30,7 +31,7 @@ pub struct SocketCredentials {
     pub dbname: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct HostCredentials {
     pub username: String,
     pub password: Option<String>,
@@ -39,12 +40,25 @@ pub struct HostCredentials {
     pub dbname: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct ConnectionConfig {
     pub id: Uuid,
     pub scheme: Scheme,
     pub name: String,
     pub color: String,
+}
+
+#[derive(Debug, Clone)]
+pub enum Pool {
+    Mysql(sqlx::Pool<sqlx::MySql>),
+    Postgres(sqlx::Pool<sqlx::Postgres>),
+    Sqlite(sqlx::Pool<sqlx::Sqlite>),
+}
+
+#[derive(Debug, Clone)]
+pub struct ConnectedConnection {
+    pub config: ConnectionConfig,
+    pub pool: Pool,
 }
 
 impl TryFrom<&str> for Scheme {
@@ -77,6 +91,70 @@ impl ConnectionConfig {
             name: name.to_string(),
             color: color.to_string(),
         })
+    }
+
+    pub fn to_dsn(&self) -> String {
+        match &self.scheme {
+            Scheme::Mysql(BaseConnectionMode::Host(host)) => {
+                format!(
+                    "mysql://{}:{}@{}:{}/{}",
+                    host.username,
+                    host.password.clone().unwrap_or_default(),
+                    host.host,
+                    host.port,
+                    host.dbname
+                )
+            }
+            Scheme::Mysql(BaseConnectionMode::Socket(socket)) => {
+                format!(
+                    "mysql://{}:{}@{}",
+                    socket.username,
+                    socket.password.clone().unwrap_or_default(),
+                    socket.path.display()
+                )
+            }
+            Scheme::Postgres(BaseConnectionMode::Host(host)) => {
+                format!(
+                    "postgres://{}:{}@{}:{}/{}",
+                    host.username,
+                    host.password.clone().unwrap_or_default(),
+                    host.host,
+                    host.port,
+                    host.dbname
+                )
+            }
+            Scheme::Postgres(BaseConnectionMode::Socket(socket)) => {
+                format!(
+                    "postgres://{}:{}@{}",
+                    socket.username,
+                    socket.password.clone().unwrap_or_default(),
+                    socket.path.display()
+                )
+            }
+            Scheme::Sqlite(FileConnectionMode::File(path)) => {
+                format!("sqlite://{}", path.display())
+            }
+        }
+    }
+}
+
+impl ConnectedConnection {
+    pub async fn new(config: ConnectionConfig) -> Result<Self> {
+        match &config.scheme {
+            Scheme::Mysql(BaseConnectionMode::Host(_)) => {
+                let pool = MySqlPoolOptions::new()
+                    .max_connections(5)
+                    .connect(&config.to_dsn())
+                    .await?;
+                return Ok(ConnectedConnection {
+                    config,
+                    pool: Pool::Mysql(pool),
+                });
+            }
+            Scheme::Mysql(BaseConnectionMode::Socket(_)) => todo!(),
+            Scheme::Postgres(_) => todo!(),
+            Scheme::Sqlite(_) => todo!(),
+        }
     }
 }
 
