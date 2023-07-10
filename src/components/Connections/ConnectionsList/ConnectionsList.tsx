@@ -20,8 +20,8 @@ export const ConnectionsList = (props: { connections: ConnectionConfig[], setCon
 
 
   return (
-    <div class="h-full p-2 pt-5 bg-gray-900">
-      <h3 class="text px-2 text-xl font-bold">Saved Connections</h3>
+    <div class="h-full p-2 pt-5 bg-base-300">
+      <h3 class="px-2 text-xl font-bold">Saved Connections</h3>
       <div class="divider my-0"></div>
       <ul class="grid grid-cols-1 gap-1"
       >

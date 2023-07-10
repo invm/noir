@@ -1,8 +1,8 @@
 const colors = {
-  info: 'text-blue-800 bg-blue-50 dark:bg-gray-800 dark:text-blue-400',
-  success: 'text-green-800 bg-green-50 dark:bg-gray-800 dark:text-green-400',
-  warning: 'text-yellow-800 bg-yellow-50 dark:bg-gray-800 dark:text-yellow-400',
-  error: 'text-red-800 bg-red-50 dark:bg-gray-800 dark:text-red-400',
+  info: 'text-info-content bg-info',
+  success: 'text-success-content bg-success',
+  warning: 'text-warning-content bg-warning',
+  error: 'text-error-content bg-error',
 }
 
 const Alert = (props: { children: any, color: keyof typeof colors }) => {
