@@ -11,15 +11,15 @@ export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
 
   return (
     <div
-      class="group hover:bg-gray-800 rounded-md flex items-center justify-between px-2 py-1">
+      class="group hover:bg-base-200 rounded-md flex items-center justify-between px-2 py-1">
       <div>
         <div class="flex items-center">
-          <h5 class="text text-md font-bold">{props.connection.name}</h5>
+          <h5 class="text-md font-bold">{props.connection.name}</h5>
           <div class="flex px-3">
             <ColorCircle color={props.connection.color} />
           </div>
         </div>
-        <p class="text text-sm dark:text-slate-500">{connectionString}</p>
+        <p class="text-sm">{connectionString}</p>
       </div>
       <div class="hidden group-hover:block">
         <ActionsMenu {...{ connection: props.connection! }} />

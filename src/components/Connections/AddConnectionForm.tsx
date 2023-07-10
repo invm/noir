@@ -101,7 +101,7 @@ const AddConnectionForm = (props: { addConnection: ({ name, scheme, color }: { n
     <div class="p-3 w-full flex justify-center items-around pt-20">
       <form class="flex max-w-lg flex-col gap-1" autocomplete="off" onSubmit={submit}>
         <div>
-          <h2 class="text-2xl font-bold text">{t('components.add_connection_form.title')}</h2>
+          <h2 class="text-2xl font-bold">{t('components.add_connection_form.title')}</h2>
         </div>
         <div class='grid grid-cols-5 gap-3'>
           <div class='col-span-3'>
