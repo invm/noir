@@ -16,16 +16,18 @@ function App() {
   return (
     <div class="w-full h-full flex flex-col">
       <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2 flex justify-between items-center">
-        <div>
+        <div class="flex items-center">
           <For each={tabsStore.tabs}>
             {(tab, idx) =>
-              <div class="group flex items-center">
-                <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md "
+              <div class="flex items-center">
+                <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md tab-secondary"
                   classList={{ 'tab-active': tabsStore.activeTab === idx() + 1, }}
-                ><span class="">{tab.label}</span>               </div>
-                {idx() + 1 !== 1 && <button onClick={() => closeTab(tab.id!)} class="hidden group-hover:block pl-2 mb-1">
-                  <CloseIcon />
-                </button>}
+                ><span class="text-md font-bold">{tab.label}</span></div>
+                <Show when={tabsStore.activeTab === idx() + 1 && idx() + 1 !== 1}>
+                  <button onClick={() => closeTab(tab.id!)} class="pl-2 mb-1">
+                    <CloseIcon />
+                  </button>
+                </Show>
               </div>
             }
           </For>
