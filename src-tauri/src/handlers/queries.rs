@@ -1,4 +1,4 @@
-use crate::{database::connections::ConnectionConfig, utils::error::CommandResult};
+use crate::{database::connections::ConnectionConfig, utils::error::CommandResult, state::ServiceAccess};
 use log::info;
 use tauri::{command, AppHandle};
 
@@ -10,7 +10,9 @@ pub fn execute_query(_app_handle: AppHandle, query: String) -> CommandResult<()>
 }
 
 #[command]
-pub fn ping_db(_app_handle: AppHandle, _conn: ConnectionConfig) -> CommandResult<()> {
+pub async fn ping_db(app_handle: AppHandle, conn: ConnectionConfig) -> CommandResult<()> {
+    let res = app_handle.acquire_connection(conn.id.to_string()).ping().await;
+    info!("ping_db: {:?}", res);
     Ok(())
 }
 
