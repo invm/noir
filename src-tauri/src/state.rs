@@ -1,12 +1,13 @@
+use anyhow::Result;
 use rusqlite::Connection;
-use std::sync::Mutex;
+use std::{collections::HashMap, sync::Mutex};
 use tauri::{AppHandle, Manager, State};
 
 use crate::database::connections::ConnectedConnection;
 
 pub struct AppState {
     pub db: Mutex<Option<Connection>>,
-    pub connections: Mutex<Vec<ConnectedConnection>>,
+    pub connections: Mutex<HashMap<String, ConnectedConnection>>,
 }
 
 pub trait ServiceAccess {
@@ -18,7 +19,8 @@ pub trait ServiceAccess {
     where
         F: FnOnce(&mut Connection) -> TResult;
 
-    fn connections<F, TResult>(&self) -> Mutex<Vec<ConnectedConnection>>;
+    fn acquire_connection(&self, conn_id: String) -> ConnectedConnection;
+    fn add_connection(&mut self, conn: ConnectedConnection) -> Result<()>;
 }
 
 impl ServiceAccess for AppHandle {
@@ -44,10 +46,21 @@ impl ServiceAccess for AppHandle {
         operation(db)
     }
 
-    fn connections<F, TResult>(&self) -> Mutex<Vec<ConnectedConnection>> {
+    fn acquire_connection(&self, conn_id: String) -> ConnectedConnection {
         let app_state: State<AppState> = self.state();
-        let connections_guard = app_state.connections.lock().unwrap();
+        let binding = app_state.connections.lock();
+        let connection_guard = binding.as_ref();
+        let connection = connection_guard.unwrap().get(&conn_id).unwrap();
 
-        connections_guard.clone().into()
+        return connection.clone();
+    }
+
+    fn add_connection(&mut self, conn: ConnectedConnection) -> Result<()> {
+        let app_state: State<AppState> = self.state();
+        let mut binding = app_state.connections.lock();
+        let connection_guard = binding.as_mut();
+        connection_guard.unwrap().insert(conn.config.id.to_string().clone(), conn);
+
+        Ok(())
     }
 }
