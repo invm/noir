@@ -156,6 +156,20 @@ impl ConnectedConnection {
             Scheme::Sqlite(_) => todo!(),
         }
     }
+    pub async fn ping(&self) -> Result<()> {
+        match &self.pool {
+            Pool::Mysql(pool) => {
+                sqlx::query("SELECT 1").execute(pool).await?;
+            }
+            Pool::Postgres(pool) => {
+                sqlx::query("SELECT 1").execute(pool).await?;
+            }
+            Pool::Sqlite(pool) => {
+                sqlx::query("SELECT 1").execute(pool).await?;
+            }
+        }
+        Ok(())
+    }
 }
 
 pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
