@@ -27,7 +27,6 @@
     "tabulator-tables": "^5.5.0",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
-    "theme-change": "^2.5.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
