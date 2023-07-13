@@ -77,12 +77,6 @@ export const Console = (props: { connection: ConnectionConfig }) => {
     setActiveTab(0)
   }
 
-  createEffect(() => {
-    console.log(tabs, activeTab());
-    console.log(tabs[activeTab()]?.query);
-  })
-
-
   return (
     <div class="w-full h-full bg-base-300">
       <div class="flex w-full h-full">

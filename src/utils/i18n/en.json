@@ -37,6 +37,9 @@
           "format": "Format",
           "execute": "Execute"
         }
+      },
+      "theme_switch": {
+        "theme": "Theme"
       }
     }
   }

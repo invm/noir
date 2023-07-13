@@ -139,7 +139,7 @@ impl ConnectionConfig {
 }
 
 impl ConnectedConnection {
-    pub async fn new(config: ConnectionConfig) -> Result<Self> {
+    pub async fn new(config: ConnectionConfig) -> Result<Self, sqlx::error::Error> {
         match &config.scheme {
             Scheme::Mysql(BaseConnectionMode::Host(_)) => {
                 let pool = MySqlPoolOptions::new()
