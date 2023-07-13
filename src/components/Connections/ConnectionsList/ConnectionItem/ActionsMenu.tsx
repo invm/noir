@@ -1,11 +1,19 @@
+import { invoke } from '@tauri-apps/api';
 import { ConnectionConfig } from '../../../../interfaces';
 import { useAppSelector } from '../../../../services/Context';
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
-  const { tabsService: { addTab } } = useAppSelector()
+  const { errorService: { addError }, tabsService: { addTab } } = useAppSelector()
 
 
   const onConnect = async () => {
+    console.log('before init')
+    await invoke('init_connection', { config: props.connection }).catch(e => {
+      addError(e)
+    })
+    console.log('after init')
+    await invoke('ping_db', { connId: props.connection.id });
+    console.log('after ping')
     await addTab({
       id: props.connection.id,
       label: props.connection.name,

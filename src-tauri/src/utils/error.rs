@@ -10,6 +10,8 @@ pub enum Error {
     General(#[from] anyhow::Error),
     #[error("Uuid parse error")]
     UUIDError(#[from] uuid::Error),
+    #[error("DBError: {0}")]
+    DBError(#[from] sqlx::error::Error),
 }
 
 // we must also implement serde::Serialize
