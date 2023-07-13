@@ -20,7 +20,7 @@ function App() {
           <For each={tabsStore.tabs}>
             {(tab, idx) =>
               <div class="flex items-center">
-                <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md tab-secondary"
+                <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md"
                   classList={{ 'tab-active': tabsStore.activeTab === idx() + 1, }}
                 ><span class="text-md font-bold">{tab.label}</span></div>
                 <Show when={tabsStore.activeTab === idx() + 1 && idx() + 1 !== 1}>
