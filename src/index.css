@@ -87,3 +87,7 @@ input[type=number] {
 .cm-editor {
   height: 100%;
 }
+
+*:focus {
+  outline-style: auto !important;
+}

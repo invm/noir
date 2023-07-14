@@ -45,7 +45,7 @@ fn main() {
             connections::delete_connection,
             connections::get_connections,
             queries::execute_query,
-            queries::ping_db,
+            queries::get_tables,
             queries::init_connection,
         ])
         .run(tauri::generate_context!())

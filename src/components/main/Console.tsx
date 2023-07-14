@@ -1,6 +1,6 @@
 import Split from 'split.js'
 import { createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js"
-import { ConnectionConfig } from '../../interfaces'
+import { ConnectionConfig, DbSchema } from '../../interfaces'
 import { Sidebar } from '../Connections/Console/Sidebar'
 import { QueryTextArea } from '../Connections/Console/QueryTextArea'
 import { ResultsArea } from '../Connections/Console/ResultsArea'
@@ -15,7 +15,7 @@ type QueryTab = {
   query: string
 }
 
-export const Console = (props: { connection: ConnectionConfig }) => {
+export const Console = (props: { schema: DbSchema, connection: ConnectionConfig }) => {
   // TODO: remove from local storage when parent tab is deleted
   const CONNECTION_STORE_STORAGE_KEY = '_connection:' + props.connection.id
   const [activeTab, setActiveTab] = createSignal(0)
@@ -82,7 +82,7 @@ export const Console = (props: { connection: ConnectionConfig }) => {
       <div class="flex w-full h-full">
         <div id="sidebar" class="h-full">
           <div class="bg-base-100 w-full h-full rounded-tr-lg">
-            <Sidebar />
+            <Sidebar schema={props.schema} />
           </div>
         </div>
         <div id="main" class="flex flex-col h-full">

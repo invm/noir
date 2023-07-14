@@ -7,21 +7,33 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
 
 
   const onConnect = async () => {
-    console.log('before init')
-    await invoke('init_connection', { config: props.connection }).catch(e => {
-      addError(e)
-    })
-    console.log('after init')
-    await invoke('ping_db', { connId: props.connection.id });
-    console.log('after ping')
-    await addTab({
-      id: props.connection.id,
-      label: props.connection.name,
-      key: 'Console',
-      props: {
-        connection: props.connection
-      }
-    })
+    try {
+      await invoke('init_connection', { config: props.connection })
+      const { columns } = await invoke('get_tables', { connId: props.connection.id }) as { columns: Record<string, any>[] }
+      const schema = columns.reduce((acc: any, col: any) => {
+        return {
+          ...acc,
+          [col.TABLE_SCHEMA]: {
+            ...acc[col.TABLE_SCHEMA],
+            [col.TABLE_NAME]: {
+              ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
+              [col.COLUMN_NAME]: col
+            }
+          }
+        }
+      }, {})
+      await addTab({
+        id: props.connection.id,
+        label: props.connection.name,
+        key: 'Console',
+        props: {
+          schema,
+          connection: props.connection
+        }
+      })
+    } catch (error) {
+      addError(String(error))
+    }
   }
 
   return (
