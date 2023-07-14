@@ -5,7 +5,6 @@ import { useAppSelector } from '../../../../services/Context';
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const { errorService: { addError }, tabsService: { addTab } } = useAppSelector()
 
-
   const onConnect = async () => {
     try {
       await invoke('init_connection', { config: props.connection })

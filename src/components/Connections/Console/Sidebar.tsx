@@ -71,7 +71,7 @@ export const Sidebar = (props: { schema: DbSchema }) => {
                   {(column) => (
                     <div class="flex justify-between items-center">
                       <span class="text-sm"><span class="px-1">{emojiType(column.props.COLUMN_TYPE)}</span>{column.name}</span>
-                      <span class="text-xs text-accent">{column.props.COLUMN_TYPE}</span>
+                      <span class="text-xs text-accentt">{column.props.COLUMN_TYPE}</span>
                     </div>
                   )}
                 </For>
