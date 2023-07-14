@@ -13,10 +13,6 @@ function App() {
     setActiveTab(1)
   }
 
-  const resetStore = async () => {
-    await clearStore()
-  }
-
   return (
     <div class="w-full h-full flex flex-col">
       <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2 flex justify-between items-center">
@@ -38,7 +34,7 @@ function App() {
         </div>
         <div>
           {/*
-          <button onClick={resetStore}>Reset store</button>
+          <button onClick={async () => await clearStore()}>Reset store</button>
           */}
           <ThemeSwitch />
         </div>
@@ -54,7 +50,7 @@ function App() {
         </For>
       </div>
       <Alerts />
-    </div>
+    </div >
   );
 }
 

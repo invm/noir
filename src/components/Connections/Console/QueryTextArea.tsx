@@ -40,7 +40,7 @@ export const QueryTextArea = (props: { query: string, updateQueryText: (s: strin
           <button class="btn btn-ghost btn-sm" onClick={() => onExecute()}><FireIcon /></button>
         </div>
       </div>
-      <div class="overflow-hidden w-full h-full rounded-bl-md">
+      <div class="overflow-hidden w-full h-full">
         <div ref={ref} class="w-full h-full" />
       </div>
     </div>

@@ -91,3 +91,7 @@ input[type=number] {
 *:focus {
   outline-style: auto !important;
 }
+
+.tab-lifted.tab-active:not(.tab-disabled):not([disabled]){
+  border-width: 0px;
+}
