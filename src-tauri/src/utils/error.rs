@@ -10,7 +10,7 @@ pub enum Error {
     General(#[from] anyhow::Error),
     #[error("Uuid parse error")]
     UUIDError(#[from] uuid::Error),
-    #[error("DBError: {0}")]
+    #[error("DB Error: {0}")]
     DBError(#[from] sqlx::error::Error),
 }
 

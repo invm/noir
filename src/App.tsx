@@ -6,11 +6,15 @@ import { CloseIcon } from './components/UI/Icons';
 import ThemeSwitch from './components/UI/ThemeSwitch';
 
 function App() {
-  const { tabsService: { tabsStore, setActiveTab, removeTab } } = useAppSelector()
+  const { tabsService: { tabsStore, setActiveTab, removeTab, clearStore } } = useAppSelector()
 
   const closeTab = async (id: string) => {
     await removeTab(id)
     setActiveTab(1)
+  }
+
+  const resetStore = async () => {
+    await clearStore()
   }
 
   return (
@@ -32,7 +36,10 @@ function App() {
             }
           </For>
         </div>
-        <div class="">
+        <div>
+          {/*
+          <button onClick={resetStore}>Reset store</button>
+          */}
           <ThemeSwitch />
         </div>
       </div>
