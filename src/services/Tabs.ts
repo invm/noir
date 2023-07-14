@@ -2,7 +2,7 @@ import { JSX } from "solid-js/jsx-runtime";
 import { createStore } from "solid-js/store"
 import { Home } from "../components/main/Home";
 import { Console } from "../components/main/Console";
-import { ConnectionConfig } from "../interfaces";
+import { ConnectionConfig, DbSchema } from "../interfaces";
 import { onMount } from "solid-js";
 import { Store } from "tauri-plugin-store-api";
 
@@ -15,6 +15,7 @@ type Tab = {
   label: string,
   id?: string,
   props?: {
+    schema?: DbSchema,
     connection?: ConnectionConfig
   }
 }
@@ -76,7 +77,10 @@ export const TabsService = () => {
     updateStore(tabsStore)
   }
 
+  const clearStore = async () => {
+    await store.clear();
+  }
 
-  return { tabsStore, addTab, removeTab, setActiveTab }
+  return { tabsStore, addTab, removeTab, setActiveTab, clearStore }
 }
 

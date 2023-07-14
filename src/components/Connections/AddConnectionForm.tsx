@@ -92,7 +92,6 @@ const AddConnectionForm = (props: { addConnection: ({ name, scheme, color }: { n
       const { name, scheme, color } = formToConnectionStruct(formData());
       await props.addConnection({ name, scheme, color });
     } catch (error) {
-      console.error(error);
       addError((error as any).message);
     }
   };

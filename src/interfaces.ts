@@ -90,3 +90,22 @@ export const connectionColors = [
 ] as const
 
 export type ConnectionColor = typeof connectionColors[number];
+
+export type DbSchema = {
+  [schema: string]: {
+    [table: string]: {
+      [column: string]: {
+        TABLE_SCHEMA: string
+        TABLE_NAME: string
+        COLUMN_NAME: string
+        COLUMN_DEFAULT: string
+        IS_NULLABLE: string
+        DATA_TYPE: string
+        CHARACTER_MAXIMUM_LENGTH: number
+        NUMERIC_PRECISION: number
+        NUMERIC_SCALE: number
+      }
+    }
+  }
+}
+

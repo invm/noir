@@ -1,7 +1,11 @@
 use anyhow::Result;
 use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
-use sqlx::mysql::MySqlPoolOptions;
+use serde_json::{json, Value};
+use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
+use sqlx::postgres::PgRow;
+use sqlx::sqlite::SqliteRow;
+use std::fmt::Display;
 use std::path::PathBuf;
 use uuid::Uuid;
 
@@ -61,6 +65,18 @@ pub struct ConnectedConnection {
     pub pool: Pool,
 }
 
+pub enum QueryResult {
+    Mysql(Vec<MySqlRow>),
+    Postgres(Vec<PgRow>),
+    Sqlite(Vec<SqliteRow>),
+}
+
+impl Display for QueryResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        return format!("{}", self).fmt(f);
+    }
+}
+
 impl TryFrom<&str> for Scheme {
     type Error = anyhow::Error;
 
@@ -91,6 +107,18 @@ impl ConnectionConfig {
             name: name.to_string(),
             color: color.to_string(),
         })
+    }
+
+    pub fn get_db_name(&self) -> String {
+        match &self.scheme {
+            Scheme::Mysql(BaseConnectionMode::Host(host)) => host.dbname.clone(),
+            Scheme::Mysql(BaseConnectionMode::Socket(socket)) => socket.dbname.clone(),
+            Scheme::Postgres(BaseConnectionMode::Host(host)) => host.dbname.clone(),
+            Scheme::Postgres(BaseConnectionMode::Socket(socket)) => socket.dbname.clone(),
+            Scheme::Sqlite(FileConnectionMode::File(path)) => {
+                path.file_stem().unwrap().to_str().unwrap().to_string()
+            }
+        }
     }
 
     pub fn to_dsn(&self) -> String {
@@ -138,6 +166,29 @@ impl ConnectionConfig {
     }
 }
 
+#[allow(non_snake_case)]
+#[derive(Serialize, Debug, sqlx::FromRow)]
+struct MySqlColumn {
+    TABLE_CATALOG: String,
+    TABLE_SCHEMA: String,
+    TABLE_NAME: String,
+    COLUMN_NAME: String,
+    ORDINAL_POSITION: u32,
+    COLUMN_DEFAULT: Option<String>,
+    IS_NULLABLE: String,
+    DATA_TYPE: String,
+    CHARACTER_MAXIMUM_LENGTH: Option<i64>,
+    CHARACTER_OCTET_LENGTH: Option<i64>,
+    NUMERIC_PRECISION: Option<u32>,
+    NUMERIC_SCALE: Option<u32>,
+    DATETIME_PRECISION: Option<u32>,
+    CHARACTER_SET_NAME: Option<String>,
+    COLLATION_NAME: Option<String>,
+    COLUMN_TYPE: String,
+    COLUMN_KEY: String,
+    COLUMN_COMMENT: String,
+}
+
 impl ConnectedConnection {
     pub async fn new(config: ConnectionConfig) -> Result<Self, sqlx::error::Error> {
         match &config.scheme {
@@ -156,19 +207,21 @@ impl ConnectedConnection {
             Scheme::Sqlite(_) => todo!(),
         }
     }
-    pub async fn ping(&self) -> Result<()> {
+    pub async fn get_tables(&self) -> Result<Value> {
         match &self.pool {
             Pool::Mysql(pool) => {
-                sqlx::query("SELECT 1").execute(pool).await?;
+                let db_name = self.config.get_db_name();
+                let query = format!(
+                    "select * from information_schema.columns where table_schema = '{}'",
+                    db_name
+                );
+                let rows: Vec<MySqlColumn> = sqlx::query_as(&query).fetch_all(pool).await?;
+                let result = json!({ "columns": rows });
+                Ok(result)
             }
-            Pool::Postgres(pool) => {
-                sqlx::query("SELECT 1").execute(pool).await?;
-            }
-            Pool::Sqlite(pool) => {
-                sqlx::query("SELECT 1").execute(pool).await?;
-            }
+            Pool::Postgres(_pool) => todo!(),
+            Pool::Sqlite(_pool) => todo!(),
         }
-        Ok(())
     }
 }
 
