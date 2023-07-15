@@ -1,38 +1,42 @@
-import { JSX } from "solid-js/jsx-runtime";
 import { createStore } from "solid-js/store"
-import { Home } from "../components/main/Home";
-import { Console } from "../components/main/Console";
 import { ConnectionConfig, DbSchema } from "../interfaces";
 import { onMount } from "solid-js";
 import { Store } from "tauri-plugin-store-api";
 
 const store = new Store(".tabs.dat");
 
-
 type Tab = {
-  key: keyof typeof ComponentsMap,
-  component?: (props: any) => JSX.Element,
   label: string,
-  id?: string,
-  props?: {
-    schema?: DbSchema,
-    connection?: ConnectionConfig
+  id: string,
+  props: {
+    schema: DbSchema,
+    connection: ConnectionConfig
   }
 }
 
 type TabStore = {
   tabs: Tab[],
-  activeTab: number,
+  activeTabIndex: number,
+  activeTab: Tab
 }
 
-const ComponentsMap = {
-  Home: Home,
-  Console: Console
+const EMPTY_TAB = {
+  label: '',
+  id: '',
+  props: {
+    schema: {
+      db_name: {
+        col_name: {}
+      }
+    },
+    connection: {} as ConnectionConfig
+  }
 }
 
 const _tabsStore = createStore<TabStore>({
-  tabs: [{ label: '🏠', key: 'Home', component: ComponentsMap['Home'] }],
-  activeTab: 1
+  tabs: [],
+  activeTabIndex: 0,
+  activeTab: EMPTY_TAB
 });
 
 const TAB_STORE_STORAGE_KEY = '_tabs'
@@ -44,10 +48,6 @@ export const TabsService = () => {
     const tabStr = await store.get(TAB_STORE_STORAGE_KEY);
     if (!tabStr) return
     const res = JSON.parse(tabStr as string)
-    res.tabs = res.tabs.map((t: Tab) => {
-      t.component = ComponentsMap[t.key]
-      return t
-    })
     setTabsStore(() => res as unknown as TabStore)
   })
 
@@ -58,23 +58,27 @@ export const TabsService = () => {
 
   const addTab = async (tab: Tab) => {
     if (tabsStore.tabs.find(t => t.id === tab.id)) return;
-    tab.component = Console;
-    const idx = tabsStore.tabs.length + 1
     setTabsStore('tabs', tabsStore.tabs.concat(tab))
-    setTabsStore('activeTab', idx)
+    setTabsStore('activeTab', tab)
+    const idx = tabsStore.tabs.length;
+    setTabsStore('activeTabIndex', idx)
     await updateStore(tabsStore)
   }
 
   const removeTab = async (id: string) => {
-    const idx = tabsStore.tabs.findIndex(t => t.id === id)
-    if (idx <= 0) return;
-    setTabsStore('tabs', tabsStore.tabs.filter((_t, i) => i !== idx));
+    setTabsStore('tabs', tabsStore.tabs.filter((t) => t.id !== id));
+    setTabsStore('activeTab', EMPTY_TAB)
+    setTabsStore('activeTabIndex', 0)
     await updateStore(tabsStore)
   }
 
-  const setActiveTab = (idx: number) => {
-    setTabsStore('activeTab', idx)
-    updateStore(tabsStore)
+  const setActiveTab = async (idx: number) => {
+    if (idx > 0) {
+      const tab = tabsStore.tabs[idx - 1]
+      setTabsStore('activeTab', tab)
+    }
+    setTabsStore('activeTabIndex', idx)
+    await updateStore(tabsStore)
   }
 
   const clearStore = async () => {

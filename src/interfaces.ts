@@ -58,7 +58,7 @@ export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, Conn
 export type Scheme = Partial<Record<SchemeType, Record<ConnectionModeType, Record<string, string>>>>
 
 export type ConnectionConfig = {
-  id?: string;
+  id: string;
   name: string;
   scheme: Scheme;
   color: ConnectionColor;

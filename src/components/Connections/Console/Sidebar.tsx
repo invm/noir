@@ -1,6 +1,6 @@
 import { createSignal, For, onMount } from "solid-js"
 import { createStore } from "solid-js/store"
-import { DbSchema } from "../../../interfaces"
+import { useAppSelector } from "../../../services/Context"
 
 type Table = {
   name: string
@@ -19,18 +19,19 @@ const TypeToEmoji = {
   varbinary: '📟',
 }
 
-export const Sidebar = (props: { schema: DbSchema }) => {
+export const Sidebar = () => {
+  const { tabsService: { tabsStore: { activeTab: { props: { schema } } } } } = useAppSelector()
   const [displayedSchema, setDisplayedSchema] = createSignal('')
   const [tables, setTables] = createStore<Table[]>([])
 
   onMount(() => {
-    const schema = Object.keys(props.schema)[0];
-    setDisplayedSchema(schema)
-    setTables(transformSchema(schema))
+    const _schema = Object.keys(schema)[0];
+    setDisplayedSchema(_schema)
+    setTables(transformSchema(_schema))
   })
 
-  const transformSchema = (schema: string) => {
-    const _tables = Object.entries(props.schema[schema])
+  const transformSchema = (sch: string) => {
+    const _tables = Object.entries(schema[sch])
       .reduce((acc: any, [name, columns]) => [...acc, {
         name, columns: Object.entries(columns).reduce(
           (cols: any, [name, props]) => [...cols, { name, props }], []
@@ -53,7 +54,7 @@ export const Sidebar = (props: { schema: DbSchema }) => {
     <div class="p-2 bg-base-200 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md">
         <select value={displayedSchema()} onChange={(e) => select(e.currentTarget.value)} class="select select-accent select-bordered select-xs w-full">
-          <For each={Object.keys(props.schema)}>
+          <For each={Object.keys(schema)}>
             {(schema) => <option class="py-1" value={schema}>{schema}</option>}
           </For>
         </select>
