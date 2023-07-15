@@ -5,13 +5,17 @@ import { Store } from "tauri-plugin-store-api";
 
 const store = new Store(".tabs.dat");
 
+type ContentTab = {
+  label: string,
+  data: any
+}
+
 type Tab = {
   label: string,
   id: string,
-  props: {
-    schema: DbSchema,
-    connection: ConnectionConfig
-  }
+  schema: DbSchema,
+  connection: ConnectionConfig
+  contentTabs?: ContentTab[]
 }
 
 type TabStore = {
@@ -23,14 +27,9 @@ type TabStore = {
 const EMPTY_TAB = {
   label: '',
   id: '',
-  props: {
-    schema: {
-      db_name: {
-        col_name: {}
-      }
-    },
-    connection: {} as ConnectionConfig
-  }
+  schema: { db_name: { col_name: {} } },
+  connection: {} as ConnectionConfig,
+  contentTabs: []
 }
 
 const _tabsStore = createStore<TabStore>({

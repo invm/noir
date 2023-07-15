@@ -4,7 +4,7 @@ const THEMES = ["light", "dark", "aqua", "synthwave", "dracula", "night", "cupca
 import { onMount } from 'solid-js'
 import { t } from "i18next";
 
-const ThemeSwitch = () => {
+export const ThemeSwitch = () => {
   onMount(async () => {
     const theme = localStorage.getItem("theme") || "dark"
     document.documentElement.dataset.theme = theme
@@ -26,5 +26,3 @@ const ThemeSwitch = () => {
     </div>
   )
 }
-
-export default ThemeSwitch
