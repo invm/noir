@@ -1,11 +1,11 @@
-import './utils/i18n';
-import { useAppSelector } from './services/Context';
-import { Alerts } from './components/UI';
+import 'utils/i18n';
+import { useAppSelector } from 'services/Context';
+import { Alerts } from 'components/UI';
 import { For, Match, Show, Switch } from 'solid-js';
-import { CloseIcon } from './components/UI/Icons';
-import ThemeSwitch from './components/UI/ThemeSwitch';
-import { Home } from './components/main/Home';
-import { Console } from './components/main/Console';
+import { CloseIcon } from 'components/UI/Icons';
+import ThemeSwitch from 'components/UI/ThemeSwitch';
+import { Console } from 'components/Pages/Console';
+import { Home } from 'components/Pages/Home';
 
 function App() {
   const { tabsService: { tabsStore, setActiveTab, removeTab, clearStore } } = useAppSelector()

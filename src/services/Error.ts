@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store"
-import { randomId } from "../utils/utils";
+import { randomId } from "utils/utils";
 
 type Error = {
   message: string;

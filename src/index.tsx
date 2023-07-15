@@ -4,7 +4,7 @@ import "solid-contextmenu/dist/style.css"
 
 import "./index.css";
 import App from "./App";
-import { StoreProvider } from "./services/Context";
+import { StoreProvider } from "services/Context";
 
 render(() =>
   <StoreProvider>

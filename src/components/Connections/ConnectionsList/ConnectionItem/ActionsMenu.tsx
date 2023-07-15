@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api';
-import { ConnectionConfig } from '../../../../interfaces';
-import { useAppSelector } from '../../../../services/Context';
+import { ConnectionConfig } from 'interfaces';
+import { useAppSelector } from 'services/Context';
 
 const columnsToSchema = (columns: Record<string, any>[]) => {
   const schema = columns.reduce((acc: any, col: any) => {

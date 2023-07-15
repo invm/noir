@@ -1,6 +1,6 @@
+import { useAppSelector } from "services/Context"
 import { createSignal, For, onMount } from "solid-js"
 import { createStore } from "solid-js/store"
-import { useAppSelector } from "../../../services/Context"
 
 type Table = {
   name: string
