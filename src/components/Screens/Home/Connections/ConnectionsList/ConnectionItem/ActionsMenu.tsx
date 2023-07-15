@@ -29,10 +29,8 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
       await addTab({
         id: props.connection.id,
         label: props.connection.name,
-        props: {
-          schema,
-          connection: props.connection
-        }
+        schema,
+        connection: props.connection
       })
     } catch (error) {
       addError(String(error))

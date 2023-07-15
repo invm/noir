@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api';
 import { createStore } from 'solid-js/store';
 import { onMount } from 'solid-js';
-import { ConnectionsList } from 'components/Connections/ConnectionsList/ConnectionsList';
-import { AddConnectionForm } from 'components/Connections/AddConnectionForm';
+import { ConnectionsList } from 'components/Screens/Home/Connections/ConnectionsList/ConnectionsList';
+import { AddConnectionForm } from 'components/Screens/Home/Connections/AddConnectionForm';
 import { ConnectionConfig, Scheme } from 'interfaces';
 
 export const Home = () => {
