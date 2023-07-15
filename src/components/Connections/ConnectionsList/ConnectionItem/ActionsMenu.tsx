@@ -2,6 +2,22 @@ import { invoke } from '@tauri-apps/api';
 import { ConnectionConfig } from '../../../../interfaces';
 import { useAppSelector } from '../../../../services/Context';
 
+const columnsToSchema = (columns: Record<string, any>[]) => {
+  const schema = columns.reduce((acc: any, col: any) => {
+    return {
+      ...acc,
+      [col.TABLE_SCHEMA]: {
+        ...acc[col.TABLE_SCHEMA],
+        [col.TABLE_NAME]: {
+          ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
+          [col.COLUMN_NAME]: col
+        }
+      }
+    }
+  }, {})
+  return schema
+}
+
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const { errorService: { addError }, tabsService: { addTab } } = useAppSelector()
 
@@ -9,22 +25,10 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
     try {
       await invoke('init_connection', { config: props.connection })
       const { columns } = await invoke('get_tables', { connId: props.connection.id }) as { columns: Record<string, any>[] }
-      const schema = columns.reduce((acc: any, col: any) => {
-        return {
-          ...acc,
-          [col.TABLE_SCHEMA]: {
-            ...acc[col.TABLE_SCHEMA],
-            [col.TABLE_NAME]: {
-              ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
-              [col.COLUMN_NAME]: col
-            }
-          }
-        }
-      }, {})
+      const schema = columnsToSchema(columns)
       await addTab({
         id: props.connection.id,
         label: props.connection.name,
-        key: 'Console',
         props: {
           schema,
           connection: props.connection
