@@ -4,9 +4,9 @@ import { lineNumbers } from '@codemirror/view';
 import { sql } from '@codemirror/lang-sql'
 import { dracula } from '@uiw/codemirror-theme-dracula'
 import { format } from 'sql-formatter';
-import { EditIcon, FireIcon } from "../../UI/Icons";
 import { t } from "i18next";
 import { invoke } from '@tauri-apps/api';
+import { EditIcon, FireIcon } from "components/UI/Icons";
 
 export const QueryTextArea = (props: { query: string, updateQueryText: (s: string) => void }) => {
   const onInput = (q: string) => {

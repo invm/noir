@@ -1,10 +1,10 @@
 import { invoke } from '@tauri-apps/api';
 import { createSignal, For } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
-import { ConnectionConfig } from '../../../interfaces';
+import { ConnectionConfig } from 'interfaces';
 import { ConnectionItem } from './ConnectionItem/ConnectionItem';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
-import { t } from '../../../utils/i18n';
+import { t } from 'utils/i18n';
 
 export const ConnectionsList = (props: { connections: ConnectionConfig[], setConnections: SetStoreFunction<ConnectionConfig[]> }) => {
 

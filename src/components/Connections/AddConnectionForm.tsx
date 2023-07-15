@@ -4,15 +4,14 @@ import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
 
-import { Alert, TextInput, Select, ColorCircle } from '../UI';
+import { Alert, TextInput, Select, ColorCircle, FileInput } from 'components/UI';
 import {
   PORTS_MAP, Schemes, AvailableConnectionModes, SocketPathDefaults,
   connectionColors, ConnectionMode, connectionModes, schemes, HostCredentials, SocketCredentials, FileCredentials, Scheme
-} from '../../interfaces';
-import { titleCase } from '../../utils/formatters';
-import { FileInput } from './../UI/FileInput';
-import { omit } from '../../utils/utils';
-import { useAppSelector } from '../../services/Context';
+} from 'interfaces';
+import { titleCase } from 'utils/formatters';
+import { omit } from 'utils/utils';
+import { useAppSelector } from 'services/Context';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
