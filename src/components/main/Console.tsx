@@ -1,10 +1,9 @@
 import Split from 'split.js'
 import { createEffect, onCleanup } from "solid-js"
-import { ConnectionConfig, DbSchema } from '../../interfaces'
 import { Sidebar } from '../Connections/Console/Sidebar'
 import Content from '../Connections/Console/Content'
 
-export const Console = (props: { schema: DbSchema, connection: ConnectionConfig }) => {
+export const Console = () => {
   createEffect(() => {
     const s = Split(['#sidebar', '#main'], {
       sizes: [20, 80],
@@ -22,11 +21,11 @@ export const Console = (props: { schema: DbSchema, connection: ConnectionConfig 
       <div class="flex w-full h-full">
         <div id="sidebar" class="h-full">
           <div class="bg-base-100 w-full h-full rounded-tr-lg">
-            <Sidebar schema={props.schema} />
+            <Sidebar />
           </div>
         </div>
         <div id="main">
-          <Content connection={props.connection} />
+          <Content />
         </div>
       </div>
     </div>

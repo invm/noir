@@ -4,9 +4,9 @@ import { Store } from "tauri-plugin-store-api";
 import { t } from "../../../utils/i18n"
 import Split from "split.js"
 import { AddIcon, CloseIcon } from "../../UI/Icons";
-import { ConnectionConfig } from "../../../interfaces";
 import { QueryTextArea } from "./QueryTextArea";
 import { ResultsArea } from "./ResultsArea";
+import { useAppSelector } from "../../../services/Context";
 
 const store = new Store(".console.dat");
 
@@ -14,9 +14,10 @@ type QueryTab = {
   query: string
 }
 
-const Content = (props: { connection: ConnectionConfig }) => {
+const Content = () => {
+  const { tabsService: { tabsStore: { activeTab: { props: { connection } } } } } = useAppSelector()
   // TODO: remove from local storage when parent tab is deleted
-  const CONNECTION_STORE_STORAGE_KEY = '_connection:' + props.connection.id
+  const CONNECTION_STORE_STORAGE_KEY = '_connection:' + connection.id
   const [activeTab, setActiveTab] = createSignal(0)
   const [tabs, setTabs] = createStore<QueryTab[]>([])
 

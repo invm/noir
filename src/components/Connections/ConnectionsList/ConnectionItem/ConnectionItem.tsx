@@ -11,7 +11,7 @@ export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
 
   return (
     <div
-      class="group hover:bg-base-200 rounded-md flex items-center justify-between px-2 py-1">
+      class="hover:bg-base-200 rounded-md flex items-center justify-between px-2 py-1">
       <div>
         <div class="flex items-center">
           <h5 class="text-md font-bold">{props.connection.name}</h5>
@@ -21,7 +21,7 @@ export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
         </div>
         <p class="text-sm">{connectionString}</p>
       </div>
-      <div class="hidden group-hover:block">
+      <div>
         <ActionsMenu {...{ connection: props.connection! }} />
       </div>
     </div>
