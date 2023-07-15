@@ -1,7 +1,7 @@
 import Split from 'split.js'
 import { createEffect, onCleanup } from "solid-js"
-import { Sidebar } from '../Connections/Console/Sidebar'
-import Content from '../Connections/Console/Content'
+import { Sidebar } from 'components/Console/Sidebar'
+import Content from 'components/Console/Content'
 
 export const Console = () => {
   createEffect(() => {

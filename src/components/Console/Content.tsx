@@ -1,12 +1,12 @@
 import { createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import { createStore } from 'solid-js/store'
 import { Store } from "tauri-plugin-store-api";
-import { t } from "../../../utils/i18n"
 import Split from "split.js"
-import { AddIcon, CloseIcon } from "../../UI/Icons";
 import { QueryTextArea } from "./QueryTextArea";
 import { ResultsArea } from "./ResultsArea";
-import { useAppSelector } from "../../../services/Context";
+import { useAppSelector } from "../../services/Context";
+import { AddIcon, CloseIcon } from "components/UI/Icons";
+import { t } from "utils/i18n";
 
 const store = new Store(".console.dat");
 

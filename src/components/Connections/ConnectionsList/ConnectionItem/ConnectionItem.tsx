@@ -1,6 +1,6 @@
-import { ConnectionConfig, ConnectionModeType, SchemeType } from '../../../../interfaces';
-import { firstKey } from '../../../../utils/utils';
-import { ColorCircle } from '../../../UI';
+import { ConnectionConfig, ConnectionModeType, SchemeType } from 'interfaces';
+import { firstKey } from 'utils/utils';
+import { ColorCircle } from 'components/UI';
 import { ActionsMenu } from './ActionsMenu';
 
 export const ConnectionItem = (props: { connection: ConnectionConfig }) => {

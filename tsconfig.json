@@ -13,6 +13,21 @@
     ],
     "noEmit": true,
     "isolatedModules": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "./src",
+    "paths": {
+      "components": [
+        "src/components"
+      ],
+      "services": [
+        "src/services"
+      ],
+      "utils": [
+        "src/utils"
+      ],
+      "src/*": [
+        "src/*"
+      ]
+    }
   }
 }
