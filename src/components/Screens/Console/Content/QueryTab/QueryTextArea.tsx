@@ -31,8 +31,8 @@ export const QueryTextArea = (props: { query: string, updateQueryText: (s: strin
   }
 
   return (
-    <div class="flex-1 flex flex-col ">
-      <div class="w-full p-1">
+    <div class="flex-1 flex flex-col">
+      <div class="w-full p-1 bg-base-100">
         <div class="tooltip tooltip-primary" data-tip={t('components.console.actions.format')}>
           <button class="btn btn-ghost btn-sm" onClick={() => onFormat()}><EditIcon /></button>
         </div>
