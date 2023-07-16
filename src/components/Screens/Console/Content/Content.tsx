@@ -55,15 +55,9 @@ export const Content = () => {
     await persistState()
   }
 
-  const removeTab = (idx: number) => {
-    if (idx <= 0) return;
-    setActiveTabIndex(0)
+  const closeTab = async (idx: number) => {
+    if (!idx) return;
     setTabs(tabs.filter((_t, i) => i !== idx));
-  }
-
-  const closeTab = async (id: number) => {
-    if (!id) return;
-    removeTab(id)
     setActiveTabIndex(0)
   }
 
