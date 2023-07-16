@@ -19,7 +19,7 @@ export const QueryTab = (props: { query: string, updateQueryText: (s: string) =>
 
   return (
     <div class="flex flex-col h-full">
-      <div id="query">
+      <div id="query" class="flex">
         <QueryTextArea query={props.query} updateQueryText={props.updateQueryText} />
       </div>
       <div id="results" class="bg-base-200 p-3">
