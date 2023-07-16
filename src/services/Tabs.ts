@@ -6,6 +6,7 @@ import { Store } from "tauri-plugin-store-api";
 const store = new Store(".tabs.dat");
 
 type ContentTab = {
+  active: boolean,
   label: string,
   data: any
 }
@@ -15,7 +16,7 @@ type Tab = {
   id: string,
   schema: DbSchema,
   connection: ConnectionConfig
-  contentTabs?: ContentTab[]
+  contentTabs: ContentTab[]
 }
 
 type TabStore = {
@@ -73,6 +74,9 @@ export const TabsService = () => {
 
   const setActiveTab = async (idx: number) => {
     if (idx > 0) {
+      const tabs = tabsStore.tabs
+      tabs[tabsStore.activeTabIndex] = tabsStore.activeTab
+      setTabsStore('tabs', tabs);
       const tab = tabsStore.tabs[idx - 1]
       setTabsStore('activeTab', tab)
     }
@@ -82,6 +86,13 @@ export const TabsService = () => {
 
   const clearStore = async () => {
     await store.clear();
+  }
+
+  const updateActiveTabQuery = (query: string) => {
+    const activeTab = tabsStore.activeTab
+    const activeContentTabIdx = activeTab.contentTabs.indexOf(t => t.active)
+    activeTab.contentTabs[activeContentTabIdx].data.query = query
+    setTabsStore('activeTab', activeTab)
   }
 
   return { tabsStore, addTab, removeTab, setActiveTab, clearStore }
