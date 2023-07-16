@@ -95,3 +95,7 @@ input[type=number] {
 .tab-lifted.tab-active:not(.tab-disabled):not([disabled]){
   border-width: 0px;
 }
+
+dialog {
+  color: inherit;
+}
