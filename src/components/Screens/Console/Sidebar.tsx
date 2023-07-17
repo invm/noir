@@ -20,7 +20,7 @@ const TypeToEmoji = {
 }
 
 export const Sidebar = () => {
-  const { tabsService: { tabsStore: { activeTab: { schema } } } } = useAppSelector()
+  const { connectionsService: { tabsStore: { activeConnectionTab: { schema } } } } = useAppSelector()
   const [displayedSchema, setDisplayedSchema] = createSignal('')
   const [tables, setTables] = createStore<Table[]>([])
 

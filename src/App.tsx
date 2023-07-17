@@ -8,7 +8,7 @@ import { Console } from 'components/Screens/Console/Console';
 import { Home } from 'components/Screens/Home/Home';
 
 function App() {
-  const { tabsService: { tabsStore, setActiveTab, removeTab, clearStore } } = useAppSelector()
+  const { connectionsService: { tabsStore, setActiveTab, removeTab, clearStore } } = useAppSelector()
 
   const closeTab = async (id: string) => {
     await removeTab(id)
@@ -20,17 +20,17 @@ function App() {
         <div class="flex items-center">
           <div class="flex items-center">
             <div onClick={() => setActiveTab(0)} class="tab tab-md"
-              classList={{ 'tab-active': tabsStore.activeTabIndex === 0, }} >
+              classList={{ 'tab-active': tabsStore.activeConnectionTabIdx === 0, }} >
               <span class="text-md font-bold">Home</span>
             </div>
           </div>
-          <For each={tabsStore.tabs}>
+          <For each={tabsStore.connectionTabs}>
             {(tab, idx) =>
               <div class="flex items-center">
                 <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md"
-                  classList={{ 'tab-active': tabsStore.activeTabIndex === idx() + 1, }}
+                  classList={{ 'tab-active': tabsStore.activeConnectionTabIdx === idx() + 1, }}
                 ><span class="text-md font-bold">{tab.label}</span></div>
-                <Show when={tabsStore.activeTabIndex === idx() + 1}>
+                <Show when={tabsStore.activeConnectionTabIdx === idx() + 1}>
                   <button onClick={() => closeTab(tab.id!)} class="pl-2 mb-1">
                     <CloseIcon />
                   </button>
@@ -47,10 +47,10 @@ function App() {
       <div class="h-full">
         <div class="h-full">
           <Switch>
-            <Match when={tabsStore.activeTabIndex === 0}>
+            <Match when={tabsStore.activeConnectionTabIdx === 0}>
               <Home />
             </Match>
-            <Match when={tabsStore.activeTabIndex !== 0}>
+            <Match when={tabsStore.activeConnectionTabIdx !== 0}>
               <Console />
             </Match>
           </Switch>
