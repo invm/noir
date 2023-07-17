@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api';
+import { NEW_QUERY_TAB } from 'components/Screens/Console/Content/Content';
 import { ConnectionConfig } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 
@@ -19,7 +20,7 @@ const columnsToSchema = (columns: Record<string, any>[]) => {
 }
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
-  const { errorService: { addError }, tabsService: { addTab } } = useAppSelector()
+  const { errorService: { addError }, connectionsService: { addTab } } = useAppSelector()
 
   const onConnect = async () => {
     try {
@@ -30,7 +31,9 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
         id: props.connection.id,
         label: props.connection.name,
         schema,
-        connection: props.connection
+        connection: props.connection,
+        contentTabs: [NEW_QUERY_TAB],
+        activeTabIdx: 0
       })
     } catch (error) {
       addError(String(error))
