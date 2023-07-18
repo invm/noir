@@ -18,6 +18,7 @@
     "@tauri-apps/api": "^1.4.0",
     "@uiw/codemirror-theme-dracula": "^4.21.7",
     "i18next": "^23.1.0",
+    "patch-package": "^7.0.2",
     "solid-codemirror": "^2.3.0",
     "solid-contextmenu": "^0.0.2",
     "solid-form-handler": "^1.2.0",
