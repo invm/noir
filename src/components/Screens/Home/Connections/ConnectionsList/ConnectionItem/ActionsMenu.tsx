@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api';
-import { NEW_QUERY_TAB } from 'components/Screens/Console/Content/Content';
 import { ConnectionConfig } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 
@@ -32,8 +31,6 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
         label: props.connection.name,
         schema,
         connection: props.connection,
-        contentTabs: [NEW_QUERY_TAB],
-        activeTabIdx: 0
       })
     } catch (error) {
       addError(String(error))

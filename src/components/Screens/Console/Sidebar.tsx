@@ -20,18 +20,19 @@ const TypeToEmoji = {
 }
 
 export const Sidebar = () => {
-  const { connectionsService: { tabsStore: { activeConnectionTab: { schema } } } } = useAppSelector()
+  const { connectionsService: { connectionStore } } = useAppSelector()
+  const getSchema = () => connectionStore.tabs[connectionStore.idx - 1].schema
   const [displayedSchema, setDisplayedSchema] = createSignal('')
   const [tables, setTables] = createStore<Table[]>([])
 
   onMount(() => {
-    const _schema = Object.keys(schema)[0];
+    const _schema = Object.keys(getSchema())[0];
     setDisplayedSchema(_schema)
     setTables(transformSchema(_schema))
   })
 
   const transformSchema = (sch: string) => {
-    const _tables = Object.entries(schema[sch])
+    const _tables = Object.entries(getSchema()[sch])
       .reduce((acc: any, [name, columns]) => [...acc, {
         name, columns: Object.entries(columns).reduce(
           (cols: any, [name, props]) => [...cols, { name, props }], []
@@ -40,9 +41,9 @@ export const Sidebar = () => {
     return _tables
   };
 
-  const select = (schema: string) => {
-    setDisplayedSchema(schema)
-    setTables(transformSchema(schema))
+  const select = (_schema: string) => {
+    setDisplayedSchema(_schema)
+    setTables(transformSchema(_schema))
   }
 
   const emojiType = (t: string) => {
@@ -54,8 +55,8 @@ export const Sidebar = () => {
     <div class="p-2 bg-base-200 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md">
         <select value={displayedSchema()} onChange={(e) => select(e.currentTarget.value)} class="select select-accent select-bordered select-xs w-full">
-          <For each={Object.keys(schema)}>
-            {(schema) => <option class="py-1" value={schema}>{schema}</option>}
+          <For each={Object.keys(getSchema())}>
+            {(_schema) => <option class="py-1" value={_schema}>{_schema}</option>}
           </For>
         </select>
       </div>

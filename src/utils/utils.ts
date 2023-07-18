@@ -10,3 +10,16 @@ export const firstKey = (obj: Record<string, any>) => {
 
 export const randomId = () => Math.random().toString(36).substring(12);
 
+export const debounce = (func: Function, wait: number) => {
+  let timer: NodeJS.Timeout;
+
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      clearTimeout(timer);
+      func(...args);
+    };
+
+    clearTimeout(timer);
+    timer = setTimeout(later, wait);
+  }
+};
