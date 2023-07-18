@@ -8,7 +8,7 @@ import { Console } from 'components/Screens/Console/Console';
 import { Home } from 'components/Screens/Home/Home';
 
 function App() {
-  const { connectionsService: { tabsStore, setActiveTab, removeTab, clearStore } } = useAppSelector()
+  const { connectionsService: { removeTab, clearStore, connectionStore, setConnectionStore } } = useAppSelector()
 
   const closeTab = async (id: string) => {
     await removeTab(id)
@@ -19,18 +19,22 @@ function App() {
       <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2 flex justify-between items-center">
         <div class="flex items-center">
           <div class="flex items-center">
-            <div onClick={() => setActiveTab(0)} class="tab tab-md"
-              classList={{ 'tab-active': tabsStore.activeConnectionTabIdx === 0, }} >
+            <div onClick={() => {
+              console.log('click')
+              setConnectionStore('idx', 0)
+            }} class="tab tab-md"
+              classList={{ 'tab-active': connectionStore.idx === 0, }} >
               <span class="text-md font-bold">Home</span>
             </div>
           </div>
-          <For each={tabsStore.connectionTabs}>
+          <For each={connectionStore.tabs}>
             {(tab, idx) =>
               <div class="flex items-center">
-                <div onClick={() => setActiveTab(idx() + 1)} class="tab tab-md"
-                  classList={{ 'tab-active': tabsStore.activeConnectionTabIdx === idx() + 1, }}
+                <div onClick={() => { setConnectionStore('idx', idx() + 1) }}
+                  class="tab tab-md"
+                  classList={{ 'tab-active': connectionStore.idx === idx() + 1, }}
                 ><span class="text-md font-bold">{tab.label}</span></div>
-                <Show when={tabsStore.activeConnectionTabIdx === idx() + 1}>
+                <Show when={connectionStore.idx === idx() + 1}>
                   <button onClick={() => closeTab(tab.id!)} class="pl-2 mb-1">
                     <CloseIcon />
                   </button>
@@ -47,10 +51,10 @@ function App() {
       <div class="h-full">
         <div class="h-full">
           <Switch>
-            <Match when={tabsStore.activeConnectionTabIdx === 0}>
+            <Match when={connectionStore.idx === 0}>
               <Home />
             </Match>
-            <Match when={tabsStore.activeConnectionTabIdx !== 0}>
+            <Match when={connectionStore.idx !== 0}>
               <Console />
             </Match>
           </Switch>
