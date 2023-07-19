@@ -1,10 +1,9 @@
 use anyhow::Result;
+use mysql::prelude::Queryable;
+use mysql::{Pool, Row, Value};
 use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use sqlx::mysql::{MySqlPoolOptions, MySqlRow};
-use sqlx::postgres::PgRow;
-use sqlx::sqlite::SqliteRow;
+use serde_json::json;
 use std::fmt::Display;
 use std::path::PathBuf;
 use uuid::Uuid;
@@ -53,22 +52,22 @@ pub struct ConnectionConfig {
 }
 
 #[derive(Debug, Clone)]
-pub enum Pool {
-    Mysql(sqlx::Pool<sqlx::MySql>),
-    Postgres(sqlx::Pool<sqlx::Postgres>),
-    Sqlite(sqlx::Pool<sqlx::Sqlite>),
+pub enum ConnectionPool {
+    Mysql(Pool),
+    // Postgres(),
+    // Sqlite(),
 }
 
 #[derive(Debug, Clone)]
 pub struct ConnectedConnection {
     pub config: ConnectionConfig,
-    pub pool: Pool,
+    pub pool: ConnectionPool,
 }
 
 pub enum QueryResult {
-    Mysql(Vec<MySqlRow>),
-    Postgres(Vec<PgRow>),
-    Sqlite(Vec<SqliteRow>),
+    Mysql(Vec<mysql::Row>),
+    // Postgres(Vec<PgRow>),
+    // Sqlite(Vec<SqliteRow>),
 }
 
 impl Display for QueryResult {
@@ -123,42 +122,34 @@ impl ConnectionConfig {
 
     pub fn to_dsn(&self) -> String {
         match &self.scheme {
-            Scheme::Mysql(BaseConnectionMode::Host(host)) => {
-                format!(
-                    "mysql://{}:{}@{}:{}/{}",
-                    host.username,
-                    host.password.clone().unwrap_or_default(),
-                    host.host,
-                    host.port,
-                    host.dbname
-                )
-            }
-            Scheme::Mysql(BaseConnectionMode::Socket(socket)) => {
-                format!(
-                    "mysql://{}:{}@{}",
-                    socket.username,
-                    socket.password.clone().unwrap_or_default(),
-                    socket.path.display()
-                )
-            }
-            Scheme::Postgres(BaseConnectionMode::Host(host)) => {
-                format!(
-                    "postgres://{}:{}@{}:{}/{}",
-                    host.username,
-                    host.password.clone().unwrap_or_default(),
-                    host.host,
-                    host.port,
-                    host.dbname
-                )
-            }
-            Scheme::Postgres(BaseConnectionMode::Socket(socket)) => {
-                format!(
-                    "postgres://{}:{}@{}",
-                    socket.username,
-                    socket.password.clone().unwrap_or_default(),
-                    socket.path.display()
-                )
-            }
+            Scheme::Mysql(BaseConnectionMode::Host(host)) => format!(
+                "mysql://{}:{}@{}:{}/{}",
+                host.username,
+                host.password.clone().unwrap_or_default(),
+                host.host,
+                host.port,
+                host.dbname
+            ),
+            Scheme::Mysql(BaseConnectionMode::Socket(socket)) => format!(
+                "mysql://{}:{}@{}",
+                socket.username,
+                socket.password.clone().unwrap_or_default(),
+                socket.path.display()
+            ),
+            Scheme::Postgres(BaseConnectionMode::Host(host)) => format!(
+                "postgres://{}:{}@{}:{}/{}",
+                host.username,
+                host.password.clone().unwrap_or_default(),
+                host.host,
+                host.port,
+                host.dbname
+            ),
+            Scheme::Postgres(BaseConnectionMode::Socket(socket)) => format!(
+                "postgres://{}:{}@{}",
+                socket.username,
+                socket.password.clone().unwrap_or_default(),
+                socket.path.display()
+            ),
             Scheme::Sqlite(FileConnectionMode::File(path)) => {
                 format!("sqlite://{}", path.display())
             }
@@ -166,40 +157,37 @@ impl ConnectionConfig {
     }
 }
 
-#[allow(non_snake_case)]
-#[derive(Serialize, Debug, sqlx::FromRow)]
-struct MySqlColumn {
-    TABLE_CATALOG: String,
-    TABLE_SCHEMA: String,
-    TABLE_NAME: String,
-    COLUMN_NAME: String,
-    ORDINAL_POSITION: u32,
-    COLUMN_DEFAULT: Option<String>,
-    IS_NULLABLE: String,
-    DATA_TYPE: String,
-    CHARACTER_MAXIMUM_LENGTH: Option<i64>,
-    CHARACTER_OCTET_LENGTH: Option<i64>,
-    NUMERIC_PRECISION: Option<u32>,
-    NUMERIC_SCALE: Option<u32>,
-    DATETIME_PRECISION: Option<u32>,
-    CHARACTER_SET_NAME: Option<String>,
-    COLLATION_NAME: Option<String>,
-    COLUMN_TYPE: String,
-    COLUMN_KEY: String,
-    COLUMN_COMMENT: String,
+fn convert_value(value: &mysql::Value) -> serde_json::Value {
+    match value {
+        Value::Bytes(v) => serde_json::Value::String(String::from_utf8_lossy(v).to_string()),
+        Value::Int(v) => serde_json::Value::Number((*v).into()),
+        Value::UInt(v) => serde_json::Value::Number((*v).into()),
+        Value::Float(v) => serde_json::Value::Number(
+            serde_json::Number::from_f64(<f32 as std::convert::Into<f64>>::into(*v)).unwrap(),
+        ),
+        Value::Double(v) => serde_json::Value::Number(serde_json::Number::from_f64(*v).unwrap()),
+        Value::Date(y, m, d, ..) => serde_json::Value::String(format!("{}-{}-{}", y, m, d)),
+        Value::Time(neg, _d, h, m, s, z) => serde_json::Value::String(format!(
+            "{}{}:{}:{}{}",
+            if *neg { "-" } else { "" },
+            h,
+            m,
+            s,
+            z
+        )),
+        _ => serde_json::Value::Null,
+    }
 }
 
 impl ConnectedConnection {
-    pub async fn new(config: ConnectionConfig) -> Result<Self, sqlx::error::Error> {
+    pub async fn new(config: ConnectionConfig) -> Result<Self> {
         match &config.scheme {
             Scheme::Mysql(BaseConnectionMode::Host(_)) => {
-                let pool = MySqlPoolOptions::new()
-                    .max_connections(5)
-                    .connect(&config.to_dsn())
-                    .await?;
+                let url: &str = &config.to_dsn();
+                let pool = mysql::Pool::new(url)?;
                 return Ok(ConnectedConnection {
                     config,
-                    pool: Pool::Mysql(pool),
+                    pool: ConnectionPool::Mysql(pool),
                 });
             }
             Scheme::Mysql(BaseConnectionMode::Socket(_)) => todo!(),
@@ -207,20 +195,32 @@ impl ConnectedConnection {
             Scheme::Sqlite(_) => todo!(),
         }
     }
-    pub async fn get_tables(&self) -> Result<Value> {
+    pub async fn get_tables(&self) -> Result<serde_json::Value> {
         match &self.pool {
-            Pool::Mysql(pool) => {
-                let db_name = self.config.get_db_name();
-                let query = format!(
-                    "select * from information_schema.columns where table_schema = '{}'",
-                    db_name
-                );
-                let rows: Vec<MySqlColumn> = sqlx::query_as(&query).fetch_all(pool).await?;
-                let result = json!({ "columns": rows });
-                Ok(result)
+            ConnectionPool::Mysql(pool) => {
+            let db_name = self.config.get_db_name();
+            let mut conn = pool.get_conn()?;
+            let query = format!(
+                "select * from information_schema.columns where table_schema = '{}'",
+                db_name
+            );
+
+            let rows: Vec<Row> = conn.query(&query)?;
+            let mut result = Vec::new();
+            for row in rows {
+                let mut object = json!({});
+                for column in row.columns_ref() {
+                    let column_value = &row[column.name_str().as_ref()];
+                    let value = convert_value(column_value);
+                    object[column.name_str().as_ref()] = value;
+                }
+                result.push(object);
             }
-            Pool::Postgres(_pool) => todo!(),
-            Pool::Sqlite(_pool) => todo!(),
+            let result = json!({ "columns": result });
+            Ok(result)
+            }
+            // Pool::Postgres(_pool) => todo!(),
+            // Pool::Sqlite(_pool) => todo!(),
         }
     }
 }
