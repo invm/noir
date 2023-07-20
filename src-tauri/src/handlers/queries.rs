@@ -15,9 +15,37 @@ pub fn execute_query(_app_handle: AppHandle, query: String) -> CommandResult<()>
 }
 
 #[command]
-pub async fn get_tables(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_tables().await?;
+    let stats = connection.get_columns().await?;
+    Ok(stats)
+}
+
+#[command]
+pub async fn get_constraints(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let stats = connection.get_constraints().await?;
+    Ok(stats)
+}
+
+#[command]
+pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let stats = connection.get_triggers().await?;
+    Ok(stats)
+}
+
+#[command]
+pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let stats = connection.get_functions().await?;
+    Ok(stats)
+}
+
+#[command]
+pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let stats = connection.get_procedures().await?;
     Ok(stats)
 }
 
