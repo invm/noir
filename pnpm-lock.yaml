@@ -73,6 +73,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.3.2
     version: 20.3.2
+  '@types/tabulator-tables':
+    specifier: ^5.4.8
+    version: 5.4.8
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.24)
@@ -1170,6 +1173,10 @@ packages:
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
     dev: false
+
+  /@types/tabulator-tables@5.4.8:
+    resolution: {integrity: sha512-4gTi8VgvIQGcnmQXkH6hr65uXcARWCGZ+RCbOmpdZylWXgF8IWgwRRl+JVsBmeYy/K0U+hrABvFBHDqqfmo+WA==}
+    dev: true
 
   /@uiw/codemirror-theme-dracula@4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1):
     resolution: {integrity: sha512-ikaxDsw5STeFTAgz5nnRg/ENv8McX+4I7SX2ZTpsL51JyoiujIffjZHncc9QRvpkhlCZL4+we4A7pKtPOaI7UA==}
