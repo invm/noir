@@ -24,8 +24,8 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const onConnect = async () => {
     try {
       await invoke('init_connection', { config: props.connection })
-      const { columns } = await invoke('get_tables', { connId: props.connection.id }) as { columns: Record<string, any>[] }
-      const schema = columnsToSchema(columns)
+      const { result } = await invoke('get_columns', { connId: props.connection.id }) as { result: Record<string, any>[] }
+      const schema = columnsToSchema(result)
       await addTab({
         id: props.connection.id,
         label: props.connection.name,
