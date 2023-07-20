@@ -200,6 +200,14 @@ impl ConnectedConnection {
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
     }
+
+    pub async fn execute_query(&self, q: String) -> Result<Value> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),
+            // ConnectionPool::Postgres(_pool) => todo!(),
+            // ConnectionPool::Sqlite(_pool) => todo!(),
+        }
+    }
 }
 
 pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {

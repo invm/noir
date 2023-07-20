@@ -3,43 +3,42 @@ use crate::{
     state::ServiceAccess,
     utils::error::CommandResult,
 };
-use log::info;
 use serde_json::Value;
 use tauri::{command, AppHandle};
 
 #[command]
-pub fn execute_query(_app_handle: AppHandle, query: String) -> CommandResult<()> {
-    info!("execute_query: {}", query);
-    println!("{}", sql_lexer::sanitize_string(query.to_string()));
-    Ok(())
+pub async fn execute_query(app_handle: AppHandle, conn_id: String, query: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let result = connection.execute_query(query).await?;
+    Ok(result)
 }
 
 #[command]
 pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_columns().await?;
-    Ok(stats)
+    let result = connection.get_columns().await?;
+    Ok(result)
 }
 
 #[command]
 pub async fn get_constraints(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_constraints().await?;
-    Ok(stats)
+    let result = connection.get_constraints().await?;
+    Ok(result)
 }
 
 #[command]
 pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_triggers().await?;
-    Ok(stats)
+    let result = connection.get_triggers().await?;
+    Ok(result)
 }
 
 #[command]
 pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_functions().await?;
-    Ok(stats)
+    let result = connection.get_functions().await?;
+    Ok(result)
 }
 
 #[command]

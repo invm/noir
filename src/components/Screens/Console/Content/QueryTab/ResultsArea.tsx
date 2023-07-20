@@ -1,4 +1,5 @@
-import { For } from "solid-js"
+import { useAppSelector } from "services/Context"
+import { createEffect, For } from "solid-js"
 
 const rows = [
   { id: 1, name: 'Snow', calories: 159, fat: 6.0, carbs: 24, protein: 4.0 },
@@ -14,6 +15,10 @@ const rows = [
   { id: 11, name: 'Lannister', calories: 237, fat: 9.0, carbs: 37, protein: 4.3 },
 ]
 export const ResultsArea = () => {
+  const { connectionsService: { getActiveContentTab } } = useAppSelector()
+  createEffect(() => {
+    console.log(getActiveContentTab().data)
+  })
   return (
     <div class="p-3">
       <div class="text-xs font-bold text-primary">Results</div>

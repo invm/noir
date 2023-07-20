@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api';
-import { ConnectionConfig } from 'interfaces';
+import { ConnectionConfig, QueryResult } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 
 const columnsToSchema = (columns: Record<string, any>[]) => {
@@ -24,7 +24,7 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const onConnect = async () => {
     try {
       await invoke('init_connection', { config: props.connection })
-      const { result } = await invoke('get_columns', { connId: props.connection.id }) as { result: Record<string, any>[] }
+      const { result } = await invoke<QueryResult>('get_columns', { connId: props.connection.id });
       const schema = columnsToSchema(result)
       await addTab({
         id: props.connection.id,

@@ -3,7 +3,7 @@ import Split from "split.js"
 import { QueryTextArea } from "./QueryTextArea"
 import { ResultsArea } from "./ResultsArea"
 
-export const QueryTab = (props: { query: string, updateQueryText: (s: string) => void }) => {
+export const QueryTab = () => {
 
   createEffect(() => {
     const q = Split(['#query', '#results'], {
@@ -20,7 +20,7 @@ export const QueryTab = (props: { query: string, updateQueryText: (s: string) =>
   return (
     <div class="flex flex-col h-full">
       <div id="query" class="flex">
-        <QueryTextArea query={props.query} updateQueryText={props.updateQueryText} />
+        <QueryTextArea />
       </div>
       <div id="results" class="bg-base-200 p-3">
         <ResultsArea />
