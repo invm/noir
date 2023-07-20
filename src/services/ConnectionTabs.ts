@@ -116,9 +116,7 @@ export const ConnectionTabsService = () => {
   const setActiveContentQueryTabData = (data: ContentTabData['QueryTab']) => {
     const tab = getActiveContentTab()
     if (!tab) return;
-    const tabs = contentStore.tabs;
-    tabs[contentStore.idx].data = data;
-    setContentStore('tabs', tabs);
+    setContentStore('tabs', contentStore.tabs.map((t, i) => i === contentStore.idx ? { ...t, data } as ContentTab<'QueryTab'> : t))
   }
 
   return {

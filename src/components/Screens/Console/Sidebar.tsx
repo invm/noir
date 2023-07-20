@@ -28,7 +28,7 @@ const TypeToEmoji = {
 
 export const Sidebar = () => {
   const { connectionsService: { getActiveConnection } } = useAppSelector()
-  const getSchema = () => getActiveConnection().schema
+  const getSchema = () => getActiveConnection()?.schema ?? {}
   const [displayedSchema, setDisplayedSchema] = createSignal('')
   const [tables, setTables] = createStore<Table[]>([])
 
