@@ -109,3 +109,4 @@ export type DbSchema = {
   }
 }
 
+export type QueryResult = { result: Record<string, any>[], message?: string }

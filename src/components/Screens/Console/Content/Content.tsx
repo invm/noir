@@ -4,7 +4,7 @@ import { AddIcon, CloseIcon } from "components/UI/Icons";
 import { t } from "utils/i18n";
 import { QueryTab } from "./QueryTab/QueryTab";
 import { TableStructureTab } from "./TableStructureTab";
-import { ContentComponent, ContentTab, ContentTabData, NEW_QUERY_TAB } from "services/ConnectionTabs";
+import { ContentComponent, NEW_QUERY_TAB } from "services/ConnectionTabs";
 
 export const Content = () => {
   const { connectionsService: { contentStore, setContentStore } } = useAppSelector()
@@ -12,13 +12,6 @@ export const Content = () => {
   const addTab = async () => {
     setContentStore('tabs', [...contentStore.tabs, NEW_QUERY_TAB])
     setContentStore('idx', contentStore.tabs.length - 1)
-  }
-
-  const updateQueryText = async (query: string) => {
-    setContentStore('tabs', contentStore.tabs.map((t, idx) => idx === contentStore.idx ? {
-      ...t,
-      data: { ...t.data, query }
-    } as ContentTab<'QueryTab'> : t))
   }
 
   const closeTab = async (idx: number) => {
@@ -48,7 +41,7 @@ export const Content = () => {
       <div class="flex-1">
         <Switch>
           <Match when={contentStore.tabs[contentStore.idx]?.key === ContentComponent.QueryTab}>
-            <QueryTab query={(contentStore.tabs[contentStore.idx]?.data as ContentTabData['QueryTab']).query} updateQueryText={updateQueryText} />
+            <QueryTab />
           </Match>
           <Match when={contentStore.tabs[contentStore.idx]?.key === ContentComponent.TableStructureTab}>
             <TableStructureTab />
