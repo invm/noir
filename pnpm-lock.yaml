@@ -20,21 +20,30 @@ dependencies:
   '@uiw/codemirror-theme-dracula':
     specifier: ^4.21.7
     version: 4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
+  fuse.js:
+    specifier: ^6.6.2
+    version: 6.6.2
   i18next:
     specifier: ^23.1.0
     version: 23.1.0
   solid-codemirror:
     specifier: ^2.3.0
     version: 2.3.0(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(solid-js@1.7.7)
+  solid-command-palette:
+    specifier: github:on3iro/solid-command-palette#update-dependencies
+    version: github.com/on3iro/solid-command-palette/8aabf0d59871f5f6aee19b5d10a1851243e0bdb8(fuse.js@6.6.2)(solid-js@1.7.7)(solid-transition-group@0.2.2)(tinykeys@2.1.0)
   solid-contextmenu:
     specifier: ^0.0.2
-    version: 0.0.2(solid-js@1.7.7)(solid-transition-group@0.0.10)
+    version: 0.0.2(solid-js@1.7.7)(solid-transition-group@0.2.2)
   solid-form-handler:
     specifier: ^1.2.0
     version: 1.2.0(solid-js@1.7.7)
   solid-js:
     specifier: ^1.7.7
     version: 1.7.7
+  solid-transition-group:
+    specifier: ^0.2.2
+    version: 0.2.2(solid-js@1.7.7)
   split.js:
     specifier: ^1.6.5
     version: 1.6.5
@@ -50,6 +59,9 @@ dependencies:
   tauri-plugin-window-state-api:
     specifier: github:tauri-apps/tauri-plugin-window-state#v1
     version: github.com/tauri-apps/tauri-plugin-window-state/347c792535d2623fc21f66590d06f4c8dadd85ba
+  tinykeys:
+    specifier: ^2.1.0
+    version: 2.1.0
   zod:
     specifier: ^3.21.4
     version: 3.21.4
@@ -959,6 +971,39 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
+  /@solid-primitives/refs@1.0.4(solid-js@1.7.7):
+    resolution: {integrity: sha512-BxZKkct0OIyADWIoA9UITm+3G5Xb3IkOa0nZd40SgOK5DtMqpXFIEPUkJ/woPB90WqlM9UvvuiJHUyAjMeAmCw==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/utils': 6.2.0(solid-js@1.7.7)
+      solid-js: 1.7.7
+    dev: false
+
+  /@solid-primitives/transition-group@1.0.2(solid-js@1.7.7):
+    resolution: {integrity: sha512-+o3J7TnU0/Sok+LKA0z0wvhim88dpd2eFBk8/05adE6wVypVlME8sKqTMO+xRv8HoT4Kq3sczmvwV07FKg2n+g==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.7.7
+    dev: false
+
+  /@solid-primitives/utils@6.2.0(solid-js@1.7.7):
+    resolution: {integrity: sha512-T62WlLwKkbmicsw/xpwMQyv9MmZRSaVyutXfS5icc9v0cb8qGMUxRxr5LVvZHYQCZ9DEFboZB0r711xsbVBbeA==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.7.7
+    dev: false
+
+  /@solidjs/router@0.8.2(solid-js@1.7.7):
+    resolution: {integrity: sha512-gUKW+LZqxtX6y/Aw6JKyy4gQ9E7dLqp513oB9pSYJR1HM5c56Pf7eijzyXX+b3WuXig18Cxqah4tMtF0YGu80w==}
+    peerDependencies:
+      solid-js: ^1.5.3
+    dependencies:
+      solid-js: 1.7.7
+    dev: false
+
   /@tauri-apps/api@1.4.0:
     resolution: {integrity: sha512-Jd6HPoTM1PZSFIzq7FB8VmMu3qSSyo/3lSwLpoapW+lQ41CL5Dow2KryLg+gyazA/58DRWI9vu/XpEeHK4uMdw==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
@@ -1819,6 +1864,11 @@ packages:
 
   /functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
+    dev: false
+
+  /fuse.js@6.6.2:
+    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
+    engines: {node: '>=10'}
     dev: false
 
   /gensync@1.0.0-beta.2:
@@ -2866,7 +2916,7 @@ packages:
       solid-js: 1.7.7
     dev: false
 
-  /solid-contextmenu@0.0.2(solid-js@1.7.7)(solid-transition-group@0.0.10):
+  /solid-contextmenu@0.0.2(solid-js@1.7.7)(solid-transition-group@0.2.2):
     resolution: {integrity: sha512-TmOhIvVpZmQdoiydSP07d9rT0xu/wvRSH6TJqbGPd+2XZz0wOualbm5CvLiHbOGnOU5tBrbe4q0cU/EMvG7u+w==}
     peerDependencies:
       solid-js: ^1.4.8
@@ -2875,7 +2925,7 @@ packages:
       clsx: 1.2.1
       mitt: 3.0.1
       solid-js: 1.7.7
-      solid-transition-group: 0.0.10(solid-js@1.7.7)
+      solid-transition-group: 0.2.2(solid-js@1.7.7)
     dev: false
 
   /solid-form-handler@1.2.0(solid-js@1.7.7):
@@ -2903,11 +2953,13 @@ packages:
       solid-js: 1.7.7
     dev: true
 
-  /solid-transition-group@0.0.10(solid-js@1.7.7):
-    resolution: {integrity: sha512-b3O9z6BUP60CG1WnTdqFuvHms0reDNYwQF+eAEEaSaoDEmiOu9+Lu7zQgWGySJjaAdSAClhmFCmx/eAjQgfIoA==}
+  /solid-transition-group@0.2.2(solid-js@1.7.7):
+    resolution: {integrity: sha512-6nB90UM2PB6VsIo/UCkmZmlIJb9mnmP7QPGrePqQJWtpUiRs5PbhkB8fvdyv9g/RPHWYpdJhQgxL6n++WmTt5A==}
     peerDependencies:
-      solid-js: ^1.0.0
+      solid-js: ^1.6.12
     dependencies:
+      '@solid-primitives/refs': 1.0.4(solid-js@1.7.7)
+      '@solid-primitives/transition-group': 1.0.2(solid-js@1.7.7)
       solid-js: 1.7.7
     dev: false
 
@@ -3108,6 +3160,10 @@ packages:
     dependencies:
       any-promise: 1.3.0
     dev: true
+
+  /tinykeys@2.1.0:
+    resolution: {integrity: sha512-/MESnqBD1xItZJn5oGQ4OsNORQgJfPP96XSGoyu4eLpwpL0ifO0SYR5OD76u0YMhMXsqkb0UqvI9+yXTh4xv8Q==}
+    dev: false
 
   /tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
@@ -3461,6 +3517,24 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
+    dev: false
+
+  github.com/on3iro/solid-command-palette/8aabf0d59871f5f6aee19b5d10a1851243e0bdb8(fuse.js@6.6.2)(solid-js@1.7.7)(solid-transition-group@0.2.2)(tinykeys@2.1.0):
+    resolution: {tarball: https://codeload.github.com/on3iro/solid-command-palette/tar.gz/8aabf0d59871f5f6aee19b5d10a1851243e0bdb8}
+    id: github.com/on3iro/solid-command-palette/8aabf0d59871f5f6aee19b5d10a1851243e0bdb8
+    name: solid-command-palette
+    version: 1.0.0
+    peerDependencies:
+      fuse.js: ^6.5.3
+      solid-js: ^1.3.2
+      solid-transition-group: ^0.2.2
+      tinykeys: ^2.1.0
+    dependencies:
+      '@solidjs/router': 0.8.2(solid-js@1.7.7)
+      fuse.js: 6.6.2
+      solid-js: 1.7.7
+      solid-transition-group: 0.2.2(solid-js@1.7.7)
+      tinykeys: 2.1.0
     dev: false
 
   github.com/tauri-apps/tauri-plugin-store/8a37f08e6c0b7781fc1f0e458f2d0ff18368ac75:
