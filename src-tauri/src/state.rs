@@ -1,4 +1,5 @@
 use anyhow::Result;
+use log::error;
 use rusqlite::Connection;
 use std::{collections::HashMap, sync::Mutex};
 use tauri::{AppHandle, Manager, State};
@@ -59,7 +60,12 @@ impl ServiceAccess for AppHandle {
         let app_state: State<AppState> = self.state();
         let mut binding = app_state.connections.lock();
         let connection_guard = binding.as_mut();
-        connection_guard.unwrap().insert(conn.config.id.to_string().clone(), conn);
+        match connection_guard {
+            Ok(connection_guard) => {
+                connection_guard.insert(conn.config.id.to_string().clone(), conn);
+            }
+            Err(e) => error!("Error: {}", e),
+        }
 
         Ok(())
     }

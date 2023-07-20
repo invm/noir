@@ -43,7 +43,7 @@ export const QueryTextArea = () => {
   const onExecute = async () => {
     const activeConnection = getActiveConnection()
     const { result } = await invoke<QueryResult>('execute_query', { connId: activeConnection.id, query: code() })
-    setActiveContentQueryTabData({ data: { query: code, results: result } })
+    setActiveContentQueryTabData({ query: code(), results: result })
   }
 
   createEffect(() => {
