@@ -105,6 +105,22 @@ export const ConnectionTabsService = () => {
     await store.clear();
   }
 
+  const getActiveConnection = () => {
+    return connectionStore.tabs[connectionStore.idx - 1]
+  }
+
+  const getActiveContentTab = () => {
+    return contentStore.tabs[contentStore.idx]
+  }
+
+  const setActiveContentQueryTabData = (data: ContentTabData['QueryTab']) => {
+    const tab = getActiveContentTab()
+    if (!tab) return;
+    const tabs = contentStore.tabs;
+    tabs[contentStore.idx].data = data;
+    setContentStore('tabs', tabs);
+  }
+
   return {
     connectionStore,
     setConnectionStore,
@@ -113,6 +129,9 @@ export const ConnectionTabsService = () => {
     addTab,
     removeTab,
     clearStore,
+    getActiveConnection,
+    getActiveContentTab,
+    setActiveContentQueryTabData,
   }
 }
 

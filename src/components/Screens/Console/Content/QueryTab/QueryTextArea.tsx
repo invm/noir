@@ -1,5 +1,5 @@
 import { createCodeMirror, createEditorControlledValue } from "solid-codemirror";
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { lineNumbers } from '@codemirror/view';
 import { sql } from '@codemirror/lang-sql'
 import { dracula } from '@uiw/codemirror-theme-dracula'
@@ -7,14 +7,28 @@ import { format } from 'sql-formatter';
 import { t } from "i18next";
 import { invoke } from '@tauri-apps/api';
 import { EditIcon, FireIcon } from "components/UI/Icons";
+import { useAppSelector } from "services/Context";
+import { ContentTab, ContentTabData } from "services/ConnectionTabs";
+import { QueryResult } from "interfaces";
 
-export const QueryTextArea = (props: { query: string, updateQueryText: (s: string) => void }) => {
+export const QueryTextArea = () => {
+  const { connectionsService: { setActiveContentQueryTabData, contentStore,
+    setContentStore, getActiveConnection, getActiveContentTab } } =
+    useAppSelector()
+
+  const updateQueryText = async (query: string) => {
+    setContentStore('tabs', contentStore.tabs.map((t, idx) => idx === contentStore.idx ? {
+      ...t,
+      data: { ...t.data, query }
+    } as ContentTab<'QueryTab'> : t))
+  }
+
   const onInput = (q: string) => {
-    props.updateQueryText(q)
+    updateQueryText(q)
     setCode(q)
   }
 
-  const [code, setCode] = createSignal(props.query);
+  const [code, setCode] = createSignal('');
   const { ref, editorView, createExtension } = createCodeMirror({ onValueChange: onInput });
   createEditorControlledValue(editorView, code);
   createExtension(() => lineNumbers());
@@ -27,8 +41,14 @@ export const QueryTextArea = (props: { query: string, updateQueryText: (s: strin
   }
 
   const onExecute = async () => {
-    await invoke('execute_query', { query: code() })
+    const activeConnection = getActiveConnection()
+    const { result } = await invoke<QueryResult>('execute_query', { connId: activeConnection.id, query: code() })
+    setActiveContentQueryTabData({ data: { query: code, results: result } })
   }
+
+  createEffect(() => {
+    setCode((getActiveContentTab()?.data as ContentTabData['QueryTab']).query ?? '')
+  })
 
   return (
     <div class="flex-1 flex flex-col">
