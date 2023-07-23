@@ -48,17 +48,15 @@ function App() {
           <ThemeSwitch />
         </div>
       </div>
-      <div class="h-full">
-        <div class="h-full">
-          <Switch>
-            <Match when={connectionStore.idx === 0}>
-              <Home />
-            </Match>
-            <Match when={connectionStore.idx !== 0}>
-              <Console />
-            </Match>
-          </Switch>
-        </div>
+      <div class="flex-1 overflow-hidden">
+        <Switch>
+          <Match when={connectionStore.idx === 0}>
+            <Home />
+          </Match>
+          <Match when={connectionStore.idx !== 0}>
+            <Console />
+          </Match>
+        </Switch>
       </div>
       <Alerts />
     </div >

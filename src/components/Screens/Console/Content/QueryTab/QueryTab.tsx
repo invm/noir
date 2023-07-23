@@ -8,7 +8,7 @@ export const QueryTab = () => {
   createEffect(() => {
     const q = Split(['#query', '#results'], {
       sizes: [40, 60],
-      minSize: [100, 200],
+      minSize: [100, 400],
       direction: 'vertical',
       gutterSize: 8,
     })
@@ -19,10 +19,10 @@ export const QueryTab = () => {
 
   return (
     <div class="flex flex-col h-full">
-      <div id="query" class="flex">
+      <div id="query" class="flex max-h-[40%]">
         <QueryTextArea />
       </div>
-      <div id="results" class="bg-base-200 p-3">
+      <div id="results" class="max-h-[60%] h-full bg-base-200 p-3 overflow-hidden">
         <ResultsArea />
       </div>
     </div >
