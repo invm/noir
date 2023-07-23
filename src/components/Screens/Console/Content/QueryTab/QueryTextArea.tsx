@@ -43,6 +43,7 @@ export const QueryTextArea = () => {
   const onExecute = async () => {
     const activeConnection = getActiveConnection()
     const { result } = await invoke<QueryResult>('execute_query', { connId: activeConnection.id, query: code() })
+    console.log(result)
     setActiveContentQueryTabData({ query: code(), results: result })
   }
 
@@ -54,10 +55,10 @@ export const QueryTextArea = () => {
     <div class="flex-1 flex flex-col">
       <div class="w-full p-1 bg-base-100">
         <div class="tooltip tooltip-primary" data-tip={t('components.console.actions.format')}>
-          <button class="btn btn-ghost btn-sm" onClick={() => onFormat()}><EditIcon /></button>
+          <button class="btn btn-ghost btn-sm mr-2" onClick={() => onFormat()}><EditIcon /></button>
         </div>
         <div class="tooltip tooltip-primary" data-tip={t('components.console.actions.execute')}>
-          <button class="btn btn-ghost btn-sm" onClick={() => onExecute()}><FireIcon /></button>
+          <button class="btn btn-ghost btn-sm mr-2" onClick={() => onExecute()}><FireIcon /></button>
         </div>
       </div>
       <div class="overflow-hidden w-full h-full">

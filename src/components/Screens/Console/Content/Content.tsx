@@ -38,7 +38,7 @@ export const Content = () => {
         </For>
         <div onClick={() => addTab()} class="tab py-2 tab-sm tab-lifted tab-active" ><AddIcon /></div>
       </div>
-      <div class="flex-1">
+      <div class="flex-1 overflow-hidden">
         <Switch>
           <Match when={contentStore.tabs[contentStore.idx]?.key === ContentComponent.QueryTab}>
             <QueryTab />

@@ -3,6 +3,7 @@ import { ConnectionConfig, DbSchema } from "../interfaces";
 import { onMount } from "solid-js";
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
+import { invoke } from "@tauri-apps/api";
 
 const store = new Store(".connections.dat");
 
@@ -74,8 +75,18 @@ export const ConnectionTabsService = () => {
   const [contentStore, setContentStore] = createStore<ContentStore>({ tabs: [], idx: 0 })
 
   onMount(async () => {
-    const conn_tabs = await getSavedData(CONNECTIONS_TABS_KEY)
-    setConnectionStore(() => conn_tabs as ConnectionStore)
+    const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_TABS_KEY)
+    const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
+      const res = await acc;
+      try {
+        await invoke('init_connection', { config: conn.connection });
+        return Promise.resolve([...res, conn])
+      } catch (e) {
+        console.log(e)
+        return acc
+      }
+    }, Promise.resolve([] as ConnectionTab[]))
+    setConnectionStore(() => ({ ...conn_tabs, tabs }))
     const content = await getSavedData(CONTENT_TABS_KEY)
     setContentStore(() => content as ContentStore)
   })

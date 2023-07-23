@@ -50,9 +50,6 @@ dependencies:
   sql-formatter:
     specifier: ^12.2.3
     version: 12.2.3
-  tabulator-tables:
-    specifier: ^5.5.0
-    version: 5.5.0
   tauri-plugin-store-api:
     specifier: github:tauri-apps/tauri-plugin-store#v1
     version: github.com/tauri-apps/tauri-plugin-store/8a37f08e6c0b7781fc1f0e458f2d0ff18368ac75
@@ -3113,10 +3110,6 @@ packages:
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  /tabulator-tables@5.5.0:
-    resolution: {integrity: sha512-UVe26QIaGqFfaP5wfN51zF4Vy23MNTWyvM95bF7EWGsDRQm6b2MV0wiBzakVGFj28YAgz5PvEyfqLZF415PWxw==}
-    dev: false
 
   /tailwindcss@3.3.2:
     resolution: {integrity: sha512-9jPkMiIBXvPc2KywkraqsUfbfj+dHDb+JPWtSJa9MLFdrPyazI7q6WX2sUrm7R9eVR7qqv3Pas7EvQFzxKnI6w==}

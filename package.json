@@ -27,7 +27,6 @@
     "solid-transition-group": "^0.2.2",
     "split.js": "^1.6.5",
     "sql-formatter": "^12.2.3",
-    "tabulator-tables": "^5.5.0",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
     "tinykeys": "^2.1.0",
