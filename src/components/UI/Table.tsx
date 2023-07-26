@@ -8,12 +8,13 @@ export const Table = (props: { data: Record<string, any>[] }) => {
     if (!props.data.length) return;
     console.log(props.data.length)
     const columns = Object.keys(props.data[0]).map((k) => ({ title: k, field: k }))
+    console.log(columns)
     setColumns(columns)
     setTableData(props.data)
   });
 
   return (
-    <div class="h-[1200px] w-full overflow-hidden">
+    <div class="flex- overflow-hidden">
       <div class="overflow-auto h-full">
         <table class="table table-xs table-zebra table-pin-rows table-pin-cols">
           <thead>

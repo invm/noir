@@ -35,7 +35,6 @@
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
     "@types/node": "^20.3.2",
-    "@types/tabulator-tables": "^5.4.8",
     "autoprefixer": "^10.4.14",
     "daisyui": "^3.1.7",
     "postcss": "^8.4.24",
