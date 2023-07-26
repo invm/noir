@@ -17,7 +17,7 @@ export const ResultsArea = () => {
   return (
     <div class="p-3 h-full">
       <div class="text-xs font-bold text-primary">Results</div>
-      <div class="overflow-hidden w-full h-full">
+      <div class="overflow-hidden flex w-full h-full">
         <Table data={data()} />
       </div>
     </div>
