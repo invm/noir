@@ -17,6 +17,9 @@ dependencies:
   '@tauri-apps/api':
     specifier: ^1.4.0
     version: 1.4.0
+  '@types/tabulator-tables':
+    specifier: ^5.4.10
+    version: 5.4.10
   '@uiw/codemirror-theme-dracula':
     specifier: ^4.21.7
     version: 4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
@@ -50,12 +53,15 @@ dependencies:
   sql-formatter:
     specifier: ^12.2.3
     version: 12.2.3
+  tabulator-tables:
+    specifier: ^5.5.1
+    version: 5.5.1
   tauri-plugin-store-api:
     specifier: github:tauri-apps/tauri-plugin-store#v1
-    version: github.com/tauri-apps/tauri-plugin-store/e08b8fdf6adb27a437b71ede4f7e572e7d11cc2d
+    version: github.com/tauri-apps/tauri-plugin-store/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa
   tauri-plugin-window-state-api:
     specifier: github:tauri-apps/tauri-plugin-window-state#v1
-    version: github.com/tauri-apps/tauri-plugin-window-state/255d8cd6c966e38d323aed6029fcc2e391408685
+    version: github.com/tauri-apps/tauri-plugin-window-state/5ea9eb0d4a9affd17269f92c0085935046be3f4a
   tinykeys:
     specifier: ^2.1.0
     version: 2.1.0
@@ -1166,6 +1172,10 @@ packages:
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
+    dev: false
+
+  /@types/tabulator-tables@5.4.10:
+    resolution: {integrity: sha512-ale/wbhA7zsmSSz6lTnxferRCCbKq3oZtxaNY8osb7YND2k27ZlEhfZzlVfRq8b5t7shhP8M53HyAgm1M0O+FA==}
     dev: false
 
   /@uiw/codemirror-theme-dracula@4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1):
@@ -3104,6 +3114,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  /tabulator-tables@5.5.1:
+    resolution: {integrity: sha512-YxWVXbWVgUOMhU/g2xnf7y4Vrk1grYpDftQigbY/yAOKMEfgCRYzNaNEpMZbaimWdCt7KdpIp+lpp+HM5DY5sQ==}
+    dev: false
+
   /tailwindcss@3.3.2:
     resolution: {integrity: sha512-9jPkMiIBXvPc2KywkraqsUfbfj+dHDb+JPWtSJa9MLFdrPyazI7q6WX2sUrm7R9eVR7qqv3Pas7EvQFzxKnI6w==}
     engines: {node: '>=14.0.0'}
@@ -3530,16 +3544,16 @@ packages:
       tinykeys: 2.1.0
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-store/e08b8fdf6adb27a437b71ede4f7e572e7d11cc2d:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/e08b8fdf6adb27a437b71ede4f7e572e7d11cc2d}
+  github.com/tauri-apps/tauri-plugin-store/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa}
     name: tauri-plugin-store-api
     version: 0.0.0
     dependencies:
       '@tauri-apps/api': 1.4.0
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-window-state/255d8cd6c966e38d323aed6029fcc2e391408685:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/255d8cd6c966e38d323aed6029fcc2e391408685}
+  github.com/tauri-apps/tauri-plugin-window-state/5ea9eb0d4a9affd17269f92c0085935046be3f4a:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/5ea9eb0d4a9affd17269f92c0085935046be3f4a}
     name: tauri-plugin-window-state-api
     version: 0.0.0
     dependencies:
