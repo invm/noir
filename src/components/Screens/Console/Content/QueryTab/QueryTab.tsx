@@ -1,30 +1,45 @@
-import { createEffect, onCleanup } from "solid-js"
-import Split from "split.js"
-import { QueryTextArea } from "./QueryTextArea"
-import { ResultsArea } from "./ResultsArea"
+import { Table } from "components/UI";
+import { ContentTabData } from "services/ConnectionTabs";
+import { useAppSelector } from "services/Context";
+import { createEffect, createSignal, onCleanup, Show } from "solid-js";
+import Split from "split.js";
+import { QueryTextArea } from "./QueryTextArea";
 
 export const QueryTab = () => {
+  const {
+    connectionsService: { getActiveContentTab },
+  } = useAppSelector();
+  const [data, setData] = createSignal<Record<string, any>[]>([]);
 
   createEffect(() => {
-    const q = Split(['#query', '#results'], {
+    const tabledata = (getActiveContentTab().data as ContentTabData["QueryTab"])
+      .results;
+    if (!tabledata.length) return;
+    setData(tabledata);
+  });
+  createEffect(() => {
+    const q = Split(["#query", "#results"], {
       sizes: [40, 60],
       minSize: [100, 400],
-      direction: 'vertical',
+      maxSize: [500, Infinity],
+      direction: "vertical",
       gutterSize: 8,
-    })
+    });
     onCleanup(() => {
-      q.destroy()
-    })
-  })
+      q.destroy();
+    });
+  });
 
   return (
-    <div class="flex flex-col h-full">
-      <div id="query" class="flex max-h-[40%]">
+    <div class="flex flex-col h-full overflow-hidden">
+      <div id="query" class="flex">
         <QueryTextArea />
       </div>
-      <div id="results" class="max-h-[60%] h-full bg-base-200 p-3 overflow-hidden">
-        <ResultsArea />
+      <div id="results" class="overflow-y-scroll">
+        <Show when={data().length}>
+          <Table data={data()} />
+        </Show>
       </div>
-    </div >
-  )
-}
+    </div>
+  );
+};

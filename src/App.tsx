@@ -6,6 +6,7 @@ import { CloseIcon } from 'components/UI/Icons';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 import { Console } from 'components/Screens/Console/Console';
 import { Home } from 'components/Screens/Home/Home';
+import "tabulator-tables/dist/css/tabulator_midnight.min.css";
 
 function App() {
   const { connectionsService: { removeTab, clearStore, connectionStore, setConnectionStore } } = useAppSelector()
@@ -19,10 +20,8 @@ function App() {
       <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2 flex justify-between items-center">
         <div class="flex items-center">
           <div class="flex items-center">
-            <div onClick={() => {
-              console.log('click')
-              setConnectionStore('idx', 0)
-            }} class="tab tab-md"
+            <div onClick={() => { setConnectionStore('idx', 0) }} 
+              class="tab tab-md"
               classList={{ 'tab-active': connectionStore.idx === 0, }} >
               <span class="text-md font-bold">Home</span>
             </div>
