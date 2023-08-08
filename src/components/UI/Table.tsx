@@ -1,55 +1,28 @@
-import { createEffect, createSignal, For } from "solid-js";
+import { createEffect } from "solid-js";
+import { TabulatorFull as Tabulator } from "tabulator-tables";
 
 export const Table = (props: { data: Record<string, any>[] }) => {
-  const [columns, setColumns] = createSignal<Record<string, any>[]>([])
-  const [tabledata, setTableData] = createSignal<Record<string, any>[]>([])
-
   createEffect(() => {
     if (!props.data.length) return;
-    console.log(props.data.length)
-    const columns = Object.keys(props.data[0]).map((k) => ({ title: k, field: k }))
-    console.log(columns)
-    setColumns(columns)
-    setTableData(props.data)
+    const columns = Object.keys(props.data[0]).map((k) => ({
+      title: k,
+      field: k,
+    }));
+
+    new Tabulator("#results-table", {
+      data: props.data,
+      columns,
+      layout: "fitColumns",
+      autoResize: true,
+      pagination: true,
+      height: "100%",
+      paginationCounter:"rows",
+    });
   });
 
   return (
-    <div class="flex- overflow-hidden">
-      <div class="overflow-auto h-full">
-        <table class="table table-xs table-zebra table-pin-rows table-pin-cols">
-          <thead>
-            <tr>
-              <th></th>
-              <For each={columns()}>
-                {(column) => (<th>{column.title}</th>)}
-              </For>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <For each={tabledata()}>
-              {(row, i) => (
-                <tr>
-                  <th>{i() + 1}</th>
-                  <For each={columns()}>
-                    {(column) => (<th>{row[column.field]}</th>)}
-                  </For>
-                  <th>{i() + 1}</th>
-                </tr>
-              )}
-            </For>
-          </tbody>
-          <tfoot>
-            <tr>
-              <th></th>
-              <For each={columns()}>
-                {(column) => (<th>{column.title}</th>)}
-              </For>
-              <th></th>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-  )
-}
+    <>
+      <div id="results-table"></div>
+    </>
+  );
+};
