@@ -47,7 +47,7 @@ export const Sidebar = () => {
           </For>
         </select>
       </div>
-      <div class="text-xs font-bold text-primary">Tables</div>
+      <div class="text-sm font-bold py-1 text-primary">Tables</div>
       <For each={tables}>
         {(table) => (
           <div class="rounded-sm mb-1 px-2 min-w-full w-fit">

@@ -9,8 +9,8 @@ use tauri::{command, AppHandle};
 #[command]
 pub async fn execute_query(app_handle: AppHandle, conn_id: String, mut query: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    if !query.to_lowercase().ends_with("limit 100") {
-        query.push_str(" limit 100");
+    if !query.to_lowercase().ends_with("limit 1000") {
+        query.push_str(" limit 1000");
     }
     let result = connection.execute_query(query).await?;
     Ok(result)
