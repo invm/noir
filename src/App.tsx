@@ -6,6 +6,7 @@ import { CloseIcon } from 'components/UI/Icons';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 import { Console } from 'components/Screens/Console/Console';
 import { Home } from 'components/Screens/Home/Home';
+import "tabulator-tables/dist/css/tabulator.min.css";
 
 function App() {
   const { connectionsService: { removeTab, clearStore, connectionStore, setConnectionStore } } = useAppSelector()
