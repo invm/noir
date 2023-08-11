@@ -15,6 +15,7 @@ export const Table = (props: { data: Record<string, any>[] }) => {
       layout: "fitColumns",
       autoResize: true,
       pagination: true,
+      paginationSize: 30,
       height: "100%",
       paginationCounter:"rows",
     });

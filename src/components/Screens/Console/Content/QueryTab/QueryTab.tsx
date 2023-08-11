@@ -35,7 +35,7 @@ export const QueryTab = () => {
       <div id="query" class="flex">
         <QueryTextArea />
       </div>
-      <div id="results" class="overflow-y-scroll">
+      <div id="results">
         <Show when={data().length}>
           <Table data={data()} />
         </Show>
