@@ -20,7 +20,7 @@ export const Home = () => {
   });
 
   return (
-    <div class="grid grid-cols-2 h-full">
+    <div class="grid grid-cols-2 h-full bg-base-300">
       <ConnectionsList {...{ connections, setConnections }} />
       <AddConnectionForm {...{ addConnection }} />
     </div>

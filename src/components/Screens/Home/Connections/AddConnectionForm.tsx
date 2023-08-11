@@ -96,7 +96,7 @@ const AddConnectionForm = (props: { addConnection: ({ name, scheme, color }: { n
   };
 
   return (
-    <div class="p-3 w-full flex justify-center items-around pt-20">
+    <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-200">
       <form class="flex max-w-lg flex-col gap-1" autocomplete="off" onSubmit={submit}>
         <div>
           <h2 class="text-2xl font-bold">{t('components.add_connection_form.title')}</h2>
