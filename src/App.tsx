@@ -7,9 +7,9 @@ import { ThemeSwitch } from "components/UI/ThemeSwitch";
 import { Console } from "components/Screens/Console/Console";
 import { Home } from "components/Screens/Home/Home";
 import "tabulator-tables/dist/css/tabulator_midnight.min.css";
-import { Root, CommandPalette } from 'solid-command-palette';
-import { actions } from './actions';
-import 'solid-command-palette/pkg-dist/style.css';
+import { Root, CommandPalette } from "solid-command-palette";
+import { actions } from "./actions";
+import "solid-command-palette/pkg-dist/style.css";
 
 function App() {
   const {
@@ -19,6 +19,7 @@ function App() {
       connectionStore,
       setConnectionStore,
     },
+    appService: { toggleThemeSwitcher },
   } = useAppSelector();
 
   const closeTab = async (id: string) => {
@@ -26,8 +27,10 @@ function App() {
   };
 
   const actionsContext = {
-    increment() {
-      console.log("increment count state by 1");
+    showThemeSwitcher() {
+      toggleThemeSwitcher();
+      // FIXME: focuses only on first render
+      document.getElementById("theme-switch")?.focus();
     },
   };
 
@@ -38,32 +41,36 @@ function App() {
         <div class="px-2 pb-2 bg-base-300 tabs tabs-boxed rounded-none gap-2 flex justify-between items-center">
           <div class="flex items-center">
             <div class="flex items-center">
-              <div
+              <button
                 onClick={() => {
                   setConnectionStore("idx", 0);
                 }}
                 class="tab tab-md"
+                tabIndex={0}
                 classList={{ "tab-active": connectionStore.idx === 0 }}
               >
                 <span class="text-md font-bold">Home</span>
-              </div>
+              </button>
             </div>
             <For each={connectionStore.tabs}>
               {(tab, idx) => (
                 <div class="flex items-center">
-                  <div
-                    onClick={() => {
-                      setConnectionStore("idx", idx() + 1);
-                    }}
+                  <button
+                    onClick={() => setConnectionStore("idx", idx() + 1)}
                     class="tab tab-md"
                     classList={{
                       "tab-active": connectionStore.idx === idx() + 1,
                     }}
+                    tabindex={0}
                   >
                     <span class="text-md font-bold">{tab.label}</span>
-                  </div>
+                  </button>
                   <Show when={connectionStore.idx === idx() + 1}>
-                    <button onClick={() => closeTab(tab.id!)} class="pl-2 mb-1">
+                    <button
+                      tabindex={0}
+                      onClick={() => closeTab(tab.id!)}
+                      class="ml-2 mb-1"
+                    >
                       <CloseIcon />
                     </button>
                   </Show>
