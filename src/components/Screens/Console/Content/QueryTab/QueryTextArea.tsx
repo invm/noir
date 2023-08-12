@@ -1,8 +1,9 @@
 import {
   createCodeMirror,
   createEditorControlledValue,
+  createEditorFocus,
 } from "solid-codemirror";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, onMount, Show } from "solid-js";
 import { lineNumbers } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
@@ -13,11 +14,14 @@ import { EditIcon, FireIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
 import { ContentTab, ContentTabData } from "services/ConnectionTabs";
 import { QueryResult } from "interfaces";
+import { commandPaletteEmitter } from "components/CommandPalette/actions";
 
 export const QueryTextArea = () => {
   const {
     connectionsService: {
       setActiveContentQueryTabData,
+      setActiveContentQueryTabMessage,
+      resetActiveContentQueryTabMessage,
       contentStore,
       setContentStore,
       getActiveConnection,
@@ -52,6 +56,7 @@ export const QueryTextArea = () => {
   createExtension(() => lineNumbers());
   createExtension(() => sql());
   createExtension(dracula);
+  const { focused, setFocused } = createEditorFocus(editorView);
 
   const onFormat = () => {
     const formatted = format(code());
@@ -59,12 +64,17 @@ export const QueryTextArea = () => {
   };
 
   const onExecute = async () => {
+    resetActiveContentQueryTabMessage();
     const activeConnection = getActiveConnection();
-    const { result } = await invoke<QueryResult>("execute_query", {
-      connId: activeConnection.id,
-      query: code(),
-    });
-    setActiveContentQueryTabData({ query: code(), results: result });
+    try {
+      const { result } = await invoke<QueryResult>("execute_query", {
+        connId: activeConnection.id,
+        query: code(),
+      });
+      setActiveContentQueryTabData({ query: code(), results: result });
+    } catch (error) {
+      setActiveContentQueryTabMessage("error", error as string);
+    }
   };
 
   createEffect(() => {
@@ -74,16 +84,22 @@ export const QueryTextArea = () => {
   });
 
   const handleKeyDown = async (e: KeyboardEvent) => {
-    if (e.key === 'f' && e.ctrlKey) {
+    if (e.key === "f" && e.ctrlKey) {
       onFormat();
-    } else if (e.key === 'e' && e.ctrlKey) {
-      console.log('execute')
+    } else if (e.key === "e" && e.ctrlKey) {
       await onExecute();
     }
   };
 
+  onMount(() => {
+    commandPaletteEmitter.on("focus-query-text-area", (e) => {
+      setFocused(e);
+    });
+  });
+
   return (
     <div class="flex-1 flex flex-col">
+      <span>{focused() ? "focused" : "not focused"}</span>
       <div class="w-full p-2 bg-base-100">
         <div
           class="tooltip tooltip-primary tooltip-bottom"
@@ -105,6 +121,11 @@ export const QueryTextArea = () => {
       <div class="overflow-hidden w-full h-full" onKeyDown={handleKeyDown}>
         <div ref={ref} class="w-full h-full" />
       </div>
+      <Show when={getActiveContentTab()?.error}>
+        <div class="w-full p-2 bg-base-100">
+          <span>{getActiveContentTab()?.error?.message}</span>
+        </div>
+      </Show>
     </div>
   );
 };

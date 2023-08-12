@@ -14,6 +14,9 @@ dependencies:
   '@codemirror/view':
     specifier: ^6.14.1
     version: 6.14.1
+  '@solid-primitives/event-bus':
+    specifier: ^1.0.8
+    version: 1.0.8(solid-js@1.7.7)
   '@tauri-apps/api':
     specifier: ^1.4.0
     version: 1.4.0
@@ -974,6 +977,15 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
 
+  /@solid-primitives/event-bus@1.0.8(solid-js@1.7.7):
+    resolution: {integrity: sha512-vw9Q8oHL8h3WOxFiFFBE8lwJ1oOmCEdtFsOck3i66GPaJbmzHwBtQxTkAgF+DtpeSpSyCHlxKE7ojHnL4nl1Ww==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/utils': 6.2.1(solid-js@1.7.7)
+      solid-js: 1.7.7
+    dev: false
+
   /@solid-primitives/refs@1.0.4(solid-js@1.7.7):
     resolution: {integrity: sha512-BxZKkct0OIyADWIoA9UITm+3G5Xb3IkOa0nZd40SgOK5DtMqpXFIEPUkJ/woPB90WqlM9UvvuiJHUyAjMeAmCw==}
     peerDependencies:
@@ -993,6 +1005,14 @@ packages:
 
   /@solid-primitives/utils@6.2.0(solid-js@1.7.7):
     resolution: {integrity: sha512-T62WlLwKkbmicsw/xpwMQyv9MmZRSaVyutXfS5icc9v0cb8qGMUxRxr5LVvZHYQCZ9DEFboZB0r711xsbVBbeA==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      solid-js: 1.7.7
+    dev: false
+
+  /@solid-primitives/utils@6.2.1(solid-js@1.7.7):
+    resolution: {integrity: sha512-TsecNzxiO5bLfzqb4OOuzfUmdOROcssuGqgh5rXMMaasoFZ3GoveUgdY1wcf17frMJM7kCNGNuK34EjErneZkg==}
     peerDependencies:
       solid-js: ^1.6.12
     dependencies:
