@@ -96,6 +96,10 @@ input[type=number] {
   border-width: 0px;
 }
 
+.tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
+  @apply bg-accent;
+}
+
 dialog {
   color: inherit;
 }
@@ -109,6 +113,8 @@ dialog {
   @apply bg-base-200;
   cursor: col-resize;
 }
+
+/* Tabulator */
 
 .tabulator-page {
   @apply text-base-content !important;

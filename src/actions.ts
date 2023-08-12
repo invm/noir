@@ -1,25 +1,26 @@
-import { defineAction } from 'solid-command-palette';
+import { useAppSelector } from "services/Context";
+import { ActionContext, defineAction } from "solid-command-palette";
 
-const minimalAction = defineAction({
-  id: 'minimal',
-  title: 'Minimal Action',
-  run: () => {
-    console.log('ran minimal action');
-  },
-});
-
-const incrementCounterAction = defineAction({
-  id: 'increment-counter',
-  title: 'Increment Counter by 1',
-  subtitle: 'Press CMD + E to trigger this.',
-  shortcut: '$mod+e', // $mod = Command on Mac & Control on Windows.
+const showThemeSwitcher = defineAction({
+  id: "toggle-theme-switcher",
+  title: "Toggle Theme Switcher",
   run: ({ rootContext }) => {
-    rootContext.increment();
+    (rootContext as any).showThemeSwitcher();
   },
 });
+
+// const incrementCounterAction = defineAction({
+//   id: "increment-counter",
+//   title: "Increment Counter by 1",
+//   subtitle: "Press CMD + E to trigger this.",
+//   shortcut: "$mod+e", // $mod = Command on Mac & Control on Windows.
+//   run: ({ rootContext }) => {
+//     (rootContext as ActionsContext).increment();
+//   },
+// });
 
 export const actions = {
-  [minimalAction.id]: minimalAction,
-  [incrementCounterAction.id]: incrementCounterAction,
+  [showThemeSwitcher.id]: showThemeSwitcher,
+  // [incrementCounterAction.id]: incrementCounterAction,
 };
 
