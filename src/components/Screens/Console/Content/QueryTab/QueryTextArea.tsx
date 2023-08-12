@@ -64,7 +64,6 @@ export const QueryTextArea = () => {
       connId: activeConnection.id,
       query: code(),
     });
-    console.log(result);
     setActiveContentQueryTabData({ query: code(), results: result });
   };
 
@@ -74,14 +73,23 @@ export const QueryTextArea = () => {
     );
   });
 
+  const handleKeyDown = async (e: KeyboardEvent) => {
+    if (e.key === 'f' && e.ctrlKey) {
+      onFormat();
+    } else if (e.key === 'e' && e.ctrlKey) {
+      console.log('execute')
+      await onExecute();
+    }
+  };
+
   return (
     <div class="flex-1 flex flex-col">
-      <div class="w-full p-1 bg-base-100">
+      <div class="w-full p-2 bg-base-100">
         <div
           class="tooltip tooltip-primary tooltip-bottom"
           data-tip={t("components.console.actions.format")}
         >
-          <button class="btn btn-ghost btn-sm mr-2" onClick={() => onFormat()}>
+          <button class="btn btn-ghost btn-xs mr-2" onClick={() => onFormat()}>
             <EditIcon />
           </button>
         </div>
@@ -89,12 +97,12 @@ export const QueryTextArea = () => {
           class="tooltip tooltip-primary tooltip-bottom"
           data-tip={t("components.console.actions.execute")}
         >
-          <button class="btn btn-ghost btn-sm mr-2" onClick={() => onExecute()}>
+          <button class="btn btn-ghost btn-xs mr-2" onClick={() => onExecute()}>
             <FireIcon />
           </button>
         </div>
       </div>
-      <div class="overflow-hidden w-full h-full">
+      <div class="overflow-hidden w-full h-full" onKeyDown={handleKeyDown}>
         <div ref={ref} class="w-full h-full" />
       </div>
     </div>
