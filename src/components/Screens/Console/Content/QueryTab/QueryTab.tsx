@@ -14,10 +14,10 @@ export const QueryTab = () => {
   createEffect(() => {
     const tabledata = (getActiveContentTab().data as ContentTabData["QueryTab"])
       .results;
-    if (!tabledata.length) return;
-    setData(tabledata);
-  });
-  createEffect(() => {
+    if (tabledata.length) {
+      setData(tabledata);
+    }
+
     const q = Split(["#query", "#results"], {
       sizes: [40, 60],
       minSize: [100, 400],
@@ -25,6 +25,7 @@ export const QueryTab = () => {
       direction: "vertical",
       gutterSize: 8,
     });
+
     onCleanup(() => {
       q.destroy();
     });
