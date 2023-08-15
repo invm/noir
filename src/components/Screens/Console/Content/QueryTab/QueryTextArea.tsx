@@ -4,7 +4,7 @@ import {
   createEditorFocus,
 } from "solid-codemirror";
 import { createEffect, createSignal, onMount, Show } from "solid-js";
-import { lineNumbers } from "@codemirror/view";
+import { lineNumbers, EditorView } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
 import { format } from "sql-formatter";
@@ -56,7 +56,10 @@ export const QueryTextArea = () => {
   createExtension(() => lineNumbers());
   createExtension(() => sql());
   createExtension(dracula);
-  const { focused, setFocused } = createEditorFocus(editorView);
+  const { setFocused } = createEditorFocus(editorView);
+
+  const lineWrapping = EditorView.lineWrapping;
+  createExtension(lineWrapping);
 
   const onFormat = () => {
     const formatted = format(code());
@@ -92,14 +95,19 @@ export const QueryTextArea = () => {
   };
 
   onMount(() => {
-    commandPaletteEmitter.on("focus-query-text-area", (e) => {
-      setFocused(e);
+    commandPaletteEmitter.on("focus-query-text-area", () => {
+      // this is done with a timeout because when this event is emitted the active element is the command palette
+      // and imeediately focusing the query text area doesn't work
+      setTimeout(() => {
+        // @ts-ignore
+        document.activeElement?.blur();
+        setFocused(true);
+      }, 1);
     });
   });
 
   return (
     <div class="flex-1 flex flex-col">
-      <span>{focused() ? "focused" : "not focused"}</span>
       <div class="w-full p-2 bg-base-100">
         <div
           class="tooltip tooltip-primary tooltip-bottom"

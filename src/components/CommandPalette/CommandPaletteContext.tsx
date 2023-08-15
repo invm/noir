@@ -11,8 +11,10 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const actionsContext = {
     showThemeSwitcher() {
       toggleThemeSwitcher();
-      // FIXME: focuses only on first render
-      document.getElementById("theme-switch")?.focus();
+      // always focus with a timeout because of the command palette, it is the active element
+      setTimeout(() => {
+        document.getElementById("theme-switch")?.focus();
+      }, 1);
     },
   };
 
