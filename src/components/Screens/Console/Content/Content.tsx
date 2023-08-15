@@ -55,7 +55,7 @@ export const Content = () => {
           </button>
         </div>
       </div>
-      <div class="flex-1 overflow-hidden">
+      <div class="flex-1">
         <Switch>
           <Match
             when={
