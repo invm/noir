@@ -151,3 +151,9 @@ dialog {
 .tabulator .tabulator-tableholder .tabulator-table {
   @apply text-base-content !important;
 }
+
+#results {
+  -webkit-user-select: auto; /* Safari */
+  -ms-user-select: auto; /* IE 10 and IE 11 */
+  user-select: auto;
+}
