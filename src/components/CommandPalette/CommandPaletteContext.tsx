@@ -3,12 +3,17 @@ import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
 
+export interface ActionsContext {
+  showThemeSwitcher: () => void;
+  [key: string]: any;
+}
+
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
     appService: { toggleThemeSwitcher },
   } = useAppSelector();
 
-  const actionsContext = {
+  const actionsContext: ActionsContext = {
     showThemeSwitcher() {
       toggleThemeSwitcher();
       // always focus with a timeout because of the command palette, it is the active element
