@@ -1,5 +1,6 @@
 import { createSignal, JSXElement } from "solid-js";
 import { useContextMenu, Menu, animation, Item } from "solid-contextmenu";
+import { t } from "utils/i18n";
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -23,12 +24,12 @@ export const TableColumnsCollapse = (props: {
             console.log("show table structure");
           }}
         >
-          Show table structure
+          {t('components.sidebar.show_table_structure')}
         </Item>
       </Menu>
       <button
         onClick={() => setOpen(!open())}
-        class="collapse button-ghost flex items-center rounded-sm text-sm font-semibold cursor-pointer border-b-2 border-base-300"
+        class="collapse button-ghost flex items-center text-sm text-base-content font-medium cursor-pointer border-b-2 border-base-300"
       >
         <label class={`swap text-6xl ${open() ? "swap-active" : ""}`}>
           <svg
