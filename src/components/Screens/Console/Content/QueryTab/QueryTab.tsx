@@ -1,4 +1,4 @@
-import { Table } from "components/UI";
+import { Table } from "./Table";
 import { ContentTabData } from "services/ConnectionTabs";
 import { useAppSelector } from "services/Context";
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";

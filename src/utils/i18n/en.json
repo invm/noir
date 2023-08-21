@@ -4,6 +4,11 @@
     "home": {
       "add_connection": "Add Connection"
     },
+    "command_palette": {
+      "toggle_theme_switcher": "Toggle Theme Switcher",
+      "focus_on": "Focus on",
+      "focus_query_text_area": "Focus On Query Text Area"
+    },
     "components": {
       "add_connection_form": {
         "title": "Add Connection",
@@ -38,8 +43,16 @@
           "execute": "Execute"
         }
       },
+      "sidebar": {
+        "show_table_structure": "Show table structure",
+        "tables": "Tables",
+        "schema": "Schema"
+      },
       "theme_switch": {
         "theme": "Theme"
+      },
+      "file_input": {
+        "choose_file": "Choose file"
       }
     }
   }

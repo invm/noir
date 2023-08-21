@@ -1,5 +1,6 @@
 import { createEmitter } from "@solid-primitives/event-bus";
 import { defineAction } from "solid-command-palette";
+import { t } from "utils/i18n";
 import { ActionsContext } from "./CommandPaletteContext";
 
 export const commandPaletteEmitter = createEmitter<{
@@ -7,21 +8,21 @@ export const commandPaletteEmitter = createEmitter<{
 }>();
 
 const showThemeSwitcher = defineAction({
-  id: "toggle-theme-switcher",
-  title: "Toggle Theme Switcher",
+  id: "toggle_theme_switcher",
+  title: t("command_palette.toggle_theme_switcher"),
   run: ({ rootContext }) => {
     (rootContext as ActionsContext).showThemeSwitcher();
   },
 });
 
 const focusOn = defineAction({
-  id: "focus-on",
-  title: "Focus On",
+  id: "focus_on",
+  title: t("command_palette.focus_on"),
 });
 
 const focusQueryTextArea = defineAction({
-  id: "focus-query-text-area",
-  title: "Focus On Query Text Area",
+  id: "focus_query_text_area",
+  title: t("command_palette.focus_query_text_area"),
   parentActionId: focusOn.id,
   /* Condition for allowing action */
   //   shortcut: "$mod+e", // $mod = Command on Mac & Control on Windows.
