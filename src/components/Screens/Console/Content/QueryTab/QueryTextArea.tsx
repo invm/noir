@@ -26,6 +26,7 @@ export const QueryTextArea = () => {
       setContentStore,
       getActiveConnection,
       getActiveContentTab,
+      updateStore,
     },
   } = useAppSelector();
 
@@ -64,6 +65,7 @@ export const QueryTextArea = () => {
   const onFormat = () => {
     const formatted = format(code());
     onInput(formatted);
+    updateStore();
   };
 
   const onExecute = async () => {
@@ -77,7 +79,8 @@ export const QueryTextArea = () => {
       setActiveContentQueryTabData({ query: code(), results: result });
     } catch (error) {
       setActiveContentQueryTabMessage("error", error as string);
-    }
+    };
+    updateStore();
   };
 
   createEffect(() => {

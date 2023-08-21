@@ -8,12 +8,13 @@ import { ContentComponent, NEW_QUERY_TAB } from "services/ConnectionTabs";
 
 export const Content = () => {
   const {
-    connectionsService: { contentStore, setContentStore },
+    connectionsService: { contentStore, setContentStore, updateStore },
   } = useAppSelector();
 
   const addTab = async () => {
     setContentStore("tabs", [...contentStore.tabs, NEW_QUERY_TAB]);
     setContentStore("idx", contentStore.tabs.length - 1);
+    updateStore();
   };
 
   const closeTab = async (idx: number) => {

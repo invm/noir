@@ -1,5 +1,6 @@
 import { Field, FieldProps } from 'solid-form-handler';
 import { Component, JSX, Show, splitProps } from 'solid-js';
+import { t } from 'utils/i18n';
 import { Label } from '.';
 
 export type FileInputProps = Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'type' | 'value'> &
@@ -33,7 +34,7 @@ export const FileInput: Component<FileInputProps> = (props) => {
             type="button"
             onClick={() => fileInput?.click()}
           >
-            <span class="p-2 border-end">Choose File</span>
+            <span class="p-2 border-end">{t('components.file_input.choose_file')}</span>
           </button>
         </div>
       )}

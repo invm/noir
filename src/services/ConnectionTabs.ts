@@ -47,7 +47,7 @@ export type ContentTab<C extends ContentComponentKeys> = {
   data: ContentTabData[C];
   error?: {
     message: string;
-    type: keyof typeof MessageType
+    type: keyof typeof MessageType;
   };
 };
 
@@ -117,7 +117,7 @@ export const ConnectionTabsService = () => {
     await store.set(CONNECTIONS_TABS_KEY, JSON.stringify(connectionStore));
     await store.set(CONTENT_TABS_KEY, JSON.stringify(contentStore));
     await store.save();
-  }, 3000);
+  }, 1000);
 
   const addTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
@@ -169,7 +169,7 @@ export const ConnectionTabsService = () => {
         i === contentStore.idx
           ? ({
             ...t,
-            error: undefined
+            error: undefined,
           } as ContentTab<"QueryTab">)
           : t
       )
@@ -207,6 +207,7 @@ export const ConnectionTabsService = () => {
     getActiveContentTab,
     setActiveContentQueryTabData,
     setActiveContentQueryTabMessage,
-    resetActiveContentQueryTabMessage
+    resetActiveContentQueryTabMessage,
+    updateStore,
   };
 };
