@@ -4,7 +4,7 @@ import { AddIcon, CloseIcon } from "components/UI/Icons";
 import { t } from "utils/i18n";
 import { QueryTab } from "./QueryTab/QueryTab";
 import { TableStructureTab } from "./TableStructureTab";
-import { ContentComponent, NEW_QUERY_TAB } from "services/ConnectionTabs";
+import { ContentComponent, newContentTab} from "services/ConnectionTabs";
 
 export const Content = () => {
   const {
@@ -12,7 +12,7 @@ export const Content = () => {
   } = useAppSelector();
 
   const addTab = async () => {
-    setContentStore("tabs", [...contentStore.tabs, NEW_QUERY_TAB]);
+    setContentStore("tabs", [...contentStore.tabs, newContentTab('Query', 'QueryTab')]);
     setContentStore("idx", contentStore.tabs.length - 1);
     updateStore();
   };
