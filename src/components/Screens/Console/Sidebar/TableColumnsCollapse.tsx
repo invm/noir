@@ -1,6 +1,8 @@
 import { createSignal, JSXElement } from "solid-js";
 import { useContextMenu, Menu, animation, Item } from "solid-contextmenu";
 import { t } from "utils/i18n";
+import { useAppSelector } from "services/Context";
+import { newContentTab } from "services/ConnectionTabs";
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -8,9 +10,23 @@ export const TableColumnsCollapse = (props: {
 }) => {
   const [open, setOpen] = createSignal(false);
 
+  const {
+    connectionsService: { contentStore, setContentStore, updateStore },
+  } = useAppSelector();
+
   const menu_id = "sidebar-table-menu";
 
   const { show } = useContextMenu({ id: menu_id, props: { id: "" } });
+
+  const openTableStructureTab = () => {
+    setContentStore("tabs", [
+      ...contentStore.tabs,
+      newContentTab(props.title, "TableStructureTab"),
+    ]);
+    setContentStore("idx", contentStore.tabs.length - 1);
+    updateStore();
+  };
+
   return (
     <div
       class="w-full"
@@ -19,17 +35,13 @@ export const TableColumnsCollapse = (props: {
       }}
     >
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
-        <Item
-          onClick={() => {
-            console.log("show table structure");
-          }}
-        >
-          {t('components.sidebar.show_table_structure')}
+        <Item onClick={() => openTableStructureTab()}>
+          {t("components.sidebar.show_table_structure")}
         </Item>
       </Menu>
-      <button
+      <div
         onClick={() => setOpen(!open())}
-        class="collapse button-ghost flex items-center text-sm text-base-content font-medium cursor-pointer border-b-2 border-base-300"
+        class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300"
       >
         <label class={`swap text-6xl ${open() ? "swap-active" : ""}`}>
           <svg
@@ -64,7 +76,7 @@ export const TableColumnsCollapse = (props: {
           </svg>
         </label>
         <span class="ml-2">{props.title}</span>
-      </button>
+      </div>
       {open() && props.children}
     </div>
   );

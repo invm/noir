@@ -157,6 +157,11 @@ dialog {
   -ms-user-select: auto; /* IE 10 and IE 11 */
   user-select: auto;
 }
+
 .solid-contextmenu__item__content {
   padding: 0 1rem;
+}
+
+.solid-contextmenu {
+  box-shadow: none;
 }
