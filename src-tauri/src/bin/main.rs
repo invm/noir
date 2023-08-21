@@ -51,6 +51,7 @@ fn main() {
             queries::get_procedures,
             queries::get_triggers,
             queries::init_connection,
+            queries::get_table_structure,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

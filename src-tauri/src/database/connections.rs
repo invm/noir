@@ -161,9 +161,26 @@ impl ConnectedConnection {
             Scheme::Sqlite(_) => todo!(),
         }
     }
+
+    pub async fn get_table_structure(&self, table_name: String) -> Result<Value> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_table_structure(self, pool, table_name)
+            // ConnectionPool::Postgres(_pool) => todo!(),
+            // ConnectionPool::Sqlite(_pool) => todo!(),
+        }
+    }
+
+    pub async fn get_indices(&self, table_name: Option<&str>) -> Result<Value> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_indices(self, pool, table_name)
+            // ConnectionPool::Postgres(_pool) => todo!(),
+            // ConnectionPool::Sqlite(_pool) => todo!(),
+        }
+    }
+
     pub async fn get_columns(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_columns(self, pool)
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_columns(self, pool, None)
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
@@ -171,7 +188,7 @@ impl ConnectedConnection {
 
     pub async fn get_constraints(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_constraints(self, pool),
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_constraints(self, pool, None),
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
@@ -195,7 +212,7 @@ impl ConnectedConnection {
 
     pub async fn get_triggers(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_triggers(pool),
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_triggers(self, pool, None),
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
