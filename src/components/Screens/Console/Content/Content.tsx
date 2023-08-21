@@ -24,6 +24,7 @@ export const Content = () => {
       contentStore.tabs.filter((_t, i) => i !== idx)
     );
     setContentStore("idx", 0);
+    updateStore();
   };
 
   return (

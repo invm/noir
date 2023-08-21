@@ -1,5 +1,5 @@
 import { Table } from "./Table";
-import { ContentTabData } from "services/ConnectionTabs";
+import { QueryContentTabData } from "services/ConnectionTabs";
 import { useAppSelector } from "services/Context";
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 import Split from "split.js";
@@ -12,7 +12,7 @@ export const QueryTab = () => {
   const [data, setData] = createSignal<Record<string, any>[]>([]);
 
   createEffect(() => {
-    const tabledata = (getActiveContentTab().data as ContentTabData["QueryTab"])
+    const tabledata = (getActiveContentTab().data as QueryContentTabData)
       .results;
     if (tabledata.length) {
       setData(tabledata);

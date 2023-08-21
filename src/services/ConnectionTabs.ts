@@ -33,7 +33,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
       return {
         label,
         data: {
-          table: "",
+          table: label,
           structure: [],
           indices: [],
           foreignKeys: [],

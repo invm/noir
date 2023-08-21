@@ -14,6 +14,13 @@ pub async fn execute_query(app_handle: AppHandle, conn_id: String, query: String
 }
 
 #[command]
+pub async fn get_table_structure(app_handle: AppHandle, conn_id: String, table_name: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let result = connection.get_table_structure(table_name).await?;
+    Ok(result)
+}
+
+#[command]
 pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_columns().await?;

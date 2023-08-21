@@ -12,7 +12,7 @@ import { t } from "i18next";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { ContentTab, ContentTabData } from "services/ConnectionTabs";
+import { ContentComponent, QueryContentTabData } from "services/ConnectionTabs";
 import { QueryResult } from "interfaces";
 import { commandPaletteEmitter } from "components/CommandPalette/actions";
 
@@ -35,10 +35,14 @@ export const QueryTextArea = () => {
       "tabs",
       contentStore.tabs.map((t, idx) =>
         idx === contentStore.idx
-          ? ({
+          ? {
             ...t,
-            data: { ...t.data, query },
-          } as ContentTab<"QueryTab">)
+            data: {
+              query,
+              results: (t.data as QueryContentTabData).results ?? [],
+            },
+            key: ContentComponent.QueryTab,
+          }
           : t
       )
     );
@@ -79,14 +83,12 @@ export const QueryTextArea = () => {
       setActiveContentQueryTabData({ query: code(), results: result });
     } catch (error) {
       setActiveContentQueryTabMessage("error", error as string);
-    };
+    }
     updateStore();
   };
 
   createEffect(() => {
-    setCode(
-      (getActiveContentTab()?.data as ContentTabData["QueryTab"]).query ?? ""
-    );
+    setCode((getActiveContentTab()?.data as QueryContentTabData).query ?? "");
   });
 
   const handleKeyDown = async (e: KeyboardEvent) => {
