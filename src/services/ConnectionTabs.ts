@@ -19,41 +19,62 @@ export const ContentComponent = {
   TableStructureTab: "TableStructureTab",
 } as const;
 
-export const NEW_QUERY_TAB = {
-  label: "Query",
-  data: { query: "", results: [] },
-  key: ContentComponent.QueryTab,
-};
-
 type ContentComponentKeys = keyof typeof ContentComponent;
 
-export type ContentTabData = {
-  [ContentComponent.QueryTab]: {
-    query: string;
-    results: Record<string, any>[];
-  };
-  [ContentComponent.TableStructureTab]: {
-    table: string;
-    structure: Record<string, any>[];
-    indices: Record<string, any>[];
-    foreignKeys: Record<string, any>[];
-    triggers: Record<string, any>[];
-  };
+export const newContentTab = (label: string, key: ContentComponentKeys) => {
+  switch (key) {
+    case ContentComponent.QueryTab:
+      return {
+        label,
+        data: { query: "", results: [] },
+        key,
+      };
+    case ContentComponent.TableStructureTab:
+      return {
+        label,
+        data: {
+          table: "",
+          structure: [],
+          indices: [],
+          foreignKeys: [],
+          triggers: [],
+        },
+        key,
+      };
+    default:
+      throw new Error("Invalid content tab key");
+  }
 };
 
-export type ContentTab<C extends ContentComponentKeys> = {
+export type QueryContentTabData = {
+  query: string;
+  results: Record<string, any>[];
+};
+
+export type TableStructureContentTabData = {
+  table: string;
+  structure: Record<string, any>[];
+  indices: Record<string, any>[];
+  foreignKeys: Record<string, any>[];
+  triggers: Record<string, any>[];
+};
+
+export type ContentTab = {
   label: string;
-  key: C;
-  data: ContentTabData[C];
   error?: {
     message: string;
     type: keyof typeof MessageType;
   };
-};
-
-type ContentTabOption =
-  | ContentTab<"TableStructureTab">
-  | ContentTab<"QueryTab">;
+} & (
+    | {
+      key: typeof ContentComponent.QueryTab;
+      data: QueryContentTabData;
+    }
+    | {
+      key: typeof ContentComponent.TableStructureTab;
+      data: TableStructureContentTabData;
+    }
+  );
 
 type ConnectionTab = {
   label: string;
@@ -82,7 +103,7 @@ type ConnectionStore = {
 };
 
 type ContentStore = {
-  tabs: ContentTabOption[];
+  tabs: ContentTab[];
   idx: number;
 };
 
@@ -91,6 +112,7 @@ export const ConnectionTabsService = () => {
     tabs: [],
     idx: 0,
   });
+
   const [contentStore, setContentStore] = createStore<ContentStore>({
     tabs: [],
     idx: 0,
@@ -122,7 +144,7 @@ export const ConnectionTabsService = () => {
   const addTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
     setConnectionStore("tabs", connectionStore.tabs.concat(tab));
-    setContentStore("tabs", [NEW_QUERY_TAB]);
+    setContentStore("tabs", [newContentTab("Query", ContentComponent.QueryTab)]);
     const idx = connectionStore.tabs.length;
     setConnectionStore("idx", idx);
     updateStore();
@@ -149,13 +171,13 @@ export const ConnectionTabsService = () => {
     return contentStore.tabs[contentStore.idx];
   };
 
-  const setActiveContentQueryTabData = (data: ContentTabData["QueryTab"]) => {
+  const setActiveContentQueryTabData = (data: QueryContentTabData) => {
     const tab = getActiveContentTab();
     if (!tab) return;
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx ? ({ ...t, data } as ContentTab<"QueryTab">) : t
+        i === contentStore.idx ? { ...t, data, key: ContentComponent.QueryTab } : t
       )
     );
   };
@@ -166,12 +188,7 @@ export const ConnectionTabsService = () => {
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? ({
-            ...t,
-            error: undefined,
-          } as ContentTab<"QueryTab">)
-          : t
+        i === contentStore.idx ? { ...t, error: undefined } : t
       )
     );
   };
@@ -185,12 +202,7 @@ export const ConnectionTabsService = () => {
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? ({
-            ...t,
-            error: { type, message },
-          } as ContentTab<"QueryTab">)
-          : t
+        i === contentStore.idx ? { ...t, error: { type, message } } : t
       )
     );
   };
