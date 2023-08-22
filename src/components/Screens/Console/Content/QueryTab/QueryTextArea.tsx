@@ -51,6 +51,7 @@ export const QueryTextArea = () => {
   const onInput = (q: string) => {
     updateQueryText(q);
     setCode(q);
+    updateStore();
   };
 
   const [code, setCode] = createSignal("");
@@ -69,7 +70,6 @@ export const QueryTextArea = () => {
   const onFormat = () => {
     const formatted = format(code());
     onInput(formatted);
-    updateStore();
   };
 
   const onExecute = async () => {
@@ -82,9 +82,8 @@ export const QueryTextArea = () => {
       });
       setActiveContentQueryTabData({ query: code(), results: result });
     } catch (error) {
-      setActiveContentQueryTabMessage("error", error as string);
+      setActiveContentQueryTabMessage("error", error);
     }
-    updateStore();
   };
 
   createEffect(() => {

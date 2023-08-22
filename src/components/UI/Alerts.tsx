@@ -8,8 +8,8 @@ export const Alerts = () => {
       <div class="toast">
         <For each={errors}>
           {error => (
-            <div class="alert alert-error">
-              <span>{error.message}</span>
+            <div class="alert alert-error py-1 px-2 rounded-lg">
+              <span class="text-sm font-medium">{error.message}</span>
             </div>
           )}
         </For>

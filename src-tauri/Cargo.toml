@@ -33,6 +33,7 @@ tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-wo
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 sql_lexer = "0.9.4"
 mysql = { version = "24.0.0", features = ["default"] }
+futures = "0.3.28"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
