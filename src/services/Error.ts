@@ -11,9 +11,9 @@ const errorStore = createStore<Error[]>([]);
 export const ErrorService = () => {
   const [errors, setErrors] = errorStore
 
-  const addError = (error: string) => {
+  const addError = (error: string | unknown) => {
     const id = randomId()
-    setErrors(errors.concat({ message: error, id }))
+    setErrors(errors.concat({ message: String(error), id }))
 
     setTimeout(() => {
       setErrors(errors.filter(e => e.id !== id))
