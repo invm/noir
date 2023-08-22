@@ -16,7 +16,7 @@
 
 html, body {
   margin: 0;
-  /* overflow: hidden; */
+  overflow: hidden;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
@@ -73,7 +73,7 @@ input[type=number] {
 }
 
 .app-input {
-  @apply block w-full p-2 border border-gray-300 rounded-lg bg-base-100 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 py-1.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base;
+  @apply block w-full p-2 border border-gray-300 rounded-lg bg-base-100 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 py-1.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base h-[32px];
 }
 
 .app-checkbox{
@@ -81,7 +81,7 @@ input[type=number] {
 }
 
 .app-select {
-  @apply border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base sm:text-sm py-0.5;
+  @apply border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base sm:text-sm py-0.5 h-[32px];
 }
 
 .background-gradient {

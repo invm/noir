@@ -1,9 +1,6 @@
 {
   "translation": {
     "query_noir_titlecase": "Query Noir",
-    "home": {
-      "add_connection": "Add Connection"
-    },
     "command_palette": {
       "toggle_theme_switcher": "Toggle Theme Switcher",
       "focus_on": "Focus on",
@@ -11,10 +8,10 @@
     },
     "components": {
       "add_connection_form": {
-        "title": "Add Connection",
+        "title": "Add New Connection",
         "length_validation": "Must be between 2 and 255 characters",
         "labels": {
-          "name": "Connection name",
+          "name": "Name",
           "mode": "Mode",
           "color": "Color",
           "scheme": "Scheme",
@@ -53,6 +50,12 @@
       },
       "file_input": {
         "choose_file": "Choose file"
+      },
+      "table_structure_tab":{
+        "columns": "Columns",
+        "indices": "Indices",
+        "constraints": "Constraints",
+        "triggers": "Triggers"
       }
     }
   }
