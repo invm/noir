@@ -10,7 +10,7 @@ export const Main = () => {
   const {
     connectionsService: {
       removeTab,
-      // clearStore,
+      clearStore,
       connectionStore,
       setConnectionStore,
     },
@@ -61,7 +61,8 @@ export const Main = () => {
           </For>
         </div>
         <div>
-          {/*<button onClick={async () => await clearStore()}>Reset store</button> */}
+          {/**/}
+          <button onClick={async () => await clearStore()}>Reset store</button> 
           <ThemeSwitch />
         </div>
       </div>

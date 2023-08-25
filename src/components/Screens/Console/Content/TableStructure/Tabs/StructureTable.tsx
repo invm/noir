@@ -1,6 +1,5 @@
-export const Table = (props: { data: Record<string, any>[] }) => {
-  console.log(props.data);
-  const columns = Object.keys(props.data[0]);
+export const StructureTable = (props: { data: Record<string, any>[] }) => {
+  const columns = props.data.length ? Object.keys(props.data[0]) : [];
   const rows = props.data.map((row) => Object.values(row));
   return (
     <div class="overflow-x-auto">

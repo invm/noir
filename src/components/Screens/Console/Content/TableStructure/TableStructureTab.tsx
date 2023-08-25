@@ -1,25 +1,16 @@
 import { useAppSelector } from "services/Context";
-import {
-  createEffect,
-  createSignal,
-  For,
-  Match,
-  onMount,
-  Switch,
-} from "solid-js";
+import { createSignal, For, Match, onMount, Switch } from "solid-js";
 import { invoke } from "@tauri-apps/api";
 import { TableStructureResult } from "interfaces";
 import { t } from "utils/i18n";
 import { Loader } from "components/UI";
 import { createStore } from "solid-js/store";
-import { Table } from "./TableStructure/Tabs/Table";
+import { StructureTable } from "./Tabs/StructureTable";
+import { TableStructureContentTabData } from "services/ConnectionTabs";
 
 export const TableStructureTab = () => {
   const {
-    connectionsService: {
-      getActiveConnection,
-      getActiveContentTab
-    },
+    connectionsService: { getActiveConnection, getActiveContentTab },
     errorService: { addError },
   } = useAppSelector();
   const [loading, setLoading] = createSignal(true);
@@ -31,13 +22,12 @@ export const TableStructureTab = () => {
 
   onMount(async () => {
     const activeConnection = getActiveConnection();
-    const activeTab = getActiveContentTab()
-    console.log(activeTab)
+    const activeTab = getActiveContentTab();
     try {
       const { columns, indices, triggers, constraints } =
         await invoke<TableStructureResult>("get_table_structure", {
           connId: activeConnection.id,
-          tableName: "app",
+          tableName: (activeTab.data as TableStructureContentTabData).table,
         });
       setData({ columns, indices, triggers, constraints });
     } catch (error) {
@@ -73,7 +63,7 @@ export const TableStructureTab = () => {
               <For each={tabs}>
                 {(item, idx) => (
                   <Match when={tabIdx() === idx()}>
-                    <Table data={data[item]} />
+                    <StructureTable data={data[item]} />
                   </Match>
                 )}
               </For>
