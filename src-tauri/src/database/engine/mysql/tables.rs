@@ -38,6 +38,8 @@ pub async fn get_columns(
     let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
+        TABLE_SCHEMA,
+        TABLE_NAME,
         COLUMN_NAME, 
         COLUMN_TYPE, 
         DATA_TYPE, 

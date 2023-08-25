@@ -25,7 +25,7 @@ const focusQueryTextArea = defineAction({
   title: t("command_palette.focus_query_text_area"),
   parentActionId: focusOn.id,
   /* Condition for allowing action */
-  //   shortcut: "$mod+e", // $mod = Command on Mac & Control on Windows.
+  shortcut: "$mod+d", // $mod = Command on Mac & Control on Windows.
   run: () => {
     commandPaletteEmitter.emit("focus-query-text-area", true);
   },

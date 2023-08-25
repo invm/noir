@@ -165,3 +165,7 @@ dialog {
 .solid-contextmenu {
   box-shadow: none;
 }
+
+.loading-xl {
+  width: 6rem;
+}
