@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 
-export const Table = (props: { data: Record<string, any>[] }) => {
+export const ResultsTable = (props: { data: Record<string, any>[] }) => {
   createEffect(() => {
     if (!props.data.length) return;
     const columns = Object.keys(props.data[0]).map((k) => ({

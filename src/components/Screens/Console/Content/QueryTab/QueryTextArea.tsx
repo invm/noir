@@ -84,6 +84,7 @@ export const QueryTextArea = () => {
     } catch (error) {
       setActiveContentQueryTabMessage("error", error);
     }
+    updateStore()
   };
 
   createEffect(() => {
@@ -93,7 +94,7 @@ export const QueryTextArea = () => {
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === "f" && e.ctrlKey) {
       onFormat();
-    } else if (e.key === "e" && e.ctrlKey) {
+    } else if ((e.metaKey || e.ctrlKey) && (e.key === 'Enter' || e.key === "e")) {
       await onExecute();
     }
   };

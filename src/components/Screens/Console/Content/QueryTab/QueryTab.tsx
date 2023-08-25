@@ -1,4 +1,4 @@
-import { Table } from "./Table";
+import { ResultsTable } from "./ResultesTable";
 import { QueryContentTabData } from "services/ConnectionTabs";
 import { useAppSelector } from "services/Context";
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
@@ -38,7 +38,7 @@ export const QueryTab = () => {
       </div>
       <div id="results">
         <Show when={data().length}>
-          <Table data={data()} />
+          <ResultsTable data={data()} />
         </Show>
       </div>
     </div>

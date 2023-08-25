@@ -141,7 +141,16 @@ export const ConnectionTabsService = () => {
 
   const updateStore = debounce(async () => {
     await store.set(CONNECTIONS_TABS_KEY, JSON.stringify(connectionStore));
-    await store.set(CONTENT_TABS_KEY, JSON.stringify(contentStore));
+    const contentStoreTabs = contentStore.tabs.map((t) => {
+      if (t.key === ContentComponent.QueryTab) {
+        return { ...t, data: { ...t.data, results: [] } };
+      }
+      return t;
+    });
+    await store.set(
+      CONTENT_TABS_KEY,
+      JSON.stringify({ ...contentStore, tabs: contentStoreTabs })
+    );
     await store.save();
   }, 1000);
 
@@ -177,7 +186,9 @@ export const ConnectionTabsService = () => {
     return contentStore.tabs[contentStore.idx];
   };
 
-  const setActiveContentTableStructureTabData = (data: TableStructureContentTabData) => {
+  const setActiveContentTableStructureTabData = (
+    data: TableStructureContentTabData
+  ) => {
     const tab = getActiveContentTab();
     if (!tab) return;
     setContentStore(
@@ -223,7 +234,9 @@ export const ConnectionTabsService = () => {
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx ? { ...t, error: { type, message: String(message) } } : t
+        i === contentStore.idx
+          ? { ...t, error: { type, message: String(message) } }
+          : t
       )
     );
   };

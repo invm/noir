@@ -3,7 +3,7 @@ import { useAppSelector } from "services/Context";
 import { AddIcon, CloseIcon } from "components/UI/Icons";
 import { t } from "utils/i18n";
 import { QueryTab } from "./QueryTab/QueryTab";
-import { TableStructureTab } from "./TableStructureTab";
+import { TableStructureTab } from "./TableStructure/TableStructureTab"
 import { ContentComponent, newContentTab} from "services/ConnectionTabs";
 
 export const Content = () => {

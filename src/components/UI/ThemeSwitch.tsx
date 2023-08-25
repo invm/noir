@@ -1,7 +1,6 @@
 import { For, Show } from "solid-js";
 import { titleCase } from "../../utils/formatters";
 const THEMES = [
-  "light",
   "dark",
   "aqua",
   "synthwave",
@@ -9,7 +8,6 @@ const THEMES = [
   "night",
   "cupcake",
 ] as const;
-import { onMount } from "solid-js";
 import { t } from "i18next";
 import { useAppSelector } from "services/Context";
 
@@ -17,10 +15,6 @@ export const ThemeSwitch = () => {
   const {
     appService: { appStore },
   } = useAppSelector();
-  onMount(async () => {
-    const theme = localStorage.getItem("theme") || "dark";
-    document.documentElement.dataset.theme = theme;
-  });
 
   const select = (theme: (typeof THEMES)[number]) => {
     document.documentElement.dataset.theme = theme;
