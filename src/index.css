@@ -109,12 +109,12 @@ dialog {
 }
 
 .gutter-vertical:hover{
-  @apply bg-base-200;
+  @apply bg-neutral-content rounded-lg;
   cursor: row-resize;
 }
 
 .gutter-horizontal:hover{
-  @apply bg-base-200;
+  @apply bg-neutral-content rounded-lg;
   cursor: col-resize;
 }
 

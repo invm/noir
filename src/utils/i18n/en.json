@@ -38,7 +38,8 @@
         "actions": {
           "format": "Format",
           "execute": "Execute"
-        }
+        },
+        "zero_results": "0 rows retuned"
       },
       "sidebar": {
         "show_table_structure": "Show table structure",
