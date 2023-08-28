@@ -9,7 +9,7 @@ export const Console = () => {
       sizes: [20, 80],
       minSize: [100, 200],
       maxSize: [400, Infinity],
-      gutterSize: 12,
+      gutterSize: 6,
     });
     onCleanup(() => {
       s.destroy();

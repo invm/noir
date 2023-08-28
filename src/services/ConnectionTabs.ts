@@ -26,7 +26,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
     case ContentComponent.QueryTab:
       return {
         label,
-        data: { query: "", results: [] },
+        data: { query: "", executed: false,  results: [] },
         key,
       };
     case ContentComponent.TableStructureTab:
@@ -48,6 +48,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
 
 export type QueryContentTabData = {
   query: string;
+  executed: boolean;
   results: Record<string, any>[];
 };
 
@@ -122,6 +123,7 @@ export const ConnectionTabsService = () => {
 
   onMount(async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_TABS_KEY);
+    if (!conn_tabs.tabs) return;
     const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
       const res = await acc;
       try {
@@ -143,7 +145,7 @@ export const ConnectionTabsService = () => {
     await store.set(CONNECTIONS_TABS_KEY, JSON.stringify(connectionStore));
     const contentStoreTabs = contentStore.tabs.map((t) => {
       if (t.key === ContentComponent.QueryTab) {
-        return { ...t, data: { ...t.data, results: [] } };
+        return { ...t, data: { ...t.data, executed: false, results: [] } };
       }
       return t;
     });

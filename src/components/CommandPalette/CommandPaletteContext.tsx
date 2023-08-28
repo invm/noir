@@ -1,7 +1,8 @@
-import { actions } from "./actions";
+import { actions, commandPaletteEmitter } from "./actions";
 import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
+import { onMount } from "solid-js";
 
 export interface ActionsContext {
   showThemeSwitcher: () => void;
@@ -22,6 +23,36 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
       }, 1);
     },
   };
+
+  onMount(() => {
+    document.onkeyup = function(e: KeyboardEvent) {
+      console.log(e.code, e.key, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey);
+      const number =
+        e.altKey && e.code.startsWith("Digit")
+          ? +e.code.replace("Digit", "")
+          : Number.isNaN(+e.key)
+            ? null
+            : +e.key;
+      if (
+        (e.ctrlKey || e.metaKey || e.altKey) &&
+        number &&
+        number > 0 &&
+        number <= 9
+      ) {
+        commandPaletteEmitter.emit(
+          e.altKey ? "select-query-tab" : "select-connection-tab",
+          number
+        );
+      }
+    };
+
+    commandPaletteEmitter.on("select-connection-tab", (val) => {
+      console.log({ val, actions: "select-connection-tab" });
+    });
+    commandPaletteEmitter.on("select-query-tab", (val) => {
+      console.log({ val, actions: "select-connection-tab" });
+    });
+  });
 
   return (
     <Root actions={actions} actionsContext={actionsContext}>

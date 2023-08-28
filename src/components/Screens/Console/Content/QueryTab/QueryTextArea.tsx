@@ -37,10 +37,7 @@ export const QueryTextArea = () => {
         idx === contentStore.idx
           ? {
             ...t,
-            data: {
-              query,
-              results: (t.data as QueryContentTabData).results ?? [],
-            },
+            data: { ...(t.data as QueryContentTabData), query },
             key: ContentComponent.QueryTab,
           }
           : t
@@ -80,11 +77,15 @@ export const QueryTextArea = () => {
         connId: activeConnection.id,
         query: code(),
       });
-      setActiveContentQueryTabData({ query: code(), results: result });
+      setActiveContentQueryTabData({
+        query: code(),
+        executed: true,
+        results: result,
+      });
     } catch (error) {
       setActiveContentQueryTabMessage("error", error);
     }
-    updateStore()
+    updateStore();
   };
 
   createEffect(() => {
@@ -94,7 +95,10 @@ export const QueryTextArea = () => {
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === "f" && e.ctrlKey) {
       onFormat();
-    } else if ((e.metaKey || e.ctrlKey) && (e.key === 'Enter' || e.key === "e")) {
+    } else if (
+      (e.metaKey || e.ctrlKey) &&
+      (e.key === "Enter" || e.key === "e")
+    ) {
       await onExecute();
     }
   };
