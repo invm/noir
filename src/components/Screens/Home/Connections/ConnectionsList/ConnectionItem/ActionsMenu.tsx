@@ -19,14 +19,14 @@ const columnsToSchema = (columns: Record<string, any>[]) => {
 }
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
-  const { errorService: { addError }, connectionsService: { addTab } } = useAppSelector()
+  const { errorService: { addError }, connectionsService: { addConnectionTab } } = useAppSelector()
 
   const onConnect = async () => {
     try {
       await invoke('init_connection', { config: props.connection })
       const { result } = await invoke<QueryResult>('get_columns', { connId: props.connection.id });
       const schema = columnsToSchema(result)
-      await addTab({
+      await addConnectionTab ({
         id: props.connection.id,
         label: props.connection.name,
         schema,
