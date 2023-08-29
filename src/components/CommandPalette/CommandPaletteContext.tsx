@@ -12,6 +12,12 @@ export interface ActionsContext {
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
     appService: { toggleThemeSwitcher },
+    connectionsService: {
+      setActiveContentTab,
+      setActiveConnection,
+      addContentTab,
+      removeActiveContentTab,
+    },
   } = useAppSelector();
 
   const actionsContext: ActionsContext = {
@@ -26,7 +32,6 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
 
   onMount(() => {
     document.onkeyup = function(e: KeyboardEvent) {
-      console.log(e.code, e.key, e.metaKey, e.ctrlKey, e.altKey, e.shiftKey);
       const number =
         e.altKey && e.code.startsWith("Digit")
           ? +e.code.replace("Digit", "")
@@ -43,14 +48,21 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
           e.altKey ? "select-query-tab" : "select-connection-tab",
           number
         );
+      } else if ((e.ctrlKey || e.metaKey) && e.code === "KeyT") {
+        if (e.shiftKey) {
+          removeActiveContentTab();
+        } else {
+          addContentTab();
+        }
       }
     };
 
     commandPaletteEmitter.on("select-connection-tab", (val) => {
-      console.log({ val, actions: "select-connection-tab" });
+      setActiveConnection(val - 1);
     });
+
     commandPaletteEmitter.on("select-query-tab", (val) => {
-      console.log({ val, actions: "select-connection-tab" });
+      setActiveContentTab(val);
     });
   });
 
