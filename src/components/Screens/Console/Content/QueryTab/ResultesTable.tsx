@@ -14,16 +14,17 @@ export const ResultsTable = (props: { data: Record<string, any>[] }) => {
       data: props.data,
       columns,
       columnDefaults: {
-        title: '',
+        title: "",
         width: 350,
       },
       layout: "fitDataStretch",
       autoResize: true,
-      clipboard:true,
+      clipboard: true,
       pagination: true,
       paginationSize: 20,
       height: "100%",
       paginationCounter: "rows",
+      debugInvalidOptions: false,
     });
   });
 

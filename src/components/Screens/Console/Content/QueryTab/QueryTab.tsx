@@ -10,8 +10,7 @@ export const QueryTab = () => {
   const {
     connectionsService: { getActiveContentTab },
   } = useAppSelector();
-
-  createEffect(() => {
+  const data = createEffect(() => {
     const q = Split(["#query", "#results"], {
       sizes: [40, 60],
       minSize: [100, 400],

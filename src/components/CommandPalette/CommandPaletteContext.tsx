@@ -1,4 +1,4 @@
-import { actions, commandPaletteEmitter } from "./actions";
+import { actions } from "./actions";
 import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
@@ -32,38 +32,24 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
 
   onMount(() => {
     document.onkeyup = function(e: KeyboardEvent) {
-      const number =
-        e.altKey && e.code.startsWith("Digit")
-          ? +e.code.replace("Digit", "")
-          : Number.isNaN(+e.key)
-            ? null
-            : +e.key;
+      const number = e.code.startsWith("Digit")
+        ? +e.code.replace("Digit", "")
+        : null;
       if (
         (e.ctrlKey || e.metaKey || e.altKey) &&
         number &&
         number > 0 &&
         number <= 9
       ) {
-        commandPaletteEmitter.emit(
-          e.altKey ? "select-query-tab" : "select-connection-tab",
-          number
-        );
+        e.preventDefault();
+        if (e.altKey) setActiveContentTab(number);
+        else setActiveConnection(number - 1);
       } else if ((e.ctrlKey || e.metaKey) && e.code === "KeyT") {
-        if (e.shiftKey) {
-          removeActiveContentTab();
-        } else {
-          addContentTab();
-        }
+        e.preventDefault();
+        if (e.shiftKey) removeActiveContentTab();
+        else addContentTab();
       }
     };
-
-    commandPaletteEmitter.on("select-connection-tab", (val) => {
-      setActiveConnection(val - 1);
-    });
-
-    commandPaletteEmitter.on("select-query-tab", (val) => {
-      setActiveContentTab(val);
-    });
   });
 
   return (
