@@ -240,14 +240,18 @@ export const ConnectionTabsService = () => {
     );
   };
 
-  const setActiveContentQueryTabData = (data: QueryContentTabData) => {
+  const setActiveContentQueryTabData = (data: Partial<QueryContentTabData>) => {
     const tab = getActiveContentTab();
     if (!tab) return;
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
         i === contentStore.idx
-          ? { ...t, data, key: ContentComponent.QueryTab }
+          ? {
+            ...t,
+            data: { ...(t.data as QueryContentTabData), ...data },
+            key: ContentComponent.QueryTab,
+          }
           : t
       )
     );
