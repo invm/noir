@@ -9,7 +9,7 @@ import { Home } from "./Home/Home";
 export const Main = () => {
   const {
     connectionsService: {
-      removeTab,
+      removeConnectionTab,
       // clearStore,
       connectionStore,
       setConnectionStore,
@@ -17,7 +17,7 @@ export const Main = () => {
   } = useAppSelector();
 
   const closeTab = async (id: string) => {
-    await removeTab(id);
+    await removeConnectionTab(id);
   };
 
   return (

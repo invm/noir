@@ -26,7 +26,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
     case ContentComponent.QueryTab:
       return {
         label,
-        data: { query: "", executed: false,  results: [] },
+        data: { query: "", executed: false, results: [] },
         key,
       };
     case ContentComponent.TableStructureTab:
@@ -156,7 +156,7 @@ export const ConnectionTabsService = () => {
     await store.save();
   }, 1000);
 
-  const addTab = async (tab: ConnectionTab) => {
+  const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
     setConnectionStore("tabs", connectionStore.tabs.concat(tab));
     setContentStore("tabs", [
@@ -167,7 +167,7 @@ export const ConnectionTabsService = () => {
     updateStore();
   };
 
-  const removeTab = async (id: string) => {
+  const removeConnectionTab = async (id: string) => {
     setConnectionStore(
       "tabs",
       connectionStore.tabs.filter((t) => t.id !== id)
@@ -186,6 +186,43 @@ export const ConnectionTabsService = () => {
 
   const getActiveContentTab = () => {
     return contentStore.tabs[contentStore.idx];
+  };
+
+  const addContentTab = () => {
+    setContentStore("tabs", [
+      ...contentStore.tabs,
+      newContentTab("Query", ContentComponent.QueryTab),
+    ]);
+    setContentStore("idx", contentStore.tabs.length - 1);
+  };
+
+  const removeActiveConnection = () => {
+    if (connectionStore.tabs.length === 1) return;
+    setConnectionStore(
+      "tabs",
+      connectionStore.tabs.filter((_, i) => i !== connectionStore.idx)
+    );
+  };
+
+  const removeActiveContentTab = () => {
+    if (contentStore.tabs.length === 1) return;
+    setContentStore(
+      "tabs",
+      contentStore.tabs.filter((_, i) => i !== contentStore.idx)
+    );
+    setContentStore("idx", contentStore.tabs.length - 1);
+  };
+
+  const setActiveConnection = (i: number) => {
+    if (i <= connectionStore.tabs.length) {
+      setConnectionStore("idx", i);
+    }
+  };
+
+  const setActiveContentTab = (i: number) => {
+    if (i <= contentStore.tabs.length) {
+      setContentStore("idx", i - 1);
+    }
   };
 
   const setActiveContentTableStructureTabData = (
@@ -248,8 +285,8 @@ export const ConnectionTabsService = () => {
     setConnectionStore,
     contentStore,
     setContentStore,
-    addTab,
-    removeTab,
+    addConnectionTab,
+    removeConnectionTab,
     clearStore,
     getActiveConnection,
     getActiveContentTab,
@@ -258,5 +295,10 @@ export const ConnectionTabsService = () => {
     resetActiveContentQueryTabMessage,
     updateStore,
     setActiveContentTableStructureTabData,
+    setActiveContentTab,
+    setActiveConnection,
+    removeActiveContentTab,
+    removeActiveConnection,
+    addContentTab,
   };
 };
