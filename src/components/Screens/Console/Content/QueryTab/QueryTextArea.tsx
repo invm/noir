@@ -3,7 +3,7 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import { createEffect, createSignal, onMount, Show } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { lineNumbers, EditorView } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
@@ -12,7 +12,7 @@ import { t } from "i18next";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { ContentComponent, QueryContentTabData } from "services/ConnectionTabs";
+import { QueryContentTabData } from "services/ConnectionTabs";
 import { QueryResult } from "interfaces";
 import { commandPaletteEmitter } from "components/CommandPalette/actions";
 
@@ -22,8 +22,6 @@ export const QueryTextArea = () => {
       setActiveContentQueryTabData,
       setActiveContentQueryTabMessage,
       resetActiveContentQueryTabMessage,
-      contentStore,
-      setContentStore,
       getActiveConnection,
       getActiveContentTab,
       updateStore,
@@ -31,29 +29,18 @@ export const QueryTextArea = () => {
   } = useAppSelector();
 
   const updateQueryText = async (query: string) => {
-    setContentStore(
-      "tabs",
-      contentStore.tabs.map((t, idx) =>
-        idx === contentStore.idx
-          ? {
-            ...t,
-            data: { ...(t.data as QueryContentTabData), query },
-            key: ContentComponent.QueryTab,
-          }
-          : t
-      )
-    );
+    setActiveContentQueryTabData({ query });
   };
 
-  const onInput = (q: string) => {
-    updateQueryText(q);
+  const [code, setCode] = createSignal("");
+
+  const onValueChange = (q: string) => {
     setCode(q);
     updateStore();
   };
 
-  const [code, setCode] = createSignal("");
   const { ref, editorView, createExtension } = createCodeMirror({
-    onValueChange: onInput,
+    onValueChange,
   });
   createEditorControlledValue(editorView, code);
   createExtension(() => lineNumbers());
@@ -66,7 +53,8 @@ export const QueryTextArea = () => {
 
   const onFormat = () => {
     const formatted = format(code());
-    onInput(formatted);
+    onValueChange(formatted);
+    updateQueryText(formatted);
   };
 
   const onExecute = async () => {
@@ -88,11 +76,14 @@ export const QueryTextArea = () => {
     updateStore();
   };
 
-  createEffect(() => {
+  onMount(() => {
     setCode((getActiveContentTab()?.data as QueryContentTabData).query ?? "");
   });
 
   const handleKeyDown = async (e: KeyboardEvent) => {
+    if ((e.altKey || e.metaKey || e.ctrlKey) && e.code.startsWith("Digit")) {
+      e.preventDefault();
+    }
     if (e.key === "f" && e.ctrlKey) {
       onFormat();
     } else if (

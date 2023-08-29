@@ -5,8 +5,6 @@ import { ActionsContext } from "./CommandPaletteContext";
 
 export const commandPaletteEmitter = createEmitter<{
   "focus-query-text-area": boolean;
-  "select-connection-tab": number;
-  "select-query-tab": number;
 }>();
 
 const showThemeSwitcher = defineAction({
