@@ -22,13 +22,11 @@ export const Main = () => {
 
   return (
     <div class="w-full h-full flex flex-col">
-      <div class="px-2 pb-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
+      <div class="px-2 pt-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
         <div class="tabs tabs-boxed">
           <button
-            onClick={() => {
-              setConnectionStore("idx", 0);
-            }}
-            class="tab tab-md"
+            onClick={() => setConnectionStore("idx", 0)}
+            class="tab tab-sm"
             tabIndex={0}
             classList={{ "tab-active": connectionStore.idx === 0 }}
           >
@@ -36,10 +34,10 @@ export const Main = () => {
           </button>
           <For each={connectionStore.tabs}>
             {(tab, idx) => (
-              <div class="tab tab-md flex items-center">
+              <div class="flex items-center">
                 <button
                   onClick={() => setConnectionStore("idx", idx() + 1)}
-                  class="tab tab-md"
+                  class="tab tab-sm"
                   classList={{
                     "tab-active": connectionStore.idx === idx() + 1,
                   }}
@@ -51,7 +49,7 @@ export const Main = () => {
                   <button
                     tabindex={0}
                     onClick={() => closeTab(tab.id!)}
-                    class="ml-2 mb-1"
+                    class="ml-2"
                   >
                     <CloseIcon />
                   </button>
@@ -76,6 +74,6 @@ export const Main = () => {
         </Switch>
       </div>
       <Alerts />
-    </div>
+    </div >
   );
 };

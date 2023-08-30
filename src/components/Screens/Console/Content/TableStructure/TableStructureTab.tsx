@@ -37,7 +37,7 @@ export const TableStructureTab = () => {
   });
 
   return (
-    <div class="bg-base-100 rounded-tl-md p-2 h-full">
+    <div class="bg-base-200 rounded-tl-md p-2 h-full">
       {loading() ? (
         <div class="flex justify-center items-center h-full">
           <Loader />
@@ -51,7 +51,7 @@ export const TableStructureTab = () => {
                   onClick={() => setTabIdx(idx)}
                   tabIndex={0}
                   classList={{ "tab-active": tabIdx() === idx }}
-                  class="tab text-black"
+                  class="tab"
                 >
                   {t(`components.table_structure_tab.${tab}`)}
                 </button>

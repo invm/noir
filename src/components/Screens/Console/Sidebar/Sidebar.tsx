@@ -51,9 +51,6 @@ export const Sidebar = () => {
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md">
-        <label for="schema" class="text-xs font-bold py-1 text-primary">
-          {t("components.sidebar.schema")}
-        </label>
         <select
           id="schema"
           value={displayedSchema()}
@@ -70,7 +67,7 @@ export const Sidebar = () => {
         </select>
       </div>
       <div class="overflow-y-auto h-full">
-        <div class="text-xs font-bold py-1 text-primary">
+        <div class="text-xs font-bold py-1">
           {t("components.sidebar.tables")}
         </div>
         <For each={tables}>
