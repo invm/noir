@@ -23,7 +23,7 @@ function App() {
   return (
     <CommandPaletteContext>
       {loading() ? (
-        <div class="flex justify-center items-center h-full bg-base-100 w-full">
+        <div class="flex justify-center items-center h-full bg-base-200 w-full">
           <Loader />
         </div>
       ) : (
