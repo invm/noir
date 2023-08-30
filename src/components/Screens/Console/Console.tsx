@@ -20,7 +20,7 @@ export const Console = () => {
     <div class="w-full h-full bg-base-300">
       <div class="flex w-full h-full">
         <div id="sidebar" class="h-full">
-          <div class="bg-base-100 w-full h-full rounded-tr-lg">
+          <div class="bg-base-200 w-full h-full rounded-tr-lg">
             <Sidebar />
           </div>
         </div>

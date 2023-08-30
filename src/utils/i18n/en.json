@@ -43,8 +43,7 @@
       },
       "sidebar": {
         "show_table_structure": "Show table structure",
-        "tables": "Tables",
-        "schema": "Schema"
+        "tables": "Tables"
       },
       "theme_switch": {
         "theme": "Theme"

@@ -108,7 +108,7 @@ export const QueryTextArea = () => {
 
   return (
     <div class="flex-1 flex flex-col">
-      <div class="w-full p-2 bg-base-100">
+      <div class="w-full p-2 bg-base-200">
         <div
           class="tooltip tooltip-primary tooltip-bottom"
           data-tip={t("components.console.actions.format")}
@@ -130,7 +130,7 @@ export const QueryTextArea = () => {
         <div ref={ref} class="w-full h-full" />
       </div>
       <Show when={getActiveContentTab()?.error}>
-        <div class="w-full p-2 bg-base-100">
+        <div class="w-full p-2 bg-base-200">
           <span>{getActiveContentTab()?.error?.message}</span>
         </div>
       </Show>
