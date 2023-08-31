@@ -1,7 +1,7 @@
 import { useAppSelector } from "services/Context";
 import { createSignal, For, Match, onMount, Switch } from "solid-js";
 import { invoke } from "@tauri-apps/api";
-import { TableStructureResult } from "interfaces";
+import { TableStructureResult, TableStrucureEntities } from "interfaces";
 import { t } from "utils/i18n";
 import { Loader } from "components/UI";
 import { createStore } from "solid-js/store";
@@ -15,9 +15,8 @@ export const TableStructureTab = () => {
   } = useAppSelector();
   const [loading, setLoading] = createSignal(true);
   const [tabIdx, setTabIdx] = createSignal(0);
-  const tabs = ["columns", "indices", "constraints", "triggers"];
-  const [data, setData] = createStore<Record<string, Record<string, any>[]>>(
-    {}
+  const [data, setData] = createStore<TableStructureResult>(
+    {} as TableStructureResult
   );
 
   onMount(async () => {
@@ -46,7 +45,7 @@ export const TableStructureTab = () => {
         <div>
           <div class="flex justify-center">
             <div class="tabs tabs-boxed gap-1">
-              {tabs.map((tab, idx) => (
+              {TableStrucureEntities.map((tab, idx) => (
                 <button
                   onClick={() => setTabIdx(idx)}
                   tabIndex={0}
@@ -60,7 +59,7 @@ export const TableStructureTab = () => {
           </div>
           <div>
             <Switch fallback={<div>Not found</div>}>
-              <For each={tabs}>
+              <For each={TableStrucureEntities}>
                 {(item, idx) => (
                   <Match when={tabIdx() === idx()}>
                     <StructureTable data={data[item]} />

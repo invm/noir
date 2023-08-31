@@ -16,26 +16,28 @@ export const TableColumnsCollapse = (props: {
 
   const menu_id = "sidebar-table-menu";
 
-  const { show } = useContextMenu({ id: menu_id, props: { id: "" } });
+  const { show } = useContextMenu({
+    id: menu_id,
+    props: { table: props.title },
+  });
 
-  const openTableStructureTab = () => {
+  const openTableStructureTab = (table: string) => {
     setContentStore("tabs", [
       ...contentStore.tabs,
-      newContentTab(props.title, "TableStructureTab"),
+      newContentTab(table, "TableStructureTab"),
     ]);
     setContentStore("idx", contentStore.tabs.length - 1);
     updateStore();
   };
 
   return (
-    <div
-      class="w-full"
-      onContextMenu={(e) => {
-        show(e);
-      }}
-    >
+    <div class="w-full" onContextMenu={(e) => show(e)}>
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
-        <Item onClick={() => openTableStructureTab()}>
+        <Item
+          onClick={({ props }) => {
+            openTableStructureTab(props.table);
+          }}
+        >
           {t("components.sidebar.show_table_structure")}
         </Item>
       </Menu>
