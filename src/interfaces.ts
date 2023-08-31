@@ -121,9 +121,41 @@ export type DbSchema = {
 
 export type QueryResult = { result: Record<string, any>[]; message?: string };
 
+export const TableStrucureEntity = {
+  Columns: "columns",
+  Indices: "indices",
+  Constraints: "constraints",
+  Triggers: "triggers",
+} as const;
+
+export const TableStrucureEntities = [
+  TableStrucureEntity.Columns,
+  TableStrucureEntity.Indices,
+  TableStrucureEntity.Constraints,
+  TableStrucureEntity.Triggers,
+] as const;
+
 export type TableStructureResult = {
-  columns: Record<string, any>[];
-  constraints: Record<string, any>[];
-  indices: Record<string, any>[];
-  triggers: Record<string, any>[];
+  [TableStrucureEntity.Columns]: Record<string, any>[];
+  [TableStrucureEntity.Constraints]: Record<string, any>[];
+  [TableStrucureEntity.Indices]: Record<string, any>[];
+  [TableStrucureEntity.Triggers]: Record<string, any>[];
+};
+
+const STRUCTURE_TYPES = {
+  Column: "Column",
+  Constraint: "Constraint",
+  Index: "Index",
+  Trigger: "Trigger",
+} as const;
+
+export const SORT_ORDER = {
+  [Schemes.Mysql]: {
+    [STRUCTURE_TYPES.Column]: [
+      "COLUMN_NAME",
+      "COLUMN_TYPE",
+      "IS_NULLABLE",
+      "CHARACTER_MAXIMUM_LENGTH",
+    ],
+  },
 };
