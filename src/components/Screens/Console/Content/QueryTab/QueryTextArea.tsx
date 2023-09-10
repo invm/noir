@@ -4,7 +4,13 @@ import {
   createEditorFocus,
 } from "solid-codemirror";
 import { createSignal, onMount, Show } from "solid-js";
-import { lineNumbers, EditorView } from "@codemirror/view";
+import {
+  lineNumbers,
+  EditorView,
+  drawSelection,
+  highlightWhitespace,
+  highlightActiveLine,
+} from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
 import { format } from "sql-formatter";
@@ -45,6 +51,9 @@ export const QueryTextArea = () => {
   createEditorControlledValue(editorView, code);
   createExtension(() => lineNumbers());
   createExtension(() => sql());
+  createExtension(() => drawSelection());
+  createExtension(() => highlightWhitespace());
+  createExtension(() => highlightActiveLine());
   createExtension(dracula);
   const { setFocused } = createEditorFocus(editorView);
 
