@@ -1,6 +1,6 @@
 use anyhow::Result;
 use mysql::prelude::Queryable;
-use mysql::{PooledConn, Row, Pool};
+use mysql::{PooledConn, Row, Pool, Value};
 use serde_json::json;
 
 use super::utils::convert_value;
@@ -23,7 +23,8 @@ pub fn raw_query(mut conn: PooledConn, query: String) -> Result<serde_json::Valu
 
 pub fn execute_query(pool: &Pool, query: String) -> Result<serde_json::Value> {
     let mut conn = pool.get_conn()?;
-    let rows: Vec<Row> = conn.query(&query)?;
+    let raw_params: Vec<Value> = Vec::new();
+    let rows: Vec<Row> = conn.exec(&query, raw_params)?;
     let mut result = Vec::new();
     for row in rows {
         let mut object = json!({});
