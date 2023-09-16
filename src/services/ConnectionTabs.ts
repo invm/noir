@@ -62,10 +62,7 @@ export type TableStructureContentTabData = {
 
 export type ContentTab = {
   label: string;
-  error?: {
-    message: string;
-    type: keyof typeof MessageType;
-  };
+  error?: string;
 } & (
     | {
       key: typeof ContentComponent.QueryTab;
@@ -268,18 +265,13 @@ export const ConnectionTabsService = () => {
     );
   };
 
-  const setActiveContentQueryTabMessage = (
-    type: keyof typeof MessageType,
-    message: string | unknown
-  ) => {
+  const setActiveContentQueryTabMessage = (message: string) => {
     const tab = getActiveContentTab();
     if (!tab) return;
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? { ...t, error: { type, message: String(message) } }
-          : t
+        i === contentStore.idx ? { ...t, error: String(message) } : t
       )
     );
   };
