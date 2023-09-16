@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { ConnectionConfig, DbSchema } from "../interfaces";
+import { ConnectionConfig, DbSchema, ResultSet } from "../interfaces";
 import { onMount } from "solid-js";
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
@@ -26,7 +26,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
     case ContentComponent.QueryTab:
       return {
         label,
-        data: { query: "", executed: false, results: [] },
+        data: { query: "", executed: false, result_sets: [] },
         key,
       };
     case ContentComponent.TableStructureTab:
@@ -49,7 +49,7 @@ export const newContentTab = (label: string, key: ContentComponentKeys) => {
 export type QueryContentTabData = {
   query: string;
   executed: boolean;
-  results: Record<string, any>[];
+  result_sets: ResultSet[];
 };
 
 export type TableStructureContentTabData = {
@@ -62,10 +62,7 @@ export type TableStructureContentTabData = {
 
 export type ContentTab = {
   label: string;
-  error?: {
-    message: string;
-    type: keyof typeof MessageType;
-  };
+  error?: string;
 } & (
     | {
       key: typeof ContentComponent.QueryTab;
@@ -145,7 +142,7 @@ export const ConnectionTabsService = () => {
     await store.set(CONNECTIONS_TABS_KEY, JSON.stringify(connectionStore));
     const contentStoreTabs = contentStore.tabs.map((t) => {
       if (t.key === ContentComponent.QueryTab) {
-        return { ...t, data: { ...t.data, executed: false, results: [] } };
+        return { ...t, data: { ...t.data, executed: false, result_sets: [] } };
       }
       return t;
     });
@@ -268,18 +265,13 @@ export const ConnectionTabsService = () => {
     );
   };
 
-  const setActiveContentQueryTabMessage = (
-    type: keyof typeof MessageType,
-    message: string | unknown
-  ) => {
+  const setActiveContentQueryTabMessage = (message: string) => {
     const tab = getActiveContentTab();
     if (!tab) return;
     setContentStore(
       "tabs",
       contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? { ...t, error: { type, message: String(message) } }
-          : t
+        i === contentStore.idx ? { ...t, error: String(message) } : t
       )
     );
   };
