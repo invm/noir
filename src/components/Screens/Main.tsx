@@ -26,7 +26,7 @@ export const Main = () => {
         <div class="tabs tabs-boxed">
           <button
             onClick={() => setConnectionStore("idx", 0)}
-            class="tab tab-sm"
+            class="tab tab-sm pt-1"
             tabIndex={0}
             classList={{ "tab-active": connectionStore.idx === 0 }}
           >
@@ -37,7 +37,7 @@ export const Main = () => {
               <div class="flex items-center">
                 <button
                   onClick={() => setConnectionStore("idx", idx() + 1)}
-                  class="tab tab-sm"
+                  class="tab tab-sm pt-1"
                   classList={{
                     "tab-active": connectionStore.idx === idx() + 1,
                   }}

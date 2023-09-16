@@ -1,22 +1,22 @@
 import { ResultsTable } from "./ResultesTable";
 import { QueryContentTabData } from "services/ConnectionTabs";
 import { useAppSelector } from "services/Context";
-import { createEffect, Match, onCleanup, Switch } from "solid-js";
+import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 import Split from "split.js";
 import { QueryTextArea } from "./QueryTextArea";
-import { t } from "i18next";
 
 export const QueryTab = () => {
   const {
     connectionsService: { getActiveContentTab },
   } = useAppSelector();
+  const [idx, setIdx] = createSignal(0);
   createEffect(() => {
     const q = Split(["#query", "#results"], {
-      sizes: [40, 60],
+      sizes: [30, 80],
       minSize: [100, 400],
       maxSize: [500, Infinity],
       direction: "vertical",
-      gutterSize: 6,
+      gutterSize: 4,
     });
 
     onCleanup(() => {
@@ -26,34 +26,23 @@ export const QueryTab = () => {
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
-      <div id="query" class="flex">
-        <QueryTextArea />
+      <div id="query" class="flex flex-col">
+        <QueryTextArea idx={idx} setIdx={setIdx} />
       </div>
       <div id="results">
-        <Switch>
-          <Match
-            when={
-              (getActiveContentTab().data as QueryContentTabData).executed &&
-              (getActiveContentTab().data as QueryContentTabData).results
-                .length > 0
+        <Show when={!getActiveContentTab().error}>
+          <For
+            each={
+              (getActiveContentTab().data as QueryContentTabData).result_sets
             }
           >
-            <ResultsTable
-              data={(getActiveContentTab().data as QueryContentTabData).results}
-            />
-          </Match>
-          <Match
-            when={
-              (getActiveContentTab().data as QueryContentTabData).executed &&
-              (getActiveContentTab().data as QueryContentTabData).results
-                .length === 0
-            }
-          >
-            <div class="flex justify-center align-center">
-              {t("components.console.zero_results")}
-            </div>
-          </Match>
-        </Switch>
+            {(result_set, index) => (
+              <Show when={index() === idx()}>
+                <ResultsTable data={result_set.rows} />
+              </Show>
+            )}
+          </For>
+        </Show>
       </div>
     </div>
   );

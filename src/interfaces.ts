@@ -119,7 +119,16 @@ export type DbSchema = {
   };
 };
 
-export type QueryResult = { result: Record<string, any>[]; message?: string };
+export type ResultSet = {
+  affected_rows: number;
+  warnings: number;
+  info: String;
+  rows: Record<string, any>[];
+};
+
+export type QueryResult = {
+  result_sets: ResultSet[];
+};
 
 export const TableStrucureEntity = {
   Columns: "columns",
