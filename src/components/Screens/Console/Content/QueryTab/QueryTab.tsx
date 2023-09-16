@@ -16,7 +16,7 @@ export const QueryTab = () => {
       minSize: [100, 400],
       maxSize: [500, Infinity],
       direction: "vertical",
-      gutterSize: 6,
+      gutterSize: 4,
     });
 
     onCleanup(() => {
@@ -34,18 +34,18 @@ export const QueryTab = () => {
           <Match
             when={
               (getActiveContentTab().data as QueryContentTabData).executed &&
-              (getActiveContentTab().data as QueryContentTabData).results
+              (getActiveContentTab().data as QueryContentTabData).result_sets
                 .length > 0
             }
           >
             <ResultsTable
-              data={(getActiveContentTab().data as QueryContentTabData).results}
+              data={(getActiveContentTab().data as QueryContentTabData).result_sets}
             />
           </Match>
           <Match
             when={
               (getActiveContentTab().data as QueryContentTabData).executed &&
-              (getActiveContentTab().data as QueryContentTabData).results
+              (getActiveContentTab().data as QueryContentTabData).result_sets
                 .length === 0
             }
           >
