@@ -101,7 +101,11 @@ input[type=number] {
 }
 
 .tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
-  @apply bg-accent;
+  @apply bg-base-content;
+}
+
+.tabs-lifted .tab-active:not(.tab-disabled):not([disabled]) {
+  @apply bg-base-200;
 }
 
 dialog {
