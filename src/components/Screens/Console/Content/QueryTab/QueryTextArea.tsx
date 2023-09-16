@@ -70,14 +70,14 @@ export const QueryTextArea = () => {
     resetActiveContentQueryTabMessage();
     const activeConnection = getActiveConnection();
     try {
-      const { result } = await invoke<QueryResult>("execute_query", {
+      const { result_sets } = await invoke<QueryResult>("execute_query", {
         connId: activeConnection.id,
         query: code(),
       });
       setActiveContentQueryTabData({
         query: code(),
         executed: true,
-        results: result,
+        result_sets
       });
     } catch (error) {
       setActiveContentQueryTabMessage("error", error);
@@ -117,7 +117,7 @@ export const QueryTextArea = () => {
 
   return (
     <div class="flex-1 flex flex-col">
-      <div class="w-full p-2 bg-base-200">
+      <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent">
         <div
           class="tooltip tooltip-primary tooltip-bottom"
           data-tip={t("components.console.actions.format")}
