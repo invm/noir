@@ -39,7 +39,9 @@
           "format": "Format",
           "execute": "Execute"
         },
-        "zero_results": "0 rows retuned"
+        "zero_results": "0 rows retuned",
+        "result_set": "Result set ",
+        "out_of": " out of "
       },
       "sidebar": {
         "show_table_structure": "Show table structure",

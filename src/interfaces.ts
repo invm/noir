@@ -128,7 +128,6 @@ export type ResultSet = {
 
 export type QueryResult = {
   result_sets: ResultSet[];
-  message?: string;
 };
 
 export const TableStrucureEntity = {

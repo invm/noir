@@ -28,9 +28,5 @@ export const ResultsTable = (props: { data: Record<string, any>[] }) => {
     });
   });
 
-  return (
-    <>
-      <div id="results-table"></div>
-    </>
-  );
+  return <div id="results-table"></div>;
 };
