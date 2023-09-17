@@ -5,6 +5,9 @@ import { ActionsContext } from "./CommandPaletteContext";
 
 export const commandPaletteEmitter = createEmitter<{
   "focus-query-text-area": boolean;
+  "next-result-set": undefined;
+  "prev-result-set": undefined;
+  "execute": undefined;
 }>();
 
 const showThemeSwitcher = defineAction({

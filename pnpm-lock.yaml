@@ -23,9 +23,6 @@ dependencies:
   '@tauri-apps/api':
     specifier: ^1.4.0
     version: 1.4.0
-  '@types/tabulator-tables':
-    specifier: ^5.4.10
-    version: 5.4.10
   '@uiw/codemirror-theme-dracula':
     specifier: ^4.21.7
     version: 4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
@@ -82,6 +79,9 @@ devDependencies:
   '@types/node':
     specifier: ^20.3.2
     version: 20.3.2
+  '@types/tabulator-tables':
+    specifier: ^5.4.10
+    version: 5.4.10
   autoprefixer:
     specifier: ^10.4.14
     version: 10.4.14(postcss@8.4.24)
@@ -1232,7 +1232,7 @@ packages:
 
   /@types/tabulator-tables@5.4.10:
     resolution: {integrity: sha512-ale/wbhA7zsmSSz6lTnxferRCCbKq3oZtxaNY8osb7YND2k27ZlEhfZzlVfRq8b5t7shhP8M53HyAgm1M0O+FA==}
-    dev: false
+    dev: true
 
   /@uiw/codemirror-theme-dracula@4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1):
     resolution: {integrity: sha512-ikaxDsw5STeFTAgz5nnRg/ENv8McX+4I7SX2ZTpsL51JyoiujIffjZHncc9QRvpkhlCZL4+we4A7pKtPOaI7UA==}

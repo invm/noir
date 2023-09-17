@@ -1,8 +1,9 @@
-import { actions } from "./actions";
+import { actions, commandPaletteEmitter } from "./actions";
 import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
 import { onMount } from "solid-js";
+import { QueryContentTabData } from "services/ConnectionTabs";
 
 export interface ActionsContext {
   showThemeSwitcher: () => void;
@@ -17,6 +18,7 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
       setActiveConnection,
       addContentTab,
       removeActiveContentTab,
+      getActiveContentTab,
     },
   } = useAppSelector();
 
@@ -35,19 +37,34 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
       const number = e.code.startsWith("Digit")
         ? +e.code.replace("Digit", "")
         : null;
+      const { ctrlKey, metaKey, altKey, key, preventDefault, code } = e;
       if (
-        (e.ctrlKey || e.metaKey || e.altKey) &&
+        (ctrlKey || metaKey || altKey) &&
         number &&
         number > 0 &&
         number <= 9
       ) {
-        e.preventDefault();
-        if (e.altKey) setActiveContentTab(number);
+        preventDefault();
+        if (altKey) setActiveContentTab(number);
         else setActiveConnection(number - 1);
-      } else if ((e.ctrlKey || e.metaKey) && e.code === "KeyT") {
+      } else if ((ctrlKey || metaKey) && code === "KeyT") {
         e.preventDefault();
         if (e.shiftKey) removeActiveContentTab();
         else addContentTab();
+      } else if (code === "KeyE" && (ctrlKey || metaKey)) {
+        commandPaletteEmitter.emit("execute", undefined);
+      } else if (
+        key === "p" &&
+        ctrlKey &&
+        (getActiveContentTab().data as QueryContentTabData).result_sets.length
+      ) {
+        commandPaletteEmitter.emit("prev-result-set", undefined);
+      } else if (
+        key === "n" &&
+        ctrlKey &&
+        (getActiveContentTab().data as QueryContentTabData).result_sets.length
+      ) {
+        commandPaletteEmitter.emit("next-result-set", undefined);
       }
     };
   });

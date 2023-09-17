@@ -13,7 +13,7 @@ import {
 } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-import { Vim, vim } from "@replit/codemirror-vim";
+import { vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
@@ -138,6 +138,11 @@ export const QueryTextArea = (props: {
         document.activeElement?.blur();
         setFocused(true);
       }, 1);
+    });
+    commandPaletteEmitter.on("next-result-set", onNextClick);
+    commandPaletteEmitter.on("prev-result-set", onPrevClick);
+    commandPaletteEmitter.on("execute", async () => {
+      await onExecute();
     });
   });
 

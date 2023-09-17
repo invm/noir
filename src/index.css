@@ -14,7 +14,8 @@
   -webkit-text-size-adjust: 100%;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   overflow: hidden;
   -webkit-user-select: none; /* Safari */
@@ -45,39 +46,39 @@ input::-webkit-inner-spin-button {
 }
 
 [contenteditable] {
-    -webkit-user-select: text;
-    user-select: text;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Firefox */
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
+  width: 10px;
 }
-  
+
 ::-webkit-scrollbar-track {
-    background: #888;
-    border-radius: 5px;
+  background: #888;
+  border-radius: 5px;
 }
-  
+
 ::-webkit-scrollbar-thumb {
-    background: #000;
-    border-radius: 5px;
+  background: #000;
+  border-radius: 5px;
 }
-  
+
 ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+  background: #555;
 }
 
 .app-input {
   @apply block w-full p-2 border border-gray-300 rounded-lg bg-base-100 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 py-1.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base h-[32px];
 }
 
-.app-checkbox{
- @apply w-4 h-4 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:border-gray-600;
+.app-checkbox {
+  @apply w-4 h-4 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:border-gray-600;
 }
 
 .app-select {
@@ -96,7 +97,7 @@ input[type=number] {
   outline-style: auto !important;
 }
 
-.tab-lifted.tab-active:not(.tab-disabled):not([disabled]){
+.tab-lifted.tab-active:not(.tab-disabled):not([disabled]) {
   border-width: 0px;
 }
 
@@ -112,12 +113,12 @@ dialog {
   color: inherit;
 }
 
-.gutter-vertical:hover{
+.gutter-vertical:hover {
   @apply bg-neutral-content rounded-lg;
   cursor: row-resize;
 }
 
-.gutter-horizontal:hover{
+.gutter-horizontal:hover {
   @apply bg-neutral-content rounded-lg;
   cursor: col-resize;
 }
@@ -144,7 +145,8 @@ dialog {
   @apply bg-base-300 text-base-content !important;
 }
 
-.tabulator-tableholder .tabulator-table, .tabulator-footer {
+.tabulator-tableholder .tabulator-table,
+.tabulator-footer {
   @apply border-neutral-focus !important;
 }
 
@@ -154,6 +156,10 @@ dialog {
 
 .tabulator .tabulator-tableholder .tabulator-table {
   @apply text-base-content !important;
+}
+
+.tabulator-row.tabulator-selectable:hover {
+  @apply bg-base-300 cursor-pointer font-semibold text-base text-primary !important;
 }
 
 #results {
