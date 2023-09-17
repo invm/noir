@@ -14,6 +14,9 @@ dependencies:
   '@codemirror/view':
     specifier: ^6.14.1
     version: 6.14.1
+  '@replit/codemirror-vim':
+    specifier: ^6.0.14
+    version: 6.0.14(@codemirror/commands@6.2.5)(@codemirror/language@6.8.0)(@codemirror/search@6.5.3)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
   '@solid-primitives/event-bus':
     specifier: ^1.0.8
     version: 1.0.8(solid-js@1.7.7)
@@ -655,6 +658,15 @@ packages:
       '@lezer/common': 1.0.3
     dev: false
 
+  /@codemirror/commands@6.2.5:
+    resolution: {integrity: sha512-dSi7ow2P2YgPBZflR9AJoaTHvqmeGIgkhignYMd5zK5y6DANTvxKxp6eMEpIDUJkRAaOY/TFZ4jP1ADIO/GLVA==}
+    dependencies:
+      '@codemirror/language': 6.8.0
+      '@codemirror/state': 6.2.1
+      '@codemirror/view': 6.14.1
+      '@lezer/common': 1.0.3
+    dev: false
+
   /@codemirror/lang-sql@6.5.2(@codemirror/view@6.14.1)(@lezer/common@1.0.3):
     resolution: {integrity: sha512-VYiCbApDDRUVx3k0jtZ+b5h2hMkMKZpPR9tx+VgVA3Euuf2MVjVsjx/S2+4AlJjKjS5J6z9+4bEvtponK96e4A==}
     dependencies:
@@ -677,6 +689,14 @@ packages:
       '@lezer/highlight': 1.1.6
       '@lezer/lr': 1.3.9
       style-mod: 4.0.3
+    dev: false
+
+  /@codemirror/search@6.5.3:
+    resolution: {integrity: sha512-M1nGnpUTlOqp0Ywn6V30T8eFcuNFIDfx4+0ja5Wag+qQpL/HZgsIZ7FpE6qZatPziakgj+UXyZTrTUditrkwIQ==}
+    dependencies:
+      '@codemirror/state': 6.2.1
+      '@codemirror/view': 6.14.1
+      crelt: 1.0.6
     dev: false
 
   /@codemirror/state@6.2.1:
@@ -976,6 +996,22 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+
+  /@replit/codemirror-vim@6.0.14(@codemirror/commands@6.2.5)(@codemirror/language@6.8.0)(@codemirror/search@6.5.3)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1):
+    resolution: {integrity: sha512-wwhqhvL76FdRTdwfUWpKCbv0hkp2fvivfMosDVlL/popqOiNLtUhL02ThgHZH8mus/NkVr5Mj582lyFZqQrjOA==}
+    peerDependencies:
+      '@codemirror/commands': ^6.0.0
+      '@codemirror/language': ^6.1.0
+      '@codemirror/search': ^6.2.0
+      '@codemirror/state': ^6.0.1
+      '@codemirror/view': ^6.0.3
+    dependencies:
+      '@codemirror/commands': 6.2.5
+      '@codemirror/language': 6.8.0
+      '@codemirror/search': 6.5.3
+      '@codemirror/state': 6.2.1
+      '@codemirror/view': 6.14.1
+    dev: false
 
   /@solid-primitives/event-bus@1.0.8(solid-js@1.7.7):
     resolution: {integrity: sha512-vw9Q8oHL8h3WOxFiFFBE8lwJ1oOmCEdtFsOck3i66GPaJbmzHwBtQxTkAgF+DtpeSpSyCHlxKE7ojHnL4nl1Ww==}
@@ -1521,6 +1557,10 @@ packages:
   /convert-source-map@1.9.0:
     resolution: {integrity: sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==}
     dev: true
+
+  /crelt@1.0.6:
+    resolution: {integrity: sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g==}
+    dev: false
 
   /cross-spawn@5.1.0:
     resolution: {integrity: sha512-pTgQJ5KC0d2hcY8eyL1IzlBPYjTkyH72XRZPnLyKus2mBfNjQs3klqbJU2VILqZryAZUt9JOb3h/mWMy23/f5A==}

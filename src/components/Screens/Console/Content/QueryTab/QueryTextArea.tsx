@@ -13,9 +13,10 @@ import {
 } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
+import { vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
-import { EditIcon, FireIcon } from "components/UI/Icons";
+import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
 import { QueryContentTabData } from "services/ConnectionTabs";
 import { QueryResult } from "interfaces";
@@ -37,23 +38,7 @@ export const QueryTextArea = (props: {
       updateStore,
     },
   } = useAppSelector();
-
-  const onPrevClick = () => {
-    props.setIdx(
-      (props.idx() -
-        1 +
-        (getActiveContentTab().data as QueryContentTabData).result_sets
-          .length) %
-      (getActiveContentTab().data as QueryContentTabData).result_sets.length
-    );
-  };
-
-  const onNextClick = () => {
-    props.setIdx(
-      (props.idx() + 1) %
-      (getActiveContentTab().data as QueryContentTabData).result_sets.length
-    );
-  };
+  const [vimModeOn, setVimModeOn] = createSignal(true);
 
   const updateQueryText = async (query: string) => {
     setActiveContentQueryTabData({ query });
@@ -76,6 +61,7 @@ export const QueryTextArea = (props: {
   createExtension(() => highlightWhitespace());
   createExtension(() => highlightActiveLine());
   createExtension(dracula);
+  createExtension(() => (vimModeOn() ? vim() : []));
   const { setFocused } = createEditorFocus(editorView);
 
   const lineWrapping = EditorView.lineWrapping;
@@ -138,10 +124,27 @@ export const QueryTextArea = (props: {
     });
   });
 
+  const onPrevClick = () => {
+    props.setIdx(
+      (props.idx() -
+        1 +
+        (getActiveContentTab().data as QueryContentTabData).result_sets
+          .length) %
+      (getActiveContentTab().data as QueryContentTabData).result_sets.length
+    );
+  };
+
+  const onNextClick = () => {
+    props.setIdx(
+      (props.idx() + 1) %
+      (getActiveContentTab().data as QueryContentTabData).result_sets.length
+    );
+  };
+
   return (
     <div class="flex-1 flex flex-col">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex items-center">
-        <div>
+        <div class="flex items-center">
           <div
             class="tooltip tooltip-primary tooltip-bottom"
             data-tip={t("components.console.actions.format")}
@@ -163,6 +166,26 @@ export const QueryTextArea = (props: {
             >
               <FireIcon />
             </button>
+          </div>
+
+          <div
+            class="tooltip tooltip-primary tooltip-bottom"
+            data-tip={t("components.console.actions.vim_mode_on")}
+          >
+            <div class="flex items-center mr-2">
+              <span class="mr-2">
+                <VimIcon />
+              </span>
+              <input
+                type="checkbox"
+                class="toggle"
+                classList={{
+                  "toggle-success": vimModeOn(),
+                }}
+                checked={vimModeOn()}
+                onChange={() => setVimModeOn((v) => !v)}
+              />
+            </div>
           </div>
         </div>
 

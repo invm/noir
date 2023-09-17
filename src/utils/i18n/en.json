@@ -37,7 +37,8 @@
         "query": "Query",
         "actions": {
           "format": "Format",
-          "execute": "Execute"
+          "execute": "Execute",
+          "vim_mode_on": "Vim mode on"
         },
         "zero_results": "0 rows retuned",
         "result_set": "Result set ",
