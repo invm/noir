@@ -1,13 +1,5 @@
 import { useAppSelector } from "services/Context";
-import {
-  createEffect,
-  createSignal,
-  For,
-  Match,
-  on,
-  onMount,
-  Switch,
-} from "solid-js";
+import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 import { invoke } from "@tauri-apps/api";
 import { TableStructureResult, TableStrucureEntities } from "interfaces";
 import { t } from "utils/i18n";
@@ -29,21 +21,19 @@ export const TableStructureTab = () => {
   const activeConnection = getActiveConnection();
   const activeTab = getActiveContentTab();
 
-  createEffect(
-    on(getActiveContentTab(), async () => {
-      try {
-        const { columns, indices, triggers, constraints } =
-          await invoke<TableStructureResult>("get_table_structure", {
-            connId: activeConnection.id,
-            tableName: (activeTab.data as TableStructureContentTabData).table,
-          });
-        setData({ columns, indices, triggers, constraints });
-      } catch (error) {
-        addError(error);
-      }
-      setLoading(false);
-    })
-  );
+  createEffect(async () => {
+    try {
+      const { columns, indices, triggers, constraints } =
+        await invoke<TableStructureResult>("get_table_structure", {
+          connId: activeConnection.id,
+          tableName: (activeTab.data as TableStructureContentTabData).table,
+        });
+      setData({ columns, indices, triggers, constraints });
+    } catch (error) {
+      addError(error);
+    }
+    setLoading(false);
+  });
 
   return (
     <div class="bg-base-200 rounded-tl-md p-2 h-full">

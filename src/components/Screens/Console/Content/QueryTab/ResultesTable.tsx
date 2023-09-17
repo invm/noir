@@ -8,6 +8,7 @@ export const ResultsTable = (props: { data: Record<string, any>[] }) => {
       title: k,
       field: k,
       resizeable: true,
+      // editor: 'input' as const,
     }));
 
     new Tabulator("#results-table", {
