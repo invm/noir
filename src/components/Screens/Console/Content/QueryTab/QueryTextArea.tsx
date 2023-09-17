@@ -13,7 +13,7 @@ import {
 } from "@codemirror/view";
 import { sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-import { vim } from "@replit/codemirror-vim";
+import { Vim, vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
@@ -39,12 +39,11 @@ export const QueryTextArea = (props: {
     },
   } = useAppSelector();
   const [vimModeOn, setVimModeOn] = createSignal(true);
+  const [code, setCode] = createSignal("");
 
   const updateQueryText = async (query: string) => {
     setActiveContentQueryTabData({ query });
   };
-
-  const [code, setCode] = createSignal("");
 
   const onValueChange = (q: string) => {
     setCode(q);
@@ -63,6 +62,16 @@ export const QueryTextArea = (props: {
   createExtension(dracula);
   createExtension(() => (vimModeOn() ? vim() : []));
   const { setFocused } = createEditorFocus(editorView);
+  // Vim.map("jj", "<Esc>", "insert"); // in insert mode
+  // Vim.map("Y", "y$"); // in normal mode
+  // saved for reference, TODO: add execute in normal mode
+  // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
+  // Vim.defineOperator(
+  //   "hardWrap",
+  //   function(cm, operatorArgs, ranges, oldAnchor, newHead) {
+  //     // make changes and return new cursor position
+  //   }
+  // );
 
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
@@ -73,13 +82,21 @@ export const QueryTextArea = (props: {
     updateQueryText(formatted);
   };
 
+  const getSelection = () => {
+    return editorView().state.sliceDoc(
+      editorView().state.selection.ranges[0].from,
+      editorView().state.selection.ranges[0].to
+    );
+  };
+
   const onExecute = async () => {
+    const selectedText = getSelection();
     resetActiveContentQueryTabMessage();
     const activeConnection = getActiveConnection();
     try {
       const { result_sets } = await invoke<QueryResult>("execute_query", {
         connId: activeConnection.id,
-        query: code(),
+        query: selectedText || code(),
       });
       setActiveContentQueryTabData({
         query: code(),
