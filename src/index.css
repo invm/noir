@@ -102,7 +102,7 @@ input[type="number"] {
 }
 
 .tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
-  @apply bg-base-content;
+  @apply bg-base-content text-base-300;
 }
 
 .tabs-lifted .tab-active:not(.tab-disabled):not([disabled]) {
