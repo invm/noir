@@ -5,15 +5,14 @@ import {
 } from "solid-codemirror";
 import { Accessor, createSignal, For, onMount, Setter, Show } from "solid-js";
 import {
-  lineNumbers,
   EditorView,
   drawSelection,
   highlightWhitespace,
   highlightActiveLine,
 } from "@codemirror/view";
-import { sql } from "@codemirror/lang-sql";
+import { MySQL, sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-import { vim } from "@replit/codemirror-vim";
+import { vim, Vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
@@ -23,6 +22,7 @@ import { QueryResult } from "interfaces";
 import { commandPaletteEmitter } from "components/CommandPalette/actions";
 import { t } from "utils/i18n";
 import { Alert } from "components/UI";
+import { basicSetup } from "codemirror";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -54,22 +54,26 @@ export const QueryTextArea = (props: {
     onValueChange,
   });
   createEditorControlledValue(editorView, code);
-  createExtension(() => lineNumbers());
-  createExtension(() => sql());
   createExtension(() => drawSelection());
   createExtension(() => highlightWhitespace());
   createExtension(() => highlightActiveLine());
   createExtension(dracula);
   createExtension(() => (vimModeOn() ? vim() : []));
+  createExtension(() => basicSetup);
+  // TODO: add dialect and schema
+  createExtension(() =>
+    sql({
+      dialect: MySQL,
+      schema: { account: ["added_on"] },
+    })
+  );
   const { setFocused } = createEditorFocus(editorView);
-  // Vim.map("jj", "<Esc>", "insert"); // in insert mode
-  // Vim.map("Y", "y$"); // in normal mode
-  // saved for reference, TODO: add execute in normal mode
+  // TODO: add option to scroll inside autocompletion list with c-l and c-k
   // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
   // Vim.defineOperator(
   //   "hardWrap",
   //   function(cm, operatorArgs, ranges, oldAnchor, newHead) {
-  //     // make changes and return new cursor position
+  //     console.log('hardwrap')
   //   }
   // );
 
