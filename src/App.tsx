@@ -5,9 +5,13 @@ import { Main } from "components/Screens/Main";
 import { CommandPaletteContext } from "components/CommandPalette/CommandPaletteContext";
 import { Loader } from "components/UI";
 import { createEffect, createSignal, onMount } from "solid-js";
+import { useAppSelector } from "services/Context";
 
 function App() {
   const [loading, setLoading] = createSignal(true);
+  const {
+    connectionsService: { restoreConnectionStore },
+  } = useAppSelector();
 
   createEffect(() => {
     setTimeout(() => {
@@ -18,6 +22,7 @@ function App() {
   onMount(async () => {
     const theme = localStorage.getItem("theme") || "dark";
     document.documentElement.dataset.theme = theme;
+    await restoreConnectionStore();
   });
 
   return (

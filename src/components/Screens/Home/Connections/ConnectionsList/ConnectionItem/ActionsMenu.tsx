@@ -1,50 +1,52 @@
-import { invoke } from '@tauri-apps/api';
-import { ConnectionConfig, QueryResult } from 'interfaces';
-import { useAppSelector } from 'services/Context';
-
-const columnsToSchema = (columns: Record<string, any>[]) => {
-  const schema = columns.reduce((acc: any, col: any) => {
-    return {
-      ...acc,
-      [col.TABLE_SCHEMA]: {
-        ...acc[col.TABLE_SCHEMA],
-        [col.TABLE_NAME]: {
-          ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
-          [col.COLUMN_NAME]: col
-        }
-      }
-    }
-  }, {})
-  return schema
-}
+import { invoke } from "@tauri-apps/api";
+import { ConnectionConfig, RawQueryResult } from "interfaces";
+import { useAppSelector } from "services/Context";
+import { columnsToSchema } from "utils/utils";
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
-  const { errorService: { addError }, connectionsService: { addConnectionTab } } = useAppSelector()
+  const {
+    errorService: { addError },
+    connectionsService: { addConnectionTab },
+  } = useAppSelector();
 
   const onConnect = async () => {
+    const config = props.connection;
     try {
-      await invoke('init_connection', { config: props.connection })
-      const { result } = await invoke<QueryResult>('get_columns', { connId: props.connection.id });
-      const schema = columnsToSchema(result)
-      await addConnectionTab ({
-        id: props.connection.id,
-        label: props.connection.name,
+      await invoke("init_connection", { config });
+      const { result } = await invoke<RawQueryResult>("get_columns", {
+        connId: config.id,
+      });
+      const schema = columnsToSchema(result);
+      await addConnectionTab({
+        id: config.id,
+        label: config.name,
         schema,
-        connection: props.connection,
-      })
+        connection: config,
+      });
     } catch (error) {
-      addError(String(error))
+      addError(String(error));
     }
-  }
+  };
 
   return (
     <div class="flex items-center">
       <button onClick={onConnect} class="btn btn-sm btn-ghost">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+        <svg
+          class="w-4 h-4"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 18 16"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3"
+          />
         </svg>
       </button>
-    </div >
-  )
-}
-
+    </div>
+  );
+};

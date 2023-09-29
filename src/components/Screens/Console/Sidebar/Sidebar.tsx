@@ -14,9 +14,9 @@ type Table = {
 
 export const Sidebar = () => {
   const {
-    connectionsService: { getActiveConnection },
+    connectionsService: { getConnection },
   } = useAppSelector();
-  const getSchema = () => getActiveConnection()?.schema ?? {};
+  const getSchema = () => getConnection()?.schema ?? {};
   const [displayedSchema, setDisplayedSchema] = createSignal("");
   const [tables, setTables] = createStore<Table[]>([]);
 

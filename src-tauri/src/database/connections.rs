@@ -162,17 +162,17 @@ impl ConnectedConnection {
         }
     }
 
-    pub async fn get_table_structure(&self, table_name: String) -> Result<Value> {
+    pub async fn get_table_structure(&self, table: String) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_table_structure(self, pool, table_name).await
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_table_structure(self, pool, table).await
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
     }
 
-    pub async fn get_indices(&self, table_name: Option<&str>) -> Result<Value> {
+    pub async fn get_indices(&self, table: Option<&str>) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_indices(self, pool, table_name).await
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_indices(self, pool, table).await
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
