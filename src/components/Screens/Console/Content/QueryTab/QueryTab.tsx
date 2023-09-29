@@ -1,13 +1,14 @@
 import { ResultsTable } from "./ResultesTable";
-import { QueryContentTabData } from "services/ConnectionTabs";
 import { useAppSelector } from "services/Context";
-import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 import Split from "split.js";
 import { QueryTextArea } from "./QueryTextArea";
+import { createStore } from "solid-js/store";
+import { Row } from "interfaces";
 
 export const QueryTab = () => {
   const {
-    connectionsService: { getActiveContentTab },
+    connectionsService: { getContent },
   } = useAppSelector();
   const [idx, setIdx] = createSignal(0);
   createEffect(() => {
@@ -24,24 +25,23 @@ export const QueryTab = () => {
     });
   });
 
+  const {
+    connectionsService: { getContentData },
+  } = useAppSelector();
+  const [rows, setRows] = createStore<Row[]>([]);
+
+  createEffect(() => {
+    setRows(getContentData("Query").result_sets[idx()]?.rows || []);
+  });
+
   return (
     <div class="flex flex-col h-full overflow-hidden">
       <div id="query" class="flex flex-col">
         <QueryTextArea idx={idx} setIdx={setIdx} />
       </div>
       <div id="results">
-        <Show when={!getActiveContentTab().error}>
-          <For
-            each={
-              (getActiveContentTab().data as QueryContentTabData).result_sets
-            }
-          >
-            {(result_set, index) => (
-              <Show when={index() === idx()}>
-                <ResultsTable data={result_set.rows} />
-              </Show>
-            )}
-          </For>
+        <Show when={!getContent().error}>
+          <ResultsTable rows={rows} />
         </Show>
       </div>
     </div>

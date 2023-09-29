@@ -1,6 +1,5 @@
-import { createStore } from "solid-js/store";
+import { createStore, produce } from "solid-js/store";
 import { ConnectionConfig, DbSchema, ResultSet } from "../interfaces";
-import { onMount } from "solid-js";
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
@@ -14,25 +13,34 @@ export const MessageType = {
   warning: "warning",
 } as const;
 
-export const ContentComponent = {
-  QueryTab: "QueryTab",
-  TableStructureTab: "TableStructureTab",
+export const ContentTab = {
+  Query: "Query",
+  TableStructure: "TableStructure",
 } as const;
 
-type ContentComponentKeys = keyof typeof ContentComponent;
+type ContentComponentKeys = keyof typeof ContentTab;
 
-export const newContentTab = (label: string, key: ContentComponentKeys) => {
+type ContentTabData = {
+  [ContentTab.Query]: QueryContentTabData;
+  [ContentTab.TableStructure]: TableStructureContentTabData;
+};
+
+export const newContentTab = <T extends ContentComponentKeys>(
+  label: string,
+  key: T,
+  data?: ContentTabData[T]
+) => {
   switch (key) {
-    case ContentComponent.QueryTab:
+    case ContentTab.Query:
       return {
         label,
-        data: { query: "", executed: false, result_sets: [] },
+        data: data ?? { query: "", executed: false, result_sets: [] },
         key,
       };
-    case ContentComponent.TableStructureTab:
+    case ContentTab.TableStructure:
       return {
         label,
-        data: {
+        data: data ?? {
           table: label,
           columns: [],
           indices: [],
@@ -65,12 +73,12 @@ export type ContentTab = {
   error?: string;
 } & (
     | {
-      key: typeof ContentComponent.QueryTab;
-      data: QueryContentTabData;
+      key: typeof ContentTab.Query;
+      data: Partial<QueryContentTabData>;
     }
     | {
-      key: typeof ContentComponent.TableStructureTab;
-      data: TableStructureContentTabData;
+      key: typeof ContentTab.TableStructure;
+      data: Partial<TableStructureContentTabData>;
     }
   );
 
@@ -81,8 +89,8 @@ type ConnectionTab = {
   connection: ConnectionConfig;
 };
 
-const CONNECTIONS_TABS_KEY = "_conn_tabs";
-const CONTENT_TABS_KEY = "_content_tabs";
+const CONNECTIONS_KEY = "_conn_tabs";
+const CONTENT_KEY = "_content_tabs";
 
 const getSavedData = async (key: string, defaultValue: any = []) => {
   const str = await store.get(key);
@@ -118,8 +126,8 @@ export const ConnectionTabsService = () => {
     idx: 0,
   });
 
-  onMount(async () => {
-    const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_TABS_KEY);
+  const restoreConnectionStore = async () => {
+    const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
     if (!conn_tabs.tabs) return;
     const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
       const res = await acc;
@@ -133,34 +141,34 @@ export const ConnectionTabsService = () => {
       }
     }, Promise.resolve([] as ConnectionTab[]));
     setConnectionStore(() => ({ ...conn_tabs, tabs }));
-    const content = await getSavedData(CONTENT_TABS_KEY);
+    const content = await getSavedData(CONTENT_KEY);
     setContentStore(() => content as ContentStore);
     updateStore();
-  });
+  };
 
   const updateStore = debounce(async () => {
-    await store.set(CONNECTIONS_TABS_KEY, JSON.stringify(connectionStore));
-    const contentStoreTabs = contentStore.tabs.map((t) => {
-      if (t.key === ContentComponent.QueryTab) {
-        return { ...t, data: { ...t.data, executed: false, result_sets: [] } };
-      }
-      return t;
-    });
+    await store.set(CONNECTIONS_KEY, JSON.stringify(connectionStore));
+    const tabs = contentStore.tabs.map((t) =>
+      t.key === ContentTab.Query
+        ? { ...t, data: { ...t.data, executed: false, result_sets: [] } }
+        : t
+    );
     await store.set(
-      CONTENT_TABS_KEY,
-      JSON.stringify({ ...contentStore, tabs: contentStoreTabs })
+      CONTENT_KEY,
+      JSON.stringify({ idx: contentStore.idx, tabs })
     );
     await store.save();
-  }, 1000);
+  }, 3000);
 
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
-    setConnectionStore("tabs", connectionStore.tabs.concat(tab));
-    setContentStore("tabs", [
-      newContentTab("Query", ContentComponent.QueryTab),
-    ]);
-    const idx = connectionStore.tabs.length;
-    setConnectionStore("idx", idx);
+    setContentStore("tabs", [newContentTab("Query", ContentTab.Query)]);
+    setConnectionStore(
+      produce((s) => {
+        s.tabs.push(tab);
+        s.idx = s.tabs.length;
+      })
+    );
     updateStore();
   };
 
@@ -177,103 +185,58 @@ export const ConnectionTabsService = () => {
     await store.clear();
   };
 
-  const getActiveConnection = () => {
+  const getConnection = () => {
     return connectionStore.tabs[connectionStore.idx - 1];
   };
 
-  const getActiveContentTab = () => {
-    return contentStore.tabs[contentStore.idx];
+  const getContent = () => contentStore.tabs[contentStore.idx];
+
+  const getContentData = <T extends keyof ContentTabData>(_key: T) => {
+    return contentStore.tabs[contentStore.idx].data as ContentTabData[T];
   };
 
-  const addContentTab = () => {
-    setContentStore("tabs", [
-      ...contentStore.tabs,
-      newContentTab("Query", ContentComponent.QueryTab),
-    ]);
-    setContentStore("idx", contentStore.tabs.length - 1);
-  };
-
-  const removeActiveConnection = () => {
-    if (connectionStore.tabs.length === 1) return;
-    setConnectionStore(
-      "tabs",
-      connectionStore.tabs.filter((_, i) => i !== connectionStore.idx)
+  const addContentTab = (tab?: ContentTab) => {
+    setContentStore(
+      produce((s) => {
+        s.tabs.push(tab ?? newContentTab("Query", ContentTab.Query));
+        s.idx = s.tabs.length - 1;
+      })
     );
+    updateStore();
   };
 
-  const removeActiveContentTab = () => {
+  const removeContentTab = (idx?: number) => {
     if (contentStore.tabs.length === 1) return;
     setContentStore(
-      "tabs",
-      contentStore.tabs.filter((_, i) => i !== contentStore.idx)
+      produce((s) => {
+        s.tabs.splice(idx ?? s.idx, 1);
+        s.idx = s.tabs.length - 1;
+      })
     );
-    setContentStore("idx", contentStore.tabs.length - 1);
+    updateStore();
   };
 
-  const setActiveConnection = (i: number) => {
+  const setConnectionIdx = (i: number) => {
     if (i <= connectionStore.tabs.length) {
       setConnectionStore("idx", i);
     }
   };
 
-  const setActiveContentTab = (i: number) => {
+  const setContentIdx = (i: number) => {
     if (i <= contentStore.tabs.length) {
-      setContentStore("idx", i - 1);
+      setContentStore("idx", i);
     }
   };
 
-  const setActiveContentTableStructureTabData = (
-    data: TableStructureContentTabData
+  const updateContentTab = <T extends keyof ContentTab>(
+    key: T,
+    data: ContentTab[T],
+    idx?: number
   ) => {
-    const tab = getActiveContentTab();
+    const tab = getContent();
     if (!tab) return;
-    setContentStore(
-      "tabs",
-      contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? { ...t, data, key: ContentComponent.TableStructureTab }
-          : t
-      )
-    );
-  };
-
-  const setActiveContentQueryTabData = (data: Partial<QueryContentTabData>) => {
-    const tab = getActiveContentTab();
-    if (!tab) return;
-    setContentStore(
-      "tabs",
-      contentStore.tabs.map((t, i) =>
-        i === contentStore.idx
-          ? {
-            ...t,
-            data: { ...(t.data as QueryContentTabData), ...data },
-            key: ContentComponent.QueryTab,
-          }
-          : t
-      )
-    );
-  };
-
-  const resetActiveContentQueryTabMessage = () => {
-    const tab = getActiveContentTab();
-    if (!tab) return;
-    setContentStore(
-      "tabs",
-      contentStore.tabs.map((t, i) =>
-        i === contentStore.idx ? { ...t, error: undefined } : t
-      )
-    );
-  };
-
-  const setActiveContentQueryTabMessage = (message: string) => {
-    const tab = getActiveContentTab();
-    if (!tab) return;
-    setContentStore(
-      "tabs",
-      contentStore.tabs.map((t, i) =>
-        i === contentStore.idx ? { ...t, error: String(message) } : t
-      )
-    );
+    setContentStore("tabs", idx ?? contentStore.idx, key, data);
+    updateStore();
   };
 
   return {
@@ -284,17 +247,15 @@ export const ConnectionTabsService = () => {
     addConnectionTab,
     removeConnectionTab,
     clearStore,
-    getActiveConnection,
-    getActiveContentTab,
-    setActiveContentQueryTabData,
-    setActiveContentQueryTabMessage,
-    resetActiveContentQueryTabMessage,
+    getConnection,
+    getContent,
+    getContentData,
     updateStore,
-    setActiveContentTableStructureTabData,
-    setActiveContentTab,
-    setActiveConnection,
-    removeActiveContentTab,
-    removeActiveConnection,
+    setConnectionIdx,
+    restoreConnectionStore,
+    setContentIdx,
     addContentTab,
+    updateContentTab,
+    removeContentTab,
   };
 };

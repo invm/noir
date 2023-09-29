@@ -10,20 +10,16 @@ export const Main = () => {
   const {
     connectionsService: {
       removeConnectionTab,
-      // clearStore,
+      clearStore,
       connectionStore,
       setConnectionStore,
     },
   } = useAppSelector();
 
-  const closeTab = async (id: string) => {
-    await removeConnectionTab(id);
-  };
-
   return (
     <div class="w-full h-full flex flex-col">
       <div class="px-2 pt-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
-        <div class="tabs tabs-boxed">
+        <div class="tabs tabs-boxed gap-2">
           <button
             onClick={() => setConnectionStore("idx", 0)}
             class="tab tab-sm pt-1"
@@ -48,7 +44,7 @@ export const Main = () => {
                 <Show when={connectionStore.idx === idx() + 1}>
                   <button
                     tabindex={0}
-                    onClick={() => closeTab(tab.id!)}
+                    onClick={() => removeConnectionTab(tab.id!)}
                     class="ml-2"
                   >
                     <CloseIcon />
@@ -59,7 +55,9 @@ export const Main = () => {
           </For>
         </div>
         <div>
-          {/* <button onClick={async () => await clearStore()}>Reset store</button> */}
+          {/*
+           */}
+          <button onClick={async () => await clearStore()}>Reset store</button>
           <ThemeSwitch />
         </div>
       </div>
@@ -74,6 +72,6 @@ export const Main = () => {
         </Switch>
       </div>
       <Alerts />
-    </div >
+    </div>
   );
 };

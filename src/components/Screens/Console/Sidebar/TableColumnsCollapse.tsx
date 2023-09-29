@@ -2,7 +2,12 @@ import { createSignal, JSXElement } from "solid-js";
 import { useContextMenu, Menu, animation, Item } from "solid-contextmenu";
 import { t } from "utils/i18n";
 import { useAppSelector } from "services/Context";
-import { newContentTab } from "services/ConnectionTabs";
+import {
+  newContentTab,
+  TableStructureContentTabData,
+} from "services/ConnectionTabs";
+
+import { invoke } from "@tauri-apps/api";
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -11,7 +16,8 @@ export const TableColumnsCollapse = (props: {
   const [open, setOpen] = createSignal(false);
 
   const {
-    connectionsService: { contentStore, setContentStore, updateStore },
+    connectionsService: { addContentTab, getConnection },
+    errorService: { addError },
   } = useAppSelector();
 
   const menu_id = "sidebar-table-menu";
@@ -21,23 +27,22 @@ export const TableColumnsCollapse = (props: {
     props: { table: props.title },
   });
 
-  const openTableStructureTab = (table: string) => {
-    setContentStore("tabs", [
-      ...contentStore.tabs,
-      newContentTab(table, "TableStructureTab"),
-    ]);
-    setContentStore("idx", contentStore.tabs.length - 1);
-    updateStore();
+  const addTableStructureTab = async (table: string) => {
+    try {
+      const data = await invoke<TableStructureContentTabData>(
+        "get_table_structure",
+        { connId: getConnection().id, table }
+      );
+      addContentTab(newContentTab(table, "TableStructure", data));
+    } catch (error) {
+      addError(error);
+    }
   };
 
   return (
     <div class="w-full" onContextMenu={(e) => show(e)}>
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
-        <Item
-          onClick={({ props }) => {
-            openTableStructureTab(props.table);
-          }}
-        >
+        <Item onClick={({ props }) => addTableStructureTab(props.table)}>
           {t("components.sidebar.show_table_structure")}
         </Item>
       </Menu>

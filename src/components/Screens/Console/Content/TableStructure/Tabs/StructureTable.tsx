@@ -1,4 +1,6 @@
-export const StructureTable = (props: { data: Record<string, any>[] }) => {
+import { Row } from "interfaces";
+
+export const StructureTable = (props: { data: Row[] }) => {
   const columns = props.data.length ? Object.keys(props.data[0]) : [];
   const rows = props.data.map((row) => Object.values(row));
   return (

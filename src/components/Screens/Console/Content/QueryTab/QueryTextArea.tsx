@@ -3,7 +3,15 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import { Accessor, createSignal, For, onMount, Setter, Show } from "solid-js";
+import {
+  Accessor,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Setter,
+  Show,
+} from "solid-js";
 import {
   EditorView,
   drawSelection,
@@ -12,12 +20,11 @@ import {
 } from "@codemirror/view";
 import { MySQL, sql } from "@codemirror/lang-sql";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-import { vim, Vim } from "@replit/codemirror-vim";
+import { vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
 import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { QueryContentTabData } from "services/ConnectionTabs";
 import { QueryResult } from "interfaces";
 import { commandPaletteEmitter } from "components/CommandPalette/actions";
 import { t } from "utils/i18n";
@@ -30,28 +37,21 @@ export const QueryTextArea = (props: {
 }) => {
   const {
     connectionsService: {
-      setActiveContentQueryTabData,
-      setActiveContentQueryTabMessage,
-      resetActiveContentQueryTabMessage,
-      getActiveConnection,
-      getActiveContentTab,
-      updateStore,
+      updateContentTab,
+      getConnection,
+      getContent,
+      getContentData,
     },
   } = useAppSelector();
   const [vimModeOn, setVimModeOn] = createSignal(true);
   const [code, setCode] = createSignal("");
 
   const updateQueryText = async (query: string) => {
-    setActiveContentQueryTabData({ query });
-  };
-
-  const onValueChange = (q: string) => {
-    setCode(q);
-    updateStore();
+    updateContentTab("data", { query });
   };
 
   const { ref, editorView, createExtension } = createCodeMirror({
-    onValueChange,
+    onValueChange: setCode,
   });
   createEditorControlledValue(editorView, code);
   createExtension(() => drawSelection());
@@ -82,7 +82,7 @@ export const QueryTextArea = (props: {
 
   const onFormat = () => {
     const formatted = format(code());
-    onValueChange(formatted);
+    setCode(formatted);
     updateQueryText(formatted);
   };
 
@@ -95,28 +95,23 @@ export const QueryTextArea = (props: {
 
   const onExecute = async () => {
     const selectedText = getSelection();
-    resetActiveContentQueryTabMessage();
-    const activeConnection = getActiveConnection();
+    updateContentTab("error", undefined);
+    const activeConnection = getConnection();
     try {
       const { result_sets } = await invoke<QueryResult>("execute_query", {
         connId: activeConnection.id,
         query: selectedText || code(),
       });
-      setActiveContentQueryTabData({
-        query: code(),
-        executed: true,
-        result_sets,
-      });
+      updateContentTab("data", { query: code(), executed: true, result_sets });
       // console.log({ result_sets });
     } catch (error) {
       // console.log({ error });
-      setActiveContentQueryTabMessage(String(error));
+      updateContentTab("error", String(error));
     }
-    updateStore();
   };
 
-  onMount(() => {
-    setCode((getActiveContentTab()?.data as QueryContentTabData).query ?? "");
+  createEffect(() => {
+    setCode(getContentData("Query").query ?? "");
   });
 
   const handleKeyDown = async (e: KeyboardEvent) => {
@@ -152,18 +147,14 @@ export const QueryTextArea = (props: {
 
   const onPrevClick = () => {
     props.setIdx(
-      (props.idx() -
-        1 +
-        (getActiveContentTab().data as QueryContentTabData).result_sets
-          .length) %
-      (getActiveContentTab().data as QueryContentTabData).result_sets.length
+      (props.idx() - 1 + getContentData("Query").result_sets.length) %
+      getContentData("Query").result_sets.length
     );
   };
 
   const onNextClick = () => {
     props.setIdx(
-      (props.idx() + 1) %
-      (getActiveContentTab().data as QueryContentTabData).result_sets.length
+      (props.idx() + 1) % getContentData("Query").result_sets.length
     );
   };
 
@@ -215,15 +206,11 @@ export const QueryTextArea = (props: {
           </div>
         </div>
 
-        <Show when={getActiveContentTab().error}>
-          <Alert color="error">{getActiveContentTab().error}</Alert>
+        <Show when={getContent().error}>
+          <Alert color="error">{getContent().error}</Alert>
         </Show>
-        <Show when={!getActiveContentTab().error}>
-          <For
-            each={
-              (getActiveContentTab().data as QueryContentTabData).result_sets
-            }
-          >
+        <Show when={!getContent().error}>
+          <For each={getContentData("Query").result_sets}>
             {(result_set, index) => (
               <Show when={index() === props.idx()}>
                 <Alert color="info">
@@ -243,8 +230,7 @@ export const QueryTextArea = (props: {
                       {">"}
                     </button>
                     {t("components.console.out_of") +
-                      (getActiveContentTab().data as QueryContentTabData)
-                        .result_sets.length +
+                      getContentData("Query").result_sets.length +
                       ". "}
                   </span>
                   <span class="font-semibold">{result_set.info + ""}</span>

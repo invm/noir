@@ -3,7 +3,6 @@ import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
 import { onMount } from "solid-js";
-import { QueryContentTabData } from "services/ConnectionTabs";
 
 export interface ActionsContext {
   showThemeSwitcher: () => void;
@@ -12,23 +11,21 @@ export interface ActionsContext {
 
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
-    appService: { toggleThemeSwitcher },
+    appService: { toggleThemeSwitcher, appStore },
     connectionsService: {
-      setActiveContentTab,
-      setActiveConnection,
       addContentTab,
-      removeActiveContentTab,
-      getActiveContentTab,
+      removeContentTab,
+      getContentData,
+      setContentIdx,
+      setConnectionIdx,
     },
   } = useAppSelector();
 
   const actionsContext: ActionsContext = {
     showThemeSwitcher() {
       toggleThemeSwitcher();
-      // always focus with a timeout because of the command palette, it is the active element
-      setTimeout(() => {
+      if (appStore.showThemeSwitcher)
         document.getElementById("theme-switch")?.focus();
-      }, 1);
     },
   };
 
@@ -45,24 +42,24 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
         number <= 9
       ) {
         preventDefault();
-        if (altKey) setActiveContentTab(number);
-        else setActiveConnection(number - 1);
+        if (altKey) setContentIdx(number);
+        else setConnectionIdx(number - 1);
       } else if ((ctrlKey || metaKey) && code === "KeyT") {
         e.preventDefault();
-        if (e.shiftKey) removeActiveContentTab();
+        if (e.shiftKey) removeContentTab();
         else addContentTab();
       } else if (code === "KeyE" && (ctrlKey || metaKey)) {
         commandPaletteEmitter.emit("execute", undefined);
       } else if (
         key === "p" &&
         ctrlKey &&
-        (getActiveContentTab().data as QueryContentTabData).result_sets.length
+        getContentData("Query").result_sets.length
       ) {
         commandPaletteEmitter.emit("prev-result-set", undefined);
       } else if (
         key === "n" &&
         ctrlKey &&
-        (getActiveContentTab().data as QueryContentTabData).result_sets.length
+        getContentData("Query").result_sets.length
       ) {
         commandPaletteEmitter.emit("next-result-set", undefined);
       }

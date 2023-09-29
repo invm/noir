@@ -10,7 +10,16 @@ export const firstKey = (obj: Record<string, any>) => {
   for (const key in obj) return key;
 };
 
-export const randomId = () => Math.random().toString(36).substring(12);
+export const randomId = () => {
+  const length = 36;
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
 
 export const debounce = (func: Function, wait: number) => {
   let timer: NodeJS.Timeout;
@@ -27,3 +36,20 @@ export const debounce = (func: Function, wait: number) => {
 };
 
 export const sortTableStructure = (tableStructure: TableStructureResult) => { };
+
+// TODO: for all dialects
+export const columnsToSchema = (columns: Record<string, any>[]) => {
+  const schema = columns.reduce((acc: any, col: any) => {
+    return {
+      ...acc,
+      [col.TABLE_SCHEMA]: {
+        ...acc[col.TABLE_SCHEMA],
+        [col.TABLE_NAME]: {
+          ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
+          [col.COLUMN_NAME]: col,
+        },
+      },
+    };
+  }, {});
+  return schema;
+};

@@ -119,15 +119,21 @@ export type DbSchema = {
   };
 };
 
+export type Row = Record<string, any>;
+
 export type ResultSet = {
   affected_rows: number;
   warnings: number;
   info: String;
-  rows: Record<string, any>[];
+  rows: Row[];
 };
 
 export type QueryResult = {
   result_sets: ResultSet[];
+};
+
+export type RawQueryResult = {
+  result: Row[];
 };
 
 export const TableStrucureEntity = {
@@ -143,13 +149,6 @@ export const TableStrucureEntities = [
   TableStrucureEntity.Constraints,
   TableStrucureEntity.Triggers,
 ] as const;
-
-export type TableStructureResult = {
-  [TableStrucureEntity.Columns]: Record<string, any>[];
-  [TableStrucureEntity.Constraints]: Record<string, any>[];
-  [TableStrucureEntity.Indices]: Record<string, any>[];
-  [TableStrucureEntity.Triggers]: Record<string, any>[];
-};
 
 const STRUCTURE_TYPES = {
   Column: "Column",
