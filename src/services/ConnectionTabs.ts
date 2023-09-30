@@ -1,5 +1,5 @@
 import { createStore, produce } from "solid-js/store";
-import { ConnectionConfig, DbSchema, ResultSet } from "../interfaces";
+import { ConnectionConfig, ResultSet, Row, TableEntity } from "../interfaces";
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
@@ -62,10 +62,10 @@ export type QueryContentTabData = {
 
 export type TableStructureContentTabData = {
   table: string;
-  columns: Record<string, any>[];
-  indices: Record<string, any>[];
-  constraints: Record<string, any>[];
-  triggers: Record<string, any>[];
+  [TableEntity.columns]: Row[];
+  [TableEntity.indices]: Row[];
+  [TableEntity.triggers]: Row[];
+  [TableEntity.constraints]: Row[];
 };
 
 export type ContentTab = {
@@ -85,7 +85,7 @@ export type ContentTab = {
 type ConnectionTab = {
   label: string;
   id: string;
-  schema: DbSchema;
+  schema: Record<string, string>;
   connection: ConnectionConfig;
 };
 
@@ -128,6 +128,7 @@ export const ConnectionTabsService = () => {
 
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
+    console.log({ conn_tabs });
     if (!conn_tabs.tabs) return;
     const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
       const res = await acc;

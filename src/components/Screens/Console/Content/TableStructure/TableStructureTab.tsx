@@ -1,28 +1,23 @@
 import { createSignal, For, Match, Switch } from "solid-js";
-import { TableStrucureEntity, TableStrucureEntities } from "interfaces";
+import {
+  TableEntity,
+  TableStrucureEntities,
+  TableStrucureEntityType,
+} from "interfaces";
 import { t } from "utils/i18n";
 import { StructureTable } from "./Tabs/StructureTable";
 import { useAppSelector } from "services/Context";
-import { TableStructureContentTabData } from "services/ConnectionTabs";
 
 export const TableStructureTab = () => {
   const {
-    connectionsService: { getContentData },
+    connectionsService: { getContentData, getConnection },
   } = useAppSelector();
-  const [tab, setTab] = createSignal<
-    keyof Omit<TableStructureContentTabData, "table">
-  >(TableStrucureEntity.Columns);
-  // const [data, setData] = createStore<
-  //   Omit<TableStructureContentTabData, "table">
-  // >({
-  //   columns: [],
-  //   indices: [],
-  //   triggers: [],
-  //   constraints: [],
-  // });
+  const [tab, setTab] = createSignal<TableStrucureEntityType>(
+    TableEntity.columns
+  );
 
   return (
-    <div class="bg-base-200 rounded-tl-md p-2 h-full">
+    <div class="bg-base-100 rounded-tl-md p-2 h-full">
       <div>
         <div class="flex justify-center">
           <div class="tabs tabs-boxed gap-3">
@@ -45,6 +40,8 @@ export const TableStructureTab = () => {
                 <Match when={item === tab()}>
                   <StructureTable
                     data={getContentData("TableStructure")[item]}
+                    type={item}
+                    dialect={getConnection().connection.dialect}
                   />
                 </Match>
               )}

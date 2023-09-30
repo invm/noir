@@ -1,8 +1,15 @@
-import { Row } from "interfaces";
+import { DialectType, Row, TableStrucureEntityType } from "interfaces";
+import { sortTableStructure } from "utils/utils";
 
-export const StructureTable = (props: { data: Row[] }) => {
-  const columns = props.data.length ? Object.keys(props.data[0]) : [];
-  const rows = props.data.map((row) => Object.values(row));
+export const StructureTable = (props: {
+  data: Row[];
+  dialect: DialectType;
+  type: TableStrucureEntityType;
+}) => {
+  const columns = props.data.length
+    ? sortTableStructure(Object.keys(props.data[0]), props.dialect, props.type)
+    : [];
+  const rows = props.data.map((row) => columns.map((column) => row[column]));
   return (
     <div class="overflow-x-auto">
       <table class="table">
@@ -19,7 +26,7 @@ export const StructureTable = (props: { data: Row[] }) => {
             <tr>
               <th>{idx + 1}</th>
               {row.map((cell) => (
-                <td>{cell}</td>
+                <td>{String(cell)}</td>
               ))}
             </tr>
           ))}

@@ -13,13 +13,13 @@ import {
 } from "components/UI";
 import {
   PORTS_MAP,
-  Schemes,
+  Dialect,
   AvailableConnectionModes,
   SocketPathDefaults,
   connectionColors,
   ConnectionMode,
   connectionModes,
-  schemes,
+  dialects,
   HostCredentials,
   SocketCredentials,
   FileCredentials,
@@ -43,7 +43,7 @@ export const ConnectionFormSchema = z.object({
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length),
-  scheme: z.enum(schemes),
+  scheme: z.enum(dialects),
   mode: z.enum(connectionModes),
   username: z
     .string()
@@ -114,15 +114,15 @@ export * from "./AddConnectionForm";
 
 const defaultValues = {
   name: "My Connection",
-  scheme: Schemes.Mysql,
+  scheme: Dialect.Mysql,
   port: 3306,
-  color: "orange",
-  mode: AvailableConnectionModes[Schemes.Mysql][0],
+  color: "cyan",
+  mode: AvailableConnectionModes[Dialect.Mysql][0],
   file: "",
   host: "localhost",
   username: "root",
-  password: "noir",
-  dbname: "noir",
+  password: "example",
+  dbname: "world_x",
 };
 
 const AddConnectionForm = (props: {
@@ -178,14 +178,14 @@ const AddConnectionForm = (props: {
         <div class="grid grid-cols-6 gap-3">
           <div
             class={
-              formData().scheme === Schemes.Sqlite ? "col-span-4" : "col-span-2"
+              formData().scheme === Dialect.Sqlite ? "col-span-4" : "col-span-2"
             }
           >
             <Select
               id="scheme"
               name="scheme"
               label={t("components.add_connection_form.labels.scheme")}
-              options={schemes.map((sc) => ({
+              options={dialects.map((sc) => ({
                 value: sc,
                 label: titleCase(sc),
               }))}
@@ -201,7 +201,7 @@ const AddConnectionForm = (props: {
               }}
             />
           </div>
-          <Show when={formData().scheme !== Schemes.Sqlite}>
+          <Show when={formData().scheme !== Dialect.Sqlite}>
             <div class="col-span-2">
               <Select
                 id="mode"
@@ -224,14 +224,14 @@ const AddConnectionForm = (props: {
           </Show>
           <div class="col-span-2">
             <Switch>
-              <Match when={formData().scheme === Schemes.Sqlite}>
+              <Match when={formData().scheme === Dialect.Sqlite}>
                 <FileInput
                   label={t("components.add_connection_form.labels.file")}
                   formHandler={formHandler}
                   name="file"
                 />
               </Match>
-              <Match when={formData().scheme !== Schemes.Sqlite}>
+              <Match when={formData().scheme !== Dialect.Sqlite}>
                 <TextInput
                   label={t("components.add_connection_form.labels.dbname")}
                   min={1}
@@ -244,7 +244,7 @@ const AddConnectionForm = (props: {
             </Switch>
           </div>
         </div>
-        <Show when={formData().scheme !== Schemes.Sqlite}>
+        <Show when={formData().scheme !== Dialect.Sqlite}>
           <div class="grid grid-cols-6 gap-3">
             <Switch>
               <Match when={formData().mode === ConnectionMode.Host}>

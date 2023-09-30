@@ -16,7 +16,7 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
       const { result } = await invoke<RawQueryResult>("get_columns", {
         connId: config.id,
       });
-      const schema = columnsToSchema(result);
+      const schema = columnsToSchema(result, config.dialect);
       await addConnectionTab({
         id: config.id,
         label: config.name,
