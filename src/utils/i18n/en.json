@@ -38,7 +38,8 @@
         "actions": {
           "format": "Format",
           "execute": "Execute",
-          "vim_mode_on": "Vim mode on"
+          "vim_mode_on": "Vim mode on",
+          "copy_query": "Copy query to clipboard"
         },
         "zero_results": "0 rows retuned",
         "result_set": "Result set ",

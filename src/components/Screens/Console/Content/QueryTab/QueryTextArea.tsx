@@ -18,6 +18,7 @@ import { invoke } from "@tauri-apps/api";
 import {
   ChevronLeft,
   ChevronRight,
+  Copy,
   EditIcon,
   FireIcon,
   VimIcon,
@@ -108,6 +109,10 @@ export const QueryTextArea = (props: {
     }
   };
 
+  const copyQueryToClipboard = () => {
+    navigator.clipboard.writeText(code());
+  };
+
   createEffect(() => {
     setCode(getContentData("Query").query ?? "");
   });
@@ -140,6 +145,18 @@ export const QueryTextArea = (props: {
               onClick={() => onExecute()}
             >
               <FireIcon />
+            </button>
+          </div>
+
+          <div
+            class="tooltip tooltip-primary tooltip-bottom"
+            data-tip={t("components.console.actions.copy_query")}
+          >
+            <button
+              class="btn btn-ghost btn-xs mr-2"
+              onClick={() => copyQueryToClipboard()}
+            >
+              <Copy />
             </button>
           </div>
 
