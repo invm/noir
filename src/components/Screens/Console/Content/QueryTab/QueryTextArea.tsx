@@ -3,15 +3,7 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import {
-  Accessor,
-  createEffect,
-  createSignal,
-  For,
-  onMount,
-  Setter,
-  Show,
-} from "solid-js";
+import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
 import {
   EditorView,
   drawSelection,
@@ -23,17 +15,24 @@ import { dracula } from "@uiw/codemirror-theme-dracula";
 import { vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
-import { EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
+import {
+  ChevronLeft,
+  ChevronRight,
+  EditIcon,
+  FireIcon,
+  VimIcon,
+} from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
 import { QueryResult } from "interfaces";
-import { commandPaletteEmitter } from "components/CommandPalette/actions";
 import { t } from "utils/i18n";
 import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
+import { createShortcut } from "@solid-primitives/keyboard";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
-  setIdx: Setter<number>;
+  onPrevClick: () => void;
+  onNextClick: () => void;
 }) => {
   const {
     connectionsService: {
@@ -105,7 +104,6 @@ export const QueryTextArea = (props: {
       updateContentTab("data", { query: code(), executed: true, result_sets });
       // console.log({ result_sets });
     } catch (error) {
-      // console.log({ error });
       updateContentTab("error", String(error));
     }
   };
@@ -114,49 +112,9 @@ export const QueryTextArea = (props: {
     setCode(getContentData("Query").query ?? "");
   });
 
-  const handleKeyDown = async (e: KeyboardEvent) => {
-    if ((e.altKey || e.metaKey || e.ctrlKey) && e.code.startsWith("Digit")) {
-      e.preventDefault();
-    }
-    if (e.key === "f" && e.ctrlKey) {
-      onFormat();
-    } else if (
-      (e.metaKey || e.ctrlKey) &&
-      (e.key === "Enter" || e.key === "e")
-    ) {
-      await onExecute();
-    }
-  };
-
-  onMount(() => {
-    commandPaletteEmitter.on("focus-query-text-area", () => {
-      // this is done with a timeout because when this event is emitted the active element is the command palette
-      // and imeediately focusing the query text area doesn't work
-      setTimeout(() => {
-        // @ts-ignore
-        document.activeElement?.blur();
-        setFocused(true);
-      }, 1);
-    });
-    commandPaletteEmitter.on("next-result-set", onNextClick);
-    commandPaletteEmitter.on("prev-result-set", onPrevClick);
-    commandPaletteEmitter.on("execute", async () => {
-      await onExecute();
-    });
-  });
-
-  const onPrevClick = () => {
-    props.setIdx(
-      (props.idx() - 1 + getContentData("Query").result_sets.length) %
-      getContentData("Query").result_sets.length
-    );
-  };
-
-  const onNextClick = () => {
-    props.setIdx(
-      (props.idx() + 1) % getContentData("Query").result_sets.length
-    );
-  };
+  createShortcut(["Control", "e"], onExecute);
+  createShortcut(["Control", "l"], () => setFocused(true));
+  createShortcut(["Control", "Shift", "F"], onFormat);
 
   return (
     <div class="flex-1 flex flex-col">
@@ -218,16 +176,16 @@ export const QueryTextArea = (props: {
                     {t("components.console.result_set")}
                     <button
                       class="btn btn-xs mx-0.5 btn-neutral h-5 min-h-0"
-                      onClick={onPrevClick}
+                      onClick={props.onPrevClick}
                     >
-                      {"<"}
+                      <ChevronLeft />
                     </button>
                     {"#" + (props.idx() + 1)}
                     <button
                       class="btn btn-xs mx-0.5 btn-neutral h-5 min-h-0"
-                      onClick={onNextClick}
+                      onClick={props.onNextClick}
                     >
-                      {">"}
+                      <ChevronRight />
                     </button>
                     {t("components.console.out_of") +
                       getContentData("Query").result_sets.length +
@@ -240,7 +198,7 @@ export const QueryTextArea = (props: {
           </For>
         </Show>
       </div>
-      <div class="overflow-hidden w-full h-full" onKeyDown={handleKeyDown}>
+      <div class="overflow-hidden w-full h-full">
         <div ref={ref} class="w-full h-full" />
       </div>
     </div>

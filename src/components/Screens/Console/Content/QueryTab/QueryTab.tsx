@@ -5,6 +5,7 @@ import Split from "split.js";
 import { QueryTextArea } from "./QueryTextArea";
 import { createStore } from "solid-js/store";
 import { Row } from "interfaces";
+import { createShortcut } from "@solid-primitives/keyboard";
 
 export const QueryTab = () => {
   const {
@@ -34,10 +35,28 @@ export const QueryTab = () => {
     setRows(getContentData("Query").result_sets[idx()]?.rows || []);
   });
 
+  const onPrevClick = () => {
+    setIdx(
+      (idx() - 1 + getContentData("Query").result_sets.length) %
+      getContentData("Query").result_sets.length
+    );
+  };
+
+  const onNextClick = () => {
+    setIdx((idx() + 1) % getContentData("Query").result_sets.length);
+  };
+
+  createShortcut(["Control", "Shift", "N"], onNextClick);
+  createShortcut(["Control", "Shift", "P"], onPrevClick);
+
   return (
     <div class="flex flex-col h-full overflow-hidden">
       <div id="query" class="flex flex-col">
-        <QueryTextArea idx={idx} setIdx={setIdx} />
+        <QueryTextArea
+          idx={idx}
+          onPrevClick={onPrevClick}
+          onNextClick={onNextClick}
+        />
       </div>
       <div id="results">
         <Show when={!getContent().error}>
