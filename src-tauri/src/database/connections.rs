@@ -27,6 +27,23 @@ pub enum Scheme {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+pub enum Dialect {
+    Mysql,
+    Postgres,
+    Sqlite,
+}
+
+impl Dialect {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Dialect::Mysql => "mysql",
+            Dialect::Postgres => "postgres",
+            Dialect::Sqlite => "sqlite",
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct SocketCredentials {
     pub username: String,
     pub password: Option<String>,
@@ -47,6 +64,7 @@ pub struct HostCredentials {
 pub struct ConnectionConfig {
     pub id: Uuid,
     pub scheme: Scheme,
+    pub dialect: Dialect,
     pub name: String,
     pub color: String,
 }
@@ -90,6 +108,11 @@ impl ConnectionConfig {
         let id = Uuid::new_v4();
         Ok(ConnectionConfig {
             id,
+            dialect: match scheme {
+                Scheme::Mysql(_) => Dialect::Mysql,
+                Scheme::Postgres(_) => Dialect::Postgres,
+                Scheme::Sqlite(_) => Dialect::Sqlite,
+            },
             scheme,
             name: name.to_string(),
             color: color.to_string(),
@@ -188,7 +211,9 @@ impl ConnectedConnection {
 
     pub async fn get_constraints(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_constraints(self, pool, None).await,
+            ConnectionPool::Mysql(pool) => {
+                engine::mysql::tables::get_constraints(self, pool, None).await
+            }
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
@@ -212,7 +237,9 @@ impl ConnectedConnection {
 
     pub async fn get_triggers(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_triggers(self, pool, None).await,
+            ConnectionPool::Mysql(pool) => {
+                engine::mysql::tables::get_triggers(self, pool, None).await
+            }
             // ConnectionPool::Postgres(_pool) => todo!(),
             // ConnectionPool::Sqlite(_pool) => todo!(),
         }
@@ -232,11 +259,13 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
         "INSERT INTO connections (
             id,
             scheme,
+            dialect, 
             name,
             color
             ) VALUES (
                 :id,
                 :scheme,
+                :dialect,
                 :name,
                 :color
                 )",
@@ -246,6 +275,7 @@ pub fn add_connection(db: &Connection, conn: &ConnectionConfig) -> Result<()> {
         ":id": conn.id,
         ":name": conn.name,
         ":scheme": scheme,
+        ":dialect": conn.dialect.as_str(),
         ":color": conn.color,
     })?;
 
@@ -270,6 +300,11 @@ pub fn get_all_connections(db: &Connection) -> Result<Vec<ConnectionConfig>> {
             id: row.get("id")?,
             name: row.get("name")?,
             color: row.get("color")?,
+            dialect: match scheme {
+                Scheme::Mysql(_) => Dialect::Mysql,
+                Scheme::Postgres(_) => Dialect::Postgres,
+                Scheme::Sqlite(_) => Dialect::Sqlite,
+            },
             scheme,
         });
     }

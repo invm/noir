@@ -48,6 +48,7 @@ pub fn create_app_db(app_path: &str) -> Result<()> {
         "create table `connections` (
           `id`TEXT not null,
           `scheme` TEXT not null,
+          `dialect` varchar(255) not null,
           `name` varchar(255) not null,
           `color` varchar(255) not null
         )",

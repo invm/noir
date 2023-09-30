@@ -1,21 +1,21 @@
-export const Schemes = {
+export const Dialect = {
   Mysql: "Mysql",
   Postgres: "Postgres",
   Sqlite: "Sqlite",
 } as const;
 
-export type SchemeType = keyof typeof Schemes;
+export type DialectType = keyof typeof Dialect;
 
-export const PORTS_MAP: Record<SchemeType, number> = {
-  [Schemes.Mysql]: 3306,
-  [Schemes.Postgres]: 5432,
-  [Schemes.Sqlite]: 0,
+export const PORTS_MAP: Record<DialectType, number> = {
+  [Dialect.Mysql]: 3306,
+  [Dialect.Postgres]: 5432,
+  [Dialect.Sqlite]: 0,
 } as const;
 
-export const schemes = [
-  Schemes.Mysql,
-  Schemes.Postgres,
-  Schemes.Sqlite,
+export const dialects = [
+  Dialect.Mysql,
+  Dialect.Postgres,
+  Dialect.Sqlite,
 ] as const;
 
 export type HostCredentials = {
@@ -46,15 +46,15 @@ export const ConnectionMode = {
 export type ConnectionModeType = keyof typeof ConnectionMode;
 
 export const SocketPathDefaults = {
-  [Schemes.Mysql]: "/var/run/mysqld/mysqld.sock",
-  [Schemes.Postgres]: "/var/run/postgresql/.s.PGSQL.5432",
-  [Schemes.Sqlite]: "",
+  [Dialect.Mysql]: "/var/run/mysqld/mysqld.sock",
+  [Dialect.Postgres]: "/var/run/postgresql/.s.PGSQL.5432",
+  [Dialect.Sqlite]: "",
 } as const;
 
 export const AvailableConnectionModes = {
-  [Schemes.Mysql]: [ConnectionMode.Host, ConnectionMode.Socket],
-  [Schemes.Postgres]: [ConnectionMode.Host, ConnectionMode.Socket],
-  [Schemes.Sqlite]: [ConnectionMode.File],
+  [Dialect.Mysql]: [ConnectionMode.Host, ConnectionMode.Socket],
+  [Dialect.Postgres]: [ConnectionMode.Host, ConnectionMode.Socket],
+  [Dialect.Sqlite]: [ConnectionMode.File],
 } as const;
 
 export const connectionModes = [
@@ -64,13 +64,14 @@ export const connectionModes = [
 ] as const;
 
 export type Scheme = Partial<
-  Record<SchemeType, Record<ConnectionModeType, Record<string, string>>>
+  Record<DialectType, Record<ConnectionModeType, Record<string, string>>>
 >;
 
 export type ConnectionConfig = {
   id: string;
   name: string;
   scheme: Scheme;
+  dialect: DialectType;
   color: ConnectionColor;
 };
 
@@ -101,25 +102,14 @@ export const connectionColors = [
 
 export type ConnectionColor = (typeof connectionColors)[number];
 
-export type DbSchema = {
-  [schema: string]: {
-    [table: string]: {
-      [column: string]: {
-        TABLE_SCHEMA: string;
-        TABLE_NAME: string;
-        COLUMN_NAME: string;
-        COLUMN_DEFAULT: string;
-        IS_NULLABLE: string;
-        DATA_TYPE: string;
-        CHARACTER_MAXIMUM_LENGTH: number;
-        NUMERIC_PRECISION: number;
-        NUMERIC_SCALE: number;
-      };
-    };
-  };
-};
+type JSONValue =
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>;
 
-export type Row = Record<string, any>;
+export type Row = Record<string, JSONValue>;
 
 export type ResultSet = {
   affected_rows: number;
@@ -136,34 +126,90 @@ export type RawQueryResult = {
   result: Row[];
 };
 
-export const TableStrucureEntity = {
-  Columns: "columns",
-  Indices: "indices",
-  Constraints: "constraints",
-  Triggers: "triggers",
+export const TableEntity = {
+  columns: "columns",
+  indices: "indices",
+  constraints: "constraints",
+  triggers: "triggers",
 } as const;
+
+export type TableStrucureEntityType = keyof typeof TableEntity;
 
 export const TableStrucureEntities = [
-  TableStrucureEntity.Columns,
-  TableStrucureEntity.Indices,
-  TableStrucureEntity.Constraints,
-  TableStrucureEntity.Triggers,
+  TableEntity.columns,
+  TableEntity.indices,
+  TableEntity.constraints,
+  TableEntity.triggers,
 ] as const;
 
-const STRUCTURE_TYPES = {
-  Column: "Column",
-  Constraint: "Constraint",
-  Index: "Index",
-  Trigger: "Trigger",
-} as const;
-
 export const SORT_ORDER = {
-  [Schemes.Mysql]: {
-    [STRUCTURE_TYPES.Column]: [
+  [Dialect.Mysql]: {
+    [TableEntity.columns]: [
       "COLUMN_NAME",
       "COLUMN_TYPE",
       "IS_NULLABLE",
       "CHARACTER_MAXIMUM_LENGTH",
     ],
+    [TableEntity.indices]: ["INDEX_NAME", "NON_UNIQUE", "COLUMN_NAME"],
+    [TableEntity.constraints]: [
+      "CONSTRAINT_NAME",
+      "TABLE_NAME",
+      "COLUMN_NAME",
+      "REFERENCED_COLUMN_NAME",
+      "REFERENCED_TABLE_NAME",
+    ],
+    [TableEntity.triggers]: [
+      "TRIGGER_NAME",
+      "EVENT_MANIPULATION",
+      "EVENT_OBJECT_TABLE",
+      "ACTION_TIMING",
+      "ACTION_STATEMENT",
+    ],
   },
-};
+  [Dialect.Postgres]: {
+    [TableEntity.columns]: [
+      "COLUMN_NAME",
+      "DATA_TYPE",
+      "IS_NULLABLE",
+      "CHARACTER_MAXIMUM_LENGTH",
+    ],
+    [TableEntity.indices]: ["INDEX_NAME", "COLUMN_NAME"],
+    [TableEntity.constraints]: [
+      "CONSTRAINT_NAME",
+      "TABLE_NAME",
+      "COLUMN_NAME",
+      "REFERENCED_COLUMN_NAME",
+      "REFERENCED_TABLE_NAME",
+    ],
+    [TableEntity.triggers]: [
+      "TRIGGER_NAME",
+      "EVENT_MANIPULATION",
+      "EVENT_OBJECT_TABLE",
+      "ACTION_TIMING",
+      "ACTION_STATEMENT",
+    ],
+  },
+  [Dialect.Sqlite]: {
+    [TableEntity.columns]: [
+      "COLUMN_NAME",
+      "DATA_TYPE",
+      "IS_NULLABLE",
+      "CHARACTER_MAXIMUM_LENGTH",
+    ],
+    [TableEntity.indices]: ["INDEX_NAME", "COLUMN_NAME"],
+    [TableEntity.constraints]: [
+      "CONSTRAINT_NAME",
+      "TABLE_NAME",
+      "COLUMN_NAME",
+      "REFERENCED_COLUMN_NAME",
+      "REFERENCED_TABLE_NAME",
+    ],
+    [TableEntity.triggers]: [
+      "TRIGGER_NAME",
+      "EVENT_MANIPULATION",
+      "EVENT_OBJECT_TABLE",
+      "ACTION_TIMING",
+      "ACTION_STATEMENT",
+    ],
+  },
+} as const;

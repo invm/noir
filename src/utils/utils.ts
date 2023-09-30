@@ -1,4 +1,9 @@
-import { SORT_ORDER, TableStructureResult } from "interfaces";
+import {
+  DialectType,
+  Row,
+  SORT_ORDER,
+  TableStrucureEntityType,
+} from "interfaces";
 
 export const omit = (obj: any, ...keys: string[]) => {
   const copy = { ...obj };
@@ -35,10 +40,24 @@ export const debounce = (func: Function, wait: number) => {
   };
 };
 
-export const sortTableStructure = (tableStructure: TableStructureResult) => { };
+export const sortTableStructure = (
+  order: string[],
+  dialect: DialectType,
+  tableStructureEntity: TableStrucureEntityType
+) => {
+  return order.sort((a, b) => {
+    const sortOrder = SORT_ORDER[dialect][tableStructureEntity];
+    if (!sortOrder) return 0;
+    const aIndex = sortOrder.indexOf(a as never);
+    const bIndex = sortOrder.indexOf(b as never);
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+};
 
-// TODO: for all dialects
-export const columnsToSchema = (columns: Record<string, any>[]) => {
+// TODO: handle all dialects
+export const columnsToSchema = (columns: Row[], _dialect: DialectType) => {
   const schema = columns.reduce((acc: any, col: any) => {
     return {
       ...acc,

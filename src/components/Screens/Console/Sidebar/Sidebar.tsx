@@ -77,11 +77,11 @@ export const Sidebar = () => {
                 <For each={table.columns}>
                   {(column) => (
                     <div class="flex w-full justify-between items-center w-full border-b-2 border-base-300">
-                      <span class="text-xs">
+                      <span class="text-xs font-semibold text-warning">
                         <span class="px-1"></span>
                         {column.name}
                       </span>
-                      <span class="text-xs text-neutral-focus font-medium ml-2">
+                      <span class="text-xs font-medium ml-2">
                         {column.props.COLUMN_TYPE}
                       </span>
                     </div>

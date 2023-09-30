@@ -1,10 +1,10 @@
-import { ConnectionConfig, ConnectionModeType, SchemeType } from "interfaces";
+import { ConnectionConfig, ConnectionModeType, DialectType } from "interfaces";
 import { firstKey } from "utils/utils";
 import { ColorCircle } from "components/UI";
 import { ActionsMenu } from "./ActionsMenu";
 
 export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
-  const scheme = firstKey(props.connection.scheme) as SchemeType;
+  const scheme = firstKey(props.connection.scheme) as DialectType;
   const mode = firstKey(props.connection.scheme[scheme]!) as ConnectionModeType;
   const creds = props.connection.scheme[scheme]![mode];
   const connectionString =

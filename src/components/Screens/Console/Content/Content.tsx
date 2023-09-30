@@ -13,7 +13,6 @@ export const Content = () => {
       setContentIdx,
       addContentTab,
       removeContentTab,
-      getContent,
     },
   } = useAppSelector();
 
@@ -23,11 +22,11 @@ export const Content = () => {
         <For each={contentStore.tabs}>
           {(_tab, idx) => (
             <div
-              class="tab py-2 tab-md tab-lifted"
+              class="tab tab-md tab-lifted !pr-1 !pl-1"
               classList={{ "tab-active": contentStore.idx === idx() }}
             >
               <button
-                class="text-xs p-1 px-2"
+                class="text-xs p-1 px-3"
                 tabindex={0}
                 onClick={() => setContentIdx(idx())}
               >
@@ -36,7 +35,7 @@ export const Content = () => {
               <Show when={idx() > 0}>
                 <button
                   onClick={() => removeContentTab(idx())}
-                  class="ml-2 mb-1"
+                  class="ml-2 mb-1 p-1"
                 >
                   <CloseIcon />
                 </button>
@@ -44,21 +43,27 @@ export const Content = () => {
             </div>
           )}
         </For>
-        <div class="tab py-2 tab-sm tab-lifted tab-active">
+        <div class="tab tab-sm tab-lifted tab-active">
           <button onClick={() => addContentTab()}>
             <AddIcon />
           </button>
         </div>
       </div>
       <div class="flex-1">
-        <Switch>
-          <Match when={getContent()?.key === ContentTab.Query}>
-            <QueryTab />
-          </Match>
-          <Match when={getContent().key === ContentTab.TableStructure}>
-            <TableStructureTab />
-          </Match>
-        </Switch>
+        <For each={contentStore.tabs}>
+          {(tab, idx) => (
+            <Show when={contentStore.idx === idx()}>
+              <Switch>
+                <Match when={tab.key === ContentTab.Query}>
+                  <QueryTab />
+                </Match>
+                <Match when={tab.key === ContentTab.TableStructure}>
+                  <TableStructureTab />
+                </Match>
+              </Switch>
+            </Show>
+          )}
+        </For>
       </div>
     </div>
   );

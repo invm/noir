@@ -1,17 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: 'class',
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-  ],
+  darkMode: "class",
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },
-  plugins: [
-    require("daisyui")
-  ],
+  plugins: [require("daisyui")],
   daisyui: {
-    themes: ["dark", "aqua", "synthwave", "dracula", "night", "cupcake"], // true: all themes | false: only + dark | array: specific themes like this ["light", "dark", "cupcake"]
+    themes: [
+      "retro",
+      "forest",
+      "autumn",
+      "garden",
+      "business",
+      "dark",
+      "synthwave",
+      "dracula",
+      "night",
+      "cupcake",
+    ], // true: all themes | false: only + dark | array: specific themes like this ["light", "dark", "cupcake"]
     darkTheme: "dark", // name of one of the included themes for dark mode
     base: true, // applies background color and foreground color for root element by default
     styled: true, // include daisyUI colors and design decisions for all components
@@ -43,6 +50,5 @@ export default {
     "bg-fuchsia-500",
     "bg-pink-500",
     "bg-rose-500",
-  ]
-}
-
+  ],
+};
