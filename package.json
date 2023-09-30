@@ -23,7 +23,6 @@
     "codemirror": "^6.0.1",
     "fuse.js": "^6.6.2",
     "i18next": "^23.1.0",
-    "renderjson": "^1.4.0",
     "solid-codemirror": "^2.3.0",
     "solid-command-palette": "github:on3iro/solid-command-palette#update-dependencies",
     "solid-contextmenu": "^0.0.2",

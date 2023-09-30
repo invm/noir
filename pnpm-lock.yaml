@@ -38,9 +38,6 @@ dependencies:
   i18next:
     specifier: ^23.1.0
     version: 23.1.0
-  renderjson:
-    specifier: ^1.4.0
-    version: 1.4.0
   solid-codemirror:
     specifier: ^2.3.0
     version: 2.3.0(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(solid-js@1.7.7)
@@ -2899,10 +2896,6 @@ packages:
       call-bind: 1.0.2
       define-properties: 1.2.0
       functions-have-names: 1.2.3
-    dev: false
-
-  /renderjson@1.4.0:
-    resolution: {integrity: sha512-R0IZoxjWQP4XMJjLkPjNKSwjDyl20EiLohyu1Os7AvIvO4F4Vtar1N6IjJLPLjDN7OYOXTsqtIVJupQnQMvYQw==}
     dev: false
 
   /require-directory@2.1.1:
