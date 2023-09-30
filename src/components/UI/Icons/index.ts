@@ -1,8 +1,9 @@
-export * from './Add'
-export * from './Close'
-export * from './Edit'
-export * from './Fire'
-export * from './Pen'
-export * from './ThreeDots'
-export * from './Vim'
-
+export * from "./Add";
+export * from "./Close";
+export * from "./Edit";
+export * from "./Fire";
+export * from "./Home";
+export * from "./Pen";
+export * from "./QuestionMark";
+export * from "./ThreeDots";
+export * from "./Vim";
