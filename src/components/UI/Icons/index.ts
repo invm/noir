@@ -2,6 +2,7 @@ export * from "./Add";
 export * from "./ChevronLeft";
 export * from "./ChevronRight";
 export * from "./Close";
+export * from "./Copy";
 export * from "./Edit";
 export * from "./Fire";
 export * from "./Home";
