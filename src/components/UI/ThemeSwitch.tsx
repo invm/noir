@@ -1,10 +1,14 @@
 import { For, Show } from "solid-js";
 import { titleCase } from "../../utils/formatters";
 const THEMES = [
-  "dark",
-  "aqua",
+  "retro",
+  "forest",
+  "autumn",
+  "garden",
+  "business",
   "synthwave",
   "dracula",
+  "dark",
   "night",
   "cupcake",
 ] as const;
