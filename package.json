@@ -13,7 +13,9 @@
   "license": "MIT",
   "dependencies": {
     "@codemirror/commands": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.5.2",
+    "@codemirror/search": "^6.5.4",
     "@codemirror/state": "^6.2.1",
     "@codemirror/view": "^6.14.1",
     "@replit/codemirror-vim": "^6.0.14",

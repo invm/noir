@@ -29,6 +29,7 @@ import { t } from "utils/i18n";
 import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
 import { createShortcut } from "@solid-primitives/keyboard";
+import { search } from "@codemirror/search";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -54,12 +55,13 @@ export const QueryTextArea = (props: {
     onValueChange: setCode,
   });
   createEditorControlledValue(editorView, code);
-  createExtension(() => drawSelection());
-  createExtension(() => highlightWhitespace());
-  createExtension(() => highlightActiveLine());
+  createExtension(drawSelection);
+  createExtension(highlightWhitespace);
+  createExtension(highlightActiveLine);
   createExtension(dracula);
-  createExtension(() => (vimModeOn() ? vim() : []));
+  createExtension(search);
   createExtension(() => basicSetup);
+  createExtension(() => (vimModeOn() ? vim() : []));
   // TODO: add dialect and schema
   createExtension(() =>
     sql({

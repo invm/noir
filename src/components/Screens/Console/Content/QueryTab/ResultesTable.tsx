@@ -1,9 +1,44 @@
 import { Row } from "interfaces";
-import { createEffect } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-import { debounce } from "utils/utils";
+import { dracula } from "@uiw/codemirror-theme-dracula";
+import { search } from "@codemirror/search";
+import { basicSetup } from "codemirror";
+import { json } from "@codemirror/lang-json";
+import {
+  createCodeMirror,
+  createEditorControlledValue,
+} from "solid-codemirror";
+
+const parseObjRecursive = (obj: any): Record<string, any> => {
+  if (typeof obj === "object") {
+    if (Array.isArray(obj)) {
+      return obj.map(parseObjRecursive);
+    } else {
+      return Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)])
+      );
+    }
+  } else {
+    try {
+      return JSON.parse(obj);
+    } catch (e) {
+      return obj;
+    }
+  }
+};
 
 export const ResultsTable = (props: { rows: Row[] }) => {
+  const [code, setCode] = createSignal("console.log('hello world!')");
+  const { ref, editorView, createExtension } = createCodeMirror({
+    onValueChange: setCode,
+  });
+  createEditorControlledValue(editorView, code);
+  createExtension(() => search({ top: true }));
+  createExtension(dracula);
+  createExtension(basicSetup);
+  createExtension(json);
+
   createEffect(() => {
     let columns: { title: string; field: string; resizeable: boolean }[] = [];
     if (props.rows.length) {
@@ -35,15 +70,8 @@ export const ResultsTable = (props: { rows: Row[] }) => {
           label: "Show row in JSON",
           action: function(_e, row) {
             // @ts-ignore
-            const data = { ...row._row.data };
-            for (const key in data) {
-              if (data[key].startsWith('{"')) {
-                data[key] = JSON.parse(data[key]);
-              }
-            }
-
-            const div = document.getElementById("json-data");
-            div!.innerHTML = JSON.stringify(data, null, 4);
+            const data = parseObjRecursive(row._row.data);
+            setCode(JSON.stringify(data, null, 4));
             // @ts-ignore
             document.getElementById("my_modal_1").showModal();
           },
@@ -73,30 +101,12 @@ export const ResultsTable = (props: { rows: Row[] }) => {
     });
   });
 
-  const search = (input: string) => {
-    if (input === "") return;
-    const pre = document.getElementById("json-data");
-    const special = /[\\[{().+*?|^$]/g;
-    if (special.test(input)) input = input.replace(special, "\\$&");
-    const regExp = new RegExp(input, "gi");
-    const html = pre?.textContent?.replace(regExp, `<mark>$&</mark>`);
-    pre!.innerHTML = html + "";
-  };
-
   return (
     <>
       <dialog id="my_modal_1" class="modal">
-        <div class="modal-box">
-          <div class="flex items-center mb-6">
-            <input
-              type="text"
-              placeholder="Search"
-              onkeydown={debounce((e: any) => search(e.target.value), 200)}
-              class="input input-bordered input-sm w-full max-w-xs"
-            />
-          </div>
+        <div class="modal-box min-w-[800px]">
           <div>
-            <pre id="json-data"></pre>
+            <div ref={ref} />
           </div>
         </div>
         <form method="dialog" class="modal-backdrop">
