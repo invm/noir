@@ -1,10 +1,9 @@
 import { Row } from "interfaces";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect } from "solid-js";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-import renderjson from "renderjson";
+import { debounce } from "utils/utils";
 
 export const ResultsTable = (props: { rows: Row[] }) => {
-  const [modalData, setModalData] = createSignal("");
   createEffect(() => {
     let columns: { title: string; field: string; resizeable: boolean }[] = [];
     if (props.rows.length) {
@@ -34,19 +33,26 @@ export const ResultsTable = (props: { rows: Row[] }) => {
       rowContextMenu: [
         {
           label: "Show row in JSON",
-          action: function(e, column) {
-            renderjson.set_show_to_level(10);
+          action: function(_e, row) {
             // @ts-ignore
-            setModalData(column._row.data);
+            const data = { ...row._row.data };
+            for (const key in data) {
+              if (data[key].startsWith('{"')) {
+                data[key] = JSON.parse(data[key]);
+              }
+            }
+
+            const div = document.getElementById("json-data");
+            div!.innerHTML = JSON.stringify(data, null, 4);
             // @ts-ignore
             document.getElementById("my_modal_1").showModal();
           },
         },
         {
           label: "Copy row to clipboard",
-          action: function(e, column) {
+          action: function(_e, row) {
             // @ts-ignore
-            navigator.clipboard.writeText(JSON.stringify(column._row.data));
+            navigator.clipboard.writeText(JSON.stringify(row._row.data));
           },
         },
         {
@@ -67,12 +73,31 @@ export const ResultsTable = (props: { rows: Row[] }) => {
     });
   });
 
+  const search = (input: string) => {
+    if (input === "") return;
+    const pre = document.getElementById("json-data");
+    const special = /[\\[{().+*?|^$]/g;
+    if (special.test(input)) input = input.replace(special, "\\$&");
+    const regExp = new RegExp(input, "gi");
+    const html = pre?.textContent?.replace(regExp, `<mark>$&</mark>`);
+    pre!.innerHTML = html + "";
+  };
+
   return (
     <>
       <dialog id="my_modal_1" class="modal">
         <div class="modal-box">
-          <h3 class="font-bold text-lg">Hello!</h3>
-          <div>{renderjson(modalData())}</div>
+          <div class="flex items-center mb-6">
+            <input
+              type="text"
+              placeholder="Search"
+              onkeydown={debounce((e: any) => search(e.target.value), 200)}
+              class="input input-bordered input-sm w-full max-w-xs"
+            />
+          </div>
+          <div>
+            <pre id="json-data"></pre>
+          </div>
         </div>
         <form method="dialog" class="modal-backdrop">
           <button>close</button>
