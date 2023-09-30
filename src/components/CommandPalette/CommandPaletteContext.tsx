@@ -5,13 +5,11 @@ import { JSX } from "solid-js/jsx-runtime";
 import { onMount } from "solid-js";
 
 export interface ActionsContext {
-  showThemeSwitcher: () => void;
   [key: string]: any;
 }
 
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
-    appService: { toggleThemeSwitcher, appStore },
     connectionsService: {
       addContentTab,
       removeContentTab,
@@ -21,13 +19,7 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
     },
   } = useAppSelector();
 
-  const actionsContext: ActionsContext = {
-    showThemeSwitcher() {
-      toggleThemeSwitcher();
-      if (appStore.showThemeSwitcher)
-        document.getElementById("theme-switch")?.focus();
-    },
-  };
+  const actionsContext: ActionsContext = {};
 
   onMount(() => {
     document.onkeyup = function(e: KeyboardEvent) {

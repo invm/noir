@@ -1,22 +1,13 @@
 import { createEmitter } from "@solid-primitives/event-bus";
 import { defineAction } from "solid-command-palette";
 import { t } from "utils/i18n";
-import { ActionsContext } from "./CommandPaletteContext";
 
 export const commandPaletteEmitter = createEmitter<{
   "focus-query-text-area": boolean;
   "next-result-set": undefined;
   "prev-result-set": undefined;
-  "execute": undefined;
+  execute: undefined;
 }>();
-
-const showThemeSwitcher = defineAction({
-  id: "toggle_theme_switcher",
-  title: t("command_palette.toggle_theme_switcher"),
-  run: ({ rootContext }) => {
-    (rootContext as ActionsContext).showThemeSwitcher();
-  },
-});
 
 const focusOn = defineAction({
   id: "focus_on",
@@ -35,7 +26,6 @@ const focusQueryTextArea = defineAction({
 });
 
 export const actions = {
-  [showThemeSwitcher.id]: showThemeSwitcher,
   [focusQueryTextArea.id]: focusQueryTextArea,
   [focusOn.id]: focusOn,
 };
