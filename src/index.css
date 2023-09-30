@@ -93,6 +93,10 @@ input[type="number"] {
   height: 100%;
 }
 
+.cm-button {
+  @apply !rounded-full !text-xs !text-info ;
+}
+
 *:focus {
   outline-style: auto !important;
 }
