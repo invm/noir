@@ -164,7 +164,7 @@ const AddConnectionForm = (props: {
   };
 
   return (
-    <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-200">
+    <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-100">
       <form
         class="flex max-w-lg flex-col gap-1"
         autocomplete="off"

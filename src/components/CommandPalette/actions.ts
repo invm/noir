@@ -1,13 +1,5 @@
-import { createEmitter } from "@solid-primitives/event-bus";
 import { defineAction } from "solid-command-palette";
 import { t } from "utils/i18n";
-
-export const commandPaletteEmitter = createEmitter<{
-  "focus-query-text-area": boolean;
-  "next-result-set": undefined;
-  "prev-result-set": undefined;
-  execute: undefined;
-}>();
 
 const focusOn = defineAction({
   id: "focus_on",
@@ -19,9 +11,14 @@ const focusQueryTextArea = defineAction({
   title: t("command_palette.focus_query_text_area"),
   parentActionId: focusOn.id,
   /* Condition for allowing action */
-  shortcut: "$mod+d", // $mod = Command on Mac & Control on Windows.
+  shortcut: "$mod+l", // $mod = Command on Mac & Control on Windows.
   run: () => {
-    commandPaletteEmitter.emit("focus-query-text-area", true);
+    // document.dispatchEvent(
+    //   new KeyboardEvent("keydown", {
+    //     code: "KeyL", // put everything you need in this object.
+    //     ctrlKey: true, // if you aren't going to use them.
+    //   })
+    // );
   },
 });
 

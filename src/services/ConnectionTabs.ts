@@ -128,7 +128,6 @@ export const ConnectionTabsService = () => {
 
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
-    console.log({ conn_tabs });
     if (!conn_tabs.tabs) return;
     const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
       const res = await acc;
@@ -224,9 +223,20 @@ export const ConnectionTabsService = () => {
   };
 
   const setContentIdx = (i: number) => {
-    if (i <= contentStore.tabs.length) {
+    if (i < contentStore.tabs.length) {
       setContentStore("idx", i);
     }
+  };
+
+  const updateConnectionTab = <T extends keyof ConnectionTab>(
+    key: T,
+    data: ConnectionTab[T],
+    idx?: number
+  ) => {
+    const tab = getConnection();
+    if (!tab) return;
+    setConnectionStore("tabs", idx ?? connectionStore.idx - 1, key, data);
+    updateStore();
   };
 
   const updateContentTab = <T extends keyof ContentTab>(
@@ -258,5 +268,6 @@ export const ConnectionTabsService = () => {
     addContentTab,
     updateContentTab,
     removeContentTab,
+    updateConnectionTab,
   };
 };

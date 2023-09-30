@@ -46,7 +46,8 @@ export const TableColumnsCollapse = (props: {
           {t("components.sidebar.show_table_structure")}
         </Item>
       </Menu>
-      <div
+      <button
+        tabindex={0}
         onClick={() => setOpen(!open())}
         class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300"
       >
@@ -83,7 +84,7 @@ export const TableColumnsCollapse = (props: {
           </svg>
         </label>
         <span class="ml-1 font-semibold">{props.title}</span>
-      </div>
+      </button>
       {open() && props.children}
     </div>
   );

@@ -1,8 +1,8 @@
-import { actions, commandPaletteEmitter } from "./actions";
+import { actions } from "./actions";
 import { useAppSelector } from "services/Context";
 import { CommandPalette, Root } from "solid-command-palette";
 import { JSX } from "solid-js/jsx-runtime";
-import { onMount } from "solid-js";
+import { createShortcut } from "@solid-primitives/keyboard";
 
 export interface ActionsContext {
   [key: string]: any;
@@ -13,7 +13,6 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
     connectionsService: {
       addContentTab,
       removeContentTab,
-      getContentData,
       setContentIdx,
       setConnectionIdx,
     },
@@ -21,42 +20,13 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
 
   const actionsContext: ActionsContext = {};
 
-  onMount(() => {
-    document.onkeyup = function(e: KeyboardEvent) {
-      const number = e.code.startsWith("Digit")
-        ? +e.code.replace("Digit", "")
-        : null;
-      const { ctrlKey, metaKey, altKey, key, preventDefault, code } = e;
-      if (
-        (ctrlKey || metaKey || altKey) &&
-        number &&
-        number > 0 &&
-        number <= 9
-      ) {
-        preventDefault();
-        if (altKey) setContentIdx(number);
-        else setConnectionIdx(number - 1);
-      } else if ((ctrlKey || metaKey) && code === "KeyT") {
-        e.preventDefault();
-        if (e.shiftKey) removeContentTab();
-        else addContentTab();
-      } else if (code === "KeyE" && (ctrlKey || metaKey)) {
-        commandPaletteEmitter.emit("execute", undefined);
-      } else if (
-        key === "p" &&
-        ctrlKey &&
-        getContentData("Query").result_sets.length
-      ) {
-        commandPaletteEmitter.emit("prev-result-set", undefined);
-      } else if (
-        key === "n" &&
-        ctrlKey &&
-        getContentData("Query").result_sets.length
-      ) {
-        commandPaletteEmitter.emit("next-result-set", undefined);
-      }
-    };
-  });
+  for (let i = 0; i < 9; i++) {
+    createShortcut(["Alt", String(i)], () => setContentIdx(i - 1));
+    createShortcut(["Control", String(i)], () => setConnectionIdx(i - 1));
+  }
+
+  createShortcut(["Control", "T"], () => addContentTab());
+  createShortcut(["Control", "Shift", "T"], () => removeContentTab());
 
   return (
     <Root actions={actions} actionsContext={actionsContext}>

@@ -3,6 +3,10 @@ import { useAppSelector } from "services/Context";
 import { createSignal, For, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { t } from "utils/i18n";
+import { Refresh } from "components/UI/Icons";
+import { invoke } from "@tauri-apps/api";
+import { RawQueryResult } from "interfaces";
+import { columnsToSchema } from "utils/utils";
 
 type Table = {
   name: string;
@@ -14,7 +18,14 @@ type Table = {
 
 export const Sidebar = () => {
   const {
-    connectionsService: { getConnection },
+    errorService: { addError },
+    connectionsService: {
+      addConnectionTab,
+      getConnection,
+      setConnectionStore,
+      connectionStore,
+      updateConnectionTab,
+    },
   } = useAppSelector();
   const getSchema = () => getConnection()?.schema ?? {};
   const [displayedSchema, setDisplayedSchema] = createSignal("");
@@ -48,9 +59,23 @@ export const Sidebar = () => {
     setTables(transformSchema(_schema));
   };
 
+  const refreshEntities = async () => {
+    const config = getConnection().connection;
+    try {
+      await invoke("init_connection", { config });
+      const { result } = await invoke<RawQueryResult>("get_columns", {
+        connId: config.id,
+      });
+      const schema = columnsToSchema(result, config.dialect);
+      updateConnectionTab("schema", { schema });
+    } catch (error) {
+      addError(String(error));
+    }
+  };
+
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
-      <div class="pb-2 rounded-md">
+      <div class="pb-2 rounded-md flex justify-center items-center">
         <select
           id="schema"
           value={displayedSchema()}
@@ -65,6 +90,9 @@ export const Sidebar = () => {
             )}
           </For>
         </select>
+        <button onClick={refreshEntities} class="btn btn-xs">
+          <Refresh />
+        </button>
       </div>
       <div class="overflow-y-auto h-full">
         <div class="text-xs font-bold py-1">

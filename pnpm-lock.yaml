@@ -20,9 +20,9 @@ dependencies:
   '@replit/codemirror-vim':
     specifier: ^6.0.14
     version: 6.0.14(@codemirror/commands@6.2.5)(@codemirror/language@6.8.0)(@codemirror/search@6.5.3)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
-  '@solid-primitives/event-bus':
-    specifier: ^1.0.8
-    version: 1.0.8(solid-js@1.7.7)
+  '@solid-primitives/keyboard':
+    specifier: ^1.2.5
+    version: 1.2.5(solid-js@1.7.7)
   '@tauri-apps/api':
     specifier: ^1.4.0
     version: 1.4.0
@@ -67,10 +67,10 @@ dependencies:
     version: 5.5.1
   tauri-plugin-store-api:
     specifier: github:tauri-apps/tauri-plugin-store#v1
-    version: github.com/tauri-apps/tauri-plugin-store/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa
+    version: github.com/tauri-apps/tauri-plugin-store/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73
   tauri-plugin-window-state-api:
     specifier: github:tauri-apps/tauri-plugin-window-state#v1
-    version: github.com/tauri-apps/tauri-plugin-window-state/5ea9eb0d4a9affd17269f92c0085935046be3f4a
+    version: github.com/tauri-apps/tauri-plugin-window-state/c479a6d131999b4bcf0d05eb7fdb031f87a716d1
   tinykeys:
     specifier: ^2.1.0
     version: 2.1.0
@@ -1027,11 +1027,22 @@ packages:
       '@codemirror/view': 6.14.1
     dev: false
 
-  /@solid-primitives/event-bus@1.0.8(solid-js@1.7.7):
-    resolution: {integrity: sha512-vw9Q8oHL8h3WOxFiFFBE8lwJ1oOmCEdtFsOck3i66GPaJbmzHwBtQxTkAgF+DtpeSpSyCHlxKE7ojHnL4nl1Ww==}
+  /@solid-primitives/event-listener@2.3.0(solid-js@1.7.7):
+    resolution: {integrity: sha512-0DS7DQZvCExWSpurVZC9/wjI8RmkhuOtWOy6Pp1Woq9ElMT9/bfjNpkwXsOwisLpcTqh9eUs17kp7jtpWcC20w==}
     peerDependencies:
       solid-js: ^1.6.12
     dependencies:
+      '@solid-primitives/utils': 6.2.1(solid-js@1.7.7)
+      solid-js: 1.7.7
+    dev: false
+
+  /@solid-primitives/keyboard@1.2.5(solid-js@1.7.7):
+    resolution: {integrity: sha512-1axfWM1T4ASzZp4D91vLtxARevlBuOQ6yFHr1/IkuM/7OhMLo/BrO2CcDu3vSwCPVOSiZ2P875bTiqVWQV6e5g==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/event-listener': 2.3.0(solid-js@1.7.7)
+      '@solid-primitives/rootless': 1.4.2(solid-js@1.7.7)
       '@solid-primitives/utils': 6.2.1(solid-js@1.7.7)
       solid-js: 1.7.7
     dev: false
@@ -1042,6 +1053,15 @@ packages:
       solid-js: ^1.6.12
     dependencies:
       '@solid-primitives/utils': 6.2.0(solid-js@1.7.7)
+      solid-js: 1.7.7
+    dev: false
+
+  /@solid-primitives/rootless@1.4.2(solid-js@1.7.7):
+    resolution: {integrity: sha512-ynI/2aEOPyc14IKCX6yDBqnsAYCoLbaP9V/jejEWMVKOT2ZdV2ZxdftaLimOpWPpvjyti5DUJIGTOfLaNb7jlg==}
+    peerDependencies:
+      solid-js: ^1.6.12
+    dependencies:
+      '@solid-primitives/utils': 6.2.1(solid-js@1.7.7)
       solid-js: 1.7.7
     dev: false
 
@@ -1079,6 +1099,11 @@ packages:
 
   /@tauri-apps/api@1.4.0:
     resolution: {integrity: sha512-Jd6HPoTM1PZSFIzq7FB8VmMu3qSSyo/3lSwLpoapW+lQ41CL5Dow2KryLg+gyazA/58DRWI9vu/XpEeHK4uMdw==}
+    engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
+    dev: false
+
+  /@tauri-apps/api@1.5.0:
+    resolution: {integrity: sha512-yQY9wpVNuiYhLLuyDlu1nBpqJELT1fGp7OctN4rW9I2W1T2p7A3tqPxsEzQprEwneQRBAlPM9vC8NsnMbct+pg==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: false
 
@@ -3632,18 +3657,18 @@ packages:
       tinykeys: 2.1.0
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-store/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/a65ce9bfb168a9a3cd7ed4102b9f22770cc3abfa}
+  github.com/tauri-apps/tauri-plugin-store/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73}
     name: tauri-plugin-store-api
     version: 0.0.0
     dependencies:
-      '@tauri-apps/api': 1.4.0
+      '@tauri-apps/api': 1.5.0
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-window-state/5ea9eb0d4a9affd17269f92c0085935046be3f4a:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/5ea9eb0d4a9affd17269f92c0085935046be3f4a}
+  github.com/tauri-apps/tauri-plugin-window-state/c479a6d131999b4bcf0d05eb7fdb031f87a716d1:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/c479a6d131999b4bcf0d05eb7fdb031f87a716d1}
     name: tauri-plugin-window-state-api
     version: 0.0.0
     dependencies:
-      '@tauri-apps/api': 1.4.0
+      '@tauri-apps/api': 1.5.0
     dev: false
