@@ -36,14 +36,14 @@ export const QueryTextArea = (props: {
   onNextClick: () => void;
 }) => {
   const {
-    connectionsService: {
+    connections: {
       updateContentTab,
       getConnection,
       getContent,
       getContentData,
     },
+    app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
-  const [vimModeOn, setVimModeOn] = createSignal(true);
   const [code, setCode] = createSignal("");
 
   const updateQueryText = async (query: string) => {
@@ -175,7 +175,7 @@ export const QueryTextArea = (props: {
                   "toggle-success": vimModeOn(),
                 }}
                 checked={vimModeOn()}
-                onChange={() => setVimModeOn((v) => !v)}
+                onChange={() => toggleVimModeOn()}
               />
             </div>
           </div>

@@ -4,11 +4,11 @@ import { AddIcon, CloseIcon } from "components/UI/Icons";
 import { t } from "utils/i18n";
 import { QueryTab } from "./QueryTab/QueryTab";
 import { TableStructureTab } from "./TableStructure/TableStructureTab";
-import { ContentTab } from "services/ConnectionTabs";
+import { ContentTab } from "services/Connections";
 
 export const Content = () => {
   const {
-    connectionsService: {
+    connections: {
       contentStore,
       setContentIdx,
       addContentTab,

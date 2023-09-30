@@ -10,7 +10,7 @@ export interface ActionsContext {
 
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
-    connectionsService: {
+    connections: {
       addContentTab,
       removeContentTab,
       setContentIdx,

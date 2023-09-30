@@ -5,8 +5,8 @@ import { columnsToSchema } from "utils/utils";
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const {
-    errorService: { addError },
-    connectionsService: { addConnectionTab },
+    errors: { addError },
+    connections: { addConnectionTab },
   } = useAppSelector();
 
   const onConnect = async () => {

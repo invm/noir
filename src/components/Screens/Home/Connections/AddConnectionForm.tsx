@@ -137,7 +137,7 @@ const AddConnectionForm = (props: {
   }) => Promise<void>;
 }) => {
   const {
-    errorService: { addError },
+    errors: { addError },
   } = useAppSelector();
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema));
   const { formData, setFieldDefaultValue, getFormErrors, setFieldValue } =

@@ -2,7 +2,7 @@ import { For } from "solid-js"
 import { useAppSelector } from "../../services/Context"
 
 export const Alerts = () => {
-  const { errorService: { errors } } = useAppSelector()
+  const { errors: { errors } } = useAppSelector()
   return (
     <div class="absolute">
       <div class="toast">

@@ -5,6 +5,7 @@ import { debounce } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
 
 const store = new Store(".connections.dat");
+const INTERVAL = 1000;
 
 export const MessageType = {
   error: "error",
@@ -115,7 +116,7 @@ type ContentStore = {
 
 import { ErrorService } from "./Error";
 
-export const ConnectionTabsService = () => {
+export const ConnectionsService = () => {
   const [connectionStore, setConnectionStore] = createStore<ConnectionStore>({
     tabs: [],
     idx: 0,
@@ -158,7 +159,7 @@ export const ConnectionTabsService = () => {
       JSON.stringify({ idx: contentStore.idx, tabs })
     );
     await store.save();
-  }, 3000);
+  }, INTERVAL);
 
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
