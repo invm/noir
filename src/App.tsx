@@ -10,7 +10,8 @@ import { useAppSelector } from "services/Context";
 function App() {
   const [loading, setLoading] = createSignal(true);
   const {
-    connectionsService: { restoreConnectionStore },
+    connections: { restoreConnectionStore },
+    app: { restoreAppStore },
   } = useAppSelector();
 
   createEffect(() => {
@@ -22,6 +23,7 @@ function App() {
   onMount(async () => {
     const theme = localStorage.getItem("theme") || "dark";
     document.documentElement.dataset.theme = theme;
+    await restoreAppStore();
     await restoreConnectionStore();
   });
 

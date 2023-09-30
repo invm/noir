@@ -10,7 +10,7 @@ import { useAppSelector } from "services/Context";
 
 export const TableStructureTab = () => {
   const {
-    connectionsService: { getContentData, getConnection },
+    connections: { getContentData, getConnection },
   } = useAppSelector();
   const [tab, setTab] = createSignal<TableStrucureEntityType>(
     TableEntity.columns

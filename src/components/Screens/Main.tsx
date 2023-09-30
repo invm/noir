@@ -8,7 +8,7 @@ import { Settings } from "./Settings/Settings";
 
 export const Main = () => {
   const {
-    connectionsService: {
+    connections: {
       removeConnectionTab,
       connectionStore,
       setConnectionStore,

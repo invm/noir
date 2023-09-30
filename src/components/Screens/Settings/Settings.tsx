@@ -3,7 +3,7 @@ import { useAppSelector } from "services/Context";
 
 export const Settings = () => {
   const {
-    connectionsService: { clearStore },
+    connections: { clearStore },
   } = useAppSelector();
 
   return (

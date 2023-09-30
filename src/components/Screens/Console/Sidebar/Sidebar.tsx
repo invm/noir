@@ -18,14 +18,8 @@ type Table = {
 
 export const Sidebar = () => {
   const {
-    errorService: { addError },
-    connectionsService: {
-      addConnectionTab,
-      getConnection,
-      setConnectionStore,
-      connectionStore,
-      updateConnectionTab,
-    },
+    errors: { addError },
+    connections: { getConnection, updateConnectionTab },
   } = useAppSelector();
   const getSchema = () => getConnection()?.schema ?? {};
   const [displayedSchema, setDisplayedSchema] = createSignal("");

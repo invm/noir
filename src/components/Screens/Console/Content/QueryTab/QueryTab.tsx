@@ -9,7 +9,7 @@ import { createShortcut } from "@solid-primitives/keyboard";
 
 export const QueryTab = () => {
   const {
-    connectionsService: { getContent },
+    connections: { getContent },
   } = useAppSelector();
   const [idx, setIdx] = createSignal(0);
   createEffect(() => {
@@ -27,7 +27,7 @@ export const QueryTab = () => {
   });
 
   const {
-    connectionsService: { getContentData },
+    connections: { getContentData },
   } = useAppSelector();
   const [rows, setRows] = createStore<Row[]>([]);
 

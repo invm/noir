@@ -5,7 +5,7 @@ import { useAppSelector } from "services/Context";
 import {
   newContentTab,
   TableStructureContentTabData,
-} from "services/ConnectionTabs";
+} from "services/Connections";
 
 import { invoke } from "@tauri-apps/api";
 
@@ -16,8 +16,8 @@ export const TableColumnsCollapse = (props: {
   const [open, setOpen] = createSignal(false);
 
   const {
-    connectionsService: { addContentTab, getConnection },
-    errorService: { addError },
+    connections: { addContentTab, getConnection },
+    errors: { addError },
   } = useAppSelector();
 
   const menu_id = "sidebar-table-menu";
