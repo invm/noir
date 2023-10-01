@@ -3,7 +3,7 @@ import { createEffect, createSignal } from "solid-js";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { dracula } from "@uiw/codemirror-theme-dracula";
 import { search } from "@codemirror/search";
-import { basicSetup } from "codemirror";
+import { basicSetup, EditorView } from "codemirror";
 import { json } from "@codemirror/lang-json";
 import {
   createCodeMirror,
@@ -14,7 +14,7 @@ const parseObjRecursive = (obj: any): Record<string, any> => {
   if (typeof obj === "object") {
     if (Array.isArray(obj)) {
       return obj.map(parseObjRecursive);
-    } else {
+    } else if (obj !== null) {
       return Object.fromEntries(
         Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)])
       );
@@ -38,6 +38,9 @@ export const ResultsTable = (props: { rows: Row[] }) => {
   createExtension(dracula);
   createExtension(basicSetup);
   createExtension(json);
+
+  const lineWrapping = EditorView.lineWrapping;
+  createExtension(lineWrapping);
 
   createEffect(() => {
     let columns: { title: string; field: string; resizeable: boolean }[] = [];
@@ -70,6 +73,7 @@ export const ResultsTable = (props: { rows: Row[] }) => {
           label: "Show row in JSON",
           action: function(_e, row) {
             // @ts-ignore
+            console.log(row._row.data)
             const data = parseObjRecursive(row._row.data);
             setCode(JSON.stringify(data, null, 4));
             // @ts-ignore
