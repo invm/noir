@@ -27,8 +27,7 @@ export const TableColumnsCollapse = (props: {
     props: { table: props.title },
   });
 
-  const addTableStructureTab = async (table: string) => {
-    try {
+  const addTableStructureTab = async (table: string) => { try {
       const data = await invoke<TableStructureContentTabData>(
         "get_table_structure",
         { connId: getConnection().id, table }
@@ -40,14 +39,16 @@ export const TableColumnsCollapse = (props: {
   };
 
   return (
-    <div class="w-full border-b-[0.5px] border-neutral-800" onContextMenu={(e) => show(e)}>
+    <div
+      class="w-full border-b-[0.5px] border-neutral-800"
+      onContextMenu={(e) => show(e)}
+    >
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>
           {t("components.sidebar.show_table_structure")}
         </Item>
       </Menu>
-      <button
-        tabindex={0}
+      <span
         onClick={() => setOpen(!open())}
         class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300"
       >
@@ -84,7 +85,7 @@ export const TableColumnsCollapse = (props: {
           </svg>
         </label>
         <span class="ml-1 font-semibold">{props.title}</span>
-      </button>
+      </span>
       {open() && props.children}
     </div>
   );

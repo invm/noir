@@ -3,15 +3,7 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import {
-  Accessor,
-  createEffect,
-  createSignal,
-  For,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
 import {
   EditorView,
   drawSelection,

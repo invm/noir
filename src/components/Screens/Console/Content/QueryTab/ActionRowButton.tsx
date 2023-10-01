@@ -1,5 +1,4 @@
-import { Refresh } from "components/UI/Icons";
-import { Match, Show, Switch } from "solid-js";
+import { Match, Switch } from "solid-js";
 import { JSX } from "solid-js/jsx-runtime";
 
 type ActionRowButton = {
@@ -24,9 +23,7 @@ export const ActionRowButton = (props: ActionRowButton) => {
           <Match when={props.loading}>
             <span class="loading text-primary loading-bars loading-xs"></span>
           </Match>
-          <Match when={!props.loading}>
-            {props.icon}
-          </Match>
+          <Match when={!props.loading}>{props.icon}</Match>
         </Switch>
       </button>
     </div>

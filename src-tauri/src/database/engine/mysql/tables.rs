@@ -95,7 +95,7 @@ pub async fn get_functions(conn: &ConnectedConnection, pool: &Pool) -> Result<Va
 pub async fn get_procedures(conn: &ConnectedConnection, pool: &Pool) -> Result<Value> {
     let db_name = conn.config.get_db_name();
     let mut _conn = pool.get_conn()?;
-    let query = format!("SHOW PROCEDURE STATUS WHERE DB = '{}';", db_name);
+    let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", db_name);
     let procedures = raw_query(_conn, query)?;
     Ok(procedures)
 }

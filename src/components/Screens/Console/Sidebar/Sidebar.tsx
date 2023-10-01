@@ -43,6 +43,11 @@ export const Sidebar = () => {
       });
       const schema = columnsToSchema(result, config.dialect);
       updateConnectionTab("schema", { schema });
+
+      const procedures = await invoke<RawQueryResult>("get_procedures", {
+        connId: getConnection().id,
+      });
+      console.log({ procedures });
     } catch (error) {
       addError(String(error));
     } finally {
@@ -67,7 +72,11 @@ export const Sidebar = () => {
             )}
           </For>
         </select>
-        <button onClick={refreshEntities} disabled={loading()} class="btn btn-xs">
+        <button
+          onClick={refreshEntities}
+          disabled={loading()}
+          class="ml-2 btn btn-xs"
+        >
           <Switch>
             <Match when={loading()}>
               <span class="loading text-primary loading-bars loading-xs"></span>
@@ -89,7 +98,7 @@ export const Sidebar = () => {
                 <For each={table.columns}>
                   {(column) => (
                     <div class="flex w-full justify-between items-center w-full border-b-2 border-base-300">
-                      <span class="text-xs font-semibold text-warning">
+                      <span class="text-xs font-semibold">
                         <span class="px-1"></span>
                         {column.name}
                       </span>
