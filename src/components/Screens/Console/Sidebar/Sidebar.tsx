@@ -1,56 +1,35 @@
 import { TableColumnsCollapse } from "./TableColumnsCollapse";
 import { useAppSelector } from "services/Context";
-import { createSignal, For, onMount } from "solid-js";
+import { For, onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { t } from "utils/i18n";
 import { Refresh } from "components/UI/Icons";
 import { invoke } from "@tauri-apps/api";
-import { RawQueryResult } from "interfaces";
+import { RawQueryResult, Table } from "interfaces";
 import { columnsToSchema } from "utils/utils";
-
-type Table = {
-  name: string;
-  columns: {
-    name: string;
-    props: Record<string, any>;
-  }[];
-};
 
 export const Sidebar = () => {
   const {
     errors: { addError },
-    connections: { getConnection, updateConnectionTab },
+    connections: {
+      getConnection,
+      updateConnectionTab,
+      connectionStore,
+      setConnectionStore,
+      getSchemaTables,
+    },
   } = useAppSelector();
-  const getSchema = () => getConnection()?.schema ?? {};
-  const [displayedSchema, setDisplayedSchema] = createSignal("");
   const [tables, setTables] = createStore<Table[]>([]);
 
   onMount(() => {
-    const _schema = Object.keys(getSchema())[0];
-    setDisplayedSchema(_schema);
-    setTables(transformSchema(_schema));
+    if (connectionStore.schema) {
+      setTables(getSchemaTables(connectionStore.schema));
+    }
   });
 
-  const transformSchema = (sch: string) => {
-    const _tables = Object.entries(getSchema()[sch]).reduce(
-      (acc: any, [name, columns]) => [
-        ...acc,
-        {
-          name,
-          columns: Object.entries(columns).reduce(
-            (cols: any, [name, props]) => [...cols, { name, props }],
-            []
-          ),
-        },
-      ],
-      []
-    );
-    return _tables;
-  };
-
-  const select = (_schema: string) => {
-    setDisplayedSchema(_schema);
-    setTables(transformSchema(_schema));
+  const select = (schema: string) => {
+    setConnectionStore("schema", schema);
+    setTables(getSchemaTables(schema));
   };
 
   const refreshEntities = async () => {
@@ -72,11 +51,11 @@ export const Sidebar = () => {
       <div class="pb-2 rounded-md flex justify-center items-center">
         <select
           id="schema"
-          value={displayedSchema()}
+          value={connectionStore.schema}
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full"
         >
-          <For each={Object.keys(getSchema())}>
+          <For each={Object.keys(getConnection().schema)}>
             {(_schema) => (
               <option class="py-1" value={_schema}>
                 {_schema}

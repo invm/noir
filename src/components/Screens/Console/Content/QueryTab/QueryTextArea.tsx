@@ -30,6 +30,7 @@ import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
 import { createShortcut } from "@solid-primitives/keyboard";
 import { search } from "@codemirror/search";
+import { createStore } from "solid-js/store";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -42,10 +43,12 @@ export const QueryTextArea = (props: {
       getConnection,
       getContent,
       getContentData,
+      getSchemaTables,
     },
     app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
   const [code, setCode] = createSignal("");
+  const [schema, setSchema] = createStore({});
 
   const updateQueryText = async (query: string) => {
     updateContentTab("data", { query });
@@ -63,12 +66,7 @@ export const QueryTextArea = (props: {
   createExtension(() => basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
   // TODO: add dialect and schema
-  createExtension(() =>
-    sql({
-      dialect: MySQL,
-      schema: { account: ["added_on"] },
-    })
-  );
+  createExtension(() => sql({ dialect: MySQL, schema }));
   const { setFocused } = createEditorFocus(editorView);
   // TODO: add option to scroll inside autocompletion list with c-l and c-k
   // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
@@ -117,6 +115,15 @@ export const QueryTextArea = (props: {
 
   createEffect(() => {
     setCode(getContentData("Query").query ?? "");
+    setSchema(
+      getSchemaTables().reduce(
+        (acc, table) => ({
+          ...acc,
+          [table.name]: table.columns.map(({ name }) => name),
+        }),
+        {}
+      )
+    );
   });
 
   createShortcut(["Control", "e"], onExecute);
