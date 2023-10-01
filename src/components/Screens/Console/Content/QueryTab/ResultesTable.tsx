@@ -18,6 +18,8 @@ const parseObjRecursive = (obj: any): Record<string, any> => {
       return Object.fromEntries(
         Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)])
       );
+    } else {
+      return obj;
     }
   } else {
     try {
@@ -29,7 +31,7 @@ const parseObjRecursive = (obj: any): Record<string, any> => {
 };
 
 export const ResultsTable = (props: { rows: Row[] }) => {
-  const [code, setCode] = createSignal("console.log('hello world!')");
+  const [code, setCode] = createSignal("");
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
   });
@@ -73,7 +75,6 @@ export const ResultsTable = (props: { rows: Row[] }) => {
           label: "Show row in JSON",
           action: function(_e, row) {
             // @ts-ignore
-            console.log(row._row.data)
             const data = parseObjRecursive(row._row.data);
             setCode(JSON.stringify(data, null, 4));
             // @ts-ignore
