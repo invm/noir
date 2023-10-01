@@ -1,6 +1,6 @@
 import { TableColumnsCollapse } from "./TableColumnsCollapse";
 import { useAppSelector } from "services/Context";
-import { For, onMount } from "solid-js";
+import { createSignal, For, Match, onMount, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { t } from "utils/i18n";
 import { Refresh } from "components/UI/Icons";
@@ -20,6 +20,7 @@ export const Sidebar = () => {
     },
   } = useAppSelector();
   const [tables, setTables] = createStore<Table[]>([]);
+  const [loading, setLoading] = createSignal(false);
 
   onMount(() => {
     if (connectionStore.schema) {
@@ -35,6 +36,7 @@ export const Sidebar = () => {
   const refreshEntities = async () => {
     const config = getConnection().connection;
     try {
+      setLoading(true);
       await invoke("init_connection", { config });
       const { result } = await invoke<RawQueryResult>("get_columns", {
         connId: config.id,
@@ -43,6 +45,8 @@ export const Sidebar = () => {
       updateConnectionTab("schema", { schema });
     } catch (error) {
       addError(String(error));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,8 +67,15 @@ export const Sidebar = () => {
             )}
           </For>
         </select>
-        <button onClick={refreshEntities} class="btn btn-xs">
-          <Refresh />
+        <button onClick={refreshEntities} disabled={loading()} class="btn btn-xs">
+          <Switch>
+            <Match when={loading()}>
+              <span class="loading text-primary loading-bars loading-xs"></span>
+            </Match>
+            <Match when={!loading()}>
+              <Refresh />
+            </Match>
+          </Switch>
         </button>
       </div>
       <div class="overflow-y-auto h-full">
