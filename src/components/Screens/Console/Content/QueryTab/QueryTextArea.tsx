@@ -3,7 +3,15 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
+import {
+  Accessor,
+  createEffect,
+  createSignal,
+  For,
+  Match,
+  Show,
+  Switch,
+} from "solid-js";
 import {
   EditorView,
   drawSelection,
@@ -31,6 +39,7 @@ import { basicSetup } from "codemirror";
 import { createShortcut } from "@solid-primitives/keyboard";
 import { search } from "@codemirror/search";
 import { createStore } from "solid-js/store";
+import { ActionRowButton } from "./ActionRowButton";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -49,6 +58,7 @@ export const QueryTextArea = (props: {
   } = useAppSelector();
   const [code, setCode] = createSignal("");
   const [schema, setSchema] = createStore({});
+  const [loading, setLoading] = createSignal(false);
 
   const updateQueryText = async (query: string) => {
     updateContentTab("data", { query });
@@ -94,6 +104,8 @@ export const QueryTextArea = (props: {
   };
 
   const onExecute = async () => {
+    if (loading()) return;
+    setLoading(true);
     const selectedText = getSelection();
     updateContentTab("error", undefined);
     const activeConnection = getConnection();
@@ -106,6 +118,8 @@ export const QueryTextArea = (props: {
       // console.log({ result_sets });
     } catch (error) {
       updateContentTab("error", String(error));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,42 +146,25 @@ export const QueryTextArea = (props: {
 
   return (
     <div class="flex-1 flex flex-col">
-      <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex items-center">
+      <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("components.console.actions.format")}
-          >
-            <button
-              class="btn btn-ghost btn-xs mr-2"
-              onClick={() => onFormat()}
-            >
-              <EditIcon />
-            </button>
-          </div>
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("components.console.actions.execute")}
-          >
-            <button
-              class="btn btn-ghost btn-xs mr-2"
-              onClick={() => onExecute()}
-            >
-              <FireIcon />
-            </button>
-          </div>
+          <ActionRowButton
+            dataTip={t("components.console.actions.format")}
+            onClick={onFormat}
+            icon={<EditIcon />}
+          />
+          <ActionRowButton
+            dataTip={t("components.console.actions.execute")}
+            onClick={onExecute}
+            loading={loading()}
+            icon={<FireIcon />}
+          />
 
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("components.console.actions.copy_query")}
-          >
-            <button
-              class="btn btn-ghost btn-xs mr-2"
-              onClick={() => copyQueryToClipboard()}
-            >
-              <Copy />
-            </button>
-          </div>
+          <ActionRowButton
+            dataTip={t("components.console.actions.copy_query")}
+            onClick={copyQueryToClipboard}
+            icon={<Copy />}
+          />
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
@@ -189,7 +186,6 @@ export const QueryTextArea = (props: {
             </div>
           </div>
         </div>
-
         <Show when={getContent().error}>
           <Alert color="error">{getContent().error}</Alert>
         </Show>
