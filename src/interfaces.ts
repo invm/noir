@@ -213,3 +213,11 @@ export const SORT_ORDER = {
     ],
   },
 } as const;
+
+export type Table = {
+  name: string;
+  columns: {
+    name: string;
+    props: Record<string, any>;
+  }[];
+};

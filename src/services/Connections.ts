@@ -1,8 +1,9 @@
 import { createStore, produce } from "solid-js/store";
-import { ConnectionConfig, ResultSet, Row, TableEntity } from "../interfaces";
+import { ConnectionConfig, ResultSet, Row, Table, TableEntity } from "../interfaces";
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
+import { ErrorService } from "./Error";
 
 const store = new Store(".connections.dat");
 const INTERVAL = 1000;
@@ -107,6 +108,7 @@ const getSavedData = async (key: string, defaultValue: any = []) => {
 type ConnectionStore = {
   tabs: ConnectionTab[];
   idx: number;
+  schema: string;
 };
 
 type ContentStore = {
@@ -114,12 +116,11 @@ type ContentStore = {
   idx: number;
 };
 
-import { ErrorService } from "./Error";
-
 export const ConnectionsService = () => {
   const [connectionStore, setConnectionStore] = createStore<ConnectionStore>({
     tabs: [],
     idx: 0,
+    schema: "",
   });
 
   const [contentStore, setContentStore] = createStore<ContentStore>({
@@ -251,6 +252,25 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
+  const getSchemaTables = (
+    sch = connectionStore.schema
+  ): Table[] => {
+    const _tables = Object.entries(getConnection().schema[sch]).reduce(
+      (acc: any, [name, columns]) => [
+        ...acc,
+        {
+          name,
+          columns: Object.entries(columns).reduce(
+            (cols: any, [name, props]) => [...cols, { name, props }],
+            []
+          ),
+        },
+      ],
+      []
+    );
+    return _tables;
+  };
+
   return {
     connectionStore,
     setConnectionStore,
@@ -270,5 +290,6 @@ export const ConnectionsService = () => {
     updateContentTab,
     removeContentTab,
     updateConnectionTab,
+    getSchemaTables,
   };
 };
