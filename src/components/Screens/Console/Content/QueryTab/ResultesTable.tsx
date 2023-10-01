@@ -36,7 +36,7 @@ export const ResultsTable = (props: { rows: Row[] }) => {
     onValueChange: setCode,
   });
   createEditorControlledValue(editorView, code);
-  createExtension(() => search({ top: true }));
+  createExtension(() => search());
   createExtension(dracula);
   createExtension(basicSetup);
   createExtension(json);
@@ -109,7 +109,7 @@ export const ResultsTable = (props: { rows: Row[] }) => {
   return (
     <>
       <dialog id="my_modal_1" class="modal">
-        <div class="modal-box min-w-[800px]">
+        <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
           <div>
             <div ref={ref} />
           </div>

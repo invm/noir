@@ -166,6 +166,10 @@ dialog {
   @apply bg-base-300 cursor-pointer font-semibold text-base text-primary !important;
 }
 
+.tabulator-menu-item {
+  @apply text-base-content bg-base-300 !important;
+}
+
 #results {
   -webkit-user-select: auto; /* Safari */
   -ms-user-select: auto; /* IE 10 and IE 11 */
