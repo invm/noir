@@ -3,7 +3,7 @@ import { ConnectionConfig, ResultSet, Row, Table, TableEntity } from "../interfa
 import { Store } from "tauri-plugin-store-api";
 import { debounce } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
-import { ErrorService } from "./Error";
+import { MessageService } from "./Messages";
 
 const store = new Store(".connections.dat");
 const INTERVAL = 1000;
@@ -138,7 +138,7 @@ export const ConnectionsService = () => {
         return Promise.resolve([...res, conn]);
       } catch (e) {
         conn_tabs.idx = 0;
-        ErrorService().addError(e);
+        MessageService().notify(e);
         return Promise.resolve(res);
       }
     }, Promise.resolve([] as ConnectionTab[]));

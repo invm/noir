@@ -5,7 +5,7 @@ import { columnsToSchema } from "utils/utils";
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const {
-    errors: { addError },
+    messages: { notify },
     connections: { addConnectionTab },
   } = useAppSelector();
 
@@ -24,7 +24,7 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
         connection: config,
       });
     } catch (error) {
-      addError(String(error));
+      notify(String(error));
     }
   };
 

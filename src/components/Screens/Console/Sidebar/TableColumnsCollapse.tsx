@@ -8,6 +8,7 @@ import {
 } from "services/Connections";
 
 import { invoke } from "@tauri-apps/api";
+import { QueryResult } from "interfaces";
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -17,7 +18,7 @@ export const TableColumnsCollapse = (props: {
 
   const {
     connections: { addContentTab, getConnection },
-    errors: { addError },
+    messages: { notify },
   } = useAppSelector();
 
   const menu_id = "sidebar-table-menu";
@@ -27,14 +28,44 @@ export const TableColumnsCollapse = (props: {
     props: { table: props.title },
   });
 
-  const addTableStructureTab = async (table: string) => { try {
+  const addTableStructureTab = async (table: string) => {
+    try {
       const data = await invoke<TableStructureContentTabData>(
         "get_table_structure",
         { connId: getConnection().id, table }
       );
       addContentTab(newContentTab(table, "TableStructure", data));
     } catch (error) {
-      addError(error);
+      notify(error);
+    }
+  };
+
+  const listData = async (table: string) => {
+    try {
+      const query = "SELECT * from " + table + " LIMIT 1000";
+      const { result_sets } = await invoke<QueryResult>("execute_query", {
+        connId: getConnection().id,
+        query,
+        autoLimit: true,
+      });
+      const data = { query, executed: true, result_sets };
+      addContentTab(newContentTab(table, "Query", data));
+    } catch (error) {
+      notify(error);
+    }
+  };
+
+  const truncateTable = async (table: string) => {
+    try {
+      const query = "TRUNCATE TABLE " + table;
+      await invoke<QueryResult>("execute_query", {
+        connId: getConnection().id,
+        query,
+        autoLimit: false,
+      });
+      notify(t("components.sidebar.table_was_truncated", { table }), "success");
+    } catch (error) {
+      notify(error);
     }
   };
 
@@ -46,6 +77,12 @@ export const TableColumnsCollapse = (props: {
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>
           {t("components.sidebar.show_table_structure")}
+        </Item>
+        <Item onClick={({ props }) => listData(props.table)}>
+          {t("components.sidebar.list_data")}
+        </Item>
+        <Item onClick={({ props }) => truncateTable(props.table)}>
+          {t("components.sidebar.truncate_table")}
         </Item>
       </Menu>
       <span
