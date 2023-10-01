@@ -51,7 +51,7 @@ export const QueryTextArea = (props: {
   const [code, setCode] = createSignal("");
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
-  const [autoLimit, setAutoLimit] = createSignal(false);
+  const [autoLimit, setAutoLimit] = createSignal(true);
 
   const updateQueryText = async (query: string) => {
     updateContentTab("data", { query });
