@@ -1,16 +1,16 @@
 import { createContext, ParentComponent, useContext } from "solid-js";
-import { ErrorService } from "./Error";
+import { MessageService } from "./Messages";
 import { ConnectionsService } from "./Connections";
 import { AppService } from "./App";
 
 export type RootState = {
-  errors: ReturnType<typeof ErrorService>;
+  messages: ReturnType<typeof MessageService>;
   connections: ReturnType<typeof ConnectionsService>;
   app: ReturnType<typeof AppService>;
 };
 
 const rootState: RootState = {
-  errors: ErrorService(),
+  messages: MessageService(),
   connections: ConnectionsService(),
   app: AppService(),
 };

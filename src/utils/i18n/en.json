@@ -39,7 +39,8 @@
           "format": "Format",
           "execute": "Execute",
           "vim_mode_on": "Vim mode on",
-          "copy_query": "Copy query to clipboard"
+          "copy_query": "Copy query to clipboard",
+          "limit": "LIMIT 1000"
         },
         "zero_results": "0 rows retuned",
         "result_set": "Result set ",
@@ -47,7 +48,10 @@
       },
       "sidebar": {
         "show_table_structure": "Show table structure",
-        "tables": "Tables"
+        "list_data": "List data",
+        "truncate_table": "Truncate table",
+        "tables": "Tables",
+        "table_was_truncated": "Table {{table}} was truncated"
       },
       "theme_switch": {
         "theme": "Theme"

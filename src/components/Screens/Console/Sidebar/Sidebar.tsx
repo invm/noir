@@ -10,7 +10,7 @@ import { columnsToSchema } from "utils/utils";
 
 export const Sidebar = () => {
   const {
-    errors: { addError },
+    messages: { notify },
     connections: {
       getConnection,
       updateConnectionTab,
@@ -49,7 +49,7 @@ export const Sidebar = () => {
       });
       console.log({ procedures });
     } catch (error) {
-      addError(String(error));
+      notify(String(error), 'info');
     } finally {
       setLoading(false);
     }

@@ -51,6 +51,7 @@ export const QueryTextArea = (props: {
   const [code, setCode] = createSignal("");
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
+  const [autoLimit, setAutoLimit] = createSignal(false);
 
   const updateQueryText = async (query: string) => {
     updateContentTab("data", { query });
@@ -105,6 +106,7 @@ export const QueryTextArea = (props: {
       const { result_sets } = await invoke<QueryResult>("execute_query", {
         connId: activeConnection.id,
         query: selectedText || code(),
+        autoLimit: autoLimit(),
       });
       updateContentTab("data", { query: code(), executed: true, result_sets });
       // console.log({ result_sets });
@@ -157,6 +159,17 @@ export const QueryTextArea = (props: {
             onClick={copyQueryToClipboard}
             icon={<Copy />}
           />
+          <div class="form-control">
+            <label class="cursor-pointer label">
+              <span class="label-text font-semibold mr-2">{t("components.console.actions.limit")}</span>
+              <input
+                type="checkbox"
+                checked={autoLimit()}
+                onChange={e => setAutoLimit(e.target.checked)}
+                class="checkbox checkbox-sm"
+              />
+            </label>
+          </div>
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
@@ -168,7 +181,7 @@ export const QueryTextArea = (props: {
               </span>
               <input
                 type="checkbox"
-                class="toggle"
+                class="toggle toggle-sm"
                 classList={{
                   "toggle-success": vimModeOn(),
                 }}

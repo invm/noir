@@ -1,19 +1,22 @@
-import { For } from "solid-js"
-import { useAppSelector } from "../../services/Context"
+import { For } from "solid-js";
+import { useAppSelector } from "../../services/Context";
+import { Alert } from "./Alert";
 
 export const Alerts = () => {
-  const { errors: { errors } } = useAppSelector()
+  const {
+    messages: { messages },
+  } = useAppSelector();
   return (
     <div class="absolute">
       <div class="toast">
-        <For each={errors}>
-          {error => (
-            <div class="alert alert-error py-1 px-2 rounded-lg">
-              <span class="text-sm font-medium">{error.message}</span>
-            </div>
+        <For each={messages}>
+          {(msg) => (
+            <Alert color={msg.type}>
+              <span class="font-medium">{msg.message}</span>
+            </Alert>
           )}
         </For>
       </div>
     </div>
-  )
-}
+  );
+};
