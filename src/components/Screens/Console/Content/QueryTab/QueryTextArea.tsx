@@ -3,7 +3,14 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import { Accessor, createEffect, createSignal, For, Show } from "solid-js";
+import {
+  Accessor,
+  createEffect,
+  createSignal,
+  For,
+  onMount,
+  Show,
+} from "solid-js";
 import {
   EditorView,
   drawSelection,
@@ -32,6 +39,9 @@ import { createShortcut } from "@solid-primitives/keyboard";
 import { search } from "@codemirror/search";
 import { createStore } from "solid-js/store";
 import { ActionRowButton } from "./ActionRowButton";
+
+import { listen } from "@tauri-apps/api/event";
+import { randomId } from "utils/utils";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -89,6 +99,18 @@ export const QueryTextArea = (props: {
     updateQueryText(formatted);
   };
 
+  onMount(async () => {
+    await listen("rs2js", (event) => {
+      console.log("js: rs2js: ");
+      console.log({ event });
+    });
+  });
+
+  function sendOutput(value: string) {
+    console.log("js: js2rs: " + value);
+    invoke("js2rs", { message: "asdsada" });
+  }
+
   const getSelection = () => {
     return editorView().state.sliceDoc(
       editorView().state.selection.ranges[0].from,
@@ -97,24 +119,25 @@ export const QueryTextArea = (props: {
   };
 
   const onExecute = async () => {
-    if (loading()) return;
-    setLoading(true);
-    const selectedText = getSelection();
-    updateContentTab("error", undefined);
-    const activeConnection = getConnection();
-    try {
-      const { result_sets } = await invoke<QueryResult>("execute_query", {
-        connId: activeConnection.id,
-        query: selectedText || code(),
-        autoLimit: autoLimit(),
-      });
-      updateContentTab("data", { query: code(), executed: true, result_sets });
-      // console.log({ result_sets });
-    } catch (error) {
-      updateContentTab("error", String(error));
-    } finally {
-      setLoading(false);
-    }
+    sendOutput(code());
+    // if (loading()) return;
+    // setLoading(true);
+    // const selectedText = getSelection();
+    // updateContentTab("error", undefined);
+    // const activeConnection = getConnection();
+    // try {
+    //   const { result_sets } = await invoke<QueryResult>("execute_query", {
+    //     connId: activeConnection.id,
+    //     query: selectedText || code(),
+    //     autoLimit: autoLimit(),
+    //   });
+    //   updateContentTab("data", { query: code(), executed: true, result_sets });
+    //   // console.log({ result_sets });
+    // } catch (error) {
+    //   updateContentTab("error", String(error));
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const copyQueryToClipboard = () => {
