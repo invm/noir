@@ -1,7 +1,7 @@
 use crate::utils::fs::get_app_path;
 use anyhow::Result;
-use log::info;
 use rusqlite::Connection;
+use tracing::info;
 
 const CURRENT_DB_VERSION: u32 = 1;
 

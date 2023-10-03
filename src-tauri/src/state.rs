@@ -1,6 +1,6 @@
 use anyhow::Result;
-use log::error;
 use rusqlite::Connection;
+use tracing::error;
 use std::{collections::HashMap, sync::Mutex};
 use tauri::{AppHandle, Manager, State};
 

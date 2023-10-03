@@ -1,11 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use query_noir::{
     database::database,
     handlers::{connections, queries},
+    queues::query::{rs2js, AsyncProcInputTx, async_process_model},
     state,
     utils::init,
 };
+
+use tokio::sync::mpsc;
+use tokio::sync::Mutex;
+use tracing_subscriber;
 
 use state::AppState;
 use tauri::{Manager, State};
@@ -17,7 +23,15 @@ struct Payload {
 }
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
+    let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
+    let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);
+
     tauri::Builder::default()
+        .manage(AsyncProcInputTx {
+            inner: Mutex::new(async_proc_input_tx),
+        })
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
@@ -38,6 +52,18 @@ fn main() {
             let db = database::initialize_database().expect("Database initialize should succeed");
             *app_state.db.lock().unwrap() = Some(db);
 
+            tauri::async_runtime::spawn(async move {
+                async_process_model(async_proc_input_rx, async_proc_output_tx).await
+            });
+
+            tauri::async_runtime::spawn(async move {
+                loop {
+                    if let Some(output) = async_proc_output_rx.recv().await {
+                        rs2js(output, &handle).await
+                    }
+                }
+            });
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -52,6 +78,7 @@ fn main() {
             queries::get_triggers,
             queries::init_connection,
             queries::get_table_structure,
+            queries::query_results,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
