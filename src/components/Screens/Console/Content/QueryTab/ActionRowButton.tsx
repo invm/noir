@@ -15,7 +15,7 @@ export const ActionRowButton = (props: ActionRowButton) => {
       data-tip={props.dataTip}
     >
       <button
-        class="btn btn-ghost btn-xs mr-2"
+        class="btn btn-ghost btn-xs mr-2 text-primary"
         disabled={props.loading !== undefined ? props.loading : false}
         onClick={props.onClick}
       >

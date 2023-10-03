@@ -163,7 +163,7 @@ dialog {
 }
 
 .tabulator-row.tabulator-selectable:hover {
-  @apply bg-base-300 cursor-pointer font-semibold text-base text-primary !important;
+  @apply bg-base-300 cursor-pointer font-medium !important;
 }
 
 .tabulator-menu-item {

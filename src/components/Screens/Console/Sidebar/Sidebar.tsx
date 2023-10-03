@@ -93,13 +93,12 @@ export const Sidebar = () => {
         </div>
         <For each={tables}>
           {(table) => (
-            <div class="mb-1 pl-1 min-w-full w-fit">
+            <div class="mb-1 px-2 min-w-full w-fit">
               <TableColumnsCollapse title={table.name}>
                 <For each={table.columns}>
                   {(column) => (
                     <div class="flex w-full justify-between items-center w-full border-b-2 border-base-300">
                       <span class="text-xs font-semibold">
-                        <span class="px-1"></span>
                         {column.name}
                       </span>
                       <span class="text-xs font-medium ml-2">

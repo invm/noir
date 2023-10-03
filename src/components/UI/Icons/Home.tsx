@@ -1,7 +1,7 @@
 export const HomeIcon = () => {
   return (
     <svg
-      class="w-6 h-6 text-primary"
+      class="w-6 h-6 text-secondary"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

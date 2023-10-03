@@ -161,12 +161,12 @@ export const QueryTextArea = (props: {
           />
           <div class="form-control">
             <label class="cursor-pointer label">
-              <span class="label-text font-semibold mr-2">{t("components.console.actions.limit")}</span>
+              <span class="label-text font-semibold mr-2 text-primary">{t("components.console.actions.limit")}</span>
               <input
                 type="checkbox"
                 checked={autoLimit()}
                 onChange={e => setAutoLimit(e.target.checked)}
-                class="checkbox checkbox-sm"
+                class="checkbox checkbox-sm checkbox-primary"
               />
             </label>
           </div>
