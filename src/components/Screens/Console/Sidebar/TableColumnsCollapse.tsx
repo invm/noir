@@ -70,10 +70,7 @@ export const TableColumnsCollapse = (props: {
   };
 
   return (
-    <div
-      class="w-full border-b-[0.5px] border-neutral-800"
-      onContextMenu={(e) => show(e)}
-    >
+    <div class="w-full" onContextMenu={(e) => show(e)}>
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>
           {t("components.sidebar.show_table_structure")}
@@ -123,7 +120,16 @@ export const TableColumnsCollapse = (props: {
         </label>
         <span class="ml-1 font-semibold">{props.title}</span>
       </span>
-      {open() && props.children}
+      <div
+        class="pl-2"
+        classList={{
+          "mb-4": open(),
+          "border-b-[1px]": open(),
+          "border-base-200": open(),
+        }}
+      >
+        {open() && props.children}
+      </div>
     </div>
   );
 };

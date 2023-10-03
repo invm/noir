@@ -35,6 +35,7 @@ export const ResultsTable = (props: { rows: Row[] }) => {
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
   });
+  const [paginationSize] = createSignal(20);
   createEditorControlledValue(editorView, code);
   createExtension(() => search());
   createExtension(dracula);
@@ -66,7 +67,7 @@ export const ResultsTable = (props: { rows: Row[] }) => {
       autoResize: true,
       clipboard: true,
       pagination: true,
-      paginationSize: 20,
+      paginationSize: paginationSize(),
       height: "100%",
       paginationCounter: "rows",
       debugInvalidOptions: false,
@@ -110,8 +111,8 @@ export const ResultsTable = (props: { rows: Row[] }) => {
     <>
       <dialog id="my_modal_1" class="modal">
         <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
-          <div>
-            <div ref={ref} />
+          <div class="h-full">
+            <div ref={ref} class="h-full"/>
           </div>
         </div>
         <form method="dialog" class="modal-backdrop">
