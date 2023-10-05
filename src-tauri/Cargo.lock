@@ -2997,6 +2997,7 @@ dependencies = [
  "anyhow",
  "env_logger",
  "futures",
+ "log",
  "mysql",
  "rand 0.8.5",
  "rusqlite",
@@ -3004,6 +3005,7 @@ dependencies = [
  "serde_json",
  "simplecrypt",
  "sql_lexer",
+ "sqlparser",
  "tauri",
  "tauri-build",
  "tauri-plugin-single-instance",
@@ -3686,6 +3688,15 @@ name = "sql_lexer"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2053a1b4c7ed721c7fa79dca4d82c28dfe132e0785366303558dbafe216e29c"
+
+[[package]]
+name = "sqlparser"
+version = "0.38.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0272b7bb0a225320170c99901b4b5fb3a4384e255a7f2cc228f61e2ba3893e75"
+dependencies = [
+ "log",
+]
 
 [[package]]
 name = "stable_deref_trait"

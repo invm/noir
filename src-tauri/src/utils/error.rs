@@ -1,4 +1,7 @@
 use serde::Serialize;
+use tokio::sync::mpsc::error::SendError;
+
+use crate::queues::query::QueryTask;
 // A custom error type that represents all possible in our command
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -9,9 +12,13 @@ pub enum Error {
     #[error("General error occurred: {0}")]
     General(#[from] anyhow::Error),
     #[error("Uuid parse error")]
-    UUIDError(#[from] uuid::Error),
-    #[error("Mysql Error: {0}")]
-    DBError(#[from] mysql::Error),
+    UUID(#[from] uuid::Error),
+    #[error("Queue send error: {0}")]
+    Send(#[from] SendError<QueryTask>),
+    #[error("Mysql error: {0}")]
+    Mysql(#[from] mysql::Error),
+    #[error("SQL parse error: {0}")]
+    SQLParse(#[from] sqlparser::parser::ParserError),
 }
 
 // we must also implement serde::Serialize

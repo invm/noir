@@ -146,15 +146,15 @@ export const QueryTextArea = (props: {
 
   createEffect(() => {
     setCode(getContentData("Query").query ?? "");
-    setSchema(
-      getSchemaTables().reduce(
-        (acc, table) => ({
-          ...acc,
-          [table.name]: table.columns.map(({ name }) => name),
-        }),
-        {}
-      )
-    );
+    // setSchema(
+    //   getSchemaTables().reduce(
+    //     (acc, table) => ({
+    //       ...acc,
+    //       [table.name]: table.columns.map(({ name }) => name),
+    //     }),
+    //     {}
+    //   )
+    // );
   });
 
   createShortcut(["Control", "e"], onExecute);

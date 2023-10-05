@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use crate::database::database::create_app_db;
 use anyhow::Result;
 use tauri::api::dir::with_temp_dir;
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 
 use super::{
     crypto::create_app_key,
