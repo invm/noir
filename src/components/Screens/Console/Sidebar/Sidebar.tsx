@@ -1,6 +1,6 @@
 import { TableColumnsCollapse } from "./TableColumnsCollapse";
 import { useAppSelector } from "services/Context";
-import { createSignal, For, Match, onMount, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, onMount, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { t } from "utils/i18n";
 import { Refresh } from "components/UI/Icons";
@@ -22,7 +22,7 @@ export const Sidebar = () => {
   const [tables, setTables] = createStore<Table[]>([]);
   const [loading, setLoading] = createSignal(false);
 
-  onMount(() => {
+  createEffect(() => {
     if (connectionStore.schema) {
       setTables(getSchemaTables(connectionStore.schema));
     }
@@ -47,9 +47,10 @@ export const Sidebar = () => {
       const procedures = await invoke<RawQueryResult>("get_procedures", {
         connId: getConnection().id,
       });
+      // TODO: add procedures to siderbar
       console.log({ procedures });
     } catch (error) {
-      notify(String(error), 'info');
+      notify(String(error), "info");
     } finally {
       setLoading(false);
     }

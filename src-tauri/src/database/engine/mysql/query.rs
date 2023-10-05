@@ -54,6 +54,7 @@ pub fn execute_query(pool: &Pool, query: String) -> Result<serde_json::Value> {
         };
         sets.push(set);
     }
-    let result = json!({ "result_sets": sets });
+    let result = json!(sets);
+
     return Ok(result);
 }

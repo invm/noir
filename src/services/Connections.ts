@@ -1,7 +1,13 @@
 import { createStore, produce } from "solid-js/store";
-import { ConnectionConfig, ResultSet, Row, Table, TableEntity } from "../interfaces";
+import {
+  ConnectionConfig,
+  ResultSet,
+  Row,
+  Table,
+  TableEntity,
+} from "../interfaces";
 import { Store } from "tauri-plugin-store-api";
-import { debounce } from "utils/utils";
+import { debounce, firstKey } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
 import { MessageService } from "./Messages";
 
@@ -169,6 +175,7 @@ export const ConnectionsService = () => {
       produce((s) => {
         s.tabs.push(tab);
         s.idx = s.tabs.length;
+        s.schema = firstKey(tab.schema)!
       })
     );
     updateStore();
@@ -252,9 +259,7 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const getSchemaTables = (
-    sch = connectionStore.schema
-  ): Table[] => {
+  const getSchemaTables = (sch = connectionStore.schema): Table[] => {
     const _tables = Object.entries(getConnection().schema[sch]).reduce(
       (acc: any, [name, columns]) => [
         ...acc,

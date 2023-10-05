@@ -4,8 +4,8 @@
 use query_noir::{
     database::database,
     handlers::{connections, queries},
-    queues::query::{rs2js, AsyncProcInputTx, async_process_model},
-    state,
+    queues::query::{async_process_model, rs2js},
+    state::{self, AsyncState},
     utils::init,
 };
 
@@ -29,8 +29,13 @@ fn main() {
     let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);
 
     tauri::Builder::default()
-        .manage(AsyncProcInputTx {
-            inner: Mutex::new(async_proc_input_tx),
+        .manage(AsyncState {
+            tasks: Mutex::new(async_proc_input_tx),
+            connections: Default::default(),
+        })
+        .manage(AppState {
+            db: Default::default(),
+            connections: Default::default(),
         })
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -40,10 +45,6 @@ fn main() {
             app.emit_all("single-instance", Payload { args: argv, cwd })
                 .unwrap();
         }))
-        .manage(AppState {
-            db: Default::default(),
-            connections: Default::default(),
-        })
         .setup(|app| {
             init::init_app()?;
             let handle = app.handle();
@@ -70,13 +71,14 @@ fn main() {
             connections::add_connection,
             connections::delete_connection,
             connections::get_connections,
-            queries::execute_query,
+            connections::init_connection,
+            // connections::disconnect, // TODO
+            queries::enqueue_query,
             queries::get_columns,
             queries::get_constraints,
             queries::get_functions,
             queries::get_procedures,
             queries::get_triggers,
-            queries::init_connection,
             queries::get_table_structure,
             queries::query_results,
         ])
