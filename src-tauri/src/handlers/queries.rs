@@ -1,5 +1,5 @@
 use crate::{
-    queues::query::QueryTask,
+    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
     state::{AsyncState, ServiceAccess},
     utils::error::{CommandResult, Error},
 };
@@ -8,34 +8,49 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlparser::dialect::GenericDialect;
 use tauri::{command, AppHandle, State};
-use tracing::{error, info};
+use tracing::info;
 
 #[command]
 pub async fn enqueue_query(
     async_state: State<'_, AsyncState>,
     conn_id: String,
+    tab_id: String,
     sql: &str,
     _auto_limit: bool,
-) -> CommandResult<QueryTask> {
-    // info!(?sql, "enqueue_query");
-    let statements = match sqlparser::parser::Parser::parse_sql(&GenericDialect {}, sql) {
-        Ok(s) => s,
-        Err(..) => vec![],
-    };
-
-    // for statement in statements {
-    //     println!("Got statement {:?}", statement.to_string());
-    // }
-    let binding = async_state.connections.lock().await;
-    let conn = binding.get(&conn_id);
-    // Ok(())
-    if let Some(conn) = conn {
-        let async_proc_input_tx = async_state.tasks.lock().await;
-        let task = QueryTask::new(conn.clone(), &statements[0].to_string());
-        let _ = async_proc_input_tx.send(task.clone()).await;
-        return Ok(task);
+) -> CommandResult<QueryTaskEnqueueResult> {
+    info!(sql, conn_id, tab_id, "enqueue_query");
+    let statements: Result<Vec<String>, Error> =
+        match sqlparser::parser::Parser::parse_sql(&GenericDialect {}, sql) {
+            Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
+            Err(e) => Err(Error::from(e)),
+        };
+    match statements {
+        Ok(statements) => {
+            let binding = async_state.connections.lock().await;
+            let conn = binding.get(&conn_id);
+            let async_proc_input_tx = async_state.tasks.lock().await;
+            if let Some(conn) = conn {
+                for statement in statements {
+                    println!("Got statement {:?}", statement.to_string());
+                    let task = QueryTask::new(conn.clone(), &tab_id, &statement);
+                    let res = async_proc_input_tx.send(task.clone()).await;
+                    if let Err(e) = res {
+                        return Err(Error::from(e));
+                    }
+                }
+                return Ok(QueryTaskEnqueueResult {
+                    conn_id,
+                    tab_id,
+                    status: QueryTaskStatus::Queued,
+                });
+            }
+            if statements.is_empty() {
+                return Err(Error::from(anyhow!("No statements found")));
+            }
+            Err(Error::from(anyhow!("Could not acquire connection")))
+        }
+        Err(e) => Err(e),
     }
-    Err(Error::from(anyhow!("Could not acquire connection")))
 }
 
 #[derive(Serialize, Deserialize)]
