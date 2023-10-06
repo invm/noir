@@ -23,20 +23,31 @@ impl Default for QueryTaskStatus {
 
 #[derive(Debug, Clone)]
 pub struct QueryTask {
+    pub conn: ConnectedConnection,
     pub query: String,
+    pub tab_number: String,
     pub id: String,
     pub status: QueryTaskStatus,
 }
 
 impl QueryTask {
-    pub fn new(conn: ConnectedConnection, query: &str) -> Self {
+    pub fn new(conn: ConnectedConnection, tab_number: &str, query: &str) -> Self {
         let id = Uuid::new_v4();
         QueryTask {
+            conn,
+            tab_number: tab_number.to_string(),
             query: query.to_string(),
             id: id.to_string(),
             status: QueryTaskStatus::Queued,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct QueryTaskEnqueueResult {
+    pub conn_id: String,
+    pub tab_id: String,
+    pub status: QueryTaskStatus,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -53,28 +64,28 @@ pub async fn async_process_model(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     while let Some(input) = input_rx.recv().await {
         let task = input;
-        match task.conn.execute_query(task.query).await {
-            Ok(_res) => {
-                output_tx
-                    .send(QueryTaskResult {
-                        success: false,
-                        id: "asd".to_string(),
-                        path: "asd".to_string(),
-                        error: None,
-                    })
-                    .await?;
-            }
-            Err(e) => {
-                output_tx
-                    .send(QueryTaskResult {
-                        success: false,
-                        id: "asd".to_string(),
-                        path: "asd".to_string(),
-                        error: Some(e.to_string()),
-                    })
-                    .await?;
-            }
-        }
+        // match task.conn.execute_query(task.query).await {
+        //     Ok(_res) => {
+        //         output_tx
+        //             .send(QueryTaskResult {
+        //                 success: false,
+        //                 id: "asd".to_string(),
+        //                 path: "asd".to_string(),
+        //                 error: None,
+        //             })
+        //             .await?;
+        //     }
+        //     Err(e) => {
+        //         output_tx
+        //             .send(QueryTaskResult {
+        //                 success: false,
+        //                 id: "asd".to_string(),
+        //                 path: "asd".to_string(),
+        //                 error: Some(e.to_string()),
+        //             })
+        //             .await?;
+        //     }
+        // }
     }
     Ok(())
 }
