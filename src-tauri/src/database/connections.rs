@@ -34,7 +34,7 @@ pub enum Dialect {
 }
 
 impl Dialect {
-    fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             Dialect::Mysql => "mysql",
             Dialect::Postgres => "postgres",

@@ -25,20 +25,22 @@ impl Default for QueryTaskStatus {
 pub struct QueryTask {
     pub conn: ConnectedConnection,
     pub query: String,
-    pub tab_number: String,
+    pub tab_id: String,
     pub id: String,
     pub status: QueryTaskStatus,
+    pub query_idx: usize,
 }
 
 impl QueryTask {
-    pub fn new(conn: ConnectedConnection, tab_number: &str, query: &str) -> Self {
+    pub fn new(conn: ConnectedConnection, tab_id: &str, query: &str, query_idx: usize) -> Self {
         let id = Uuid::new_v4();
         QueryTask {
             conn,
-            tab_number: tab_number.to_string(),
+            tab_id: tab_id.to_string(),
             query: query.to_string(),
             id: id.to_string(),
             status: QueryTaskStatus::Queued,
+            query_idx,
         }
     }
 }
@@ -64,28 +66,28 @@ pub async fn async_process_model(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     while let Some(input) = input_rx.recv().await {
         let task = input;
-        // match task.conn.execute_query(task.query).await {
-        //     Ok(_res) => {
-        //         output_tx
-        //             .send(QueryTaskResult {
-        //                 success: false,
-        //                 id: "asd".to_string(),
-        //                 path: "asd".to_string(),
-        //                 error: None,
-        //             })
-        //             .await?;
-        //     }
-        //     Err(e) => {
-        //         output_tx
-        //             .send(QueryTaskResult {
-        //                 success: false,
-        //                 id: "asd".to_string(),
-        //                 path: "asd".to_string(),
-        //                 error: Some(e.to_string()),
-        //             })
-        //             .await?;
-        //     }
-        // }
+        match task.conn.execute_query(task.query).await {
+            Ok(_res) => {
+                output_tx
+                    .send(QueryTaskResult {
+                        success: false,
+                        id: "asd".to_string(),
+                        path: "asd".to_string(),
+                        error: None,
+                    })
+                    .await?;
+            }
+            Err(e) => {
+                output_tx
+                    .send(QueryTaskResult {
+                        success: false,
+                        id: "asd".to_string(),
+                        path: "asd".to_string(),
+                        error: Some(e.to_string()),
+                    })
+                    .await?;
+            }
+        }
     }
     Ok(())
 }

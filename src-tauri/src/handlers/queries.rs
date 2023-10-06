@@ -6,7 +6,7 @@ use crate::{
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use sqlparser::dialect::GenericDialect;
+use sqlparser::{dialect::dialect_from_str, parser::Parser};
 use tauri::{command, AppHandle, State};
 use tracing::info;
 
@@ -19,20 +19,21 @@ pub async fn enqueue_query(
     _auto_limit: bool,
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_id, "enqueue_query");
+    let binding = async_state.connections.lock().await;
+    let conn = binding.get(&conn_id);
+    let dialect = conn.unwrap().config.dialect.as_str();
     let statements: Result<Vec<String>, Error> =
-        match sqlparser::parser::Parser::parse_sql(&GenericDialect {}, sql) {
+        match Parser::parse_sql(dialect_from_str(dialect).unwrap().as_ref(), sql) {
             Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
             Err(e) => Err(Error::from(e)),
         };
     match statements {
         Ok(statements) => {
-            let binding = async_state.connections.lock().await;
-            let conn = binding.get(&conn_id);
-            let async_proc_input_tx = async_state.tasks.lock().await;
             if let Some(conn) = conn {
-                for statement in statements {
-                    println!("Got statement {:?}", statement.to_string());
-                    let task = QueryTask::new(conn.clone(), &tab_id, &statement);
+                let async_proc_input_tx = async_state.tasks.lock().await;
+                for (idx, statement) in statements.iter().enumerate() {
+                    info!("Got statement {:?}", statement.to_string());
+                    let task = QueryTask::new(conn.clone(), &tab_id, &statement, idx);
                     let res = async_proc_input_tx.send(task.clone()).await;
                     if let Err(e) = res {
                         return Err(Error::from(e));
