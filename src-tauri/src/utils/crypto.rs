@@ -1,4 +1,5 @@
 use anyhow::Result;
+use md5::{Digest, Md5};
 use rand::{distributions::Alphanumeric, Rng};
 use simplecrypt::{decrypt, encrypt};
 use std::fs;
@@ -32,6 +33,13 @@ pub fn get_app_key() -> Result<String> {
     let key = fs::read(key_path)?;
     let key = String::from_utf8_lossy(&key).to_string();
     Ok(key)
+}
+
+pub fn md5_hash(data: &str) -> String {
+    let mut hasher = Md5::new();
+    hasher.update(data);
+    let result = hasher.finalize();
+    format!("{:x}", result)
 }
 
 #[cfg(test)]
