@@ -1,11 +1,11 @@
 use crate::database::connections::ConnectedConnection;
+use crate::utils::crypto::md5_hash;
 use anyhow::Result;
 use serde::Deserialize;
 use serde::Serialize;
 use tauri::Manager;
 use tokio::sync::mpsc;
 use tracing::info;
-use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum QueryTaskStatus {
@@ -33,14 +33,15 @@ pub struct QueryTask {
 
 impl QueryTask {
     pub fn new(conn: ConnectedConnection, tab_id: &str, query: &str, query_idx: usize) -> Self {
-        let id = Uuid::new_v4();
+        let query_hash = md5_hash(query);
+        let id = conn.config.id.to_string() + tab_id + &query_hash;
         QueryTask {
             conn,
+            id,
             tab_id: tab_id.to_string(),
-            query: query.to_string(),
-            id: id.to_string(),
-            status: QueryTaskStatus::Queued,
             query_idx,
+            query: query.to_string(),
+            status: QueryTaskStatus::Queued,
         }
     }
 }

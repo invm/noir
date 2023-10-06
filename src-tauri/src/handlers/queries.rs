@@ -30,6 +30,13 @@ pub async fn enqueue_query(
     match statements {
         Ok(statements) => {
             if let Some(conn) = conn {
+                // let mut stmts = vec![];
+                // // reduce to unique statements
+                // for stmt in statements.iter() {
+                //     if !stmts.contains(&stmt.to_string()) {
+                //         stmts.push(stmt.to_string());
+                //     }
+                // }
                 let async_proc_input_tx = async_state.tasks.lock().await;
                 for (idx, statement) in statements.iter().enumerate() {
                     info!("Got statement {:?}", statement.to_string());
