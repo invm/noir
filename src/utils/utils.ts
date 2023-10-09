@@ -5,6 +5,10 @@ import {
   TableStrucureEntityType,
 } from "interfaces";
 
+export const log = (msg: any) => {
+  console.log(`[${new Date().toISOString()}]`, msg);
+};
+
 export const omit = (obj: any, ...keys: string[]) => {
   const copy = { ...obj };
   keys.forEach((key) => delete copy[key]);

@@ -31,7 +31,7 @@ import {
   VimIcon,
 } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { QueryResult } from "interfaces";
+import { QueryTaskEnqueueResult } from "interfaces";
 import { t } from "utils/i18n";
 import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
@@ -41,7 +41,7 @@ import { createStore } from "solid-js/store";
 import { ActionRowButton } from "./ActionRowButton";
 
 import { listen } from "@tauri-apps/api/event";
-import { randomId } from "utils/utils";
+import { log } from "utils/utils";
 
 export const QueryTextArea = (props: {
   idx: Accessor<number>;
@@ -55,6 +55,7 @@ export const QueryTextArea = (props: {
       getContent,
       getContentData,
       getSchemaTables,
+      contentStore: { idx: tabIdx },
     },
     app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
@@ -101,15 +102,10 @@ export const QueryTextArea = (props: {
 
   onMount(async () => {
     await listen("rs2js", (event) => {
-      console.log("js: rs2js: ");
-      console.log({ event });
+      log("js: rs2js: ");
+      log(event);
     });
   });
-
-  function sendOutput(value: string) {
-    console.log("js: js2rs: " + value);
-    invoke("js2rs", { message: "asdsada" });
-  }
 
   const getSelection = () => {
     return editorView().state.sliceDoc(
@@ -119,25 +115,25 @@ export const QueryTextArea = (props: {
   };
 
   const onExecute = async () => {
-    sendOutput(code());
-    // if (loading()) return;
-    // setLoading(true);
-    // const selectedText = getSelection();
-    // updateContentTab("error", undefined);
-    // const activeConnection = getConnection();
-    // try {
-    //   const { result_sets } = await invoke<QueryResult>("execute_query", {
-    //     connId: activeConnection.id,
-    //     query: selectedText || code(),
-    //     autoLimit: autoLimit(),
-    //   });
-    //   updateContentTab("data", { query: code(), executed: true, result_sets });
-    //   // console.log({ result_sets });
-    // } catch (error) {
-    //   updateContentTab("error", String(error));
-    // } finally {
-    //   setLoading(false);
-    // }
+    if (loading() || !code()) return;
+    setLoading(true);
+    const selectedText = getSelection();
+    updateContentTab("error", undefined);
+    const activeConnection = getConnection();
+    try {
+      const result = await invoke<QueryTaskEnqueueResult>("enqueue_query", {
+        connId: activeConnection.id,
+        sql: selectedText || code(),
+        autoLimit: autoLimit(),
+        tabIdx,
+      });
+      // updateContentTab("data", { query: code(), executed: true, result_sets });
+      log({ result });
+    } catch (error) {
+      updateContentTab("error", String(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyQueryToClipboard = () => {
@@ -146,15 +142,15 @@ export const QueryTextArea = (props: {
 
   createEffect(() => {
     setCode(getContentData("Query").query ?? "");
-    // setSchema(
-    //   getSchemaTables().reduce(
-    //     (acc, table) => ({
-    //       ...acc,
-    //       [table.name]: table.columns.map(({ name }) => name),
-    //     }),
-    //     {}
-    //   )
-    // );
+    setSchema(
+      getSchemaTables().reduce(
+        (acc, table) => ({
+          ...acc,
+          [table.name]: table.columns.map(({ name }) => name),
+        }),
+        {}
+      )
+    );
   });
 
   createShortcut(["Control", "e"], onExecute);
