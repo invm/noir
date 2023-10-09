@@ -49,7 +49,7 @@ pub async fn enqueue_query(
                     if enqueued_ids.contains(&id) {
                         continue;
                     }
-                    if auto_limit {
+                    if auto_limit && !statement.to_lowercase().contains("limit") {
                         statement = format!("{} LIMIT 1000", statement);
                     }
                     let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx);
@@ -90,7 +90,7 @@ pub async fn execute_query(
     _auto_limit: bool,
 ) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.execute_query(query).await?;
+    let result = connection.execute_query(&query).await?;
     Ok(result)
 }
 

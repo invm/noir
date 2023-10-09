@@ -237,3 +237,7 @@ export type Table = {
     props: Record<string, any>;
   }[];
 };
+
+export const Events = {
+  QueryFinished: "query_finished",
+} as const;

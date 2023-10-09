@@ -245,7 +245,7 @@ impl ConnectedConnection {
         }
     }
 
-    pub async fn execute_query(&self, q: String) -> Result<Value> {
+    pub async fn execute_query(&self, q: &str) -> Result<Value> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),
             // ConnectionPool::Postgres(_pool) => todo!(),
