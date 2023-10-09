@@ -1,7 +1,10 @@
 use crate::{
     queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
     state::{AsyncState, ServiceAccess},
-    utils::error::{CommandResult, Error},
+    utils::{
+        crypto::md5_hash,
+        error::{CommandResult, Error},
+    },
 };
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
@@ -14,11 +17,11 @@ use tracing::info;
 pub async fn enqueue_query(
     async_state: State<'_, AsyncState>,
     conn_id: String,
-    tab_id: String,
+    tab_idx: usize,
     sql: &str,
-    _auto_limit: bool,
+    auto_limit: bool,
 ) -> CommandResult<QueryTaskEnqueueResult> {
-    info!(sql, conn_id, tab_id, "enqueue_query");
+    info!(sql, conn_id, tab_idx, "enqueue_query");
     let binding = async_state.connections.lock().await;
     let conn = binding.get(&conn_id);
     let dialect = conn.unwrap().config.dialect.as_str();
@@ -30,17 +33,26 @@ pub async fn enqueue_query(
     match statements {
         Ok(statements) => {
             if let Some(conn) = conn {
-                // let mut stmts = vec![];
-                // // reduce to unique statements
-                // for stmt in statements.iter() {
-                //     if !stmts.contains(&stmt.to_string()) {
-                //         stmts.push(stmt.to_string());
-                //     }
-                // }
+                let statements: Vec<(String, String)> = statements
+                    .into_iter()
+                    .map(|s| {
+                        let query_hash = md5_hash(&s);
+                        let id = conn.config.id.to_string() + &tab_idx.to_string() + &query_hash;
+                        return (s, id);
+                    })
+                    .collect();
                 let async_proc_input_tx = async_state.tasks.lock().await;
-                for (idx, statement) in statements.iter().enumerate() {
-                    info!("Got statement {:?}", statement.to_string());
-                    let task = QueryTask::new(conn.clone(), &tab_id, &statement, idx);
+                let enqueued_ids: Vec<String> = vec![];
+                for (idx, stmt) in statements.iter().enumerate() {
+                    let (mut statement, id) = stmt.clone();
+                    info!("Got statement {:?}", statement);
+                    if enqueued_ids.contains(&id) {
+                        continue;
+                    }
+                    if auto_limit {
+                        statement = format!("{} LIMIT 1000", statement);
+                    }
+                    let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx);
                     let res = async_proc_input_tx.send(task.clone()).await;
                     if let Err(e) = res {
                         return Err(Error::from(e));
@@ -48,8 +60,9 @@ pub async fn enqueue_query(
                 }
                 return Ok(QueryTaskEnqueueResult {
                     conn_id,
-                    tab_id,
+                    tab_idx,
                     status: QueryTaskStatus::Queued,
+                    results_sets: statements.iter().map(|s| s.1.clone()).collect(),
                 });
             }
             if statements.is_empty() {
@@ -67,6 +80,18 @@ pub struct QueryResultParams {
     pub query_hash: String,
     pub page: usize,
     pub page_size: usize,
+}
+
+#[command]
+pub async fn execute_query(
+    app_handle: AppHandle,
+    conn_id: String,
+    query: String,
+    _auto_limit: bool,
+) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let result = connection.execute_query(query).await?;
+    Ok(result)
 }
 
 #[command]

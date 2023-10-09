@@ -122,6 +122,22 @@ export type QueryResult = {
   result_sets: ResultSet[];
 };
 
+const QueryTaskStatus = {
+  Queued: "Queued",
+  Progress: "Progress",
+  Completed: "Completed",
+  Error: "Error",
+} as const;
+
+export type QueryTaskStatusType = keyof typeof QueryTaskStatus;
+
+export type QueryTaskEnqueueResult = {
+  conn_id: string;
+  tab_id: string;
+  status: QueryTaskStatusType;
+  results_sets: string[];
+};
+
 export type RawQueryResult = {
   result: Row[];
 };

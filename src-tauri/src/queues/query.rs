@@ -1,5 +1,4 @@
 use crate::database::connections::ConnectedConnection;
-use crate::utils::crypto::md5_hash;
 use anyhow::Result;
 use serde::Deserialize;
 use serde::Serialize;
@@ -25,20 +24,24 @@ impl Default for QueryTaskStatus {
 pub struct QueryTask {
     pub conn: ConnectedConnection,
     pub query: String,
-    pub tab_id: String,
+    pub tab_idx: usize,
     pub id: String,
     pub status: QueryTaskStatus,
     pub query_idx: usize,
 }
 
 impl QueryTask {
-    pub fn new(conn: ConnectedConnection, tab_id: &str, query: &str, query_idx: usize) -> Self {
-        let query_hash = md5_hash(query);
-        let id = conn.config.id.to_string() + tab_id + &query_hash;
+    pub fn new(
+        conn: ConnectedConnection,
+        query: String,
+        query_id: String,
+        tab_idx: usize,
+        query_idx: usize,
+    ) -> Self {
         QueryTask {
             conn,
-            id,
-            tab_id: tab_id.to_string(),
+            id: query_id,
+            tab_idx,
             query_idx,
             query: query.to_string(),
             status: QueryTaskStatus::Queued,
@@ -49,15 +52,16 @@ impl QueryTask {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryTaskEnqueueResult {
     pub conn_id: String,
-    pub tab_id: String,
+    pub tab_idx: usize,
     pub status: QueryTaskStatus,
+    pub results_sets: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryTaskResult {
     pub success: bool,
     pub id: String,
-    pub path: String,
+    pub path: Option<String>,
     pub error: Option<String>,
 }
 
@@ -69,11 +73,12 @@ pub async fn async_process_model(
         let task = input;
         match task.conn.execute_query(task.query).await {
             Ok(_res) => {
+                tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
                 output_tx
                     .send(QueryTaskResult {
                         success: false,
-                        id: "asd".to_string(),
-                        path: "asd".to_string(),
+                        id: task.id,
+                        path: Some("asd".to_string()),
                         error: None,
                     })
                     .await?;
@@ -82,8 +87,8 @@ pub async fn async_process_model(
                 output_tx
                     .send(QueryTaskResult {
                         success: false,
-                        id: "asd".to_string(),
-                        path: "asd".to_string(),
+                        id: task.id,
+                        path: None,
                         error: Some(e.to_string()),
                     })
                     .await?;
