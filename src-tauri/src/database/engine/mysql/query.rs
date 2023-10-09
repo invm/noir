@@ -34,9 +34,9 @@ pub fn raw_query(mut conn: PooledConn, query: String) -> Result<serde_json::Valu
     return Ok(result);
 }
 
-pub fn execute_query(pool: &Pool, query: String) -> Result<serde_json::Value> {
+pub fn execute_query(pool: &Pool, query: &str) -> Result<serde_json::Value> {
     let mut conn = pool.get_conn()?;
-    let mut results = conn.query_iter(&query)?;
+    let mut results = conn.query_iter(query)?;
     let mut sets: Vec<ResultSet> = vec![];
     while let Some(result_set) = results.iter() {
         let affected_rows = result_set.affected_rows();

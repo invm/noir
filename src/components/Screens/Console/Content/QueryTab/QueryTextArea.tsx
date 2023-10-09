@@ -31,7 +31,7 @@ import {
   VimIcon,
 } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { QueryTaskEnqueueResult } from "interfaces";
+import { Events, QueryTaskEnqueueResult } from "interfaces";
 import { t } from "utils/i18n";
 import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
@@ -101,8 +101,7 @@ export const QueryTextArea = (props: {
   };
 
   onMount(async () => {
-    await listen("rs2js", (event) => {
-      log("js: rs2js: ");
+    await listen(Events.QueryFinished, (event) => {
       log(event);
     });
   });

@@ -44,3 +44,10 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
     }
     Ok(())
 }
+
+pub fn write_query(id: &str, content: &str) -> Result<String> {
+    let tmp_dir = get_tmp_dir()?;
+    let path = tmp_dir + "/" + id;
+    write_file(&PathBuf::from(&path), content)?;
+    Ok(path)
+}
