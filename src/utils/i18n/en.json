@@ -40,7 +40,8 @@
           "execute": "Execute",
           "vim_mode_on": "Vim mode on",
           "copy_query": "Copy query to clipboard",
-          "limit": "LIMIT 1000"
+          "limit": "LIMIT 1000",
+          "auto_limit": "Apply limit if query does not have one"
         },
         "zero_results": "0 rows retuned",
         "result_set": "Result set ",
