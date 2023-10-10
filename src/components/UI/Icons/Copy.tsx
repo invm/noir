@@ -1,7 +1,7 @@
 export const Copy = () => {
   return (
     <svg
-      class="w-4 h-4 text-secondary"
+      class="w-4 h-4 text-primary"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor"

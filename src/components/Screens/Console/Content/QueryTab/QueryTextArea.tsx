@@ -177,23 +177,31 @@ export const QueryTextArea = (props: {
             onClick={copyQueryToClipboard}
             icon={<Copy />}
           />
-          <div class="form-control">
-            <label class="cursor-pointer label">
-              <span class="label-text font-semibold mr-2 text-primary">{t("components.console.actions.limit")}</span>
-              <input
-                type="checkbox"
-                checked={autoLimit()}
-                onChange={e => setAutoLimit(e.target.checked)}
-                class="checkbox checkbox-sm checkbox-primary"
-              />
-            </label>
+
+          <div
+            class="tooltip tooltip-primary tooltip-bottom"
+            data-tip={t("components.console.actions.auto_limit")}
+          >
+            <div class="form-control">
+              <label class="cursor-pointer label">
+                <span class="label-text font-semibold mr-2 text-primary mt-1">
+                  {t("components.console.actions.limit")}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={autoLimit()}
+                  onChange={(e) => setAutoLimit(e.target.checked)}
+                  class="checkbox checkbox-sm checkbox-primary"
+                />
+              </label>
+            </div>
           </div>
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
             data-tip={t("components.console.actions.vim_mode_on")}
           >
-            <div class="flex items-center mr-2">
+            <div class="flex items-center mx-2">
               <span class="mr-2">
                 <VimIcon />
               </span>
@@ -201,7 +209,7 @@ export const QueryTextArea = (props: {
                 type="checkbox"
                 class="toggle toggle-sm"
                 classList={{
-                  "toggle-success": vimModeOn(),
+                  "toggle-primary": vimModeOn(),
                 }}
                 checked={vimModeOn()}
                 onChange={() => toggleVimModeOn()}
