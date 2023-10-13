@@ -10,6 +10,7 @@ import { Store } from "tauri-plugin-store-api";
 import { debounce, firstKey } from "utils/utils";
 import { invoke } from "@tauri-apps/api";
 import { MessageService } from "./Messages";
+import { createSignal } from "solid-js";
 
 const store = new Store(".connections.dat");
 const INTERVAL = 1000;
@@ -133,6 +134,7 @@ export const ConnectionsService = () => {
     tabs: [],
     idx: 0,
   });
+  const [queryIdx, setQueryIdx] = createSignal<number>(0);
 
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
@@ -175,7 +177,7 @@ export const ConnectionsService = () => {
       produce((s) => {
         s.tabs.push(tab);
         s.idx = s.tabs.length;
-        s.schema = firstKey(tab.schema)!
+        s.schema = firstKey(tab.schema)!;
       })
     );
     updateStore();
@@ -234,6 +236,7 @@ export const ConnectionsService = () => {
   const setContentIdx = (i: number) => {
     if (i < contentStore.tabs.length) {
       setContentStore("idx", i);
+      setQueryIdx(0);
     }
   };
 
@@ -276,6 +279,14 @@ export const ConnectionsService = () => {
     return _tables;
   };
 
+  const selectPrevQuery = () => {
+    setQueryIdx((s) => (s - 1) % getContentData("Query").result_sets.length);
+  };
+
+  const selectNextQuery = () => {
+    setQueryIdx((s) => (s + 1) % getContentData("Query").result_sets.length);
+  };
+
   return {
     connectionStore,
     setConnectionStore,
@@ -296,5 +307,8 @@ export const ConnectionsService = () => {
     removeContentTab,
     updateConnectionTab,
     getSchemaTables,
+    selectPrevQuery,
+    selectNextQuery,
+    queryIdx,
   };
 };

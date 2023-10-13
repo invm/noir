@@ -72,6 +72,7 @@ pub struct QueryTaskEnqueueResult {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryTaskResult {
+    pub conn_id: String,
     pub status: QueryTaskStatus,
     pub query: String,
     pub id: String,
@@ -88,11 +89,12 @@ pub async fn async_process_model(
     while let Some(input) = input_rx.recv().await {
         let task = input;
         match task.conn.execute_query(&task.query).await {
-            Ok(content) => {
-                match write_query(&task.id, &content.to_string()) {
+            Ok(result_set) => {
+                match write_query(&task.id, result_set) {
                     Ok(path) => {
                         output_tx
                             .send(QueryTaskResult {
+                                conn_id: task.conn.config.id.to_string(),
                                 status: QueryTaskStatus::Completed,
                                 query: task.query,
                                 id: task.id,
@@ -106,6 +108,7 @@ pub async fn async_process_model(
                     Err(e) => {
                         output_tx
                             .send(QueryTaskResult {
+                                conn_id: task.conn.config.id.to_string(),
                                 status: QueryTaskStatus::Error,
                                 query: task.query,
                                 id: task.id,
@@ -121,6 +124,7 @@ pub async fn async_process_model(
             Err(e) => {
                 output_tx
                     .send(QueryTaskResult {
+                        conn_id: task.conn.config.id.to_string(),
                         status: QueryTaskStatus::Error,
                         query: task.query,
                         id: task.id,

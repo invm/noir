@@ -23,7 +23,7 @@ export const ThemeSwitch = () => {
   return (
     <div class="dropdown">
       <label id="theme-switch" tabindex="0" class="btn btn-sm btn-primary">
-        {t("components.theme_switch.theme")}
+        {t('theme_switch.theme')}
       </label>
       <ul
         tabindex={0}

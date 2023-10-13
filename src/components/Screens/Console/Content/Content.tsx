@@ -30,7 +30,7 @@ export const Content = () => {
                 tabindex={0}
                 onClick={() => setContentIdx(idx())}
               >
-                {t("components.console.query")} #{idx() + 1}
+                {t('console.query')} #{idx() + 1}
               </button>
               <Show when={idx() > 0}>
                 <button

@@ -3,14 +3,7 @@ import {
   createEditorControlledValue,
   createEditorFocus,
 } from "solid-codemirror";
-import {
-  Accessor,
-  createEffect,
-  createSignal,
-  For,
-  onMount,
-  Show,
-} from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import {
   EditorView,
   drawSelection,
@@ -22,32 +15,20 @@ import { dracula } from "@uiw/codemirror-theme-dracula";
 import { vim } from "@replit/codemirror-vim";
 import { format } from "sql-formatter";
 import { invoke } from "@tauri-apps/api";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  EditIcon,
-  FireIcon,
-  VimIcon,
-} from "components/UI/Icons";
+import { Copy, EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
 import { useAppSelector } from "services/Context";
-import { Events, QueryTaskEnqueueResult } from "interfaces";
+import { QueryTaskEnqueueResult } from "interfaces";
 import { t } from "utils/i18n";
 import { Alert } from "components/UI";
 import { basicSetup } from "codemirror";
 import { createShortcut } from "@solid-primitives/keyboard";
 import { search } from "@codemirror/search";
 import { createStore } from "solid-js/store";
-import { ActionRowButton } from "./ActionRowButton";
+import { ActionRowButton } from "./components/ActionRowButton";
 
-import { listen } from "@tauri-apps/api/event";
 import { log } from "utils/utils";
 
-export const QueryTextArea = (props: {
-  idx: Accessor<number>;
-  onPrevClick: () => void;
-  onNextClick: () => void;
-}) => {
+export const QueryTextArea = () => {
   const {
     connections: {
       updateContentTab,
@@ -99,12 +80,6 @@ export const QueryTextArea = (props: {
     setCode(formatted);
     updateQueryText(formatted);
   };
-
-  onMount(async () => {
-    await listen(Events.QueryFinished, (event) => {
-      log(event);
-    });
-  });
 
   const getSelection = () => {
     return editorView().state.sliceDoc(
@@ -161,31 +136,31 @@ export const QueryTextArea = (props: {
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
           <ActionRowButton
-            dataTip={t("components.console.actions.format")}
+            dataTip={t("console.actions.format")}
             onClick={onFormat}
             icon={<EditIcon />}
           />
           <ActionRowButton
-            dataTip={t("components.console.actions.execute")}
+            dataTip={t("console.actions.execute")}
             onClick={onExecute}
             loading={loading()}
             icon={<FireIcon />}
           />
 
           <ActionRowButton
-            dataTip={t("components.console.actions.copy_query")}
+            dataTip={t("console.actions.copy_query")}
             onClick={copyQueryToClipboard}
             icon={<Copy />}
           />
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("components.console.actions.auto_limit")}
+            data-tip={t("console.actions.auto_limit")}
           >
             <div class="form-control">
               <label class="cursor-pointer label">
                 <span class="label-text font-semibold mr-2 text-primary mt-1">
-                  {t("components.console.actions.limit")}
+                  {t("console.actions.limit")}
                 </span>
                 <input
                   type="checkbox"
@@ -199,7 +174,7 @@ export const QueryTextArea = (props: {
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("components.console.actions.vim_mode_on")}
+            data-tip={t("console.actions.vim_mode_on")}
           >
             <div class="flex items-center mx-2">
               <span class="mr-2">
@@ -219,36 +194,6 @@ export const QueryTextArea = (props: {
         </div>
         <Show when={getContent().error}>
           <Alert color="error">{getContent().error}</Alert>
-        </Show>
-        <Show when={!getContent().error}>
-          <For each={getContentData("Query").result_sets}>
-            {(result_set, index) => (
-              <Show when={index() === props.idx()}>
-                <Alert color="info">
-                  <span class="font-semibold">
-                    {t("components.console.result_set")}
-                    <button
-                      class="btn btn-xs mx-0.5 btn-neutral h-5 min-h-0"
-                      onClick={props.onPrevClick}
-                    >
-                      <ChevronLeft />
-                    </button>
-                    {"#" + (props.idx() + 1)}
-                    <button
-                      class="btn btn-xs mx-0.5 btn-neutral h-5 min-h-0"
-                      onClick={props.onNextClick}
-                    >
-                      <ChevronRight />
-                    </button>
-                    {t("components.console.out_of") +
-                      getContentData("Query").result_sets.length +
-                      ". "}
-                  </span>
-                  <span class="font-semibold">{result_set.info + ""}</span>
-                </Alert>
-              </Show>
-            )}
-          </For>
         </Show>
       </div>
       <div class="overflow-hidden w-full h-full">

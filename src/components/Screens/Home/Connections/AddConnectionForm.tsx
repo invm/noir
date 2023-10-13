@@ -35,7 +35,7 @@ const MAX_PORT = 65535;
 const MIN_PORT = 1;
 
 const messages = {
-  length: t("components.add_connection_form.length_validation"),
+  length: t('add_connection_form.length_validation'),
 };
 
 export const ConnectionFormSchema = z.object({
@@ -172,7 +172,7 @@ const AddConnectionForm = (props: {
       >
         <div>
           <h2 class="text-2xl font-bold">
-            {t("components.add_connection_form.title")}
+            {t('add_connection_form.title')}
           </h2>
         </div>
         <div class="grid grid-cols-6 gap-3">
@@ -184,7 +184,7 @@ const AddConnectionForm = (props: {
             <Select
               id="scheme"
               name="scheme"
-              label={t("components.add_connection_form.labels.scheme")}
+              label={t('add_connection_form.labels.scheme')}
               options={dialects.map((sc) => ({
                 value: sc,
                 label: titleCase(sc),
@@ -206,7 +206,7 @@ const AddConnectionForm = (props: {
               <Select
                 id="mode"
                 name="mode"
-                label={t("components.add_connection_form.labels.mode")}
+                label={t('add_connection_form.labels.mode')}
                 options={AvailableConnectionModes[formData().scheme].map(
                   (md) => ({ value: md, label: titleCase(md) })
                 )}
@@ -226,14 +226,14 @@ const AddConnectionForm = (props: {
             <Switch>
               <Match when={formData().scheme === Dialect.Sqlite}>
                 <FileInput
-                  label={t("components.add_connection_form.labels.file")}
+                  label={t('add_connection_form.labels.file')}
                   formHandler={formHandler}
                   name="file"
                 />
               </Match>
               <Match when={formData().scheme !== Dialect.Sqlite}>
                 <TextInput
-                  label={t("components.add_connection_form.labels.dbname")}
+                  label={t('add_connection_form.labels.dbname')}
                   min={1}
                   max={255}
                   name="dbname"
@@ -250,7 +250,7 @@ const AddConnectionForm = (props: {
               <Match when={formData().mode === ConnectionMode.Host}>
                 <div class="col-span-4">
                   <TextInput
-                    label={t("components.add_connection_form.labels.host")}
+                    label={t('add_connection_form.labels.host')}
                     min={1}
                     max={255}
                     name="host"
@@ -260,7 +260,7 @@ const AddConnectionForm = (props: {
                 </div>
                 <div class="col-span-2">
                   <TextInput
-                    label={t("components.add_connection_form.labels.port")}
+                    label={t('add_connection_form.labels.port')}
                     name="port"
                     id="port"
                     formHandler={formHandler}
@@ -273,9 +273,7 @@ const AddConnectionForm = (props: {
               <Match when={formData().mode === ConnectionMode.Socket}>
                 <div class="col-span-6">
                   <TextInput
-                    label={t(
-                      "components.add_connection_form.labels.socket_path"
-                    )}
+                    label={t('add_connection_form.labels.socket_path')}
                     min={1}
                     max={255}
                     name="socket_path"
@@ -290,7 +288,7 @@ const AddConnectionForm = (props: {
           <div class="grid grid-cols-2 gap-3">
             <div class="w-full">
               <TextInput
-                label={t("components.add_connection_form.labels.username")}
+                label={t('add_connection_form.labels.username')}
                 min={1}
                 max={255}
                 name="username"
@@ -300,7 +298,7 @@ const AddConnectionForm = (props: {
             </div>
             <div class="w-full">
               <TextInput
-                label={t("components.add_connection_form.labels.password")}
+                label={t('add_connection_form.labels.password')}
                 name="password"
                 id="password"
                 min={1}
@@ -314,7 +312,7 @@ const AddConnectionForm = (props: {
           <div class="grid grid-cols-5 gap-3">
             <div class="col-span-3">
               <TextInput
-                label={t("components.add_connection_form.labels.name")}
+                label={t('add_connection_form.labels.name')}
                 name="name"
                 formHandler={formHandler}
                 id="name"
@@ -327,7 +325,7 @@ const AddConnectionForm = (props: {
                 <div class="flex items-end gap-3">
                   <ColorCircle color={formData().color} />
                   <Select
-                    label={t("components.add_connection_form.labels.color")}
+                    label={t('add_connection_form.labels.color')}
                     name="color"
                     class="w-full"
                     options={connectionColors.map((color) => ({
@@ -346,7 +344,7 @@ const AddConnectionForm = (props: {
             <Alert color="error">
               {getFormErrors().map((error) => (
                 <p class="text-bold">
-                  {t(`components.add_connection_form.labels.${error.path}`)}:{" "}
+                  {t(`add_connection_form.labels.${error.path}`)}:{" "}
                   {error.message}
                 </p>
               ))}
@@ -360,7 +358,7 @@ const AddConnectionForm = (props: {
             btn-primary btn-md btn-block"
             type="submit"
           >
-            {t("components.add_connection_form.title")}
+            {t('add_connection_form.title')}
           </button>
         </div>
       </form>

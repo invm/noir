@@ -90,7 +90,7 @@ export const Sidebar = () => {
       </div>
       <div class="overflow-y-auto h-full">
         <div class="text-xs font-bold py-1">
-          {t("components.sidebar.tables")}
+          {t('sidebar.tables')}
         </div>
         <For each={tables}>
           {(table) => (

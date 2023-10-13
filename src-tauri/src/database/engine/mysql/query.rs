@@ -1,17 +1,11 @@
 use anyhow::Result;
 use mysql::prelude::Queryable;
 use mysql::{from_row, Pool, PooledConn, Row};
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+use crate::database::connections::ResultSet;
+
 use super::utils::convert_value;
-#[derive(Debug, Serialize, Deserialize)]
-struct ResultSet {
-    affected_rows: u64,
-    warnings: u16,
-    info: String,
-    rows: Vec<serde_json::Value>,
-}
 
 fn row_to_object(row: Row) -> serde_json::Value {
     let mut object = json!({});
@@ -34,10 +28,9 @@ pub fn raw_query(mut conn: PooledConn, query: String) -> Result<serde_json::Valu
     return Ok(result);
 }
 
-pub fn execute_query(pool: &Pool, query: &str) -> Result<serde_json::Value> {
+pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let mut conn = pool.get_conn()?;
     let mut results = conn.query_iter(query)?;
-    let mut sets: Vec<ResultSet> = vec![];
     while let Some(result_set) = results.iter() {
         let affected_rows = result_set.affected_rows();
         let warnings = result_set.warnings();
@@ -52,9 +45,13 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<serde_json::Value> {
             info: info.to_string(),
             rows,
         };
-        sets.push(set);
+        return Ok(set);
     }
-    let result = json!(sets);
 
-    return Ok(result);
+    return Ok(ResultSet {
+        affected_rows: 0,
+        warnings: 0,
+        info: "".to_string(),
+        rows: Vec::new(),
+    });
 }

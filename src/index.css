@@ -170,6 +170,10 @@ dialog {
   @apply text-base-content bg-base-300 !important;
 }
 
+.tabulator .tabulator-tableholder {
+  @apply bg-base-200 !important;
+}
+
 #results {
   -webkit-user-select: auto; /* Safari */
   -ms-user-select: auto; /* IE 10 and IE 11 */

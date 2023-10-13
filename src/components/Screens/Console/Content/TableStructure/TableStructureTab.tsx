@@ -28,7 +28,7 @@ export const TableStructureTab = () => {
                 classList={{ "tab-active": tab() === ta }}
                 class="tab"
               >
-                {t(`components.table_structure_tab.${ta}`)}
+                {t(`table_structure_tab.${ta}`)}
               </button>
             ))}
           </div>
