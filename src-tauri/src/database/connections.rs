@@ -168,6 +168,14 @@ impl ConnectionConfig {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResultSet {
+    pub affected_rows: u64,
+    pub warnings: u16,
+    pub info: String,
+    pub rows: Vec<serde_json::Value>,
+}
+
 impl ConnectedConnection {
     pub async fn new(config: ConnectionConfig) -> Result<Self> {
         match &config.scheme {
@@ -245,7 +253,7 @@ impl ConnectedConnection {
         }
     }
 
-    pub async fn execute_query(&self, q: &str) -> Result<Value> {
+    pub async fn execute_query(&self, q: &str) -> Result<ResultSet> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),
             // ConnectionPool::Postgres(_pool) => todo!(),

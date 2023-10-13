@@ -8,7 +8,7 @@ use crate::{
 };
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{Value, json};
 use sqlparser::{dialect::dialect_from_str, parser::Parser};
 use tauri::{command, AppHandle, State};
 use tracing::info;
@@ -91,7 +91,7 @@ pub async fn execute_query(
 ) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.execute_query(&query).await?;
-    Ok(result)
+    Ok(json!({ "result": result }))
 }
 
 #[command]

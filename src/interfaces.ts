@@ -138,6 +138,17 @@ export type QueryTaskEnqueueResult = {
   results_sets: string[];
 };
 
+export type QueryTaskResult = {
+  conn_id: string;
+  status: QueryTaskStatusType;
+  query: string;
+  id: string;
+  path: string | undefined;
+  error: string | undefined;
+  tab_idx: number;
+  query_idx: number;
+};
+
 export type RawQueryResult = {
   result: Row[];
 };

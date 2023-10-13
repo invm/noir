@@ -6,66 +6,64 @@
       "focus_on": "Focus on",
       "focus_query_text_area": "Focus On Query Text Area"
     },
-    "components": {
-      "add_connection_form": {
-        "title": "Add New Connection",
-        "length_validation": "Must be between 2 and 255 characters",
-        "labels": {
-          "name": "Name",
-          "mode": "Mode",
-          "color": "Color",
-          "scheme": "Scheme",
-          "username": "Username",
-          "password": "Password",
-          "host": "Host",
-          "socket_path": "Socket path",
-          "file": "Database file",
-          "dbname": "Database name",
-          "port": "Port"
-        }
-      },
-      "connections_list": {
-        "actions": {
-          "delete": "Delete",
-          "confirm_action": "Confirm action",
-          "confirm_delete": "Are you sure you want to delete this connection?",
-          "yes": "Yes",
-          "cancel": "Cancel"
-        }
-      },
-      "console": {
-        "query": "Query",
-        "actions": {
-          "format": "Format",
-          "execute": "Execute",
-          "vim_mode_on": "Vim mode on",
-          "copy_query": "Copy query to clipboard",
-          "limit": "LIMIT 1000",
-          "auto_limit": "Apply limit if query does not have one"
-        },
-        "zero_results": "0 rows retuned",
-        "result_set": "Result set ",
-        "out_of": " out of "
-      },
-      "sidebar": {
-        "show_table_structure": "Show table structure",
-        "list_data": "List data",
-        "truncate_table": "Truncate table",
-        "tables": "Tables",
-        "table_was_truncated": "Table {{table}} was truncated"
-      },
-      "theme_switch": {
-        "theme": "Theme"
-      },
-      "file_input": {
-        "choose_file": "Choose file"
-      },
-      "table_structure_tab":{
-        "columns": "Columns",
-        "indices": "Indices",
-        "constraints": "Constraints",
-        "triggers": "Triggers"
+    "add_connection_form": {
+      "title": "Add New Connection",
+      "length_validation": "Must be between 2 and 255 characters",
+      "labels": {
+        "name": "Name",
+        "mode": "Mode",
+        "color": "Color",
+        "scheme": "Scheme",
+        "username": "Username",
+        "password": "Password",
+        "host": "Host",
+        "socket_path": "Socket path",
+        "file": "Database file",
+        "dbname": "Database name",
+        "port": "Port"
       }
+    },
+    "connections_list": {
+      "actions": {
+        "delete": "Delete",
+        "confirm_action": "Confirm action",
+        "confirm_delete": "Are you sure you want to delete this connection?",
+        "yes": "Yes",
+        "cancel": "Cancel"
+      }
+    },
+    "console": {
+      "query": "Query",
+      "actions": {
+        "format": "Format",
+        "execute": "Execute",
+        "vim_mode_on": "Vim mode on",
+        "copy_query": "Copy query to clipboard",
+        "limit": "LIMIT 1000",
+        "auto_limit": "Apply limit if query does not have one"
+      },
+      "zero_results": "0 rows retuned",
+      "result_set": "Result set: ",
+      "out_of": " out of "
+    },
+    "sidebar": {
+      "show_table_structure": "Show table structure",
+      "list_data": "List data",
+      "truncate_table": "Truncate table",
+      "tables": "Tables",
+      "table_was_truncated": "Table {{table}} was truncated"
+    },
+    "theme_switch": {
+      "theme": "Theme"
+    },
+    "file_input": {
+      "choose_file": "Choose file"
+    },
+    "table_structure_tab": {
+      "columns": "Columns",
+      "indices": "Indices",
+      "constraints": "Constraints",
+      "triggers": "Triggers"
     }
   }
 }

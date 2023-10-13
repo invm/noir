@@ -63,7 +63,7 @@ export const TableColumnsCollapse = (props: {
         query,
         autoLimit: false,
       });
-      notify(t("components.sidebar.table_was_truncated", { table }), "success");
+      notify(t('sidebar.table_was_truncated', { table }), "success");
     } catch (error) {
       notify(error);
     }
@@ -73,13 +73,13 @@ export const TableColumnsCollapse = (props: {
     <div class="w-full" onContextMenu={(e) => show(e)}>
       <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>
-          {t("components.sidebar.show_table_structure")}
+          {t('sidebar.show_table_structure')}
         </Item>
         <Item onClick={({ props }) => listData(props.table)}>
-          {t("components.sidebar.list_data")}
+          {t('sidebar.list_data')}
         </Item>
         <Item onClick={({ props }) => truncateTable(props.table)}>
-          {t("components.sidebar.truncate_table")}
+          {t('sidebar.truncate_table')}
         </Item>
       </Menu>
       <span

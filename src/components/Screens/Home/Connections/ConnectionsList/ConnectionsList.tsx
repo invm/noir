@@ -40,16 +40,16 @@ export const ConnectionsList = (props: { connections: ConnectionConfig[], setCon
         </For>
       </ul>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-        <Item onClick={() => (window as any)[modal_id].showModal()}>{t('components.connections_list.actions.delete')}</Item>
+        <Item onClick={() => (window as any)[modal_id].showModal()}>{t('connections_list.actions.delete')}</Item>
       </Menu>
       <dialog id={modal_id} class="modal">
         <form method="dialog" class="modal-box">
-          <h3 class="font-bold text-lg">{t('components.connections_list.actions.confirm_action')}</h3>
-          <p class="py-4">{t('components.connections_list.actions.confirm_delete')}</p>
+          <h3 class="font-bold text-lg">{t('connections_list.actions.confirm_action')}</h3>
+          <p class="py-4">{t('connections_list.actions.confirm_delete')}</p>
           <p class="py-4">{focusedConnection()?.name}</p>
           <div class="grid grid-cols-2 gap-3">
-            <button class="btn btn-error btn-sm" onClick={() => deleteConnection(focusedConnection()?.id!)}>{t('components.connections_list.actions.yes')}</button>
-            <button class="btn btn-primary btn-sm">{t('components.connections_list.actions.cancel')}</button>
+            <button class="btn btn-error btn-sm" onClick={() => deleteConnection(focusedConnection()?.id!)}>{t('connections_list.actions.yes')}</button>
+            <button class="btn btn-primary btn-sm">{t('connections_list.actions.cancel')}</button>
           </div>
         </form>
         <form method="dialog" class="modal-backdrop">
