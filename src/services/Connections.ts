@@ -44,7 +44,7 @@ export const newContentTab = <T extends ContentComponentKeys>(
     case ContentTab.Query:
       return {
         label,
-        data: data ?? { query: '', executed: false, result_sets: [] },
+        data: data ?? { query: '', result_sets: [] },
         key,
       };
     case ContentTab.TableStructure:
@@ -66,7 +66,6 @@ export const newContentTab = <T extends ContentComponentKeys>(
 
 export type QueryContentTabData = {
   query: string;
-  executed: boolean;
   result_sets: ResultSet[];
 };
 
@@ -141,7 +140,6 @@ export const ConnectionsService = () => {
     idx: 0,
   });
   const [queryIdx, setQueryIdx] = createSignal<number>(0);
-  const [pageSize, setPageSize] = createSignal<number>(30);
 
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
@@ -170,7 +168,7 @@ export const ConnectionsService = () => {
     await store.set(CONNECTIONS_KEY, JSON.stringify(connectionStore));
     const tabs = contentStore.tabs.map((t) =>
       t.key === ContentTab.Query
-        ? { ...t, data: { ...t.data, executed: false, result_sets: [] } }
+        ? { ...t, data: { ...t.data, result_sets: [] } }
         : t
     );
     await store.set(
@@ -277,17 +275,13 @@ export const ConnectionsService = () => {
     query_idx: number,
     data: Partial<ResultSet>
   ) => {
-    setContentStore(
-      produce((s) => {
-        const d = (s.tabs[tab_idx].data as QueryContentTabData).result_sets[
-          query_idx
-        ];
-        (s.tabs[tab_idx].data as QueryContentTabData).result_sets[query_idx] = {
-          ...d,
-          ...data,
-        };
-      })
-    );
+    setContentStore('tabs', tab_idx, 'data', (d) => ({
+      ...d,
+      result_sets: (d as QueryContentTabData).result_sets.map((r, i) =>
+        i === query_idx ? { ...r, ...data } : r
+      ),
+    }));
+    console.log({ contentStore });
   };
 
   const getSchemaTables = (sch = connectionStore.schema): Table[] => {
@@ -308,11 +302,14 @@ export const ConnectionsService = () => {
   };
 
   const selectPrevQuery = () => {
-    setQueryIdx((s) => (s - 1) % getContentData('Query').result_sets.length);
+    // TODO: fix this
+    if (getContentData('Query').result_sets.length)
+      setQueryIdx((s) => (s - 1) % getContentData('Query').result_sets.length);
   };
 
   const selectNextQuery = () => {
-    setQueryIdx((s) => (s + 1) % getContentData('Query').result_sets.length);
+    if (getContentData('Query').result_sets.length)
+      setQueryIdx((s) => (s + 1) % getContentData('Query').result_sets.length);
   };
 
   return {
@@ -339,7 +336,5 @@ export const ConnectionsService = () => {
     selectNextQuery,
     queryIdx,
     updateResultSet,
-    pageSize,
-    setPageSize,
   };
 };

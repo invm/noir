@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, on } from 'solid-js';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { search } from '@codemirror/search';
@@ -10,6 +10,7 @@ import {
 } from 'solid-codemirror';
 import { Pagination } from './components/Pagination';
 import { useAppSelector } from 'services/Context';
+import { Row } from 'interfaces';
 
 type TableColumn = { title: string; field: string; resizeable: boolean };
 
@@ -37,28 +38,42 @@ const parseObjRecursive = (
 
 export const ResultsTable = () => {
   const {
-    connections: { queryIdx, getContentData, pageSize },
+    connections: { queryIdx, getContentData },
+    backend: { pageSize, getQueryResults },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
   });
-  const [table, setTable] = createSignal<Tabulator | null>(null);
   createEditorControlledValue(editorView, code);
   createExtension(() => search());
   createExtension(dracula);
   createExtension(basicSetup);
   createExtension(json);
-
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
 
-  createEffect(() => {
-    const data = getContentData('Query');
-    const rows = data.result_sets[queryIdx()]?.rows ?? [];
+  const [rows, setRows] = createSignal<Row[]>([]);
+  const [page, setPage] = createSignal(0);
+
+  const updateRows = async () => {
+    const result_set = getContentData('Query').result_sets[queryIdx()];
+    const _rows =
+      result_set?.status === 'Completed'
+        ? await getQueryResults(result_set.path!)
+        : [];
+
+    setRows(_rows);
+  };
+
+  createEffect(on(queryIdx, updateRows));
+  createEffect(on(page, updateRows));
+  createEffect(updateRows);
+
+  createEffect(async () => {
     let columns: TableColumn[] = [];
-    if (length) {
-      columns = Object.keys(rows[0]).map((k) => ({
+    if (rows().length) {
+      columns = Object.keys(rows()[0]).map((k) => ({
         title: k,
         field: k,
         resizeable: true,
@@ -66,8 +81,8 @@ export const ResultsTable = () => {
       }));
     }
 
-    const _table = new Tabulator('#results-table', {
-      data: rows,
+    new Tabulator('#results-table', {
+      data: rows(),
       columns,
       columnDefaults: {
         title: '',
@@ -115,8 +130,21 @@ export const ResultsTable = () => {
       //   navRight: ["ctrl + shift + l", 39],
       // },
     });
-    setTable(_table);
   });
+
+  const onNextPage = async () => {
+    setPage(page() + 1);
+    const result_set = getContentData('Query').result_sets[queryIdx()];
+    const res = await getQueryResults(result_set.path!, page());
+    setRows(res);
+  };
+
+  const onPrevPage = async () => {
+    setPage(page() - 1);
+    const result_set = getContentData('Query').result_sets[queryIdx()];
+    const res = await getQueryResults(result_set.path!, page());
+    setRows(res);
+  };
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
@@ -130,7 +158,7 @@ export const ResultsTable = () => {
           <button>close</button>
         </form>
       </dialog>
-      <Pagination table={table()} />
+      <Pagination {...{ page, onNextPage, onPrevPage }} />
       <div id="results-table"></div>
     </div>
   );

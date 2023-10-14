@@ -1,14 +1,14 @@
-import { createSignal, JSXElement } from "solid-js";
-import { useContextMenu, Menu, animation, Item } from "solid-contextmenu";
-import { t } from "utils/i18n";
-import { useAppSelector } from "services/Context";
+import { createSignal, JSXElement } from 'solid-js';
+import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
+import { t } from 'utils/i18n';
+import { useAppSelector } from 'services/Context';
 import {
   newContentTab,
   TableStructureContentTabData,
-} from "services/Connections";
+} from 'services/Connections';
 
-import { invoke } from "@tauri-apps/api";
-import { ResultSet } from "interfaces";
+import { invoke } from '@tauri-apps/api';
+import { ResultSet } from 'interfaces';
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -21,7 +21,7 @@ export const TableColumnsCollapse = (props: {
     messages: { notify },
   } = useAppSelector();
 
-  const menu_id = "sidebar-table-menu";
+  const menu_id = 'sidebar-table-menu';
 
   const { show } = useContextMenu({
     id: menu_id,
@@ -31,10 +31,10 @@ export const TableColumnsCollapse = (props: {
   const addTableStructureTab = async (table: string) => {
     try {
       const data = await invoke<TableStructureContentTabData>(
-        "get_table_structure",
+        'get_table_structure',
         { connId: getConnection().id, table }
       );
-      addContentTab(newContentTab(table, "TableStructure", data));
+      addContentTab(newContentTab(table, 'TableStructure', data));
     } catch (error) {
       notify(error);
     }
@@ -42,14 +42,14 @@ export const TableColumnsCollapse = (props: {
 
   const listData = async (table: string) => {
     try {
-      const query = "SELECT * from " + table + " LIMIT 1000";
-      const res = await invoke<ResultSet>("execute_query", {
+      const query = 'SELECT * from ' + table + ' LIMIT 1000';
+      const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
         autoLimit: true,
       });
-      const data = { query, executed: true, result_sets: [res] };
-      addContentTab(newContentTab(table, "Query", data));
+      const data = { query, result_sets: [res] };
+      addContentTab(newContentTab(table, 'Query', data));
     } catch (error) {
       notify(error);
     }
@@ -57,13 +57,13 @@ export const TableColumnsCollapse = (props: {
 
   const truncateTable = async (table: string) => {
     try {
-      const query = "TRUNCATE TABLE " + table;
-      await invoke<ResultSet>("execute_query", {
+      const query = 'TRUNCATE TABLE ' + table;
+      await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
         autoLimit: false,
       });
-      notify(t('sidebar.table_was_truncated', { table }), "success");
+      notify(t('sidebar.table_was_truncated', { table }), 'success');
     } catch (error) {
       notify(error);
     }
@@ -71,7 +71,7 @@ export const TableColumnsCollapse = (props: {
 
   return (
     <div class="w-full" onContextMenu={(e) => show(e)}>
-      <Menu id={menu_id} animation={animation.fade} theme={"dark"}>
+      <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>
           {t('sidebar.show_table_structure')}
         </Item>
@@ -86,7 +86,7 @@ export const TableColumnsCollapse = (props: {
         onClick={() => setOpen(!open())}
         class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300"
       >
-        <label class={`swap text-6xl ${open() ? "swap-active" : ""}`}>
+        <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
           <svg
             class="w-2 h-2 swap-off"
             aria-hidden="true"
@@ -123,9 +123,9 @@ export const TableColumnsCollapse = (props: {
       <div
         class="pl-2"
         classList={{
-          "mb-4": open(),
-          "border-b-[1px]": open(),
-          "border-base-200": open(),
+          'mb-4': open(),
+          'border-b-[1px]': open(),
+          'border-base-200': open(),
         }}
       >
         {open() && props.children}

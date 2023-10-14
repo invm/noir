@@ -49,8 +49,13 @@ pub fn create_app_config(app_path: &String) -> Result<()> {
 
 pub fn paginate_file(path: &str, page: usize, limit: usize) -> Vec<String> {
     let file = fs::read_to_string(path).expect("Error reading file");
-    let lines = file.lines().skip(page * limit).take(limit);
-    return lines.into_iter().map(|s| s.to_string()).collect();
+    let lines = file
+        .lines()
+        .skip(page * limit)
+        .take(limit)
+        .map(|s| s.to_string())
+        .collect();
+    return lines;
 }
 
 pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
@@ -64,7 +69,10 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
 }
 
 pub fn write_query(id: &str, result_set: ResultSet) -> Result<String> {
-    let rows = json!(result_set.rows).to_string();
+    let mut rows = String::from("");
+    result_set.rows.iter().for_each(|row| {
+        rows += &(row.to_string() + "\n");
+    });
     let metadata = json!({
         "count": result_set.rows.len(),
         "affected_rows": result_set.affected_rows,

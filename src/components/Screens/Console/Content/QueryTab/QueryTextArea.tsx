@@ -10,14 +10,14 @@ import {
   highlightWhitespace,
   highlightActiveLine,
 } from '@codemirror/view';
-import { MySQL, sql } from '@codemirror/lang-sql';
+import { MySQL, sql, SQLite, PostgreSQL } from '@codemirror/lang-sql';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { vim } from '@replit/codemirror-vim';
 import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api';
 import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
-import { QueryTaskEnqueueResult } from 'interfaces';
+import { QueryTaskEnqueueResult, Dialect } from 'interfaces';
 import { t } from 'utils/i18n';
 import { Alert } from 'components/UI';
 import { basicSetup } from 'codemirror';
@@ -26,7 +26,11 @@ import { search } from '@codemirror/search';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 
-import { log } from 'utils/utils';
+const SQLDialects = {
+  [Dialect.Mysql]: MySQL,
+  [Dialect.Postgres]: PostgreSQL,
+  [Dialect.Sqlite]: SQLite,
+};
 
 export const QueryTextArea = () => {
   const {
@@ -60,8 +64,9 @@ export const QueryTextArea = () => {
   createExtension(search);
   createExtension(() => basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
-  // TODO: add dialect and schema
-  createExtension(() => sql({ dialect: MySQL, schema }));
+  createExtension(() =>
+    sql({ dialect: SQLDialects[getConnection().connection.dialect], schema })
+  );
   const { setFocused } = createEditorFocus(editorView);
   // TODO: add option to scroll inside autocompletion list with c-l and c-k
   // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
@@ -106,12 +111,10 @@ export const QueryTextArea = () => {
       );
       updateContentTab('data', {
         query: code(),
-        executed: true,
         result_sets: results_sets.map((id) => ({
           id,
         })),
       });
-      log({ results_sets });
     } catch (error) {
       updateContentTab('error', String(error));
     } finally {
