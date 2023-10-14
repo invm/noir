@@ -1,24 +1,24 @@
-import { createStore } from "solid-js/store";
-import { Store } from "tauri-plugin-store-api";
-import { debounce } from "utils/utils";
+import { createStore } from 'solid-js/store';
+import { Store } from 'tauri-plugin-store-api';
+import { debounce } from 'utils/utils';
 
-const store = new Store(".app.dat");
+const store = new Store('.app.dat');
 const INTERVAL = 2000;
 
-const APP_KEY = "__app__";
+const APP_KEY = '__app__';
 
 type AppStore = {
   vimModeOn?: boolean;
 };
 
-const getSavedData = async (key: string, defaultValue: any = []) => {
+const getSavedData = async (key: string) => {
   const str = await store.get(key);
-  if (!str) return defaultValue;
+  if (!str) return {} as AppStore;
   try {
     const res = JSON.parse(str as string);
-    return res as unknown;
+    return res as AppStore;
   } catch (e) {
-    return defaultValue;
+    return {} as AppStore;
   }
 };
 
@@ -35,7 +35,7 @@ export const AppService = () => {
   const vimModeOn = () => appStore.vimModeOn;
 
   const toggleVimModeOn = () => {
-    setAppStore("vimModeOn", !appStore.vimModeOn);
+    setAppStore('vimModeOn', !appStore.vimModeOn);
     updateStore();
   };
 

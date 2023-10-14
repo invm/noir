@@ -1,8 +1,8 @@
-import * as z from "zod";
-import { useFormHandler } from "solid-form-handler";
-import { zodSchema } from "solid-form-handler/zod";
-import { t } from "i18next";
-import { Match, onMount, Show, Switch } from "solid-js";
+import * as z from 'zod';
+import { useFormHandler } from 'solid-form-handler';
+import { zodSchema } from 'solid-form-handler/zod';
+import { t } from 'i18next';
+import { Match, onMount, Show, Switch } from 'solid-js';
 
 import {
   Alert,
@@ -10,7 +10,7 @@ import {
   Select,
   ColorCircle,
   FileInput,
-} from "components/UI";
+} from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
@@ -24,10 +24,10 @@ import {
   SocketCredentials,
   FileCredentials,
   Scheme,
-} from "interfaces";
-import { titleCase } from "utils/formatters";
-import { omit } from "utils/utils";
-import { useAppSelector } from "services/Context";
+} from 'interfaces';
+import { titleCase } from 'utils/formatters';
+import { omit } from 'utils/utils';
+import { useAppSelector } from 'services/Context';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -50,38 +50,38 @@ export const ConnectionFormSchema = z.object({
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
-    .or(z.literal("")),
+    .or(z.literal('')),
   password: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
-    .or(z.literal("")),
+    .or(z.literal('')),
   host: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
-    .or(z.literal("")),
+    .or(z.literal('')),
   file: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
-    .or(z.literal("")),
+    .or(z.literal('')),
   socket_path: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
-    .or(z.literal("")),
+    .or(z.literal('')),
   port: z.coerce
     .number()
     .min(MIN_PORT)
     .max(MAX_PORT)
     .optional()
     .or(z.literal(0)),
-  dbname: z.string().optional().or(z.literal("")),
+  dbname: z.string().optional().or(z.literal('')),
   color: z.enum(connectionColors),
 });
 
@@ -92,15 +92,15 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
 
   switch (mode) {
     case ConnectionMode.Host: {
-      const creds: HostCredentials = omit(rest, "socket_path", "file");
+      const creds: HostCredentials = omit(rest, 'socket_path', 'file');
       return { name, scheme: { [scheme]: { [mode]: creds } }, color };
     }
     case ConnectionMode.Socket: {
-      const creds: SocketCredentials = omit(rest, "host", "port", "file");
+      const creds: SocketCredentials = omit(rest, 'host', 'port', 'file');
       return { name, scheme: { [scheme]: { [mode]: creds } }, color };
     }
     case ConnectionMode.File: {
-      const creds: FileCredentials = omit(rest, "host", "port", "socket_path");
+      const creds: FileCredentials = omit(rest, 'host', 'port', 'socket_path');
       return {
         name,
         scheme: { [scheme]: { [mode]: creds } } as Partial<Scheme>,
@@ -110,19 +110,19 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
   }
 };
 
-export * from "./AddConnectionForm";
+export * from './AddConnectionForm';
 
 const defaultValues = {
-  name: "My Connection",
+  name: 'My Connection',
   scheme: Dialect.Mysql,
   port: 3306,
-  color: "cyan",
+  color: 'cyan',
   mode: AvailableConnectionModes[Dialect.Mysql][0],
-  file: "",
-  host: "localhost",
-  username: "root",
-  password: "example",
-  dbname: "world_x",
+  file: '',
+  host: 'localhost',
+  username: 'root',
+  password: 'example',
+  dbname: 'world_x',
 };
 
 const AddConnectionForm = (props: {
@@ -171,14 +171,12 @@ const AddConnectionForm = (props: {
         onSubmit={submit}
       >
         <div>
-          <h2 class="text-2xl font-bold">
-            {t('add_connection_form.title')}
-          </h2>
+          <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
         <div class="grid grid-cols-6 gap-3">
           <div
             class={
-              formData().scheme === Dialect.Sqlite ? "col-span-4" : "col-span-2"
+              formData().scheme === Dialect.Sqlite ? 'col-span-4' : 'col-span-2'
             }
           >
             <Select
@@ -191,10 +189,10 @@ const AddConnectionForm = (props: {
               }))}
               formHandler={formHandler}
               onChange={() => {
-                setFieldValue("port", PORTS_MAP[formData().scheme] || 3306);
+                setFieldValue('port', PORTS_MAP[formData().scheme] || 3306);
                 if (formData().mode === ConnectionMode.Socket) {
                   setFieldValue(
-                    "socket_path",
+                    'socket_path',
                     SocketPathDefaults[formData().scheme]
                   );
                 }
@@ -214,7 +212,7 @@ const AddConnectionForm = (props: {
                 onChange={() => {
                   if (formData().mode === ConnectionMode.Socket) {
                     setFieldValue(
-                      "socket_path",
+                      'socket_path',
                       SocketPathDefaults[formData().scheme]
                     );
                   }
@@ -344,7 +342,7 @@ const AddConnectionForm = (props: {
             <Alert color="error">
               {getFormErrors().map((error) => (
                 <p class="text-bold">
-                  {t(`add_connection_form.labels.${error.path}`)}:{" "}
+                  {t(`add_connection_form.labels.${error.path}`)}:{' '}
                   {error.message}
                 </p>
               ))}

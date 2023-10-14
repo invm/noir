@@ -1,30 +1,30 @@
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce } from 'solid-js/store';
 import {
   ConnectionConfig,
   ResultSet,
   Row,
   Table,
   TableEntity,
-} from "../interfaces";
-import { Store } from "tauri-plugin-store-api";
-import { debounce, firstKey } from "utils/utils";
-import { invoke } from "@tauri-apps/api";
-import { MessageService } from "./Messages";
-import { createSignal } from "solid-js";
+} from '../interfaces';
+import { Store } from 'tauri-plugin-store-api';
+import { debounce, firstKey } from 'utils/utils';
+import { invoke } from '@tauri-apps/api';
+import { MessageService } from './Messages';
+import { createSignal } from 'solid-js';
 
-const store = new Store(".connections.dat");
+const store = new Store('.connections.dat');
 const INTERVAL = 1000;
 
 export const MessageType = {
-  error: "error",
-  info: "info",
-  success: "success",
-  warning: "warning",
+  error: 'error',
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
 } as const;
 
 export const ContentTab = {
-  Query: "Query",
-  TableStructure: "TableStructure",
+  Query: 'Query',
+  TableStructure: 'TableStructure',
 } as const;
 
 type ContentComponentKeys = keyof typeof ContentTab;
@@ -43,7 +43,7 @@ export const newContentTab = <T extends ContentComponentKeys>(
     case ContentTab.Query:
       return {
         label,
-        data: data ?? { query: "", executed: false, result_sets: [] },
+        data: data ?? { query: '', executed: false, result_sets: [] },
         key,
       };
     case ContentTab.TableStructure:
@@ -59,7 +59,7 @@ export const newContentTab = <T extends ContentComponentKeys>(
         key,
       };
     default:
-      throw new Error("Invalid content tab key");
+      throw new Error('Invalid content tab key');
   }
 };
 
@@ -98,8 +98,8 @@ type ConnectionTab = {
   connection: ConnectionConfig;
 };
 
-const CONNECTIONS_KEY = "_conn_tabs";
-const CONTENT_KEY = "_content_tabs";
+const CONNECTIONS_KEY = '_conn_tabs';
+const CONTENT_KEY = '_content_tabs';
 
 const getSavedData = async (key: string, defaultValue: any = []) => {
   const str = await store.get(key);
@@ -127,7 +127,7 @@ export const ConnectionsService = () => {
   const [connectionStore, setConnectionStore] = createStore<ConnectionStore>({
     tabs: [],
     idx: 0,
-    schema: "",
+    schema: '',
   });
 
   const [contentStore, setContentStore] = createStore<ContentStore>({
@@ -139,17 +139,20 @@ export const ConnectionsService = () => {
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
     if (!conn_tabs.tabs) return;
-    const tabs = await conn_tabs.tabs.reduce(async (acc, conn) => {
-      const res = await acc;
-      try {
-        await invoke("init_connection", { config: conn.connection });
-        return Promise.resolve([...res, conn]);
-      } catch (e) {
-        conn_tabs.idx = 0;
-        MessageService().notify(e);
-        return Promise.resolve(res);
-      }
-    }, Promise.resolve([] as ConnectionTab[]));
+    const tabs = await conn_tabs.tabs.reduce(
+      async (acc, conn) => {
+        const res = await acc;
+        try {
+          await invoke('init_connection', { config: conn.connection });
+          return Promise.resolve([...res, conn]);
+        } catch (e) {
+          conn_tabs.idx = 0;
+          MessageService().notify(e);
+          return Promise.resolve(res);
+        }
+      },
+      Promise.resolve([] as ConnectionTab[])
+    );
     setConnectionStore(() => ({ ...conn_tabs, tabs }));
     const content = await getSavedData(CONTENT_KEY);
     setContentStore(() => content as ContentStore);
@@ -172,7 +175,7 @@ export const ConnectionsService = () => {
 
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
-    setContentStore("tabs", [newContentTab("Query", ContentTab.Query)]);
+    setContentStore('tabs', [newContentTab('Query', ContentTab.Query)]);
     setConnectionStore(
       produce((s) => {
         s.tabs.push(tab);
@@ -185,10 +188,10 @@ export const ConnectionsService = () => {
 
   const removeConnectionTab = async (id: string) => {
     setConnectionStore(
-      "tabs",
+      'tabs',
       connectionStore.tabs.filter((t) => t.id !== id)
     );
-    setConnectionStore("idx", 0);
+    setConnectionStore('idx', 0);
     updateStore();
   };
 
@@ -209,7 +212,7 @@ export const ConnectionsService = () => {
   const addContentTab = (tab?: ContentTab) => {
     setContentStore(
       produce((s) => {
-        s.tabs.push(tab ?? newContentTab("Query", ContentTab.Query));
+        s.tabs.push(tab ?? newContentTab('Query', ContentTab.Query));
         s.idx = s.tabs.length - 1;
       })
     );
@@ -229,13 +232,13 @@ export const ConnectionsService = () => {
 
   const setConnectionIdx = (i: number) => {
     if (i <= connectionStore.tabs.length) {
-      setConnectionStore("idx", i);
+      setConnectionStore('idx', i);
     }
   };
 
   const setContentIdx = (i: number) => {
     if (i < contentStore.tabs.length) {
-      setContentStore("idx", i);
+      setContentStore('idx', i);
       setQueryIdx(0);
     }
   };
@@ -247,7 +250,7 @@ export const ConnectionsService = () => {
   ) => {
     const tab = getConnection();
     if (!tab) return;
-    setConnectionStore("tabs", idx ?? connectionStore.idx - 1, key, data);
+    setConnectionStore('tabs', idx ?? connectionStore.idx - 1, key, data);
     updateStore();
   };
 
@@ -258,7 +261,7 @@ export const ConnectionsService = () => {
   ) => {
     const tab = getContent();
     if (!tab) return;
-    setContentStore("tabs", idx ?? contentStore.idx, key, data);
+    setContentStore('tabs', idx ?? contentStore.idx, key, data);
     updateStore();
   };
 
@@ -280,11 +283,11 @@ export const ConnectionsService = () => {
   };
 
   const selectPrevQuery = () => {
-    setQueryIdx((s) => (s - 1) % getContentData("Query").result_sets.length);
+    setQueryIdx((s) => (s - 1) % getContentData('Query').result_sets.length);
   };
 
   const selectNextQuery = () => {
-    setQueryIdx((s) => (s + 1) % getContentData("Query").result_sets.length);
+    setQueryIdx((s) => (s + 1) % getContentData('Query').result_sets.length);
   };
 
   return {
