@@ -81,6 +81,7 @@ fn main() {
             queries::get_procedures,
             queries::get_triggers,
             queries::get_table_structure,
+            queries::get_query_metadata,
             queries::query_results,
         ])
         .run(tauri::generate_context!())

@@ -118,10 +118,6 @@ export type ResultSet = {
   rows: Row[];
 };
 
-export type QueryResult = {
-  result_sets: ResultSet[];
-};
-
 const QueryTaskStatus = {
   Queued: "Queued",
   Progress: "Progress",

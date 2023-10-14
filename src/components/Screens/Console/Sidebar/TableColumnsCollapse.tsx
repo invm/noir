@@ -8,7 +8,7 @@ import {
 } from "services/Connections";
 
 import { invoke } from "@tauri-apps/api";
-import { QueryResult } from "interfaces";
+import { ResultSet } from "interfaces";
 
 export const TableColumnsCollapse = (props: {
   title: string;
@@ -43,12 +43,12 @@ export const TableColumnsCollapse = (props: {
   const listData = async (table: string) => {
     try {
       const query = "SELECT * from " + table + " LIMIT 1000";
-      const { result_sets } = await invoke<QueryResult>("execute_query", {
+      const res = await invoke<ResultSet>("execute_query", {
         connId: getConnection().id,
         query,
         autoLimit: true,
       });
-      const data = { query, executed: true, result_sets };
+      const data = { query, executed: true, result_sets: [res] };
       addContentTab(newContentTab(table, "Query", data));
     } catch (error) {
       notify(error);
@@ -58,7 +58,7 @@ export const TableColumnsCollapse = (props: {
   const truncateTable = async (table: string) => {
     try {
       const query = "TRUNCATE TABLE " + table;
-      await invoke<QueryResult>("execute_query", {
+      await invoke<ResultSet>("execute_query", {
         connId: getConnection().id,
         query,
         autoLimit: false,
