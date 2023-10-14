@@ -66,7 +66,7 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
 pub fn write_query(id: &str, result_set: ResultSet) -> Result<String> {
     let rows = json!(result_set.rows).to_string();
     let metadata = json!({
-        "rows": result_set.rows.len(),
+        "count": result_set.rows.len(),
         "affected_rows": result_set.affected_rows,
         "warnings": result_set.warnings,
         "info": result_set.info,

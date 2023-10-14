@@ -1,18 +1,22 @@
-import { createEffect, createSignal } from "solid-js";
-import { TabulatorFull as Tabulator } from "tabulator-tables";
-import { dracula } from "@uiw/codemirror-theme-dracula";
-import { search } from "@codemirror/search";
-import { basicSetup, EditorView } from "codemirror";
-import { json } from "@codemirror/lang-json";
+import { createEffect, createSignal } from 'solid-js';
+import { TabulatorFull as Tabulator } from 'tabulator-tables';
+import { dracula } from '@uiw/codemirror-theme-dracula';
+import { search } from '@codemirror/search';
+import { basicSetup, EditorView } from 'codemirror';
+import { json } from '@codemirror/lang-json';
 import {
   createCodeMirror,
   createEditorControlledValue,
-} from "solid-codemirror";
-import { Pagination } from "./components/Pagination";
-import { useAppSelector } from "services/Context";
+} from 'solid-codemirror';
+import { Pagination } from './components/Pagination';
+import { useAppSelector } from 'services/Context';
 
-const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
-  if (typeof obj === "object") {
+type TableColumn = { title: string; field: string; resizeable: boolean };
+
+const parseObjRecursive = (
+  obj: unknown
+): Record<string, unknown | unknown[]> | null | unknown => {
+  if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       return obj.map(parseObjRecursive);
     } else if (obj !== null) {
@@ -33,9 +37,9 @@ const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | 
 
 export const ResultsTable = () => {
   const {
-    connections: { queryIdx },
+    connections: { queryIdx, getContentData, pageSize },
   } = useAppSelector();
-  const [code, setCode] = createSignal("");
+  const [code, setCode] = createSignal('');
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
   });
@@ -50,71 +54,74 @@ export const ResultsTable = () => {
   createExtension(lineWrapping);
 
   createEffect(() => {
-    console.log(queryIdx);
-    // let columns: { title: string; field: string; resizeable: boolean }[] = [];
-    // if (length) {
-    //   columns = Object.keys(props.rows[0]).map((k) => ({
-    //     title: k,
-    //     field: k,
-    //     resizeable: true,
-    //     // editor: "input" as const, // this will make the whole table navigable
-    //   }));
-    // }
-    //
-    // const _table = new Tabulator("#results-table", {
-    //   data: props.rows,
-    //   columns,
-    //   columnDefaults: {
-    //     title: "",
-    //     width: 350,
-    //   },
-    //   layout: "fitDataStretch",
-    //   autoResize: true,
-    //   clipboard: true,
-    //   pagination: false,
-    //   paginationSize: paginationSize(),
-    //   height: "100%",
-    //   paginationCounter: "rows",
-    //   debugInvalidOptions: false,
-    //   rowContextMenu: [
-    //     {
-    //       label: "Show row in JSON",
-    //       action: function(_e, row) {
-    //         // @ts-ignore
-    //         const data = parseObjRecursive(row._row.data);
-    //         setCode(JSON.stringify(data, null, 4));
-    //         // @ts-ignore
-    //         document.getElementById("my_modal_1").showModal();
-    //       },
-    //     },
-    //     {
-    //       label: "Copy row to clipboard",
-    //       action: function(_e, row) {
-    //         // @ts-ignore
-    //         navigator.clipboard.writeText(JSON.stringify(row._row.data));
-    //       },
-    //     },
-    //     {
-    //       separator: true,
-    //     },
-    //   ],
-    //   // only relevant if editor is set to "input"
-    //   // keybindings: {
-    //   //   //@ts-ignore
-    //   //   navUp: ["ctrl + shift + k", 38],
-    //   //   //@ts-ignore
-    //   //   navDown: ["ctrl + shift + j", 40],
-    //   //   //@ts-ignore
-    //   //   navLeft: ["ctrl + shift + h", 37],
-    //   //   //@ts-ignore
-    //   //   navRight: ["ctrl + shift + l", 39],
-    //   // },
-    // });
-    // setTable(_table);
+    const data = getContentData('Query');
+    if (data.result_sets[queryIdx()]?.rows) {
+      const rows = data.result_sets[queryIdx()].rows!;
+      let columns: TableColumn[] = [];
+      if (length) {
+        columns = Object.keys(rows[0]).map((k) => ({
+          title: k,
+          field: k,
+          resizeable: true,
+          // editor: "input" as const, // this will make the whole table navigable
+        }));
+      }
+
+      const _table = new Tabulator('#results-table', {
+        data: rows,
+        columns,
+        columnDefaults: {
+          title: '',
+          width: 350,
+        },
+        layout: 'fitDataStretch',
+        autoResize: true,
+        clipboard: true,
+        pagination: true,
+        paginationSize: pageSize(),
+        height: '100%',
+        paginationCounter: 'rows',
+        debugInvalidOptions: false,
+        rowContextMenu: [
+          {
+            label: 'Show row in JSON',
+            action: function(_e, row) {
+              // @ts-ignore
+              const data = parseObjRecursive(row._row.data);
+              setCode(JSON.stringify(data, null, 4));
+              // @ts-ignore
+              document.getElementById('my_modal_1').showModal();
+            },
+          },
+          {
+            label: 'Copy row to clipboard',
+            action: function(_e, row) {
+              // @ts-ignore
+              navigator.clipboard.writeText(JSON.stringify(row._row.data));
+            },
+          },
+          {
+            separator: true,
+          },
+        ],
+        // only relevant if editor is set to "input"
+        // keybindings: {
+        //   //@ts-ignore
+        //   navUp: ["ctrl + shift + k", 38],
+        //   //@ts-ignore
+        //   navDown: ["ctrl + shift + j", 40],
+        //   //@ts-ignore
+        //   navLeft: ["ctrl + shift + h", 37],
+        //   //@ts-ignore
+        //   navRight: ["ctrl + shift + l", 39],
+        // },
+      });
+      setTable(_table);
+    }
   });
 
   return (
-    <div class="flex-1 flex flex-col">
+    <div class="">
       <dialog id="my_modal_1" class="modal">
         <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
           <div class="h-full">
@@ -125,11 +132,11 @@ export const ResultsTable = () => {
           <button>close</button>
         </form>
       </dialog>
+      {/*
       <Pagination table={table()} />
-      <div class="flex-1 bg-red-200">
-        <div id="results-table">
-          <div id="loading-overlay"></div>
-        </div>
+      */}
+      <div class="">
+        <div id="results-table" class="bg-red-200"></div>
       </div>
     </div>
   );

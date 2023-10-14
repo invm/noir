@@ -1,7 +1,7 @@
 export const Dialect = {
-  Mysql: "Mysql",
-  Postgres: "Postgres",
-  Sqlite: "Sqlite",
+  Mysql: 'Mysql',
+  Postgres: 'Postgres',
+  Sqlite: 'Sqlite',
 } as const;
 
 export type DialectType = keyof typeof Dialect;
@@ -38,17 +38,17 @@ export type FileCredentials = {
 };
 
 export const ConnectionMode = {
-  Host: "Host",
-  Socket: "Socket",
-  File: "File",
+  Host: 'Host',
+  Socket: 'Socket',
+  File: 'File',
 } as const;
 
 export type ConnectionModeType = keyof typeof ConnectionMode;
 
 export const SocketPathDefaults = {
-  [Dialect.Mysql]: "/var/run/mysqld/mysqld.sock",
-  [Dialect.Postgres]: "/var/run/postgresql/.s.PGSQL.5432",
-  [Dialect.Sqlite]: "",
+  [Dialect.Mysql]: '/var/run/mysqld/mysqld.sock',
+  [Dialect.Postgres]: '/var/run/postgresql/.s.PGSQL.5432',
+  [Dialect.Sqlite]: '',
 } as const;
 
 export const AvailableConnectionModes = {
@@ -76,28 +76,28 @@ export type ConnectionConfig = {
 };
 
 export const connectionColors = [
-  "slate",
-  "gray",
-  "zinc",
-  "neutral",
-  "stone",
-  "red",
-  "orange",
-  "amber",
-  "yellow",
-  "lime",
-  "green",
-  "emerald",
-  "teal",
-  "cyan",
-  "sky",
-  "blue",
-  "indigo",
-  "violet",
-  "purple",
-  "fuchsia",
-  "pink",
-  "rose",
+  'slate',
+  'gray',
+  'zinc',
+  'neutral',
+  'stone',
+  'red',
+  'orange',
+  'amber',
+  'yellow',
+  'lime',
+  'green',
+  'emerald',
+  'teal',
+  'cyan',
+  'sky',
+  'blue',
+  'indigo',
+  'violet',
+  'purple',
+  'fuchsia',
+  'pink',
+  'rose',
 ] as const;
 
 export type ConnectionColor = (typeof connectionColors)[number];
@@ -112,17 +112,18 @@ type JSONValue =
 export type Row = Record<string, JSONValue>;
 
 export type ResultSet = {
-  affected_rows: number;
-  warnings: number;
-  info: String;
-  rows: Row[];
+  id?: string;
+  count?: number;
+  affected_rows?: number;
+  warnings?: number;
+  info?: string;
+  rows?: Row[];
 };
 
 const QueryTaskStatus = {
-  Queued: "Queued",
-  Progress: "Progress",
-  Completed: "Completed",
-  Error: "Error",
+  Progress: 'Progress',
+  Completed: 'Completed',
+  Error: 'Error',
 } as const;
 
 export type QueryTaskStatusType = keyof typeof QueryTaskStatus;
@@ -139,21 +140,28 @@ export type QueryTaskResult = {
   status: QueryTaskStatusType;
   query: string;
   id: string;
-  path: string | undefined;
-  error: string | undefined;
   tab_idx: number;
   query_idx: number;
-};
+} & (
+    | {
+      status: 'Error';
+      error: string;
+    }
+    | {
+      status: 'Completed';
+      path: string;
+    }
+  );
 
 export type RawQueryResult = {
   result: Row[];
 };
 
 export const TableEntity = {
-  columns: "columns",
-  indices: "indices",
-  constraints: "constraints",
-  triggers: "triggers",
+  columns: 'columns',
+  indices: 'indices',
+  constraints: 'constraints',
+  triggers: 'triggers',
 } as const;
 
 export type TableStrucureEntityType = keyof typeof TableEntity;
@@ -168,83 +176,87 @@ export const TableStrucureEntities = [
 export const SORT_ORDER = {
   [Dialect.Mysql]: {
     [TableEntity.columns]: [
-      "COLUMN_NAME",
-      "COLUMN_TYPE",
-      "IS_NULLABLE",
-      "CHARACTER_MAXIMUM_LENGTH",
+      'COLUMN_NAME',
+      'COLUMN_TYPE',
+      'IS_NULLABLE',
+      'CHARACTER_MAXIMUM_LENGTH',
     ],
-    [TableEntity.indices]: ["INDEX_NAME", "NON_UNIQUE", "COLUMN_NAME"],
+    [TableEntity.indices]: ['INDEX_NAME', 'NON_UNIQUE', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
-      "CONSTRAINT_NAME",
-      "TABLE_NAME",
-      "COLUMN_NAME",
-      "REFERENCED_COLUMN_NAME",
-      "REFERENCED_TABLE_NAME",
+      'CONSTRAINT_NAME',
+      'TABLE_NAME',
+      'COLUMN_NAME',
+      'REFERENCED_COLUMN_NAME',
+      'REFERENCED_TABLE_NAME',
     ],
     [TableEntity.triggers]: [
-      "TRIGGER_NAME",
-      "EVENT_MANIPULATION",
-      "EVENT_OBJECT_TABLE",
-      "ACTION_TIMING",
-      "ACTION_STATEMENT",
+      'TRIGGER_NAME',
+      'EVENT_MANIPULATION',
+      'EVENT_OBJECT_TABLE',
+      'ACTION_TIMING',
+      'ACTION_STATEMENT',
     ],
   },
   [Dialect.Postgres]: {
     [TableEntity.columns]: [
-      "COLUMN_NAME",
-      "DATA_TYPE",
-      "IS_NULLABLE",
-      "CHARACTER_MAXIMUM_LENGTH",
+      'COLUMN_NAME',
+      'DATA_TYPE',
+      'IS_NULLABLE',
+      'CHARACTER_MAXIMUM_LENGTH',
     ],
-    [TableEntity.indices]: ["INDEX_NAME", "COLUMN_NAME"],
+    [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
-      "CONSTRAINT_NAME",
-      "TABLE_NAME",
-      "COLUMN_NAME",
-      "REFERENCED_COLUMN_NAME",
-      "REFERENCED_TABLE_NAME",
+      'CONSTRAINT_NAME',
+      'TABLE_NAME',
+      'COLUMN_NAME',
+      'REFERENCED_COLUMN_NAME',
+      'REFERENCED_TABLE_NAME',
     ],
     [TableEntity.triggers]: [
-      "TRIGGER_NAME",
-      "EVENT_MANIPULATION",
-      "EVENT_OBJECT_TABLE",
-      "ACTION_TIMING",
-      "ACTION_STATEMENT",
+      'TRIGGER_NAME',
+      'EVENT_MANIPULATION',
+      'EVENT_OBJECT_TABLE',
+      'ACTION_TIMING',
+      'ACTION_STATEMENT',
     ],
   },
   [Dialect.Sqlite]: {
     [TableEntity.columns]: [
-      "COLUMN_NAME",
-      "DATA_TYPE",
-      "IS_NULLABLE",
-      "CHARACTER_MAXIMUM_LENGTH",
+      'COLUMN_NAME',
+      'DATA_TYPE',
+      'IS_NULLABLE',
+      'CHARACTER_MAXIMUM_LENGTH',
     ],
-    [TableEntity.indices]: ["INDEX_NAME", "COLUMN_NAME"],
+    [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
-      "CONSTRAINT_NAME",
-      "TABLE_NAME",
-      "COLUMN_NAME",
-      "REFERENCED_COLUMN_NAME",
-      "REFERENCED_TABLE_NAME",
+      'CONSTRAINT_NAME',
+      'TABLE_NAME',
+      'COLUMN_NAME',
+      'REFERENCED_COLUMN_NAME',
+      'REFERENCED_TABLE_NAME',
     ],
     [TableEntity.triggers]: [
-      "TRIGGER_NAME",
-      "EVENT_MANIPULATION",
-      "EVENT_OBJECT_TABLE",
-      "ACTION_TIMING",
-      "ACTION_STATEMENT",
+      'TRIGGER_NAME',
+      'EVENT_MANIPULATION',
+      'EVENT_OBJECT_TABLE',
+      'ACTION_TIMING',
+      'ACTION_STATEMENT',
     ],
   },
 } as const;
 
+export type Column = {
+  name: string;
+  props: Record<string, string>;
+};
+
 export type Table = {
   name: string;
-  columns: {
-    name: string;
-    props: Record<string, any>;
-  }[];
+  columns: Column[];
 };
 
 export const Events = {
-  QueryFinished: "query_finished",
+  QueryFinished: 'query_finished',
 } as const;
+
+export type QueryMetadataResult = Omit<ResultSet, 'rows' | 'id'>;

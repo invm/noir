@@ -21,7 +21,6 @@ impl Events {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum QueryTaskStatus {
-    Queued,
     Progress,
     Completed,
     Error,
@@ -29,7 +28,7 @@ pub enum QueryTaskStatus {
 
 impl Default for QueryTaskStatus {
     fn default() -> Self {
-        QueryTaskStatus::Queued
+        QueryTaskStatus::Progress
     }
 }
 
@@ -57,7 +56,7 @@ impl QueryTask {
             tab_idx,
             query_idx,
             query: query.to_string(),
-            status: QueryTaskStatus::Queued,
+            status: QueryTaskStatus::Progress,
         }
     }
 }
@@ -89,38 +88,36 @@ pub async fn async_process_model(
     while let Some(input) = input_rx.recv().await {
         let task = input;
         match task.conn.execute_query(&task.query).await {
-            Ok(result_set) => {
-                match write_query(&task.id, result_set) {
-                    Ok(path) => {
-                        output_tx
-                            .send(QueryTaskResult {
-                                conn_id: task.conn.config.id.to_string(),
-                                status: QueryTaskStatus::Completed,
-                                query: task.query,
-                                id: task.id,
-                                query_idx: task.query_idx,
-                                tab_idx: task.tab_idx,
-                                path: Some(path),
-                                error: None,
-                            })
-                            .await?
-                    }
-                    Err(e) => {
-                        output_tx
-                            .send(QueryTaskResult {
-                                conn_id: task.conn.config.id.to_string(),
-                                status: QueryTaskStatus::Error,
-                                query: task.query,
-                                id: task.id,
-                                query_idx: task.query_idx,
-                                tab_idx: task.tab_idx,
-                                path: None,
-                                error: Some(e.to_string()),
-                            })
-                            .await?
-                    }
+            Ok(result_set) => match write_query(&task.id, result_set) {
+                Ok(path) => {
+                    output_tx
+                        .send(QueryTaskResult {
+                            conn_id: task.conn.config.id.to_string(),
+                            status: QueryTaskStatus::Completed,
+                            query: task.query,
+                            id: task.id,
+                            query_idx: task.query_idx,
+                            tab_idx: task.tab_idx,
+                            path: Some(path),
+                            error: None,
+                        })
+                        .await?
                 }
-            }
+                Err(e) => {
+                    output_tx
+                        .send(QueryTaskResult {
+                            conn_id: task.conn.config.id.to_string(),
+                            status: QueryTaskStatus::Error,
+                            query: task.query,
+                            id: task.id,
+                            query_idx: task.query_idx,
+                            tab_idx: task.tab_idx,
+                            path: None,
+                            error: Some(e.to_string()),
+                        })
+                        .await?
+                }
+            },
             Err(e) => {
                 output_tx
                     .send(QueryTaskResult {

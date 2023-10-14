@@ -2,31 +2,31 @@ import {
   createCodeMirror,
   createEditorControlledValue,
   createEditorFocus,
-} from "solid-codemirror";
-import { createEffect, createSignal, Show } from "solid-js";
+} from 'solid-codemirror';
+import { createEffect, createSignal, Show } from 'solid-js';
 import {
   EditorView,
   drawSelection,
   highlightWhitespace,
   highlightActiveLine,
-} from "@codemirror/view";
-import { MySQL, sql } from "@codemirror/lang-sql";
-import { dracula } from "@uiw/codemirror-theme-dracula";
-import { vim } from "@replit/codemirror-vim";
-import { format } from "sql-formatter";
-import { invoke } from "@tauri-apps/api";
-import { Copy, EditIcon, FireIcon, VimIcon } from "components/UI/Icons";
-import { useAppSelector } from "services/Context";
-import { QueryTaskEnqueueResult } from "interfaces";
-import { t } from "utils/i18n";
-import { Alert } from "components/UI";
-import { basicSetup } from "codemirror";
-import { createShortcut } from "@solid-primitives/keyboard";
-import { search } from "@codemirror/search";
-import { createStore } from "solid-js/store";
-import { ActionRowButton } from "./components/ActionRowButton";
+} from '@codemirror/view';
+import { MySQL, sql } from '@codemirror/lang-sql';
+import { dracula } from '@uiw/codemirror-theme-dracula';
+import { vim } from '@replit/codemirror-vim';
+import { format } from 'sql-formatter';
+import { invoke } from '@tauri-apps/api';
+import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
+import { useAppSelector } from 'services/Context';
+import { QueryTaskEnqueueResult } from 'interfaces';
+import { t } from 'utils/i18n';
+import { Alert } from 'components/UI';
+import { basicSetup } from 'codemirror';
+import { createShortcut } from '@solid-primitives/keyboard';
+import { search } from '@codemirror/search';
+import { createStore } from 'solid-js/store';
+import { ActionRowButton } from './components/ActionRowButton';
 
-import { log } from "utils/utils";
+import { log } from 'utils/utils';
 
 export const QueryTextArea = () => {
   const {
@@ -40,13 +40,13 @@ export const QueryTextArea = () => {
     },
     app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
-  const [code, setCode] = createSignal("");
+  const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
 
   const updateQueryText = async (query: string) => {
-    updateContentTab("data", { query });
+    updateContentTab('data', { query });
   };
 
   const { ref, editorView, createExtension } = createCodeMirror({
@@ -92,19 +92,28 @@ export const QueryTextArea = () => {
     if (loading() || !code()) return;
     setLoading(true);
     const selectedText = getSelection();
-    updateContentTab("error", undefined);
+    updateContentTab('error', undefined);
     const activeConnection = getConnection();
     try {
-      const result = await invoke<QueryTaskEnqueueResult>("enqueue_query", {
-        connId: activeConnection.id,
-        sql: selectedText || code(),
-        autoLimit: autoLimit(),
-        tabIdx,
+      const { results_sets } = await invoke<QueryTaskEnqueueResult>(
+        'enqueue_query',
+        {
+          connId: activeConnection.id,
+          sql: selectedText || code(),
+          autoLimit: autoLimit(),
+          tabIdx,
+        }
+      );
+      updateContentTab('data', {
+        query: code(),
+        executed: true,
+        result_sets: results_sets.map((id) => ({
+          id,
+        })),
       });
-      // updateContentTab("data", { query: code(), executed: true, result_sets });
-      log({ result });
+      log({ results_sets });
     } catch (error) {
-      updateContentTab("error", String(error));
+      updateContentTab('error', String(error));
     } finally {
       setLoading(false);
     }
@@ -115,7 +124,7 @@ export const QueryTextArea = () => {
   };
 
   createEffect(() => {
-    setCode(getContentData("Query").query ?? "");
+    setCode(getContentData('Query').query ?? '');
     setSchema(
       getSchemaTables().reduce(
         (acc, table) => ({
@@ -127,40 +136,40 @@ export const QueryTextArea = () => {
     );
   });
 
-  createShortcut(["Control", "e"], onExecute);
-  createShortcut(["Control", "l"], () => setFocused(true));
-  createShortcut(["Control", "Shift", "F"], onFormat);
+  createShortcut(['Control', 'e'], onExecute);
+  createShortcut(['Control', 'l'], () => setFocused(true));
+  createShortcut(['Control', 'Shift', 'F'], onFormat);
 
   return (
     <div class="flex-1 flex flex-col">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
           <ActionRowButton
-            dataTip={t("console.actions.format")}
+            dataTip={t('console.actions.format')}
             onClick={onFormat}
             icon={<EditIcon />}
           />
           <ActionRowButton
-            dataTip={t("console.actions.execute")}
+            dataTip={t('console.actions.execute')}
             onClick={onExecute}
             loading={loading()}
             icon={<FireIcon />}
           />
 
           <ActionRowButton
-            dataTip={t("console.actions.copy_query")}
+            dataTip={t('console.actions.copy_query')}
             onClick={copyQueryToClipboard}
             icon={<Copy />}
           />
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("console.actions.auto_limit")}
+            data-tip={t('console.actions.auto_limit')}
           >
             <div class="form-control">
               <label class="cursor-pointer label">
                 <span class="label-text font-semibold mr-2 text-primary mt-1">
-                  {t("console.actions.limit")}
+                  {t('console.actions.limit')}
                 </span>
                 <input
                   type="checkbox"
@@ -174,7 +183,7 @@ export const QueryTextArea = () => {
 
           <div
             class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t("console.actions.vim_mode_on")}
+            data-tip={t('console.actions.vim_mode_on')}
           >
             <div class="flex items-center mx-2">
               <span class="mr-2">
@@ -184,7 +193,7 @@ export const QueryTextArea = () => {
                 type="checkbox"
                 class="toggle toggle-sm"
                 classList={{
-                  "toggle-primary": vimModeOn(),
+                  'toggle-primary': vimModeOn(),
                 }}
                 checked={vimModeOn()}
                 onChange={() => toggleVimModeOn()}
