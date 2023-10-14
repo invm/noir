@@ -1,5 +1,6 @@
 import { createStore, produce } from 'solid-js/store';
 import {
+  Column,
   ConnectionConfig,
   ResultSet,
   Row,
@@ -94,21 +95,26 @@ export type ContentTab = {
 type ConnectionTab = {
   label: string;
   id: string;
-  schema: Record<string, string>;
+  schema: Record<string, Table>;
   connection: ConnectionConfig;
 };
 
 const CONNECTIONS_KEY = '_conn_tabs';
 const CONTENT_KEY = '_content_tabs';
 
-const getSavedData = async (key: string, defaultValue: any = []) => {
+type StoreSavedData = {
+  [CONNECTIONS_KEY]: ConnectionStore;
+  [CONTENT_KEY]: ContentStore;
+};
+
+const getSavedData = async <T extends keyof StoreSavedData>(key: T) => {
   const str = await store.get(key);
-  if (!str) return defaultValue;
+  if (!str) return {} as StoreSavedData[T];
   try {
     const res = JSON.parse(str as string);
-    return res as unknown;
+    return res as StoreSavedData[T];
   } catch (e) {
-    return defaultValue;
+    return {} as StoreSavedData[T];
   }
 };
 
@@ -135,6 +141,7 @@ export const ConnectionsService = () => {
     idx: 0,
   });
   const [queryIdx, setQueryIdx] = createSignal<number>(0);
+  const [pageSize, setPageSize] = createSignal<number>(30);
 
   const restoreConnectionStore = async () => {
     const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
@@ -265,14 +272,32 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
+  const updateResultSet = (
+    tab_idx: number,
+    query_idx: number,
+    data: Partial<ResultSet>
+  ) => {
+    setContentStore(
+      produce((s) => {
+        const d = (s.tabs[tab_idx].data as QueryContentTabData).result_sets[
+          query_idx
+        ];
+        (s.tabs[tab_idx].data as QueryContentTabData).result_sets[query_idx] = {
+          ...d,
+          ...data,
+        };
+      })
+    );
+  };
+
   const getSchemaTables = (sch = connectionStore.schema): Table[] => {
     const _tables = Object.entries(getConnection().schema[sch]).reduce(
-      (acc: any, [name, columns]) => [
+      (acc: Table[], [name, columns]) => [
         ...acc,
         {
           name,
           columns: Object.entries(columns).reduce(
-            (cols: any, [name, props]) => [...cols, { name, props }],
+            (cols: Column[], [name, props]) => [...cols, { name, props }],
             []
           ),
         },
@@ -313,5 +338,8 @@ export const ConnectionsService = () => {
     selectPrevQuery,
     selectNextQuery,
     queryIdx,
+    updateResultSet,
+    pageSize,
+    setPageSize,
   };
 };

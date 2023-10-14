@@ -63,7 +63,7 @@ pub async fn enqueue_query(
                 return Ok(QueryTaskEnqueueResult {
                     conn_id,
                     tab_idx,
-                    status: QueryTaskStatus::Queued,
+                    status: QueryTaskStatus::Progress,
                     results_sets: statements.iter().map(|s| s.1.clone()).collect(),
                 });
             }
