@@ -55,73 +55,71 @@ export const ResultsTable = () => {
 
   createEffect(() => {
     const data = getContentData('Query');
-    if (data.result_sets[queryIdx()]?.rows) {
-      const rows = data.result_sets[queryIdx()].rows!;
-      let columns: TableColumn[] = [];
-      if (length) {
-        columns = Object.keys(rows[0]).map((k) => ({
-          title: k,
-          field: k,
-          resizeable: true,
-          // editor: "input" as const, // this will make the whole table navigable
-        }));
-      }
-
-      const _table = new Tabulator('#results-table', {
-        data: rows,
-        columns,
-        columnDefaults: {
-          title: '',
-          width: 350,
-        },
-        layout: 'fitDataStretch',
-        autoResize: true,
-        clipboard: true,
-        pagination: true,
-        paginationSize: pageSize(),
-        height: '100%',
-        paginationCounter: 'rows',
-        debugInvalidOptions: false,
-        rowContextMenu: [
-          {
-            label: 'Show row in JSON',
-            action: function(_e, row) {
-              // @ts-ignore
-              const data = parseObjRecursive(row._row.data);
-              setCode(JSON.stringify(data, null, 4));
-              // @ts-ignore
-              document.getElementById('my_modal_1').showModal();
-            },
-          },
-          {
-            label: 'Copy row to clipboard',
-            action: function(_e, row) {
-              // @ts-ignore
-              navigator.clipboard.writeText(JSON.stringify(row._row.data));
-            },
-          },
-          {
-            separator: true,
-          },
-        ],
-        // only relevant if editor is set to "input"
-        // keybindings: {
-        //   //@ts-ignore
-        //   navUp: ["ctrl + shift + k", 38],
-        //   //@ts-ignore
-        //   navDown: ["ctrl + shift + j", 40],
-        //   //@ts-ignore
-        //   navLeft: ["ctrl + shift + h", 37],
-        //   //@ts-ignore
-        //   navRight: ["ctrl + shift + l", 39],
-        // },
-      });
-      setTable(_table);
+    const rows = data.result_sets[queryIdx()]?.rows ?? [];
+    let columns: TableColumn[] = [];
+    if (length) {
+      columns = Object.keys(rows[0]).map((k) => ({
+        title: k,
+        field: k,
+        resizeable: true,
+        // editor: "input" as const, // this will make the whole table navigable
+      }));
     }
+
+    const _table = new Tabulator('#results-table', {
+      data: rows,
+      columns,
+      columnDefaults: {
+        title: '',
+        width: 350,
+      },
+      layout: 'fitDataStretch',
+      autoResize: true,
+      clipboard: true,
+      pagination: false,
+      paginationSize: pageSize(),
+      height: '100%',
+      paginationCounter: 'rows',
+      debugInvalidOptions: false,
+      rowContextMenu: [
+        {
+          label: 'Show row in JSON',
+          action: function(_e, row) {
+            // @ts-ignore
+            const data = parseObjRecursive(row._row.data);
+            setCode(JSON.stringify(data, null, 4));
+            // @ts-ignore
+            document.getElementById('my_modal_1').showModal();
+          },
+        },
+        {
+          label: 'Copy row to clipboard',
+          action: function(_e, row) {
+            // @ts-ignore
+            navigator.clipboard.writeText(JSON.stringify(row._row.data));
+          },
+        },
+        {
+          separator: true,
+        },
+      ],
+      // only relevant if editor is set to "input"
+      // keybindings: {
+      //   //@ts-ignore
+      //   navUp: ["ctrl + shift + k", 38],
+      //   //@ts-ignore
+      //   navDown: ["ctrl + shift + j", 40],
+      //   //@ts-ignore
+      //   navLeft: ["ctrl + shift + h", 37],
+      //   //@ts-ignore
+      //   navRight: ["ctrl + shift + l", 39],
+      // },
+    });
+    setTable(_table);
   });
 
   return (
-    <div class="">
+    <div class="flex flex-col h-full overflow-hidden">
       <dialog id="my_modal_1" class="modal">
         <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
           <div class="h-full">
@@ -132,12 +130,8 @@ export const ResultsTable = () => {
           <button>close</button>
         </form>
       </dialog>
-      {/*
       <Pagination table={table()} />
-      */}
-      <div class="">
-        <div id="results-table" class="bg-red-200"></div>
-      </div>
+      <div id="results-table"></div>
     </div>
   );
 };
