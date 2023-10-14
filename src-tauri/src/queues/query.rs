@@ -87,6 +87,7 @@ pub async fn async_process_model(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     while let Some(input) = input_rx.recv().await {
         let task = input;
+        // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         match task.conn.execute_query(&task.query).await {
             Ok(result_set) => match write_query(&task.id, result_set) {
                 Ok(path) => {

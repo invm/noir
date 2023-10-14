@@ -7,9 +7,8 @@ import { Loader } from 'components/UI';
 import { createEffect, createSignal, onMount } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
-import { Events, QueryMetadataResult, QueryTaskResult, Row } from 'interfaces';
+import { Events, QueryTaskResult } from 'interfaces';
 import { log } from 'utils/utils';
-import { invoke } from '@tauri-apps/api';
 
 function App() {
   const [loading, setLoading] = createSignal(true);
@@ -22,6 +21,7 @@ function App() {
       queryIdx,
     },
     app: { restoreAppStore },
+    backend: { getQueryMetadata },
   } = useAppSelector();
 
   createEffect(() => {
@@ -30,31 +30,25 @@ function App() {
     }, 500);
   });
 
-  const getQueryMetadata = (path: string) =>
-    invoke<string>('get_query_metadata', { path });
-
-  const getInitialQueryResults = (path: string) => {
-    // TODO: move page size to global store
-    return invoke<string>('query_results', {
-      params: { path, page: 0, page_size: 20 },
-    });
-  };
-
   const compareAndAssign = async (event: QueryTaskResult) => {
     if (
       getConnection().id === event.conn_id &&
       idx === event.tab_idx &&
       queryIdx() === event.query_idx
     ) {
-      // TODO: should get 0 page of results
       if (event.status === 'Completed') {
-        const res = await getInitialQueryResults(event.path);
-        const md_res = await getQueryMetadata(event.path);
-        const rows = JSON.parse(res) as Row[];
-        const metadata = JSON.parse(md_res) as QueryMetadataResult;
-        updateResultSet(event.tab_idx, event.query_idx, { rows, ...metadata });
+        const md = await getQueryMetadata(event.path);
+        const metadata = {
+          ...md,
+          path: event.path,
+          status: event.status,
+        };
+        updateResultSet(event.tab_idx, event.query_idx, metadata);
       } else if (event.status === 'Error') {
-        updateResultSet(event.tab_idx, event.query_idx, { info: event.error });
+        updateResultSet(event.tab_idx, event.query_idx, {
+          status: event.status,
+          info: event.error,
+        });
       }
     }
     // setContentStore('tabs', idx ?? contentStore.idx, key, data);

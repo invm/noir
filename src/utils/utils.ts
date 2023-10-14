@@ -5,6 +5,7 @@ import {
   TableStrucureEntityType,
 } from "interfaces";
 
+// TODO: address those anys
 export const log = (msg: any) => {
   console.log(`[${new Date().toISOString()}]`, msg);
 };

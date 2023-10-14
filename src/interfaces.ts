@@ -117,7 +117,8 @@ export type ResultSet = {
   affected_rows?: number;
   warnings?: number;
   info?: string;
-  rows?: Row[];
+  path?: string;
+  status?: QueryTaskStatusType;
 };
 
 const QueryTaskStatus = {

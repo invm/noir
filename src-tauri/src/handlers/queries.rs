@@ -5,7 +5,8 @@ use crate::{
     state::{AsyncState, ServiceAccess},
     utils::{
         crypto::md5_hash,
-        error::{CommandResult, Error}, fs::paginate_file,
+        error::{CommandResult, Error},
+        fs::paginate_file,
     },
 };
 use anyhow::anyhow;
@@ -76,7 +77,7 @@ pub async fn enqueue_query(
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct QueryResultParams {
     pub path: String,
     pub page: usize,
@@ -106,6 +107,7 @@ pub async fn query_results(
     _app_handle: AppHandle,
     params: QueryResultParams,
 ) -> CommandResult<Value> {
+    info!(?params, "query_results");
     let data = paginate_file(&params.path, params.page, params.page_size);
     Ok(Value::from(data))
 }
