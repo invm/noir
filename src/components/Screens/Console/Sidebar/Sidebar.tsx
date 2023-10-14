@@ -1,6 +1,6 @@
 import { TableColumnsCollapse } from "./TableColumnsCollapse";
 import { useAppSelector } from "services/Context";
-import { createEffect, createSignal, For, Match, onMount, Switch } from "solid-js";
+import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { t } from "utils/i18n";
 import { Refresh } from "components/UI/Icons";

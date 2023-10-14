@@ -11,7 +11,7 @@ import {
 import { Pagination } from "./components/Pagination";
 import { useAppSelector } from "services/Context";
 
-const parseObjRecursive = (obj: any): Record<string, any> => {
+const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
   if (typeof obj === "object") {
     if (Array.isArray(obj)) {
       return obj.map(parseObjRecursive);
@@ -24,7 +24,7 @@ const parseObjRecursive = (obj: any): Record<string, any> => {
     }
   } else {
     try {
-      return JSON.parse(obj);
+      return JSON.parse(obj as string);
     } catch (e) {
       return obj;
     }
