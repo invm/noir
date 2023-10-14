@@ -1,5 +1,5 @@
 use crate::database::connections::ConnectedConnection;
-use crate::utils::init::write_query;
+use crate::utils::fs::write_query;
 use anyhow::Result;
 use serde::Deserialize;
 use serde::Serialize;

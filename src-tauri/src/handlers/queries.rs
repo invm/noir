@@ -1,14 +1,16 @@
+use std::fs::read_to_string;
+
 use crate::{
     queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
     state::{AsyncState, ServiceAccess},
     utils::{
         crypto::md5_hash,
-        error::{CommandResult, Error},
+        error::{CommandResult, Error}, fs::paginate_file,
     },
 };
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use sqlparser::{dialect::dialect_from_str, parser::Parser};
 use tauri::{command, AppHandle, State};
 use tracing::info;
@@ -76,8 +78,7 @@ pub async fn enqueue_query(
 
 #[derive(Serialize, Deserialize)]
 pub struct QueryResultParams {
-    pub conn_id: String,
-    pub query_hash: String,
+    pub path: String,
     pub page: usize,
     pub page_size: usize,
 }
@@ -95,13 +96,18 @@ pub async fn execute_query(
 }
 
 #[command]
+pub async fn get_query_metadata(_app_handle: AppHandle, path: String) -> CommandResult<Value> {
+    let file = read_to_string(path + ".metadata").expect("Error reading file");
+    Ok(Value::from(file))
+}
+
+#[command]
 pub async fn query_results(
     _app_handle: AppHandle,
-    _params: QueryResultParams,
+    params: QueryResultParams,
 ) -> CommandResult<Value> {
-    // let connection = app_handle.acquire_connection(conn_id);
-    // let result = connection.execute_query(query).await?;
-    Ok(Value::Null)
+    let data = paginate_file(&params.path, params.page, params.page_size);
+    Ok(Value::from(data))
 }
 
 #[command]

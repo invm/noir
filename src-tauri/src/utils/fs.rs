@@ -1,5 +1,22 @@
+use crate::database::connections::ResultSet;
 use anyhow::Result;
-use std::{fs, path::Path};
+use serde_json::json;
+use std::{fs, path::PathBuf};
+use tauri::api::dir::with_temp_dir;
+use tracing::{debug, error};
+
+pub fn get_tmp_dir() -> Result<String> {
+    let mut temp_dir = PathBuf::from("/tmp/.noir");
+    with_temp_dir(|dir| {
+        temp_dir = PathBuf::from(dir.path());
+        return ();
+    })?;
+    let res = fs::create_dir(temp_dir.clone());
+    if let Err(res) = res {
+        error!("Error: {:?}", res);
+    }
+    return Ok(temp_dir.to_str().unwrap().to_string());
+}
 
 pub fn get_app_path() -> String {
     let xdg_path = std::env::var("XDG_CONFIG_HOME");
@@ -30,20 +47,35 @@ pub fn create_app_config(app_path: &String) -> Result<()> {
     Ok(fs::write(config_path, config)?)
 }
 
-pub fn paginate_file(path: &Path, page: usize, limit: usize) -> Vec<String> {
+pub fn paginate_file(path: &str, page: usize, limit: usize) -> Vec<String> {
     let file = fs::read_to_string(path).expect("Error reading file");
     let lines = file.lines().skip(page * limit).take(limit);
     return lines.into_iter().map(|s| s.to_string()).collect();
 }
 
-// fn main() {
-//     let path = "input.txt";
-//     let limit = 2;
-//     let page = 4;
-//     let lines = paginate_file(Path::new(path), page, limit);
-//
-//     for line in lines {
-//         println!("{}", line);
-//     }
-// }
-//
+pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
+    // let file_path = temp_dir.join(file_name);
+    debug!("Writing to file: {:?}", path);
+    let res = fs::write(&path, content);
+    if let Err(res) = res {
+        error!("Error: {:?}", res);
+    }
+    Ok(())
+}
+
+pub fn write_query(id: &str, result_set: ResultSet) -> Result<String> {
+    let rows = json!(result_set.rows).to_string();
+    let metadata = json!({
+        "rows": result_set.rows.len(),
+        "affected_rows": result_set.affected_rows,
+        "warnings": result_set.warnings,
+        "info": result_set.info,
+    })
+    .to_string();
+    let tmp_dir = get_tmp_dir()?;
+    let path = tmp_dir.clone() + "/" + id;
+    let metadata_path = tmp_dir + "/" + id + ".metadata";
+    write_file(&PathBuf::from(&path), &rows)?;
+    write_file(&PathBuf::from(&metadata_path), &metadata)?;
+    Ok(path)
+}
