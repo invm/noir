@@ -68,7 +68,7 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn write_query(id: &str, result_set: ResultSet) -> Result<String> {
+pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
     let mut rows = String::from("");
     result_set.rows.iter().for_each(|row| {
         rows += &(row.to_string() + "\n");

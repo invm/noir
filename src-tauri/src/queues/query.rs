@@ -77,6 +77,8 @@ pub struct QueryTaskResult {
     pub id: String,
     pub path: Option<String>,
     pub error: Option<String>,
+    pub info: Option<String>,
+    pub count: Option<usize>,
     pub tab_idx: usize,
     pub query_idx: usize,
 }
@@ -89,11 +91,12 @@ pub async fn async_process_model(
         let task = input;
         // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         match task.conn.execute_query(&task.query).await {
-            Ok(result_set) => match write_query(&task.id, result_set) {
+            Ok(result_set) => match write_query(&task.id, &result_set) {
                 Ok(path) => {
                     output_tx
                         .send(QueryTaskResult {
                             conn_id: task.conn.config.id.to_string(),
+                            count: Some(result_set.rows.len()),
                             status: QueryTaskStatus::Completed,
                             query: task.query,
                             id: task.id,
@@ -101,6 +104,7 @@ pub async fn async_process_model(
                             tab_idx: task.tab_idx,
                             path: Some(path),
                             error: None,
+                            info: Some(result_set.info),
                         })
                         .await?
                 }
@@ -108,6 +112,7 @@ pub async fn async_process_model(
                     output_tx
                         .send(QueryTaskResult {
                             conn_id: task.conn.config.id.to_string(),
+                            count: None,
                             status: QueryTaskStatus::Error,
                             query: task.query,
                             id: task.id,
@@ -115,6 +120,7 @@ pub async fn async_process_model(
                             tab_idx: task.tab_idx,
                             path: None,
                             error: Some(e.to_string()),
+                            info: None,
                         })
                         .await?
                 }
@@ -123,6 +129,7 @@ pub async fn async_process_model(
                 output_tx
                     .send(QueryTaskResult {
                         conn_id: task.conn.config.id.to_string(),
+                        count: None,
                         status: QueryTaskStatus::Error,
                         query: task.query,
                         id: task.id,
@@ -130,6 +137,7 @@ pub async fn async_process_model(
                         tab_idx: task.tab_idx,
                         path: None,
                         error: Some(e.to_string()),
+                        info: None,
                     })
                     .await?;
             }

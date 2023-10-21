@@ -3,7 +3,7 @@ import { QueryMetadataResult, Row } from 'interfaces';
 import { createSignal } from 'solid-js';
 
 export const BackendService = () => {
-  const [pageSize, setPageSize] = createSignal<number>(30);
+  const [pageSize, setPageSize] = createSignal<number>(20);
 
   const getQueryResults = async (
     path: string,

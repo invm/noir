@@ -116,10 +116,17 @@ export type ResultSet = {
   count?: number;
   affected_rows?: number;
   warnings?: number;
-  info?: string;
   path?: string;
-  status?: QueryTaskStatusType;
-};
+} & (
+    | {
+      status?: (typeof QueryTaskStatus)['Completed'];
+      info?: string;
+    }
+    | {
+      status?: (typeof QueryTaskStatus)['Error'];
+      error?: string;
+    }
+  );
 
 const QueryTaskStatus = {
   Progress: 'Progress',
