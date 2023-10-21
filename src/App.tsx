@@ -18,7 +18,6 @@ function App() {
       getConnection,
       updateResultSet,
       contentStore: { idx },
-      queryIdx,
     },
     app: { restoreAppStore },
     backend: { getQueryMetadata },
@@ -31,11 +30,9 @@ function App() {
   });
 
   const compareAndAssign = async (event: QueryTaskResult) => {
-    if (
-      getConnection().id === event.conn_id &&
-      idx === event.tab_idx &&
-      queryIdx() === event.query_idx
-    ) {
+    // TODO: this does not take into account the connection, when we have multiple connections
+    // FIXME: Why more than 3 queries in a tab suddenly breaks?
+    if (getConnection().id === event.conn_id && idx === event.tab_idx) {
       if (event.status === 'Completed') {
         const md = await getQueryMetadata(event.path);
         const metadata = {
@@ -47,11 +44,10 @@ function App() {
       } else if (event.status === 'Error') {
         updateResultSet(event.tab_idx, event.query_idx, {
           status: event.status,
-          info: event.error,
+          error: event.error,
         });
       }
     }
-    // setContentStore('tabs', idx ?? contentStore.idx, key, data);
   };
 
   onMount(async () => {

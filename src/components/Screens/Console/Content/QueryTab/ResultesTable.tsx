@@ -39,7 +39,7 @@ const parseObjRecursive = (
 export const ResultsTable = () => {
   const {
     connections: { queryIdx, getContentData },
-    backend: { pageSize, getQueryResults },
+    backend: { getQueryResults },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
   const { ref, editorView, createExtension } = createCodeMirror({
@@ -58,16 +58,20 @@ export const ResultsTable = () => {
 
   const updateRows = async () => {
     const result_set = getContentData('Query').result_sets[queryIdx()];
-    const _rows =
-      result_set?.status === 'Completed'
-        ? await getQueryResults(result_set.path!)
-        : [];
-
+    if (result_set?.status !== 'Completed') {
+      setRows([]);
+      return;
+    }
+    const _rows = await getQueryResults(result_set.path!, page());
     setRows(_rows);
   };
 
-  createEffect(on(queryIdx, updateRows));
-  createEffect(on(page, updateRows));
+  createEffect(
+    on(queryIdx, () => {
+      setPage(0);
+      updateRows();
+    })
+  );
   createEffect(updateRows);
 
   createEffect(async () => {
@@ -92,7 +96,7 @@ export const ResultsTable = () => {
       autoResize: true,
       clipboard: true,
       pagination: false,
-      paginationSize: pageSize(),
+      maxHeight: '100%',
       height: '100%',
       paginationCounter: 'rows',
       debugInvalidOptions: false,
@@ -134,16 +138,13 @@ export const ResultsTable = () => {
 
   const onNextPage = async () => {
     setPage(page() + 1);
-    const result_set = getContentData('Query').result_sets[queryIdx()];
-    const res = await getQueryResults(result_set.path!, page());
-    setRows(res);
+    updateRows();
   };
 
   const onPrevPage = async () => {
+    if (page() === 0) return;
     setPage(page() - 1);
-    const result_set = getContentData('Query').result_sets[queryIdx()];
-    const res = await getQueryResults(result_set.path!, page());
-    setRows(res);
+    updateRows();
   };
 
   return (

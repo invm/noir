@@ -5,7 +5,7 @@ import { JSX } from "solid-js/jsx-runtime";
 import { createShortcut } from "@solid-primitives/keyboard";
 
 export interface ActionsContext {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {

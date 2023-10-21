@@ -5,9 +5,10 @@ import { QueryTextArea } from "./QueryTextArea";
 
 export const QueryTab = () => {
   createEffect(() => {
+    // TODO: fix this, results table height changes between results sets
     const q = Split(["#query", "#results"], {
-      sizes: [30, 80],
-      minSize: [100, 400],
+      sizes: [30, 70],
+      minSize: [200, 400],
       maxSize: [500, Infinity],
       direction: "vertical",
       gutterSize: 4,

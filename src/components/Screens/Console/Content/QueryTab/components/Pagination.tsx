@@ -3,7 +3,7 @@ import { useAppSelector } from 'services/Context';
 import { createShortcut } from '@solid-primitives/keyboard';
 import { ChevronLeft, ChevronRight } from 'components/UI/Icons';
 import { t } from 'utils/i18n';
-import { Accessor, createEffect, on, Show } from 'solid-js';
+import { Accessor, createEffect, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { ResultSet } from 'interfaces';
 
@@ -21,18 +21,14 @@ export const Pagination = (props: PaginationProps) => {
 
   createShortcut(['Control', 'Shift', 'N'], selectNextQuery);
   createShortcut(['Control', 'Shift', 'P'], selectPrevQuery);
+  createShortcut(['Control', 'N'], props.onNextPage);
+  createShortcut(['Control', 'P'], props.onPrevPage);
 
   const [resultSet, setResultSet] = createStore<ResultSet>({});
 
-  createEffect(
-    on(queryIdx, () => {
-      const rs = getContentData('Query').result_sets[queryIdx()];
-      if (rs) setResultSet(rs);
-    })
-  );
-
   createEffect(() => {
-    console.log('query idx', queryIdx());
+    const rs = getContentData('Query').result_sets[queryIdx()];
+    if (rs) setResultSet(rs);
   });
 
   return (
@@ -52,13 +48,19 @@ export const Pagination = (props: PaginationProps) => {
           </button>
         </div>
         <div class="flex-1">
-          <Show when={resultSet?.info}>
-            <Alert color="info">{resultSet?.info}</Alert>
+          <Show when={resultSet?.status === 'Completed' && resultSet.info}>
+            <Alert color="info">
+              {resultSet?.status === 'Completed' && resultSet?.info}
+            </Alert>
+          </Show>
+          <Show when={resultSet?.status === 'Error'}>
+            <Alert color="error">
+              {resultSet?.status === 'Error' && resultSet?.error}
+            </Alert>
           </Show>
         </div>
       </div>
-
-      <Show when={!resultSet?.info}>
+      <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="join">
           <button
             class="join-item btn btn-sm"
@@ -67,7 +69,10 @@ export const Pagination = (props: PaginationProps) => {
           >
             <ChevronLeft />
           </button>
-          <button class="join-item btn btn-sm btn-disabled !text-base-content">
+          <button
+            disabled
+            class="join-item btn btn-sm btn-disabled !text-base-content"
+          >
             {props.page() + 1}
           </button>
           <button
