@@ -48,7 +48,7 @@ export const TableColumnsCollapse = (props: {
         query,
         autoLimit: true,
       });
-      const data = { query, result_sets: [res] };
+      const data = { query, cursor: 0, result_sets: [res] };
       addContentTab(newContentTab(table, 'Query', data));
     } catch (error) {
       notify(error);

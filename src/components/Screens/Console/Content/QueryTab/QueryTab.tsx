@@ -20,7 +20,7 @@ export const QueryTab = () => {
   });
 
   return (
-    <div class="flex flex-col h-full overflow-hidden">
+    <div class="flex flex-col h-full">
       <div id="query" class="flex flex-col">
         <QueryTextArea />
       </div>

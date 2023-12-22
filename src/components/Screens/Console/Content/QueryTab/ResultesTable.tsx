@@ -48,17 +48,21 @@ export const ResultsTable = () => {
 
   const [rows, setRows] = createSignal<Row[]>([]);
   const [page, setPage] = createSignal(0);
+  const [loading, setLoading] = createSignal(false);
 
   const updateRows = async () => {
-    const result_set = getContentData('Query').result_sets[queryIdx()];
-    // console.log(getContentData('Query').result_sets)
-    // console.log({ result_set });
-    if (result_set?.status !== 'Completed') {
-      setRows([]);
-      return;
+    try {
+      setLoading(true);
+      const result_set = getContentData('Query').result_sets[queryIdx()];
+      if (result_set?.status !== 'Completed') {
+        setRows([]);
+        return;
+      }
+      const _rows = await getQueryResults(result_set.path!, page());
+      setRows(_rows);
+    } finally {
+      setLoading(false);
     }
-    const _rows = await getQueryResults(result_set.path!, page());
-    setRows(_rows);
   };
 
   createEffect(
@@ -107,7 +111,7 @@ export const ResultsTable = () => {
           },
         },
         {
-          label: 'Copy row to clipboard',
+          label: 'Copy row to clipboard as json',
           action: function(_e, row) {
             // @ts-ignore
             navigator.clipboard.writeText(JSON.stringify(row._row.data));
@@ -154,7 +158,7 @@ export const ResultsTable = () => {
           <button>close</button>
         </form>
       </dialog>
-      <Pagination {...{ page, onNextPage, onPrevPage }} />
+      <Pagination {...{ page, onNextPage, onPrevPage, loading, setPage }} />
       <div id="results-table"></div>
     </div>
   );

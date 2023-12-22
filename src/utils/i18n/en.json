@@ -40,7 +40,11 @@
         "vim_mode_on": "Vim mode on",
         "copy_query": "Copy query to clipboard",
         "limit": "LIMIT 1000",
-        "auto_limit": "Apply limit if query does not have one"
+        "auto_limit": "Apply limit if query does not have one",
+        "next_result_set": "Next result set",
+        "previous_result_set": "Previous result set",
+        "next_page": "Next page",
+        "previous_page": "Previous page"
       },
       "zero_results": "0 rows retuned",
       "result_set": "Result set: ",
@@ -51,7 +55,12 @@
       "list_data": "List data",
       "truncate_table": "Truncate table",
       "tables": "Tables",
-      "table_was_truncated": "Table {{table}} was truncated"
+      "table_was_truncated": "Table {{table}} was truncated",
+      "refresh_schema": "Refresh schema",
+      "show_process_list": "Show process list"
+    },
+    "settings":{
+      "settings": "Settings"
     },
     "theme_switch": {
       "theme": "Theme"
