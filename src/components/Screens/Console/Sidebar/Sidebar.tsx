@@ -42,7 +42,7 @@ export const Sidebar = () => {
         connId: config.id,
       });
       const schema = columnsToSchema(result, config.dialect);
-      updateConnectionTab("schema", { schema });
+      updateConnectionTab("schema", schema);
 
       const procedures = await invoke<RawQueryResult>("get_procedures", {
         connId: getConnection().id,
@@ -65,7 +65,7 @@ export const Sidebar = () => {
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full"
         >
-          <For each={Object.keys(getConnection().schema)}>
+          <For each={(getConnection() && Object.keys(getConnection()?.schema)) ?? []}>
             {(_schema) => (
               <option class="py-1" value={_schema}>
                 {_schema}

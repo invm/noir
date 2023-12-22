@@ -100,7 +100,7 @@ export const QueryTextArea = () => {
     updateContentTab('error', undefined);
     const activeConnection = getConnection();
     try {
-      const { results_sets } = await invoke<QueryTaskEnqueueResult>(
+      const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
         {
           connId: activeConnection.id,
@@ -111,7 +111,7 @@ export const QueryTextArea = () => {
       );
       updateContentTab('data', {
         query: code(),
-        result_sets: results_sets.map((id) => ({
+        result_sets: result_sets.map((id) => ({
           id,
         })),
       });
@@ -143,10 +143,19 @@ export const QueryTextArea = () => {
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
+  const onTestClick = () => {
+    console.log(getContentData('Query'));
+  }
+
   return (
     <div class="flex-1 flex flex-col">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
+          <ActionRowButton
+            dataTip={'Testing'}
+            onClick={onTestClick}
+            icon={<EditIcon />}
+          />
           <ActionRowButton
             dataTip={t('console.actions.format')}
             onClick={onFormat}

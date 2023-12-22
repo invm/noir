@@ -32,20 +32,14 @@ function App() {
   const compareAndAssign = async (event: QueryTaskResult) => {
     // TODO: this does not take into account the connection, when we have multiple connections
     // FIXME: Why more than 3 queries in a tab suddenly breaks?
-    if (getConnection().id === event.conn_id && idx === event.tab_idx) {
-      if (event.status === 'Completed') {
+    const { status, query_idx, tab_idx, conn_id } = event;
+    if (getConnection().id === conn_id && idx === tab_idx) {
+      if (status === 'Completed') {
         const md = await getQueryMetadata(event.path);
-        const metadata = {
-          ...md,
-          path: event.path,
-          status: event.status,
-        };
-        updateResultSet(event.tab_idx, event.query_idx, metadata);
-      } else if (event.status === 'Error') {
-        updateResultSet(event.tab_idx, event.query_idx, {
-          status: event.status,
-          error: event.error,
-        });
+        const metadata = { ...md, path: event.path, status };
+        updateResultSet(tab_idx, query_idx, metadata);
+      } else if (status === 'Error') {
+        updateResultSet(tab_idx, query_idx, { status, error: event.error });
       }
     }
   };
