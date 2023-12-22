@@ -66,7 +66,7 @@ pub struct QueryTaskEnqueueResult {
     pub conn_id: String,
     pub tab_idx: usize,
     pub status: QueryTaskStatus,
-    pub results_sets: Vec<String>,
+    pub result_sets: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -89,7 +89,8 @@ pub async fn async_process_model(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     while let Some(input) = input_rx.recv().await {
         let task = input;
-        // tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        // so what happened is that this ran too fast and the UI didn't have time to update, a single millisecond is enough
+        tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
         match task.conn.execute_query(&task.query).await {
             Ok(result_set) => match write_query(&task.id, &result_set) {
                 Ok(path) => {

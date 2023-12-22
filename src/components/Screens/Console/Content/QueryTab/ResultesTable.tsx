@@ -4,26 +4,19 @@ import { dracula } from '@uiw/codemirror-theme-dracula';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
-import {
-  createCodeMirror,
-  createEditorControlledValue,
-} from 'solid-codemirror';
+import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
 import { Pagination } from './components/Pagination';
 import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 
 type TableColumn = { title: string; field: string; resizeable: boolean };
 
-const parseObjRecursive = (
-  obj: unknown
-): Record<string, unknown | unknown[]> | null | unknown => {
+const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       return obj.map(parseObjRecursive);
     } else if (obj !== null) {
-      return Object.fromEntries(
-        Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)])
-      );
+      return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)]));
     } else {
       return obj;
     }
@@ -58,6 +51,8 @@ export const ResultsTable = () => {
 
   const updateRows = async () => {
     const result_set = getContentData('Query').result_sets[queryIdx()];
+    // console.log(getContentData('Query').result_sets)
+    // console.log({ result_set });
     if (result_set?.status !== 'Completed') {
       setRows([]);
       return;

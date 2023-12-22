@@ -140,7 +140,7 @@ export type QueryTaskEnqueueResult = {
   conn_id: string;
   tab_id: string;
   status: QueryTaskStatusType;
-  results_sets: string[];
+  result_sets: string[];
 };
 
 export type QueryTaskResult = {

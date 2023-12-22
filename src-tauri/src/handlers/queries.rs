@@ -65,7 +65,7 @@ pub async fn enqueue_query(
                     conn_id,
                     tab_idx,
                     status: QueryTaskStatus::Progress,
-                    results_sets: statements.iter().map(|s| s.1.clone()).collect(),
+                    result_sets: statements.iter().map(|s| s.1.clone()).collect(),
                 });
             }
             if statements.is_empty() {
