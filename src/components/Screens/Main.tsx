@@ -1,18 +1,16 @@
-import { Alerts } from "components/UI";
-import { CloseIcon, HomeIcon, QuestionMark } from "components/UI/Icons";
-import { useAppSelector } from "services/Context";
-import { createSignal, For, Match, Show, Switch } from "solid-js";
-import { Console } from "./Console/Console";
-import { Home } from "./Home/Home";
-import { Settings } from "./Settings/Settings";
+import { Alerts } from 'components/UI';
+import { ThemeSwitch } from 'components/UI/ThemeSwitch';
+import { CloseIcon, HomeIcon, QuestionMark } from 'components/UI/Icons';
+import { useAppSelector } from 'services/Context';
+import { createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Console } from './Console/Console';
+import { Home } from './Home/Home';
+import { Settings } from './Settings/Settings';
+import { t } from 'utils/i18n';
 
 export const Main = () => {
   const {
-    connections: {
-      removeConnectionTab,
-      connectionStore,
-      setConnectionStore,
-    },
+    connections: { removeConnectionTab, connectionStore, setConnectionStore },
   } = useAppSelector();
 
   const [showSettings, setShowSettings] = createSignal(false);
@@ -24,12 +22,11 @@ export const Main = () => {
           <button
             onClick={() => {
               setShowSettings(false);
-              setConnectionStore("idx", 0);
+              setConnectionStore('idx', 0);
             }}
             class="tab tab-md"
             tabIndex={0}
-            classList={{ "tab-active": connectionStore.idx === 0 }}
-          >
+            classList={{ 'tab-active': connectionStore.idx === 0 }}>
             <span class="text-md font-bold">
               <HomeIcon />
             </span>
@@ -40,22 +37,17 @@ export const Main = () => {
                 <button
                   onClick={() => {
                     setShowSettings(false);
-                    setConnectionStore("idx", idx() + 1);
+                    setConnectionStore('idx', idx() + 1);
                   }}
                   class="tab tab-md pt-1"
                   classList={{
-                    "tab-active": connectionStore.idx === idx() + 1,
+                    'tab-active': connectionStore.idx === idx() + 1,
                   }}
-                  tabindex={0}
-                >
+                  tabindex={0}>
                   <span class="text-md font-bold">{tab.label}</span>
                 </button>
                 <Show when={connectionStore.idx === idx() + 1}>
-                  <button
-                    tabindex={0}
-                    onClick={() => removeConnectionTab(tab.id!)}
-                    class="ml-2"
-                  >
+                  <button tabindex={0} onClick={() => removeConnectionTab(tab.id!)} class="ml-2">
                     <CloseIcon />
                   </button>
                 </Show>
@@ -63,13 +55,13 @@ export const Main = () => {
             )}
           </For>
         </div>
-        <div>
-          <button
-            class="btn btn-square btn-ghost btn-sm"
-            onClick={() => setShowSettings((s) => !s)}
-          >
+        <div class="flex items-center">
+          <ThemeSwitch />
+          <div class="tooltip tooltip-primary tooltip-left" data-tip={t('settings.settings')}>
+          <button class="btn btn-square btn-ghost btn-sm" onClick={() => setShowSettings((s) => !s)}>
             <QuestionMark />
           </button>
+          </div>
         </div>
       </div>
       <div class="flex-1 overflow-hidden flex">

@@ -55,6 +55,7 @@ export const newContentTab = <T extends ContentComponentKeys>(label: string, key
 
 export type QueryContentTabData = {
   query: string;
+  cursor: number;
   result_sets: ResultSet[];
 };
 
@@ -247,14 +248,18 @@ export const ConnectionsService = () => {
 
   const updateContentTab = <T extends keyof ContentTab>(key: T, data: ContentTab[T], idx?: number) => {
     const tab = getContent();
-    console.log('updateContentTab ', data)
     if (!tab) return;
     setContentStore('tabs', idx ?? contentStore.idx, key, data);
     updateStore();
   };
 
+  const insertColumnName = (column: string) => {
+    const { query, cursor } = getContentData('Query');
+    const _query = query.slice(0, cursor) + column + ', ' + query.slice(cursor);
+    setContentStore('tabs', contentStore.idx, 'data', { query: _query, cursor: cursor + column.length + 2 }); // 2 for ', '
+  };
+
   const updateResultSet = (tab_idx: number, query_idx: number, data: Partial<ResultSet>) => {
-    console.log({  query_idx, data });
     setContentStore('tabs', tab_idx, 'data', (d) => ({
       ...d,
       result_sets: (d as QueryContentTabData).result_sets.map((r, i) => (i === query_idx ? { ...r, ...data } : r)),
@@ -311,5 +316,6 @@ export const ConnectionsService = () => {
     queryIdx,
     updateResultSet,
     getSchema,
+    insertColumnName,
   };
 };

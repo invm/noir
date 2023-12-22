@@ -1,15 +1,6 @@
-import {
-  createCodeMirror,
-  createEditorControlledValue,
-  createEditorFocus,
-} from 'solid-codemirror';
-import { createEffect, createSignal, Show } from 'solid-js';
-import {
-  EditorView,
-  drawSelection,
-  highlightWhitespace,
-  highlightActiveLine,
-} from '@codemirror/view';
+import { createCodeMirror, createEditorControlledValue, createEditorFocus } from 'solid-codemirror';
+import { createEffect, createSignal } from 'solid-js';
+import { EditorView, drawSelection, highlightWhitespace, highlightActiveLine } from '@codemirror/view';
 import { MySQL, sql, SQLite, PostgreSQL } from '@codemirror/lang-sql';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { vim } from '@replit/codemirror-vim';
@@ -19,12 +10,12 @@ import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult, Dialect } from 'interfaces';
 import { t } from 'utils/i18n';
-import { Alert } from 'components/UI';
 import { basicSetup } from 'codemirror';
 import { createShortcut } from '@solid-primitives/keyboard';
 import { search } from '@codemirror/search';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
+import { debounce } from 'utils/utils';
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
@@ -37,7 +28,6 @@ export const QueryTextArea = () => {
     connections: {
       updateContentTab,
       getConnection,
-      getContent,
       getContentData,
       getSchemaTables,
       contentStore: { idx: tabIdx },
@@ -49,12 +39,21 @@ export const QueryTextArea = () => {
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
 
-  const updateQueryText = async (query: string) => {
-    updateContentTab('data', { query });
+  const updateCursor = debounce(() => {
+    updateContentTab('data', { query: code() });
+  }, 300);
+
+  const updateQueryText = (query: string) => {
+    setCode(query);
+    if (focused()) {
+      updateContentTab('data', { cursor: editorView().state.selection.ranges[0].from });
+    }
+    updateCursor();
   };
 
   const { ref, editorView, createExtension } = createCodeMirror({
-    onValueChange: setCode,
+    value: code(),
+    onValueChange: updateQueryText,
   });
   createEditorControlledValue(editorView, code);
   createExtension(drawSelection);
@@ -64,10 +63,8 @@ export const QueryTextArea = () => {
   createExtension(search);
   createExtension(() => basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
-  createExtension(() =>
-    sql({ dialect: SQLDialects[getConnection().connection.dialect], schema })
-  );
-  const { setFocused } = createEditorFocus(editorView);
+  createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));
+  const { setFocused, focused } = createEditorFocus(editorView);
   // TODO: add option to scroll inside autocompletion list with c-l and c-k
   // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
   // Vim.defineOperator(
@@ -100,17 +97,15 @@ export const QueryTextArea = () => {
     updateContentTab('error', undefined);
     const activeConnection = getConnection();
     try {
-      const { result_sets } = await invoke<QueryTaskEnqueueResult>(
-        'enqueue_query',
-        {
-          connId: activeConnection.id,
-          sql: selectedText || code(),
-          autoLimit: autoLimit(),
-          tabIdx,
-        }
-      );
+      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
+        connId: activeConnection.id,
+        sql: selectedText || code(),
+        autoLimit: autoLimit(),
+        tabIdx,
+      });
       updateContentTab('data', {
         query: code(),
+        cursor: editorView().state.selection.ranges[0].from,
         result_sets: result_sets.map((id) => ({
           id,
         })),
@@ -143,24 +138,18 @@ export const QueryTextArea = () => {
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
-  const onTestClick = () => {
-    console.log(getContentData('Query'));
-  }
+  // const onTestClick = () => {
+  //   console.log(editorView());
+  // };
 
   return (
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col h-full">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
-          <ActionRowButton
-            dataTip={'Testing'}
-            onClick={onTestClick}
-            icon={<EditIcon />}
-          />
-          <ActionRowButton
-            dataTip={t('console.actions.format')}
-            onClick={onFormat}
-            icon={<EditIcon />}
-          />
+          {/*
+          <ActionRowButton dataTip={'Testing'} onClick={onTestClick} icon={<EditIcon />} />
+          */}
+          <ActionRowButton dataTip={t('console.actions.format')} onClick={onFormat} icon={<EditIcon />} />
           <ActionRowButton
             dataTip={t('console.actions.execute')}
             onClick={onExecute}
@@ -168,21 +157,12 @@ export const QueryTextArea = () => {
             icon={<FireIcon />}
           />
 
-          <ActionRowButton
-            dataTip={t('console.actions.copy_query')}
-            onClick={copyQueryToClipboard}
-            icon={<Copy />}
-          />
+          <ActionRowButton dataTip={t('console.actions.copy_query')} onClick={copyQueryToClipboard} icon={<Copy />} />
 
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t('console.actions.auto_limit')}
-          >
+          <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('console.actions.auto_limit')}>
             <div class="form-control">
               <label class="cursor-pointer label">
-                <span class="label-text font-semibold mr-2 text-primary mt-1">
-                  {t('console.actions.limit')}
-                </span>
+                <span class="label-text font-semibold mr-2 text-primary mt-1">{t('console.actions.limit')}</span>
                 <input
                   type="checkbox"
                   checked={autoLimit()}
@@ -193,10 +173,7 @@ export const QueryTextArea = () => {
             </div>
           </div>
 
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t('console.actions.vim_mode_on')}
-          >
+          <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('console.actions.vim_mode_on')}>
             <div class="flex items-center mx-2">
               <span class="mr-2">
                 <VimIcon />
@@ -213,9 +190,6 @@ export const QueryTextArea = () => {
             </div>
           </div>
         </div>
-        <Show when={getContent().error}>
-          <Alert color="error">{getContent().error}</Alert>
-        </Show>
       </div>
       <div class="overflow-hidden w-full h-full">
         <div ref={ref} class="w-full h-full" />

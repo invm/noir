@@ -12,7 +12,7 @@ export type AlertTypes = keyof typeof AlertColors;
 const Alert = (props: { children: JSX.Element; color: AlertTypes }) => {
   return (
     <div
-      class={`flex px-2 py-1 items-center text-lg rounded-lg ${AlertColors[props.color]
+      class={`flex px-2 py-1 items-center text-sm rounded-lg ${AlertColors[props.color]
         }`}
       role="alert"
     >

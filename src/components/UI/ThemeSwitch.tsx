@@ -21,13 +21,13 @@ export const ThemeSwitch = () => {
   };
 
   return (
-    <div class="dropdown">
+    <div class="dropdown dropdown-end">
       <label id="theme-switch" tabindex="0" class="btn btn-sm btn-primary">
         {t('theme_switch.theme')}
       </label>
       <ul
         tabindex={0}
-        class="p-2 shadow menu dropdown-content  z-[1]
+        class="shadow menu dropdown-content z-[1]
           bg-base-100 rounded-box w-52"
       >
         <For each={THEMES}>
