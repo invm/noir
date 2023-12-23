@@ -93,7 +93,7 @@ pub async fn execute_query(
 ) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.execute_query(&query).await?;
-    Ok(json!({ "result": result }))
+    Ok(json!(result))
 }
 
 #[command]

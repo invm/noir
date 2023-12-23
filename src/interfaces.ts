@@ -116,9 +116,10 @@ export type ResultSet = {
   count?: number;
   affected_rows?: number;
   warnings?: number;
-  path?: string;
+  rows?: Row[];
 } & (
     | {
+      path?: string;
       status?: (typeof QueryTaskStatus)['Completed'];
       info?: string;
     }
@@ -150,6 +151,7 @@ export type QueryTaskResult = {
   id: string;
   tab_idx: number;
   query_idx: number;
+  count: number;
 } & (
     | {
       status: 'Error';
