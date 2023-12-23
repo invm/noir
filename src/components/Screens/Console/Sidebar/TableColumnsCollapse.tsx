@@ -2,22 +2,21 @@ import { createSignal, JSXElement } from 'solid-js';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
-import {
-  newContentTab,
-  TableStructureContentTabData,
-} from 'services/Connections';
+import { newContentTab, TableStructureContentTabData } from 'services/Connections';
 
 import { invoke } from '@tauri-apps/api';
-import { ResultSet } from 'interfaces';
+import { QueryTaskEnqueueResult, ResultSet } from 'interfaces';
 
-export const TableColumnsCollapse = (props: {
-  title: string;
-  children: JSXElement;
-}) => {
+export const TableColumnsCollapse = (props: { title: string; children: JSXElement }) => {
   const [open, setOpen] = createSignal(false);
 
   const {
-    connections: { addContentTab, getConnection },
+    connections: {
+      contentStore: { idx: tabIdx },
+      addContentTab,
+      getConnection,
+      updateContentTab,
+    },
     messages: { notify },
   } = useAppSelector();
 
@@ -30,10 +29,10 @@ export const TableColumnsCollapse = (props: {
 
   const addTableStructureTab = async (table: string) => {
     try {
-      const data = await invoke<TableStructureContentTabData>(
-        'get_table_structure',
-        { connId: getConnection().id, table }
-      );
+      const data = await invoke<TableStructureContentTabData>('get_table_structure', {
+        connId: getConnection().id,
+        table,
+      });
       addContentTab(newContentTab(table, 'TableStructure', data));
     } catch (error) {
       notify(error);
@@ -42,14 +41,25 @@ export const TableColumnsCollapse = (props: {
 
   const listData = async (table: string) => {
     try {
+      const activeConnection = getConnection();
       const query = 'SELECT * from ' + table + ' LIMIT 1000';
-      const res = await invoke<ResultSet>('execute_query', {
-        connId: getConnection().id,
+      const data = {
         query,
-        autoLimit: true,
-      });
-      const data = { query, cursor: 0, result_sets: [res] };
+        cursor: 0,
+        result_sets: [],
+      };
       addContentTab(newContentTab(table, 'Query', data));
+      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
+        connId: activeConnection.id,
+        sql: query,
+        autoLimit: false,
+        tabIdx,
+      });
+      updateContentTab('data', {
+        result_sets: result_sets.map((id) => ({
+          id,
+        })),
+      });
     } catch (error) {
       notify(error);
     }
@@ -72,28 +82,20 @@ export const TableColumnsCollapse = (props: {
   return (
     <div class="w-full" onContextMenu={(e) => show(e)}>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-        <Item onClick={({ props }) => addTableStructureTab(props.table)}>
-          {t('sidebar.show_table_structure')}
-        </Item>
-        <Item onClick={({ props }) => listData(props.table)}>
-          {t('sidebar.list_data')}
-        </Item>
-        <Item onClick={({ props }) => truncateTable(props.table)}>
-          {t('sidebar.truncate_table')}
-        </Item>
+        <Item onClick={({ props }) => addTableStructureTab(props.table)}>{t('sidebar.show_table_structure')}</Item>
+        <Item onClick={({ props }) => listData(props.table)}>{t('sidebar.list_data')}</Item>
+        <Item onClick={({ props }) => truncateTable(props.table)}>{t('sidebar.truncate_table')}</Item>
       </Menu>
       <span
         onClick={() => setOpen(!open())}
-        class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300"
-      >
+        class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300">
         <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
           <svg
             class="w-2 h-2 swap-off"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
-            viewBox="0 0 6 10"
-          >
+            viewBox="0 0 6 10">
             <path
               stroke="currentColor"
               stroke-linecap="round"
@@ -107,8 +109,7 @@ export const TableColumnsCollapse = (props: {
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
-            viewBox="0 0 10 6"
-          >
+            viewBox="0 0 10 6">
             <path
               stroke="currentColor"
               stroke-linecap="round"
@@ -126,8 +127,7 @@ export const TableColumnsCollapse = (props: {
           'mb-4': open(),
           'border-b-[1px]': open(),
           'border-base-200': open(),
-        }}
-      >
+        }}>
         {open() && props.children}
       </div>
     </div>
