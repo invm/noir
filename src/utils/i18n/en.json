@@ -55,9 +55,12 @@
       "list_data": "List data",
       "truncate_table": "Truncate table",
       "tables": "Tables",
+      "routines": "Routines",
       "table_was_truncated": "Table {{table}} was truncated",
       "refresh_schema": "Refresh schema",
-      "show_process_list": "Show process list"
+      "show_routine": "Show routine",
+      "show_process_list": "Show process list",
+      "process_list": "Process list"
     },
     "settings":{
       "settings": "Settings"
