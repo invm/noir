@@ -57,10 +57,10 @@ export const Main = () => {
         </div>
         <div class="flex items-center">
           <ThemeSwitch />
-          <div class="tooltip tooltip-primary tooltip-left" data-tip={t('settings.settings')}>
-          <button class="btn btn-square btn-ghost btn-sm" onClick={() => setShowSettings((s) => !s)}>
-            <QuestionMark />
-          </button>
+          <div class="tooltip tooltip-primary tooltip-left px-3" data-tip={t('settings.settings')}>
+            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setShowSettings((s) => !s)}>
+              <QuestionMark />
+            </button>
           </div>
         </div>
       </div>
