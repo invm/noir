@@ -85,6 +85,8 @@ type ConnectionTab = {
   label: string;
   id: string;
   schema: Record<string, Table>;
+  routines: Row[];
+  triggers: Row[];
   connection: ConnectionConfig;
 };
 
@@ -266,6 +268,7 @@ export const ConnectionsService = () => {
     }));
   };
 
+  // TODO: compress these 3 functions into single one that retrieves a specific entity
   const getSchemaTables = (sch = connectionStore.schema): Table[] => {
     const _tables = Object.entries(getSchema(sch)).reduce(
       (acc: Table[], [name, columns]) => [
@@ -278,6 +281,14 @@ export const ConnectionsService = () => {
       []
     );
     return _tables;
+  };
+
+  const getSchemaRoutines = (): Row[] => {
+    return getConnection().routines;
+  };
+
+  const getSchemaTriggers = (): Row[] => {
+    return getConnection().triggers;
   };
 
   const selectPrevQuery = () => {
@@ -317,5 +328,7 @@ export const ConnectionsService = () => {
     updateResultSet,
     getSchema,
     insertColumnName,
+    getSchemaRoutines,
+    getSchemaTriggers,
   };
 };
