@@ -1,13 +1,18 @@
-import {
-  DialectType,
-  Row,
-  SORT_ORDER,
-  TableStrucureEntityType,
-} from "interfaces";
+import { DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
 
 // TODO: address those anys
 export const log = (msg: any) => {
   console.log(`[${new Date().toISOString()}]`, msg);
+};
+
+export const get = (obj: any, path: string, defaultValue?: any) => {
+  const travel = (regexp: RegExp) =>
+    String.prototype.split // eslint-disable-line
+      .call(path, regexp)
+      .filter(Boolean)
+      .reduce((res: any, key: any) => (res !== null && res !== undefined ? res[key] : res), obj);
+  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  return result === undefined || result === obj ? defaultValue : result;
 };
 
 export const omit = (obj: any, ...keys: string[]) => {
@@ -22,9 +27,8 @@ export const firstKey = (obj: Record<string, any>) => {
 
 export const randomId = () => {
   const length = 36;
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }

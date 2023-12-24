@@ -1,12 +1,13 @@
 import { TableColumnsCollapse } from './TableColumnsCollapse';
 import { useAppSelector } from 'services/Context';
+import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { createEffect, createSignal, For, Match, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { t } from 'utils/i18n';
 import { Refresh, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
-import { RawQueryResult, ResultSet, Table } from 'interfaces';
-import { columnsToSchema } from 'utils/utils';
+import { RawQueryResult, ResultSet, Row, Table } from 'interfaces';
+import { columnsToSchema, get } from 'utils/utils';
 import { newContentTab } from 'services/Connections';
 
 export const Sidebar = () => {
@@ -23,7 +24,15 @@ export const Sidebar = () => {
     },
   } = useAppSelector();
   const [tables, setTables] = createStore<Table[]>([]);
+  const [routines, setRoutines] = createStore<Row[]>([]);
   const [loading, setLoading] = createSignal(false);
+
+  const menu_id = 'sidebar-routine-menu';
+
+  const { show } = useContextMenu({
+    id: menu_id,
+    props: {},
+  });
 
   createEffect(() => {
     if (connectionStore.schema) {
@@ -47,11 +56,11 @@ export const Sidebar = () => {
       const schema = columnsToSchema(result, config.dialect);
       updateConnectionTab('schema', schema);
 
-      const procedures = await invoke<RawQueryResult>('get_procedures', {
+      const { result: procedures } = await invoke<RawQueryResult>('get_procedures', {
         connId: getConnection().id,
       });
-      // TODO: add procedures to siderbar
-      console.log({ procedures });
+      setRoutines(procedures);
+      updateConnectionTab('schema', schema);
     } catch (error) {
       notify(String(error), 'info');
     } finally {
@@ -68,7 +77,22 @@ export const Sidebar = () => {
         autoLimit: false,
       });
       const data = { query, result_sets: [res], cursor: 0 };
-      addContentTab(newContentTab('Process list', 'Query', data));
+      addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
+    } catch (error) {
+      notify(error);
+    }
+  };
+
+  const showRoutine = async (routine: string) => {
+    try {
+      const query = 'SHOW CREATE PROCEDURE ' + routine;
+      const res = await invoke<ResultSet>('execute_query', {
+        connId: getConnection().id,
+        query,
+        autoLimit: false,
+      });
+      const data = { query, result_sets: [res], cursor: 0 };
+      addContentTab(newContentTab(routine, 'Query', data));
     } catch (error) {
       notify(error);
     }
@@ -115,7 +139,7 @@ export const Sidebar = () => {
           </button>
         </div>
       </div>
-      <div class="overflow-y-auto h-full">
+      <div class="overflow-y-auto h-full pb-10">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
         <For each={tables}>
           {(table) => (
@@ -132,6 +156,19 @@ export const Sidebar = () => {
                   )}
                 </For>
               </TableColumnsCollapse>
+            </div>
+          )}
+        </For>
+        <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
+        <For each={routines}>
+          {(routine) => (
+            <div class="px-2 min-w-full w-fit">
+              <div class="bg-blue-300" onContextMenu={(e) => show(e)}>
+                <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
+                  <Item onClick={() => showRoutine(routine.ROUTINE_NAME as string)}>{t('sidebar.show_routine')}</Item>
+                </Menu>
+                {<span class="text-xs font-medium">{get(routine, 'ROUTINE_NAME')}</span>}
+              </div>
             </div>
           )}
         </For>
