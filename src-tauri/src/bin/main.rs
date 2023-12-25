@@ -72,7 +72,7 @@ fn main() {
             connections::delete_connection,
             connections::get_connections,
             connections::init_connection,
-            // connections::disconnect, // TODO
+            connections::disconnect,
             queries::execute_query,
             queries::enqueue_query,
             queries::get_columns,

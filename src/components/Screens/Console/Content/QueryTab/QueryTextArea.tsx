@@ -138,16 +138,14 @@ export const QueryTextArea = () => {
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
-  // const onTestClick = () => {
-  //   console.log(editorView());
-  // };
+  // const dummyAction = () => {};
 
   return (
     <div class="flex-1 flex flex-col h-full">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
           {/*
-          <ActionRowButton dataTip={'Testing'} onClick={onTestClick} icon={<EditIcon />} />
+          <ActionRowButton dataTip={'Testing'} onClick={dummyAction} icon={<EditIcon />} />
           */}
           <ActionRowButton dataTip={t('console.actions.format')} onClick={onFormat} icon={<EditIcon />} />
           <ActionRowButton

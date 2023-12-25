@@ -1,6 +1,6 @@
 use crate::{
     database::connections::{self, ConnectedConnection, ConnectionConfig, Scheme},
-    state::{AsyncState, ServiceAccess},
+    state::ServiceAccess,
     utils::error::{CommandResult, Error},
 };
 use tauri::{command, AppHandle};
@@ -40,13 +40,17 @@ pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionCon
 #[command]
 pub async fn init_connection(
     mut app_handle: AppHandle,
-    async_state: tauri::State<'_, AsyncState>,
     config: ConnectionConfig,
 ) -> CommandResult<()> {
     info!(?config, "init_connection");
     let conn = ConnectedConnection::new(config).await?;
-    app_handle.add_connection(&conn)?;
-    let mut binding = async_state.connections.lock().await;
-    binding.insert(conn.config.id.to_string().clone(), conn);
+    app_handle.connect(&conn)?;
+    Ok(())
+}
+
+#[command]
+pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()> {
+    info!(?id, "disconnect");
+    app_handle.disconnect(&id)?;
     Ok(())
 }

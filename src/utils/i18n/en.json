@@ -33,7 +33,6 @@
       }
     },
     "console": {
-      "query": "Query",
       "actions": {
         "format": "Format",
         "execute": "Execute",

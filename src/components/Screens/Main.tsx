@@ -1,4 +1,5 @@
 import { Alerts } from 'components/UI';
+import { invoke } from '@tauri-apps/api';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 import { CloseIcon, HomeIcon, QuestionMark } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
@@ -14,6 +15,11 @@ export const Main = () => {
   } = useAppSelector();
 
   const [showSettings, setShowSettings] = createSignal(false);
+
+  const handleCloseConnection = async (id) => {
+    await invoke<string>('disconnect', { id });
+    await removeConnectionTab(id);
+  };
 
   return (
     <div class="w-full h-full flex flex-col">
@@ -47,7 +53,7 @@ export const Main = () => {
                   <span class="text-md font-bold">{tab.label}</span>
                 </button>
                 <Show when={connectionStore.idx === idx() + 1}>
-                  <button tabindex={0} onClick={() => removeConnectionTab(tab.id!)} class="ml-2">
+                  <button tabindex={0} onClick={() => handleCloseConnection(tab.id!)} class="ml-2">
                     <CloseIcon />
                   </button>
                 </Show>

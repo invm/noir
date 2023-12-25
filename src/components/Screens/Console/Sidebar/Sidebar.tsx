@@ -72,7 +72,6 @@ export const Sidebar = () => {
       const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
         connId: config.id,
       });
-      console.log({ triggers });
       setTriggers(triggers);
       updateConnectionTab('triggers', triggers);
     } catch (error) {

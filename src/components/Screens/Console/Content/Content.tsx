@@ -1,7 +1,6 @@
 import { For, Match, Show, Switch } from "solid-js";
 import { useAppSelector } from "services/Context";
 import { AddIcon, CloseIcon } from "components/UI/Icons";
-import { t } from "utils/i18n";
 import { QueryTab } from "./QueryTab/QueryTab";
 import { TableStructureTab } from "./TableStructure/TableStructureTab";
 import { ContentTab } from "services/Connections";
@@ -30,7 +29,7 @@ export const Content = () => {
                 tabindex={0}
                 onClick={() => setContentIdx(idx())}
               >
-                {t('console.query')} #{idx() + 1}
+                {_tab.label}
               </button>
               <Show when={idx() > 0}>
                 <button
