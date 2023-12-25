@@ -1,21 +1,21 @@
 import { DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
 
 // TODO: address those anys
-export const log = (msg: any) => {
+export const log = (msg: string) => {
   console.log(`[${new Date().toISOString()}]`, msg);
 };
 
-export const get = (obj: any, path: string, defaultValue?: any) => {
+export const get = (obj: Record<string, unknown>, path: string) => {
   const travel = (regexp: RegExp) =>
     String.prototype.split // eslint-disable-line
       .call(path, regexp)
       .filter(Boolean)
-      .reduce((res: any, key: any) => (res !== null && res !== undefined ? res[key] : res), obj);
+      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
   const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
   return result === undefined || result === obj ? defaultValue : result;
 };
 
-export const omit = (obj: any, ...keys: string[]) => {
+export const omit = (obj: Record<string, unknown>, ...keys: string[]) => {
   const copy = { ...obj };
   keys.forEach((key) => delete copy[key]);
   return copy;
@@ -23,6 +23,7 @@ export const omit = (obj: any, ...keys: string[]) => {
 
 export const firstKey = (obj: Record<string, any>) => {
   for (const key in obj) return key;
+  return '';
 };
 
 export const randomId = () => {
@@ -35,10 +36,10 @@ export const randomId = () => {
   return result;
 };
 
-export const debounce = (func: Function, wait: number) => {
+export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   let timer: NodeJS.Timeout;
 
-  return function executedFunction(...args: any[]) {
+  return function executedFunction(...args: unknown[]) {
     const later = () => {
       clearTimeout(timer);
       func(...args);
@@ -67,7 +68,7 @@ export const sortTableStructure = (
 
 // TODO: handle all dialects
 export const columnsToSchema = (columns: Row[], _dialect: DialectType) => {
-  const schema = columns.reduce((acc: any, col: any) => {
+  const schema = columns.reduce((acc, col) => {
     return {
       ...acc,
       [col.TABLE_SCHEMA]: {
@@ -79,5 +80,6 @@ export const columnsToSchema = (columns: Row[], _dialect: DialectType) => {
       },
     };
   }, {});
-  return schema;
+  // todo: is this correct
+  return schema as Table;
 };

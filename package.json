@@ -56,5 +56,10 @@
     "vite": "^4.3.9",
     "vite-plugin-solid": "^2.7.0",
     "vite-tsconfig-paths": "^4.2.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "solid-contextmenu@0.0.2": "patches/solid-contextmenu@0.0.2.patch"
+    }
   }
 }

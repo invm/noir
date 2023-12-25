@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  solid-contextmenu@0.0.2:
+    hash: df2yvz34tducgiwp4thl3akrsu
+    path: patches/solid-contextmenu@0.0.2.patch
+
 dependencies:
   '@codemirror/commands':
     specifier: ^6.2.5
@@ -52,7 +57,7 @@ dependencies:
     version: github.com/on3iro/solid-command-palette/8aabf0d59871f5f6aee19b5d10a1851243e0bdb8(fuse.js@6.6.2)(solid-js@1.7.7)(solid-transition-group@0.2.2)(tinykeys@2.1.0)
   solid-contextmenu:
     specifier: ^0.0.2
-    version: 0.0.2(solid-js@1.7.7)(solid-transition-group@0.2.2)
+    version: 0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.2.2)
   solid-form-handler:
     specifier: ^1.2.0
     version: 1.2.0(solid-js@1.7.7)
@@ -73,10 +78,10 @@ dependencies:
     version: 5.5.1
   tauri-plugin-store-api:
     specifier: github:tauri-apps/tauri-plugin-store#v1
-    version: github.com/tauri-apps/tauri-plugin-store/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73
+    version: github.com/tauri-apps/tauri-plugin-store/7d2632996f290b0f18cc5f8a2b2791046400690e
   tauri-plugin-window-state-api:
     specifier: github:tauri-apps/tauri-plugin-window-state#v1
-    version: github.com/tauri-apps/tauri-plugin-window-state/c479a6d131999b4bcf0d05eb7fdb031f87a716d1
+    version: github.com/tauri-apps/tauri-plugin-window-state/91fafb628cd0c83ad52bdf9029cad212381f740a
   tinykeys:
     specifier: ^2.1.0
     version: 2.1.0
@@ -1199,8 +1204,8 @@ packages:
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: false
 
-  /@tauri-apps/api@1.5.0:
-    resolution: {integrity: sha512-yQY9wpVNuiYhLLuyDlu1nBpqJELT1fGp7OctN4rW9I2W1T2p7A3tqPxsEzQprEwneQRBAlPM9vC8NsnMbct+pg==}
+  /@tauri-apps/api@1.5.3:
+    resolution: {integrity: sha512-zxnDjHHKjOsrIzZm6nO5Xapb/BxqUq1tc7cGkFXsFkGTsSWgCPH1D8mm0XS9weJY2OaR73I3k3S+b7eSzJDfqA==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
     dev: false
 
@@ -3704,7 +3709,7 @@ packages:
       solid-js: 1.7.7
     dev: false
 
-  /solid-contextmenu@0.0.2(solid-js@1.7.7)(solid-transition-group@0.2.2):
+  /solid-contextmenu@0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.2.2):
     resolution: {integrity: sha512-TmOhIvVpZmQdoiydSP07d9rT0xu/wvRSH6TJqbGPd+2XZz0wOualbm5CvLiHbOGnOU5tBrbe4q0cU/EMvG7u+w==}
     peerDependencies:
       solid-js: ^1.4.8
@@ -3715,6 +3720,7 @@ packages:
       solid-js: 1.7.7
       solid-transition-group: 0.2.2(solid-js@1.7.7)
     dev: false
+    patched: true
 
   /solid-form-handler@1.2.0(solid-js@1.7.7):
     resolution: {integrity: sha512-T+bIzu9xJgfuZUrN1w7zhl8Dy8FYHZQ+iqtmmfO0dE5qerPbSRWDhSK3tykpfC7cEbW4Ts+ZfNM5IKyqiAALsg==}
@@ -4430,18 +4436,18 @@ packages:
       tinykeys: 2.1.0
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-store/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/1a741b721ed1eae0de0d811ecfe86fc6ad54fb73}
+  github.com/tauri-apps/tauri-plugin-store/7d2632996f290b0f18cc5f8a2b2791046400690e:
+    resolution: {commit: 7d2632996f290b0f18cc5f8a2b2791046400690e, repo: git+ssh://git@github.com/tauri-apps/tauri-plugin-store.git, type: git}
     name: tauri-plugin-store-api
     version: 0.0.0
     dependencies:
-      '@tauri-apps/api': 1.5.0
+      '@tauri-apps/api': 1.5.3
     dev: false
 
-  github.com/tauri-apps/tauri-plugin-window-state/c479a6d131999b4bcf0d05eb7fdb031f87a716d1:
-    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/c479a6d131999b4bcf0d05eb7fdb031f87a716d1}
+  github.com/tauri-apps/tauri-plugin-window-state/91fafb628cd0c83ad52bdf9029cad212381f740a:
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-window-state/tar.gz/91fafb628cd0c83ad52bdf9029cad212381f740a}
     name: tauri-plugin-window-state-api
     version: 0.0.0
     dependencies:
-      '@tauri-apps/api': 1.5.0
+      '@tauri-apps/api': 1.5.3
     dev: false

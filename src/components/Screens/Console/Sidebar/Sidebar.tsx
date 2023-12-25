@@ -6,8 +6,8 @@ import { createStore } from 'solid-js/store';
 import { t } from 'utils/i18n';
 import { Refresh, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
-import { RawQueryResult, ResultSet, Row, Table } from 'interfaces';
-import { columnsToSchema, get } from 'utils/utils';
+import { ConnectionModeType, ResultSet, Row, Table } from 'interfaces';
+import { firstKey, get } from 'utils/utils';
 import { newContentTab } from 'services/Connections';
 
 export const Sidebar = () => {
@@ -23,6 +23,8 @@ export const Sidebar = () => {
       addContentTab,
       getSchemaRoutines,
       getSchemaTriggers,
+      getSchemaEntity,
+      fetchSchemaEntities,
     },
   } = useAppSelector();
   const [tables, setTables] = createStore<Table[]>([]);
@@ -38,6 +40,13 @@ export const Sidebar = () => {
   });
 
   createEffect(() => {
+    const sch = getConnection().selectSchema;
+    const _schema = getSchemaEntity(sch, 'schema');
+    const _routines = getSchemaEntity(sch, 'routines');
+    const _triggers = getSchemaEntity(sch, 'triggers');
+    setRoutines(_routines);
+    setTriggers(_triggers);
+    console.log({ _schema, _routines, _triggers });
     if (connectionStore.schema) {
       setTables(getSchemaTables(connectionStore.schema));
       setRoutines(getSchemaRoutines());
@@ -57,23 +66,16 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const { result } = await invoke<RawQueryResult>('get_columns', {
-        connId: config.id,
-      });
-      const schema = columnsToSchema(result, config.dialect);
+      const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
+      const dbName = firstKey(config.scheme[config.dialect]![type]);
+      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, dbName);
+      setTables(getSchemaTables(dbName));
+      setTables(getSchemaTables(connectionStore.schema));
       updateConnectionTab('schema', schema);
-
-      const { result: routines } = await invoke<RawQueryResult>('get_procedures', {
-        connId: getConnection().id,
-      });
-
       updateConnectionTab('routines', routines);
-      setRoutines(routines);
-      const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
-        connId: config.id,
-      });
-      setTriggers(triggers);
       updateConnectionTab('triggers', triggers);
+      setRoutines(routines);
+      setTriggers(triggers);
     } catch (error) {
       notify(String(error), 'info');
     } finally {
@@ -118,8 +120,7 @@ export const Sidebar = () => {
 
   const showTrigger = async (trigger: string) => {
     try {
-      const query =
-        `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${connectionStore.schema}" and TRIGGER_NAME = "${trigger}"`;
+      const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${connectionStore.schema}" and TRIGGER_NAME = "${trigger}"`;
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
@@ -137,6 +138,7 @@ export const Sidebar = () => {
       <div class="pb-2 rounded-md flex justify-center items-center">
         <select
           id="schema"
+          // todo: change to selectedSchema
           value={connectionStore.schema}
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full">

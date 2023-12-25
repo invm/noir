@@ -12,11 +12,7 @@ export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.Sqlite]: 0,
 } as const;
 
-export const dialects = [
-  Dialect.Mysql,
-  Dialect.Postgres,
-  Dialect.Sqlite,
-] as const;
+export const dialects = [Dialect.Mysql, Dialect.Postgres, Dialect.Sqlite] as const;
 
 export type HostCredentials = {
   username: string;
@@ -57,15 +53,32 @@ export const AvailableConnectionModes = {
   [Dialect.Sqlite]: [ConnectionMode.File],
 } as const;
 
-export const connectionModes = [
-  ConnectionMode.Host,
-  ConnectionMode.Socket,
-  ConnectionMode.File,
-] as const;
+export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, ConnectionMode.File] as const;
 
-export type Scheme = Partial<
-  Record<DialectType, Record<ConnectionModeType, Record<string, string>>>
->;
+export type Scheme = Partial<Record<DialectType, Record<ConnectionModeType, Record<string, string>>>>;
+
+// TODO:
+// const Dialects =
+//   {
+//     dialect: Dialect.Mysql,
+//     mode: ConnectionMode.Host,
+//   } |
+//   {
+//     dialect: Dialect.Mysql,
+//     mode: ConnectionMode.Socket,
+//   } |
+//   {
+//     dialect: Dialect.Postgres,
+//     mode: ConnectionMode.Host,
+//   } |
+//   {
+//     dialect: Dialect.Postgres,
+//     mode: ConnectionMode.Socket,
+//   } |
+//   {
+//     dialect: Dialect.Sqlite,
+//     mode: ConnectionMode.File,
+//   };
 
 export type ConnectionConfig = {
   id: string;
@@ -102,12 +115,7 @@ export const connectionColors = [
 
 export type ConnectionColor = (typeof connectionColors)[number];
 
-type JSONValue =
-  | string
-  | number
-  | boolean
-  | { [x: string]: JSONValue }
-  | Array<JSONValue>;
+type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
 
 export type Row = Record<string, JSONValue>;
 
@@ -185,12 +193,7 @@ export const TableStrucureEntities = [
 
 export const SORT_ORDER = {
   [Dialect.Mysql]: {
-    [TableEntity.columns]: [
-      'COLUMN_NAME',
-      'COLUMN_TYPE',
-      'IS_NULLABLE',
-      'CHARACTER_MAXIMUM_LENGTH',
-    ],
+    [TableEntity.columns]: ['COLUMN_NAME', 'COLUMN_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
     [TableEntity.indices]: ['INDEX_NAME', 'NON_UNIQUE', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
       'CONSTRAINT_NAME',
@@ -208,12 +211,7 @@ export const SORT_ORDER = {
     ],
   },
   [Dialect.Postgres]: {
-    [TableEntity.columns]: [
-      'COLUMN_NAME',
-      'DATA_TYPE',
-      'IS_NULLABLE',
-      'CHARACTER_MAXIMUM_LENGTH',
-    ],
+    [TableEntity.columns]: ['COLUMN_NAME', 'DATA_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
     [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
       'CONSTRAINT_NAME',
@@ -231,12 +229,7 @@ export const SORT_ORDER = {
     ],
   },
   [Dialect.Sqlite]: {
-    [TableEntity.columns]: [
-      'COLUMN_NAME',
-      'DATA_TYPE',
-      'IS_NULLABLE',
-      'CHARACTER_MAXIMUM_LENGTH',
-    ],
+    [TableEntity.columns]: ['COLUMN_NAME', 'DATA_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
     [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
     [TableEntity.constraints]: [
       'CONSTRAINT_NAME',
