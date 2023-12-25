@@ -24,6 +24,8 @@
       }
     },
     "connections_list": {
+      "title": "Connections",
+      "connect": "Connect",
       "actions": {
         "delete": "Delete",
         "confirm_action": "Confirm action",

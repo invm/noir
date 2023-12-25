@@ -4,36 +4,23 @@ import 'solid-command-palette/pkg-dist/style.css';
 import { Main } from 'components/Screens/Main';
 import { CommandPaletteContext } from 'components/CommandPalette/CommandPaletteContext';
 import { Loader } from 'components/UI';
-import { createEffect, createSignal, onMount } from 'solid-js';
+import { onMount } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
 import { log } from 'utils/utils';
 
 function App() {
-  const [loading, setLoading] = createSignal(true);
   const {
-    connections: {
-      restoreConnectionStore,
-      getConnection,
-      updateResultSet,
-      contentStore: { idx },
-    },
+    connections: { restoreConnectionStore, getConnection, updateResultSet, contentStore, loading },
     app: { restoreAppStore },
     backend: { getQueryMetadata },
   } = useAppSelector();
 
-  createEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  });
-
   const compareAndAssign = async (event: QueryTaskResult) => {
     // TODO: this does not take into account the connection, when we have multiple connections
-    // FIXME: Why more than 3 queries in a tab suddenly breaks?
     const { status, query_idx, tab_idx, conn_id } = event;
-    if (getConnection().id === conn_id && idx === tab_idx) {
+    if (getConnection().id === conn_id && contentStore.idx === tab_idx) {
       if (status === 'Completed') {
         const md = await getQueryMetadata(event.path);
         const metadata = { ...md, path: event.path, status };

@@ -11,12 +11,7 @@ export const TableColumnsCollapse = (props: { title: string; children: JSXElemen
   const [open, setOpen] = createSignal(false);
 
   const {
-    connections: {
-      contentStore: { idx: tabIdx },
-      addContentTab,
-      getConnection,
-      updateContentTab,
-    },
+    connections: { contentStore, addContentTab, getConnection, updateContentTab },
     messages: { notify },
   } = useAppSelector();
 
@@ -42,7 +37,7 @@ export const TableColumnsCollapse = (props: { title: string; children: JSXElemen
   const listData = async (table: string) => {
     try {
       const activeConnection = getConnection();
-      const query = 'SELECT * from ' + table + ' LIMIT 1000';
+      const query = 'SELECT * from ' + table;
       const data = {
         query,
         cursor: 0,
@@ -52,13 +47,11 @@ export const TableColumnsCollapse = (props: { title: string; children: JSXElemen
       const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
         connId: activeConnection.id,
         sql: query,
-        autoLimit: false,
-        tabIdx,
+        autoLimit: true,
+        tabIdx: contentStore.idx,
       });
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({
-          id,
-        })),
+        result_sets: result_sets.map((id) => ({ id })),
       });
     } catch (error) {
       notify(error);

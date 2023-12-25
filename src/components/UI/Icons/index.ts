@@ -4,6 +4,7 @@ export * from "./ChevronRight";
 export * from "./Close";
 export * from "./Copy";
 export * from "./Edit";
+export * from "./Enter";
 export * from "./Fire";
 export * from "./Home";
 export * from "./Pen";

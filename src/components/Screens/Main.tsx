@@ -16,7 +16,7 @@ export const Main = () => {
 
   const [showSettings, setShowSettings] = createSignal(false);
 
-  const handleCloseConnection = async (id) => {
+  const handleCloseConnection = async (id: string) => {
     await invoke<string>('disconnect', { id });
     await removeConnectionTab(id);
   };

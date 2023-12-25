@@ -1,5 +1,6 @@
 use anyhow::Result;
-use mysql::Pool;
+use log::info;
+use mysql::{Opts, Pool};
 use rusqlite::{named_params, Connection};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -180,12 +181,18 @@ impl ConnectedConnection {
     pub async fn new(config: ConnectionConfig) -> Result<Self> {
         match &config.scheme {
             Scheme::Mysql(BaseConnectionMode::Host(_)) => {
-                let url: &str = &config.to_dsn();
-                let pool = Pool::new(url)?;
-                return Ok(ConnectedConnection {
-                    config,
-                    pool: ConnectionPool::Mysql(pool),
-                });
+                let url = format!("{}{}", &config.to_dsn(), "?tcp_connect_timeout_ms=5000");
+                let opts = Opts::from_url(&url)?;
+                match Pool::new(opts) {
+                    Ok(pool) => Ok(ConnectedConnection {
+                        config,
+                        pool: ConnectionPool::Mysql(pool),
+                    }),
+                    Err(e) => {
+                        info!("Error connecting to mysql: {}", e);
+                        Err(anyhow::anyhow!("Error connecting to mysql: {}", e))
+                    }
+                }
             }
             Scheme::Mysql(BaseConnectionMode::Socket(_)) => todo!(),
             Scheme::Postgres(_) => todo!(),

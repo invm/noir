@@ -23,7 +23,7 @@ export const ConnectionsList = (props: {
 
   return (
     <div class="h-full p-2 pt-5 bg-base-300">
-      <h3 class="px-2 text-xl font-bold">Saved Connections</h3>
+      <h3 class="px-2 text-xl font-bold">{t('connections_list.title')}</h3>
       <div class="divider my-0"></div>
       <ul class="grid grid-cols-1 gap-1">
         <For each={props.connections}>

@@ -1,5 +1,14 @@
 import { createStore, produce } from 'solid-js/store';
-import { Column, ConnectionConfig, DialectType, ResultSet, Row, Table, TableEntity } from '../interfaces';
+import {
+  Column,
+  ConnectionConfig,
+  DialectType,
+  RawQueryResult,
+  ResultSet,
+  Row,
+  Table,
+  TableEntity,
+} from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
 import { columnsToSchema, debounce, firstKey } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
@@ -57,6 +66,7 @@ export type QueryContentTabData = {
   query: string;
   cursor: number;
   result_sets: ResultSet[];
+  auto_limit?: boolean;
 };
 
 export type TableStructureContentTabData = {
@@ -129,6 +139,7 @@ type ContentStore = {
 };
 
 export const ConnectionsService = () => {
+  const [loading, setLoading] = createSignal(true);
   const [connectionStore, setConnectionStore] = createStore<ConnectionStore>({
     tabs: [],
     idx: 0,
@@ -142,28 +153,32 @@ export const ConnectionsService = () => {
   const [queryIdx, setQueryIdx] = createSignal<number>(0);
 
   const restoreConnectionStore = async () => {
-    const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
-    if (!conn_tabs.tabs) return;
-    const tabs = await conn_tabs.tabs.reduce(
-      async (acc, conn) => {
-        const res = await acc;
-        try {
-          await invoke('init_connection', { config: conn.connection });
-          return Promise.resolve([...res, conn]);
-        } catch (e) {
-          conn_tabs.idx = 0;
-          MessageService().notify(e);
-          return Promise.resolve(res);
-        }
-      },
-      Promise.resolve([] as ConnectionTab[])
-    );
-    if (tabs.length) {
-      setConnectionStore(() => ({ ...conn_tabs, tabs }));
-      const content = await getSavedData(CONTENT_KEY);
-      setContentStore(() => content as ContentStore);
+    try {
+      const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
+      if (!conn_tabs.tabs) return;
+      const tabs = await conn_tabs.tabs.reduce(
+        async (acc, conn) => {
+          const res = await acc;
+          try {
+            await invoke('init_connection', { config: conn.connection });
+            return Promise.resolve([...res, conn]);
+          } catch (e) {
+            conn_tabs.idx = 0;
+            MessageService().notify(e);
+            return Promise.resolve(res);
+          }
+        },
+        Promise.resolve([] as ConnectionTab[])
+      );
+      if (tabs.length) {
+        setConnectionStore(() => ({ ...conn_tabs, tabs }));
+        const content = await getSavedData(CONTENT_KEY);
+        setContentStore(() => content as ContentStore);
+      }
+      updateStore();
+    } finally {
+      setLoading(false);
     }
-    updateStore();
   };
 
   const updateStore = debounce(async () => {
@@ -316,13 +331,12 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType, _dbName: string) => {
-    const { result: columns } = await invoke<RawQueryResult>('get_columns', {
-      connId,
-    });
-    const { result: routines } = await invoke<RawQueryResult>('get_procedures', { connId });
-    const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
-      connId,
-    });
+    const [{ result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
+      invoke<RawQueryResult>('get_columns', { connId }),
+      invoke<RawQueryResult>('get_procedures', { connId }),
+      invoke<RawQueryResult>('get_triggers', { connId }),
+    ]);
+
     const schema = columnsToSchema(columns, dialect);
     return { schema, routines, columns, triggers };
   };
@@ -357,5 +371,7 @@ export const ConnectionsService = () => {
     getSchemaTriggers,
     getSchemaEntity,
     fetchSchemaEntities,
+    loading,
+    setLoading,
   };
 };

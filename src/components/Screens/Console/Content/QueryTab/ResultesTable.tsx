@@ -54,7 +54,7 @@ export const ResultsTable = () => {
     try {
       setLoading(true);
       const result_set = getContentData('Query').result_sets[queryIdx()];
-      if (result_set?.rows){ 
+      if (result_set?.rows) {
         setRows(result_set.rows);
         return;
       }
