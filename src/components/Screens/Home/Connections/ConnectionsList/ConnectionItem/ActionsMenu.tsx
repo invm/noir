@@ -24,7 +24,6 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
       const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
         connId: config.id,
       });
-      console.log({ triggers });
       await addConnectionTab({
         id: config.id,
         label: config.name,

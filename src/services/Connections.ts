@@ -181,6 +181,7 @@ export const ConnectionsService = () => {
   };
 
   const removeConnectionTab = async (id: string) => {
+    setContentStore('idx', 0);
     setConnectionStore('idx', 0);
     setConnectionStore(
       'tabs',
