@@ -68,7 +68,7 @@ export const Sidebar = () => {
       await invoke('init_connection', { config });
       const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
       const dbName = firstKey(config.scheme[config.dialect]![type]);
-      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, dbName);
+      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, config.dialect, dbName);
       setTables(getSchemaTables(dbName));
       setTables(getSchemaTables(connectionStore.schema));
       updateConnectionTab('schema', schema);
@@ -91,7 +91,7 @@ export const Sidebar = () => {
         query,
         autoLimit: false,
       });
-      const data = { query, result_sets: [res], cursor: 0 };
+      const data = { query, result_sets: [res], cursor: 0, auto_limit: false };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
     } catch (error) {
       notify(error);

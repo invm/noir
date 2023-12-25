@@ -49,7 +49,7 @@ export const Pagination = (props: PaginationProps) => {
               {t('console.result_set')} {queryIdx() + 1}
             </span>
           </button>
-          <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_result_set')}>
+          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.next_result_set')}>
             <button class="join-item btn btn-sm" onClick={selectNextQuery}>
               <ChevronRight />
             </button>

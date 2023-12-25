@@ -1,16 +1,19 @@
 import { invoke } from '@tauri-apps/api';
+import { EnterIcon } from 'components/UI/Icons';
 import { ConnectionConfig, ConnectionModeType } from 'interfaces';
 import { useAppSelector } from 'services/Context';
+import { t } from 'utils/i18n';
 import { firstKey } from 'utils/utils';
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const {
     messages: { notify },
-    connections: { addConnectionTab, fetchSchemaEntities },
+    connections: { addConnectionTab, fetchSchemaEntities, setLoading },
   } = useAppSelector();
 
   const onConnect = async () => {
     const config = props.connection;
+    setLoading(true);
     try {
       await invoke('init_connection', { config });
       const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
@@ -28,22 +31,18 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
       });
     } catch (error) {
       notify(String(error));
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div class="flex items-center">
-      <button onClick={onConnect} class="btn btn-sm btn-ghost">
-        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-          <path
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3"
-          />
-        </svg>
-      </button>
+      <div class="tooltip tooltip-primary tooltip-left px-3" data-tip={t('connections_list.connect')}>
+        <button onClick={onConnect} class="btn btn-sm btn-ghost">
+          <EnterIcon />
+        </button>
+      </div>
     </div>
   );
 };

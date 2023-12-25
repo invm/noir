@@ -25,13 +25,7 @@ const SQLDialects = {
 
 export const QueryTextArea = () => {
   const {
-    connections: {
-      updateContentTab,
-      getConnection,
-      getContentData,
-      getSchemaTables,
-      contentStore: { idx: tabIdx },
-    },
+    connections: { updateContentTab, getConnection, getContentData, getSchemaTables, contentStore },
     app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -101,7 +95,7 @@ export const QueryTextArea = () => {
         connId: activeConnection.id,
         sql: selectedText || code(),
         autoLimit: autoLimit(),
-        tabIdx,
+        tabIdx: contentStore.idx,
       });
       updateContentTab('data', {
         query: code(),
@@ -122,7 +116,9 @@ export const QueryTextArea = () => {
   };
 
   createEffect(() => {
-    setCode(getContentData('Query').query ?? '');
+    const data = getContentData('Query');
+    setCode(data.query ?? '');
+    setAutoLimit(data.auto_limit ?? true);
     setSchema(
       getSchemaTables().reduce(
         (acc, table) => ({
@@ -138,7 +134,7 @@ export const QueryTextArea = () => {
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
-  // const dummyAction = () => {};
+  // const dummyAction = () => { };
 
   return (
     <div class="flex-1 flex flex-col h-full">
@@ -146,7 +142,7 @@ export const QueryTextArea = () => {
         <div class="flex items-center">
           {/*
           <ActionRowButton dataTip={'Testing'} onClick={dummyAction} icon={<EditIcon />} />
-          */}
+           */}
           <ActionRowButton dataTip={t('console.actions.format')} onClick={onFormat} icon={<EditIcon />} />
           <ActionRowButton
             dataTip={t('console.actions.execute')}

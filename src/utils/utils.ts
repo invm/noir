@@ -1,7 +1,7 @@
-import { DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
+import { DialectType, Row, SORT_ORDER, Table, TableStrucureEntityType } from 'interfaces';
 
 // TODO: address those anys
-export const log = (msg: string) => {
+export const log = (msg: unknown) => {
   console.log(`[${new Date().toISOString()}]`, msg);
 };
 
