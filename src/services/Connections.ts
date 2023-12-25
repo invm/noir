@@ -1,7 +1,7 @@
 import { createStore, produce } from 'solid-js/store';
-import { Column, ConnectionConfig, ResultSet, Row, Table, TableEntity } from '../interfaces';
+import { Column, ConnectionConfig, DialectType, ResultSet, Row, Table, TableEntity } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { debounce, firstKey } from 'utils/utils';
+import { columnsToSchema, debounce, firstKey } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { MessageService } from './Messages';
 import { createSignal } from 'solid-js';
@@ -84,6 +84,14 @@ export type ContentTab = {
 type ConnectionTab = {
   label: string;
   id: string;
+  selectSchema: string;
+  schemas: {
+    [key: string]: {
+      schema: Row[];
+      routines: Row[];
+      triggers: Row[];
+    };
+  };
   schema: Record<string, Table>;
   routines: Row[];
   triggers: Row[];
@@ -167,6 +175,7 @@ export const ConnectionsService = () => {
     await store.save();
   }, INTERVAL);
 
+  // doing: change this
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
     setContentStore('tabs', [newContentTab('Query', ContentTab.Query)]);
@@ -269,6 +278,10 @@ export const ConnectionsService = () => {
     }));
   };
 
+  const getSchemaEntity = (schema: string, entity: 'schema' | 'routines' | 'triggers') => {
+    return getConnection().schemas[schema][entity];
+  };
+
   // TODO: compress these 3 functions into single one that retrieves a specific entity
   const getSchemaTables = (sch = connectionStore.schema): Table[] => {
     const _tables = Object.entries(getSchema(sch)).reduce(
@@ -293,7 +306,6 @@ export const ConnectionsService = () => {
   };
 
   const selectPrevQuery = () => {
-    // TODO: fix this
     if (getContentData('Query').result_sets.length)
       setQueryIdx((s) => (s - 1) % getContentData('Query').result_sets.length);
   };
@@ -301,6 +313,18 @@ export const ConnectionsService = () => {
   const selectNextQuery = () => {
     if (getContentData('Query').result_sets.length)
       setQueryIdx((s) => (s + 1) % getContentData('Query').result_sets.length);
+  };
+
+  const fetchSchemaEntities = async (connId: string, dialect: DialectType, _dbName: string) => {
+    const { result: columns } = await invoke<RawQueryResult>('get_columns', {
+      connId,
+    });
+    const { result: routines } = await invoke<RawQueryResult>('get_procedures', { connId });
+    const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
+      connId,
+    });
+    const schema = columnsToSchema(columns, dialect);
+    return { schema, routines, columns, triggers };
   };
 
   return {
@@ -331,5 +355,7 @@ export const ConnectionsService = () => {
     insertColumnName,
     getSchemaRoutines,
     getSchemaTriggers,
+    getSchemaEntity,
+    fetchSchemaEntities,
   };
 };

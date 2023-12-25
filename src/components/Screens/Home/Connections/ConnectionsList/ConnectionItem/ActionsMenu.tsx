@@ -1,32 +1,26 @@
 import { invoke } from '@tauri-apps/api';
-import { ConnectionConfig, RawQueryResult } from 'interfaces';
+import { ConnectionConfig, ConnectionModeType } from 'interfaces';
 import { useAppSelector } from 'services/Context';
-import { columnsToSchema } from 'utils/utils';
+import { firstKey } from 'utils/utils';
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const {
     messages: { notify },
-    connections: { addConnectionTab },
+    connections: { addConnectionTab, fetchSchemaEntities },
   } = useAppSelector();
 
   const onConnect = async () => {
     const config = props.connection;
     try {
       await invoke('init_connection', { config });
-      const { result } = await invoke<RawQueryResult>('get_columns', {
-        connId: config.id,
-      });
-      const schema = columnsToSchema(result, config.dialect);
-      const { result: routines } = await invoke<RawQueryResult>('get_procedures', {
-        connId: config.id,
-      });
-
-      const { result: triggers } = await invoke<RawQueryResult>('get_triggers', {
-        connId: config.id,
-      });
+      const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
+      const dbName = firstKey(config.scheme[config.dialect]![type]);
+      const { triggers, columns, routines, schema } = await fetchSchemaEntities(config.id, config.dialect, dbName);
       await addConnectionTab({
         id: config.id,
         label: config.name,
+        selectSchema: dbName,
+        schemas: { [dbName]: { columns, schema, routines, triggers } },
         schema,
         connection: config,
         routines,
