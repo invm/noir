@@ -4,29 +4,21 @@ import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { Match, onMount, Show, Switch } from 'solid-js';
 
-import {
-  Alert,
-  TextInput,
-  Select,
-  ColorCircle,
-  FileInput,
-} from 'components/UI';
+import { Alert, TextInput, Select, ColorCircle, FileInput } from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
-  AvailableConnectionModes,
+  AvailableModes,
   SocketPathDefaults,
   connectionColors,
-  ConnectionMode,
+  Mode,
   connectionModes,
   dialects,
-  HostCredentials,
-  SocketCredentials,
-  FileCredentials,
-  Scheme,
+  DialectType,
+  ModeType,
+  Credentials,
 } from 'interfaces';
 import { titleCase } from 'utils/formatters';
-import { omit } from 'utils/utils';
 import { useAppSelector } from 'services/Context';
 
 const MIN_LENGTH_STR = 2;
@@ -39,13 +31,10 @@ const messages = {
 };
 
 export const ConnectionFormSchema = z.object({
-  name: z
-    .string()
-    .min(MIN_LENGTH_STR, messages.length)
-    .max(MAX_LENGTH_STR, messages.length),
-  scheme: z.enum(dialects),
+  name: z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length),
+  dialect: z.enum(dialects),
   mode: z.enum(connectionModes),
-  username: z
+  user: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
@@ -69,70 +58,57 @@ export const ConnectionFormSchema = z.object({
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
     .or(z.literal('')),
-  socket_path: z
+  socket: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
     .or(z.literal('')),
-  port: z.coerce
-    .number()
-    .min(MIN_PORT)
-    .max(MAX_PORT)
-    .optional()
-    .or(z.literal(0)),
-  dbname: z.string().optional().or(z.literal('')),
+  port: z.coerce.number().min(MIN_PORT).max(MAX_PORT).optional(),
+  db_name: z.string().optional().or(z.literal('')),
   color: z.enum(connectionColors),
 });
 
 type ConnectionForm = z.infer<typeof ConnectionFormSchema>;
 
 export const formToConnectionStruct = (form: ConnectionForm) => {
-  const { name, color, scheme, mode, ...rest } = form;
+  const { name, color, dialect, mode, socket, file, ...credentials } = form;
 
-  switch (mode) {
-    case ConnectionMode.Host: {
-      const creds: HostCredentials = omit(rest, 'socket_path', 'file');
-      return { name, scheme: { [scheme]: { [mode]: creds } }, color };
-    }
-    case ConnectionMode.Socket: {
-      const creds: SocketCredentials = omit(rest, 'host', 'port', 'file');
-      return { name, scheme: { [scheme]: { [mode]: creds } }, color };
-    }
-    case ConnectionMode.File: {
-      const creds: FileCredentials = omit(rest, 'host', 'port', 'socket_path');
-      return {
-        name,
-        scheme: { [scheme]: { [mode]: creds } } as Partial<Scheme>,
-        color,
-      };
-    }
-  }
+  return {
+    name,
+    color,
+    dialect,
+    mode,
+    credentials: {
+      ...credentials,
+      port: String(credentials.port),
+      ...(mode === Mode.Socket ? { socket } : {}),
+      ...(dialect === Dialect.Sqlite ? { file } : {}),
+    },
+  };
 };
 
 export * from './AddConnectionForm';
 
 const defaultValues = {
-  name: 'My Connection',
-  scheme: Dialect.Mysql,
+  name: 'Local',
+  dialect: Dialect.Mysql,
   port: 3306,
   color: 'cyan',
-  mode: AvailableConnectionModes[Dialect.Mysql][0],
+  mode: AvailableModes[Dialect.Mysql][0],
   file: '',
   host: 'localhost',
-  username: 'root',
-  password: 'example',
-  dbname: 'world_x',
+  user: 'root',
+  password: 'localR00t!',
+  db_name: 'dev_NAME',
 };
 
 const AddConnectionForm = (props: {
-  addConnection: ({
-    name,
-    scheme,
-    color,
-  }: {
+  addConnection: (args: {
+    dialect: DialectType;
+    mode: ModeType;
+    credentials: Credentials;
     name: string;
-    scheme: Scheme;
     color: string;
   }) => Promise<void>;
 }) => {
@@ -140,15 +116,11 @@ const AddConnectionForm = (props: {
     messages: { notify },
   } = useAppSelector();
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema));
-  const { formData, setFieldDefaultValue, getFormErrors, setFieldValue } =
-    formHandler;
+  const { formData, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
 
   onMount(() => {
     for (const key in defaultValues) {
-      setFieldDefaultValue(
-        key,
-        defaultValues[key as keyof typeof defaultValues]
-      );
+      setFieldDefaultValue(key, defaultValues[key as keyof typeof defaultValues]);
     }
   });
 
@@ -156,65 +128,48 @@ const AddConnectionForm = (props: {
     event.preventDefault();
     await formHandler.validateForm().catch(() => { });
     try {
-      const { name, scheme, color } = formToConnectionStruct(formData());
-      await props.addConnection({ name, scheme, color });
+      await props.addConnection(formToConnectionStruct(formData()));
     } catch (error) {
-      notify((error as any).message);
+      notify(error);
     }
   };
 
   return (
     <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-100">
-      <form
-        class="flex max-w-lg flex-col gap-1"
-        autocomplete="off"
-        onSubmit={submit}
-      >
+      <form class="flex max-w-lg flex-col gap-1" autocomplete="off" onSubmit={submit}>
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
         <div class="grid grid-cols-6 gap-3">
-          <div
-            class={
-              formData().scheme === Dialect.Sqlite ? 'col-span-4' : 'col-span-2'
-            }
-          >
+          <div class={formData().dialect === Dialect.Sqlite ? 'col-span-4' : 'col-span-2'}>
             <Select
-              id="scheme"
-              name="scheme"
-              label={t('add_connection_form.labels.scheme')}
+              id="dialect"
+              name="dialect"
+              label={t('add_connection_form.labels.dialect')}
               options={dialects.map((sc) => ({
                 value: sc,
                 label: titleCase(sc),
               }))}
               formHandler={formHandler}
               onChange={() => {
-                setFieldValue('port', PORTS_MAP[formData().scheme] || 3306);
-                if (formData().mode === ConnectionMode.Socket) {
-                  setFieldValue(
-                    'socket_path',
-                    SocketPathDefaults[formData().scheme]
-                  );
+                setFieldValue('port', PORTS_MAP[formData().dialect] || 3306);
+                if (formData().mode === Mode.Socket) {
+                  setFieldValue('socket', SocketPathDefaults[formData().dialect]);
                 }
               }}
             />
           </div>
-          <Show when={formData().scheme !== Dialect.Sqlite}>
+          <Show when={formData().dialect !== Dialect.Sqlite}>
             <div class="col-span-2">
               <Select
                 id="mode"
                 name="mode"
                 label={t('add_connection_form.labels.mode')}
-                options={AvailableConnectionModes[formData().scheme].map(
-                  (md) => ({ value: md, label: titleCase(md) })
-                )}
+                options={AvailableModes[formData()?.dialect].map((md) => ({ value: md, label: titleCase(md) }))}
                 formHandler={formHandler}
                 onChange={() => {
-                  if (formData().mode === ConnectionMode.Socket) {
-                    setFieldValue(
-                      'socket_path',
-                      SocketPathDefaults[formData().scheme]
-                    );
+                  if (formData().mode === Mode.Socket) {
+                    setFieldValue('socket', SocketPathDefaults[formData().dialect]);
                   }
                 }}
               />
@@ -222,33 +177,30 @@ const AddConnectionForm = (props: {
           </Show>
           <div class="col-span-2">
             <Switch>
-              <Match when={formData().scheme === Dialect.Sqlite}>
-                <FileInput
-                  label={t('add_connection_form.labels.file')}
-                  formHandler={formHandler}
-                  name="file"
-                />
+              <Match when={formData().dialect === Dialect.Sqlite}>
+                <FileInput label={t('add_connection_form.labels.file')} formHandler={formHandler} name="file" />
               </Match>
-              <Match when={formData().scheme !== Dialect.Sqlite}>
+              <Match when={formData().dialect !== Dialect.Sqlite}>
                 <TextInput
-                  label={t('add_connection_form.labels.dbname')}
+                  label={t('add_connection_form.labels.db_name')}
                   min={1}
                   max={255}
-                  name="dbname"
-                  id="dbname"
+                  name="db_name"
+                  id="db_name"
                   formHandler={formHandler}
                 />
               </Match>
             </Switch>
           </div>
         </div>
-        <Show when={formData().scheme !== Dialect.Sqlite}>
+        <Show when={formData().dialect !== Dialect.Sqlite}>
           <div class="grid grid-cols-6 gap-3">
             <Switch>
-              <Match when={formData().mode === ConnectionMode.Host}>
+              <Match when={formData().mode === Mode.Host}>
                 <div class="col-span-4">
                   <TextInput
                     label={t('add_connection_form.labels.host')}
+                    autocapitalize="off"
                     min={1}
                     max={255}
                     name="host"
@@ -259,6 +211,7 @@ const AddConnectionForm = (props: {
                 <div class="col-span-2">
                   <TextInput
                     label={t('add_connection_form.labels.port')}
+                    autocapitalize="off"
                     name="port"
                     id="port"
                     formHandler={formHandler}
@@ -268,14 +221,15 @@ const AddConnectionForm = (props: {
                   />
                 </div>
               </Match>
-              <Match when={formData().mode === ConnectionMode.Socket}>
+              <Match when={formData().mode === Mode.Socket}>
                 <div class="col-span-6">
                   <TextInput
-                    label={t('add_connection_form.labels.socket_path')}
+                    label={t('add_connection_form.labels.socket')}
+                    autocapitalize="off"
                     min={1}
                     max={255}
-                    name="socket_path"
-                    id="socket_path"
+                    name="socket"
+                    id="socket"
                     formHandler={formHandler}
                   />
                 </div>
@@ -286,17 +240,19 @@ const AddConnectionForm = (props: {
           <div class="grid grid-cols-2 gap-3">
             <div class="w-full">
               <TextInput
-                label={t('add_connection_form.labels.username')}
+                label={t('add_connection_form.labels.user')}
+                autocapitalize="off"
                 min={1}
                 max={255}
-                name="username"
-                id="username"
+                name="user"
+                id="user"
                 formHandler={formHandler}
               />
             </div>
             <div class="w-full">
               <TextInput
                 label={t('add_connection_form.labels.password')}
+                autocapitalize="off"
                 name="password"
                 id="password"
                 min={1}
@@ -312,6 +268,7 @@ const AddConnectionForm = (props: {
               <TextInput
                 label={t('add_connection_form.labels.name')}
                 name="name"
+                autocapitalize="off"
                 formHandler={formHandler}
                 id="name"
                 minLength={2}
@@ -342,8 +299,7 @@ const AddConnectionForm = (props: {
             <Alert color="error">
               {getFormErrors().map((error) => (
                 <p class="text-bold">
-                  {t(`add_connection_form.labels.${error.path}`)}:{' '}
-                  {error.message}
+                  {t(`add_connection_form.labels.${error.path}`)}: {error.message}
                 </p>
               ))}
             </Alert>
@@ -354,8 +310,7 @@ const AddConnectionForm = (props: {
             disabled={!!Object.keys(getFormErrors()).length}
             class="btn
             btn-primary btn-md btn-block"
-            type="submit"
-          >
+            type="submit">
             {t('add_connection_form.title')}
           </button>
         </div>

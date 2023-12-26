@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::database::database::create_app_db;
+use crate::database::queries::create_app_db;
 
 use super::{
     crypto::create_app_key,

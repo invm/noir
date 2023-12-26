@@ -5,16 +5,16 @@ use tauri::{AppHandle, Manager, State};
 use tokio::sync::{mpsc, Mutex};
 use tracing::error;
 
-use crate::{database::connections::ConnectedConnection, queues::query::QueryTask};
+use crate::{database::connections::InitiatedConnection, queues::query::QueryTask};
 
 pub struct AppState {
     pub db: std::sync::Mutex<Option<Connection>>,
-    pub connections: std::sync::Mutex<HashMap<String, ConnectedConnection>>,
+    pub connections: std::sync::Mutex<HashMap<String, InitiatedConnection>>,
 }
 
 pub struct AsyncState {
     pub tasks: Mutex<mpsc::Sender<QueryTask>>,
-    pub connections: Mutex<HashMap<String, ConnectedConnection>>,
+    pub connections: Mutex<HashMap<String, InitiatedConnection>>,
 }
 
 pub trait ServiceAccess {
@@ -26,9 +26,9 @@ pub trait ServiceAccess {
     where
         F: FnOnce(&mut Connection) -> TResult;
 
-    fn acquire_connection(&self, conn_id: String) -> ConnectedConnection;
+    fn acquire_connection(&self, conn_id: String) -> InitiatedConnection;
     fn disconnect(&mut self, conn_id: &str) -> Result<()>;
-    fn connect(&mut self, conn: &ConnectedConnection) -> Result<()>;
+    fn connect(&mut self, conn: &InitiatedConnection) -> Result<()>;
 }
 
 impl ServiceAccess for AppHandle {
@@ -54,7 +54,7 @@ impl ServiceAccess for AppHandle {
         operation(db)
     }
 
-    fn acquire_connection(&self, conn_id: String) -> ConnectedConnection {
+    fn acquire_connection(&self, conn_id: String) -> InitiatedConnection {
         let app_state: State<AppState> = self.state();
         let binding = app_state.connections.lock();
         let connection_guard = binding.as_ref();
@@ -63,7 +63,7 @@ impl ServiceAccess for AppHandle {
         return connection.clone();
     }
 
-    fn connect(&mut self, conn: &ConnectedConnection) -> Result<()> {
+    fn connect(&mut self, conn: &InitiatedConnection) -> Result<()> {
         let app_state: State<AppState> = self.state();
         let mut binding = app_state.connections.lock();
         let connection_guard = binding.as_mut();

@@ -1,6 +1,6 @@
-import { AlertTypes } from "components/UI";
-import { createStore } from "solid-js/store";
-import { randomId } from "utils/utils";
+import { AlertTypes } from 'components/UI';
+import { createStore } from 'solid-js/store';
+import { randomId } from 'utils/utils';
 
 type Error = {
   message: string;
@@ -13,6 +13,7 @@ export const MessageService = () => {
   const [messages, setMessages] = errorStore;
 
   const notify = (message: string | unknown, type: AlertTypes = 'error') => {
+    console.log({ message });
     const id = randomId();
     setMessages(messages.concat({ message: String(message), id, type }));
 

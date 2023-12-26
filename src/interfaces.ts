@@ -1,6 +1,6 @@
 export const Dialect = {
   Mysql: 'Mysql',
-  Postgres: 'Postgres',
+  Postgresql: 'Postgresql',
   Sqlite: 'Sqlite',
 } as const;
 
@@ -8,83 +8,42 @@ export type DialectType = keyof typeof Dialect;
 
 export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.Mysql]: 3306,
-  [Dialect.Postgres]: 5432,
+  [Dialect.Postgresql]: 5432,
   [Dialect.Sqlite]: 0,
 } as const;
 
-export const dialects = [Dialect.Mysql, Dialect.Postgres, Dialect.Sqlite] as const;
+export const dialects = [Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite] as const;
 
-export type HostCredentials = {
-  username: string;
-  password: string;
-  host: string;
-  port: number;
-  dbname: string;
-};
-
-export type SocketCredentials = {
-  username: string;
-  password: string;
-  path: string;
-  dbname: string;
-};
-
-export type FileCredentials = {
-  path: string;
-};
-
-export const ConnectionMode = {
+export const Mode = {
   Host: 'Host',
   Socket: 'Socket',
   File: 'File',
 } as const;
 
-export type ConnectionModeType = keyof typeof ConnectionMode;
+export type ModeType = keyof typeof Mode;
 
 export const SocketPathDefaults = {
   [Dialect.Mysql]: '/var/run/mysqld/mysqld.sock',
-  [Dialect.Postgres]: '/var/run/postgresql/.s.PGSQL.5432',
+  [Dialect.Postgresql]: '/var/run/postgresql/.s.PGSQL.5432',
   [Dialect.Sqlite]: '',
 } as const;
 
-export const AvailableConnectionModes = {
-  [Dialect.Mysql]: [ConnectionMode.Host, ConnectionMode.Socket],
-  [Dialect.Postgres]: [ConnectionMode.Host, ConnectionMode.Socket],
-  [Dialect.Sqlite]: [ConnectionMode.File],
+export const AvailableModes = {
+  [Dialect.Mysql]: [Mode.Host, Mode.Socket],
+  [Dialect.Postgresql]: [Mode.Host, Mode.Socket],
+  [Dialect.Sqlite]: [Mode.File],
 } as const;
 
-export const connectionModes = [ConnectionMode.Host, ConnectionMode.Socket, ConnectionMode.File] as const;
+export const connectionModes = [Mode.Host, Mode.Socket, Mode.File] as const;
 
-export type Scheme = Partial<Record<DialectType, Record<ConnectionModeType, Record<string, string>>>>;
-
-// TODO:
-// const Dialects =
-//   {
-//     dialect: Dialect.Mysql,
-//     mode: ConnectionMode.Host,
-//   } |
-//   {
-//     dialect: Dialect.Mysql,
-//     mode: ConnectionMode.Socket,
-//   } |
-//   {
-//     dialect: Dialect.Postgres,
-//     mode: ConnectionMode.Host,
-//   } |
-//   {
-//     dialect: Dialect.Postgres,
-//     mode: ConnectionMode.Socket,
-//   } |
-//   {
-//     dialect: Dialect.Sqlite,
-//     mode: ConnectionMode.File,
-//   };
+export type Credentials = Record<string, string>;
 
 export type ConnectionConfig = {
   id: string;
-  name: string;
-  scheme: Scheme;
   dialect: DialectType;
+  mode: ModeType;
+  credentials: Credentials;
+  name: string;
   color: ConnectionColor;
 };
 
@@ -210,7 +169,7 @@ export const SORT_ORDER = {
       'ACTION_STATEMENT',
     ],
   },
-  [Dialect.Postgres]: {
+  [Dialect.Postgresql]: {
     [TableEntity.columns]: ['COLUMN_NAME', 'DATA_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
     [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
     [TableEntity.constraints]: [

@@ -2,11 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use query_noir::{
-    database::database,
     handlers::{connections, queries},
     queues::query::{async_process_model, rs2js},
     state::{self, AsyncState},
-    utils::init,
+    utils::init, database::queries::initialize_database,
 };
 
 use tokio::sync::mpsc;
@@ -50,7 +49,7 @@ fn main() {
             let handle = app.handle();
 
             let app_state: State<AppState> = handle.state();
-            let db = database::initialize_database().expect("Database initialize should succeed");
+            let db = initialize_database().expect("Database initialize should succeed");
             *app_state.db.lock().unwrap() = Some(db);
 
             tauri::async_runtime::spawn(async move {

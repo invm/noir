@@ -8,7 +8,7 @@ import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api';
 import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
-import { QueryTaskEnqueueResult, Dialect } from 'interfaces';
+import { Dialect, QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
 import { basicSetup } from 'codemirror';
 import { createShortcut } from '@solid-primitives/keyboard';
@@ -19,7 +19,7 @@ import { debounce } from 'utils/utils';
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
-  [Dialect.Postgres]: PostgreSQL,
+  [Dialect.Postgresql]: PostgreSQL,
   [Dialect.Sqlite]: SQLite,
 };
 

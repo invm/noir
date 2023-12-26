@@ -1,9 +1,8 @@
 import { invoke } from '@tauri-apps/api';
 import { EnterIcon } from 'components/UI/Icons';
-import { ConnectionConfig, ConnectionModeType } from 'interfaces';
+import { ConnectionConfig } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
-import { firstKey } from 'utils/utils';
 
 export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
   const {
@@ -16,14 +15,13 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
     setLoading(true);
     try {
       await invoke('init_connection', { config });
-      const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
-      const dbName = firstKey(config.scheme[config.dialect]![type]);
-      const { triggers, columns, routines, schema } = await fetchSchemaEntities(config.id, config.dialect, dbName);
+      const { triggers, columns, routines, schema } = await fetchSchemaEntities(config.id, config.dialect);
+      const db_name = config.credentials.db_name;
       await addConnectionTab({
         id: config.id,
         label: config.name,
-        selectSchema: dbName,
-        schemas: { [dbName]: { columns, schema, routines, triggers } },
+        selectSchema: db_name,
+        schemas: { [db_name]: { columns, schema, routines, triggers } },
         schema,
         connection: config,
         routines,
