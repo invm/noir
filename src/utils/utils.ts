@@ -15,17 +15,6 @@ export const get = (obj: Record<string, unknown>, path: string) => {
   return result === undefined || result === obj ? defaultValue : result;
 };
 
-export const omit = (obj: Record<string, unknown>, ...keys: string[]) => {
-  const copy = { ...obj };
-  keys.forEach((key) => delete copy[key]);
-  return copy;
-};
-
-export const firstKey = (obj: Record<string, any>) => {
-  for (const key in obj) return key;
-  return '';
-};
-
 export const randomId = () => {
   const length = 36;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -81,5 +70,5 @@ export const columnsToSchema = (columns: Row[], _dialect: DialectType) => {
     };
   }, {});
   // todo: is this correct
-  return schema as Table;
+  return schema as Record<string, Table>;
 };

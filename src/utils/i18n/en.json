@@ -13,13 +13,13 @@
         "name": "Name",
         "mode": "Mode",
         "color": "Color",
-        "scheme": "Scheme",
-        "username": "Username",
+        "dialect": "Dialect",
+        "user": "User",
         "password": "Password",
         "host": "Host",
-        "socket_path": "Socket path",
+        "socket": "Socket path",
         "file": "Database file",
-        "dbname": "Database name",
+        "db_name": "Database name",
         "port": "Port"
       }
     },

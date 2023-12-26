@@ -27,9 +27,8 @@ pub async fn enqueue_query(
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
-    let dialect = conn.config.dialect.as_str();
     let statements: Result<Vec<String>, Error> =
-        match Parser::parse_sql(dialect_from_str(dialect).unwrap().as_ref(), sql) {
+        match Parser::parse_sql(dialect_from_str(conn.config.dialect.to_string()).unwrap().as_ref(), sql) {
             Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
             Err(e) => Err(Error::from(e)),
         };

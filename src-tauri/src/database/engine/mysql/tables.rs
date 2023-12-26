@@ -3,12 +3,12 @@ use futures::try_join;
 use mysql::Pool;
 use serde_json::{json, Value};
 
-use crate::database::connections::ConnectedConnection;
+use crate::database::connections::InitiatedConnection;
 
 use super::query::raw_query;
 
 pub async fn get_table_structure(
-    conn: &ConnectedConnection,
+    conn: &InitiatedConnection,
     pool: &Pool,
     table: String,
 ) -> Result<Value> {
@@ -31,11 +31,11 @@ pub async fn get_table_structure(
 }
 
 pub async fn get_columns(
-    conn: &ConnectedConnection,
+    conn: &InitiatedConnection,
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Value> {
-    let db_name = conn.config.get_db_name();
+    let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
@@ -64,11 +64,11 @@ pub async fn get_columns(
 }
 
 pub async fn get_constraints(
-    conn: &ConnectedConnection,
+    conn: &InitiatedConnection,
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Value> {
-    let db_name = conn.config.get_db_name();
+    let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION,
@@ -84,16 +84,16 @@ pub async fn get_constraints(
     Ok(columns)
 }
 
-pub async fn get_functions(conn: &ConnectedConnection, pool: &Pool) -> Result<Value> {
-    let db_name = conn.config.get_db_name();
+pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
+    let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db_name);
     let functions = raw_query(_conn, query)?;
     Ok(functions)
 }
 
-pub async fn get_procedures(conn: &ConnectedConnection, pool: &Pool) -> Result<Value> {
-    let db_name = conn.config.get_db_name();
+pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
+    let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", db_name);
     let procedures = raw_query(_conn, query)?;
@@ -101,11 +101,11 @@ pub async fn get_procedures(conn: &ConnectedConnection, pool: &Pool) -> Result<V
 }
 
 pub async fn get_indices(
-    conn: &ConnectedConnection,
+    conn: &InitiatedConnection,
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Value> {
-    let db_name = conn.config.get_db_name();
+    let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM
@@ -121,12 +121,12 @@ pub async fn get_indices(
 }
 
 pub async fn get_triggers(
-    conn: &ConnectedConnection,
+    conn: &InitiatedConnection,
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Value> {
     let mut _conn = pool.get_conn()?;
-    let db_name = conn.config.get_db_name();
+    let db_name = conn.get_schema();
     let query = format!(
         "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
         db_name

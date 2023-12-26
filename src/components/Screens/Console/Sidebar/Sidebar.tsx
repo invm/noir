@@ -6,8 +6,8 @@ import { createStore } from 'solid-js/store';
 import { t } from 'utils/i18n';
 import { Refresh, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
-import { ConnectionModeType, ResultSet, Row, Table } from 'interfaces';
-import { firstKey, get } from 'utils/utils';
+import { ResultSet, Row, Table } from 'interfaces';
+import { get } from 'utils/utils';
 import { newContentTab } from 'services/Connections';
 
 export const Sidebar = () => {
@@ -66,11 +66,8 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const type = firstKey(config.scheme[config.dialect]!) as ConnectionModeType;
-      const dbName = firstKey(config.scheme[config.dialect]![type]);
-      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, config.dialect, dbName);
-      setTables(getSchemaTables(dbName));
-      setTables(getSchemaTables(connectionStore.schema));
+      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, config.dialect);
+      setTables(getSchemaTables());
       updateConnectionTab('schema', schema);
       updateConnectionTab('routines', routines);
       updateConnectionTab('triggers', triggers);
@@ -138,8 +135,7 @@ export const Sidebar = () => {
       <div class="pb-2 rounded-md flex justify-center items-center">
         <select
           id="schema"
-          // todo: change to selectedSchema
-          value={connectionStore.schema}
+          value={connectionStore.tabs[connectionStore.idx]?.selectSchema}
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full">
           <For each={(getConnection() && Object.keys(getConnection()?.schema)) ?? []}>

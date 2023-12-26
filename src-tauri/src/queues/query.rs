@@ -1,4 +1,4 @@
-use crate::database::connections::ConnectedConnection;
+use crate::database::connections::InitiatedConnection;
 use crate::utils::fs::write_query;
 use anyhow::Result;
 use serde::Deserialize;
@@ -34,7 +34,7 @@ impl Default for QueryTaskStatus {
 
 #[derive(Debug, Clone)]
 pub struct QueryTask {
-    pub conn: ConnectedConnection,
+    pub conn: InitiatedConnection,
     pub query: String,
     pub id: String,
     pub status: QueryTaskStatus,
@@ -44,7 +44,7 @@ pub struct QueryTask {
 
 impl QueryTask {
     pub fn new(
-        conn: ConnectedConnection,
+        conn: InitiatedConnection,
         query: String,
         query_id: String,
         tab_idx: usize,
@@ -90,7 +90,7 @@ pub async fn async_process_model(
     while let Some(input) = input_rx.recv().await {
         let task = input;
         // so what happened is that this ran too fast and the UI didn't have time to update, a single millisecond is enough
-        tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+        tokio::time::sleep(tokio::time::Duration::from_nanos(1)).await;
         match task.conn.execute_query(&task.query).await {
             Ok(result_set) => match write_query(&task.id, &result_set) {
                 Ok(path) => {

@@ -10,7 +10,7 @@ import {
   TableEntity,
 } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { columnsToSchema, debounce, firstKey } from 'utils/utils';
+import { columnsToSchema, debounce } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { MessageService } from './Messages';
 import { createSignal } from 'solid-js';
@@ -198,7 +198,7 @@ export const ConnectionsService = () => {
       produce((s) => {
         s.tabs.push(tab);
         s.idx = s.tabs.length;
-        s.schema = firstKey(tab.schema)!;
+        s.schema = tab.schema;
       })
     );
     updateStore();
@@ -330,7 +330,7 @@ export const ConnectionsService = () => {
       setQueryIdx((s) => (s + 1) % getContentData('Query').result_sets.length);
   };
 
-  const fetchSchemaEntities = async (connId: string, dialect: DialectType, _dbName: string) => {
+  const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
     const [{ result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
       invoke<RawQueryResult>('get_columns', { connId }),
       invoke<RawQueryResult>('get_procedures', { connId }),

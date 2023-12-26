@@ -1,18 +1,11 @@
-import { ConnectionConfig, ConnectionModeType, DialectType } from "interfaces";
-import { firstKey } from "utils/utils";
-import { ColorCircle } from "components/UI";
-import { ActionsMenu } from "./ActionsMenu";
+import { ConnectionConfig, Mode } from 'interfaces';
+import { ColorCircle } from 'components/UI';
+import { ActionsMenu } from './ActionsMenu';
 
 export const ConnectionItem = (props: { connection: ConnectionConfig }) => {
-  const scheme = firstKey(props.connection.scheme) as DialectType;
-  const mode = firstKey(props.connection.scheme[scheme]!) as ConnectionModeType;
-  const creds = props.connection.scheme[scheme]![mode];
-  const connectionString =
-    mode === "Host"
-      ? creds.host
-      : mode === "File"
-        ? creds.file
-        : creds.sockets_path;
+  const mode = props.connection.mode;
+  const creds = props.connection.credentials;
+  const connectionString = mode === Mode.Host ? creds.host : mode === Mode.File ? creds.file : creds.socket;
 
   return (
     <div class="hover:bg-base-200 rounded-md flex items-center justify-between px-2 py-1">
