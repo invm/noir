@@ -1,16 +1,20 @@
 /* @refresh reload */
-import { render } from "solid-js/web";
-import "solid-contextmenu/dist/style.css";
+import { render } from 'solid-js/web';
+import 'solid-contextmenu/dist/style.css';
+import { ErrorBoundary } from 'solid-js';
 
-import "./index.css";
-import App from "./App";
-import { StoreProvider } from "services/Context";
+import './index.css';
+import App from './App';
+import { StoreProvider } from 'services/Context';
+import { Error } from 'components/Error';
 
 render(
   () => (
-    <StoreProvider>
-      <App />
-    </StoreProvider>
+    <ErrorBoundary fallback={(err) => <Error err={err} />}>
+      <StoreProvider>
+        <App />
+      </StoreProvider>
+    </ErrorBoundary>
   ),
-  document.getElementById("root") as HTMLElement
+  document.getElementById('root') as HTMLElement
 );
