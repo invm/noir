@@ -75,6 +75,7 @@ export const ResultsTable = () => {
       updateRows();
     })
   );
+
   createEffect(updateRows);
 
   createEffect(async () => {

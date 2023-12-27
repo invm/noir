@@ -59,9 +59,6 @@ export const Pagination = (props: PaginationProps) => {
           <Show when={resultSet?.status === 'Completed' && resultSet.info}>
             <Alert color="info">{resultSet?.status === 'Completed' && resultSet?.info}</Alert>
           </Show>
-          <Show when={resultSet?.status === 'Error'}>
-            <Alert color="error">{resultSet?.status === 'Error' && resultSet?.error}</Alert>
-          </Show>
         </div>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>

@@ -1,17 +1,18 @@
-import { DialectType, Row, SORT_ORDER, Table, TableStrucureEntityType } from 'interfaces';
+import { Dialect, DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
 
-// TODO: address those anys
 export const log = (msg: unknown) => {
   console.log(`[${new Date().toISOString()}]`, msg);
 };
 
-export const get = (obj: Record<string, unknown>, path: string) => {
+export const get = (obj: Record<string, unknown>, path: string, defaultValue = undefined) => {
   const travel = (regexp: RegExp) =>
     String.prototype.split // eslint-disable-line
       .call(path, regexp)
       .filter(Boolean)
+      // @ts-ignore
       .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
   const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+  // @ts-ignore
   return result === undefined || result === obj ? defaultValue : result;
 };
 
@@ -56,19 +57,27 @@ export const sortTableStructure = (
 };
 
 // TODO: handle all dialects
-export const columnsToSchema = (columns: Row[], _dialect: DialectType) => {
-  const schema = columns.reduce((acc, col) => {
-    return {
-      ...acc,
-      [col.TABLE_SCHEMA]: {
-        ...acc[col.TABLE_SCHEMA],
-        [col.TABLE_NAME]: {
-          ...acc[col.TABLE_SCHEMA]?.[col.TABLE_NAME],
-          [col.COLUMN_NAME]: col,
+export const columnsToTable = (allColumns: Row[], dialect: DialectType) => {
+  if (dialect === Dialect.Mysql) {
+    const schema = allColumns.reduce((acc, col) => {
+      return {
+        ...acc,
+        [String(col.TABLE_NAME)]: {
+          // @ts-ignore
+          ...acc[String(col.TABLE_NAME)],
+          [String(col.COLUMN_NAME)]: col,
         },
-      },
-    };
-  }, {});
-  // todo: is this correct
-  return schema as Record<string, Table>;
+      };
+    }, {});
+
+    return Object.keys(schema).map((name) => {
+      const columns = Object.values(schema[name]).map((col) => {
+        return {
+          name: String(col.COLUMN_NAME),
+          props: col,
+        };
+      });
+      return { name, columns };
+    });
+  }
 };

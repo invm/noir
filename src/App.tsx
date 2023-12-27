@@ -15,10 +15,10 @@ function App() {
     connections: { restoreConnectionStore, getConnection, updateResultSet, contentStore, loading },
     app: { restoreAppStore },
     backend: { getQueryMetadata },
+    messages: { notify },
   } = useAppSelector();
 
   const compareAndAssign = async (event: QueryTaskResult) => {
-    // TODO: this does not take into account the connection, when we have multiple connections
     const { status, query_idx, tab_idx, conn_id } = event;
     if (getConnection().id === conn_id && contentStore.idx === tab_idx) {
       if (status === 'Completed') {
@@ -27,6 +27,7 @@ function App() {
         updateResultSet(tab_idx, query_idx, metadata);
       } else if (status === 'Error') {
         updateResultSet(tab_idx, query_idx, { status, error: event.error });
+        notify(event.error, 'error');
       }
     }
   };

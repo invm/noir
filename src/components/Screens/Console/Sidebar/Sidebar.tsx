@@ -1,12 +1,11 @@
 import { TableColumnsCollapse } from './TableColumnsCollapse';
 import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
-import { createEffect, createSignal, For, Match, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createSignal, For, Match, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
 import { Refresh, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
-import { ResultSet, Row, Table } from 'interfaces';
+import { ResultSet } from 'interfaces';
 import { get } from 'utils/utils';
 import { newContentTab } from 'services/Connections';
 
@@ -18,18 +17,12 @@ export const Sidebar = () => {
       getConnection,
       updateConnectionTab,
       connectionStore,
-      setConnectionStore,
-      getSchemaTables,
       addContentTab,
-      getSchemaRoutines,
-      getSchemaTriggers,
       getSchemaEntity,
       fetchSchemaEntities,
+      updateSchemas,
     },
   } = useAppSelector();
-  const [tables, setTables] = createStore<Table[]>([]);
-  const [routines, setRoutines] = createStore<Row[]>([]);
-  const [triggers, setTriggers] = createStore<Row[]>([]);
   const [loading, setLoading] = createSignal(false);
 
   const menu_id = 'sidebar-routine-menu';
@@ -39,26 +32,16 @@ export const Sidebar = () => {
     props: {},
   });
 
-  createEffect(() => {
-    const sch = getConnection().selectSchema;
-    const _schema = getSchemaEntity(sch, 'schema');
-    const _routines = getSchemaEntity(sch, 'routines');
-    const _triggers = getSchemaEntity(sch, 'triggers');
-    setRoutines(_routines);
-    setTriggers(_triggers);
-    console.log({ _schema, _routines, _triggers });
-    if (connectionStore.schema) {
-      setTables(getSchemaTables(connectionStore.schema));
-      setRoutines(getSchemaRoutines());
-      setTriggers(getSchemaTriggers());
-    }
-  });
-
-  const select = (schema: string) => {
-    setConnectionStore('schema', schema);
-    setTables(getSchemaTables(schema));
-    setRoutines(getSchemaRoutines());
-    setTriggers(getSchemaTriggers());
+  const select = async (schema: string) => {
+    updateConnectionTab('selectedSchema', schema);
+    const config = getConnection();
+    await invoke('set_schema', { connId: config.id, schema, dialect: config.connection.dialect });
+    const { triggers, routines, tables, databases, columns } = await fetchSchemaEntities(
+      config.id,
+      config.connection.dialect
+    );
+    updateConnectionTab('databases', databases);
+    updateSchemas(config.id, { triggers, routines, columns, tables });
   };
 
   const refreshEntities = async () => {
@@ -66,13 +49,9 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const { triggers, routines, schema } = await fetchSchemaEntities(config.id, config.dialect);
-      setTables(getSchemaTables());
-      updateConnectionTab('schema', schema);
-      updateConnectionTab('routines', routines);
-      updateConnectionTab('triggers', triggers);
-      setRoutines(routines);
-      setTriggers(triggers);
+      const { triggers, routines, tables, databases, columns } = await fetchSchemaEntities(config.id, config.dialect);
+      updateConnectionTab('databases', databases);
+      updateSchemas(config.id, { triggers, routines, columns, tables });
     } catch (error) {
       notify(String(error), 'info');
     } finally {
@@ -135,13 +114,13 @@ export const Sidebar = () => {
       <div class="pb-2 rounded-md flex justify-center items-center">
         <select
           id="schema"
-          value={connectionStore.tabs[connectionStore.idx]?.selectSchema}
+          value={getConnection().selectedSchema}
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full">
-          <For each={(getConnection() && Object.keys(getConnection()?.schema)) ?? []}>
-            {(_schema) => (
-              <option class="py-1" value={_schema}>
-                {_schema}
+          <For each={getConnection().databases}>
+            {(db) => (
+              <option class="py-1" value={db}>
+                {db}
               </option>
             )}
           </For>
@@ -173,7 +152,7 @@ export const Sidebar = () => {
       </div>
       <div class="overflow-y-auto h-full pb-10">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
-        <For each={tables}>
+        <For each={getSchemaEntity('tables')}>
           {(table) => (
             <div class="mb-1 px-2 min-w-full w-fit">
               <TableColumnsCollapse title={table.name}>
@@ -192,7 +171,7 @@ export const Sidebar = () => {
           )}
         </For>
         <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
-        <For each={routines}>
+        <For each={getSchemaEntity('routines')}>
           {(routine) => (
             <div class="px-2 min-w-full w-fit">
               <div class="" onContextMenu={(e) => show(e)}>
@@ -211,7 +190,7 @@ export const Sidebar = () => {
           )}
         </For>
         <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
-        <For each={triggers}>
+        <For each={getSchemaEntity('triggers')}>
           {(trigger) => (
             <div class="px-2 min-w-full w-fit">
               <div class="" onContextMenu={(e) => show(e)}>

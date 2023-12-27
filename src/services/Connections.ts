@@ -1,16 +1,7 @@
 import { createStore, produce } from 'solid-js/store';
-import {
-  Column,
-  ConnectionConfig,
-  DialectType,
-  RawQueryResult,
-  ResultSet,
-  Row,
-  Table,
-  TableEntity,
-} from '../interfaces';
+import { ConnectionConfig, DialectType, RawQueryResult, ResultSet, Row, Table, TableEntity } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { columnsToSchema, debounce } from 'utils/utils';
+import { columnsToTable, debounce } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { MessageService } from './Messages';
 import { createSignal } from 'solid-js';
@@ -91,20 +82,19 @@ export type ContentTab = {
     }
   );
 
+type Schema = {
+  columns: Row[];
+  routines: Row[];
+  triggers: Row[];
+  tables: Table[];
+};
+
 type ConnectionTab = {
   label: string;
   id: string;
-  selectSchema: string;
-  schemas: {
-    [key: string]: {
-      schema: Row[];
-      routines: Row[];
-      triggers: Row[];
-    };
-  };
-  schema: Record<string, Table>;
-  routines: Row[];
-  triggers: Row[];
+  selectedSchema: string;
+  schemas: { [key: string]: Schema };
+  databases: string[];
   connection: ConnectionConfig;
 };
 
@@ -130,7 +120,6 @@ const getSavedData = async <T extends keyof StoreSavedData>(key: T) => {
 type ConnectionStore = {
   tabs: ConnectionTab[];
   idx: number;
-  schema: string;
 };
 
 type ContentStore = {
@@ -143,7 +132,6 @@ export const ConnectionsService = () => {
   const [connectionStore, setConnectionStore] = createStore<ConnectionStore>({
     tabs: [],
     idx: 0,
-    schema: '',
   });
 
   const [contentStore, setContentStore] = createStore<ContentStore>({
@@ -198,7 +186,6 @@ export const ConnectionsService = () => {
       produce((s) => {
         s.tabs.push(tab);
         s.idx = s.tabs.length;
-        s.schema = tab.schema;
       })
     );
     updateStore();
@@ -222,8 +209,8 @@ export const ConnectionsService = () => {
     return connectionStore.tabs[connectionStore.idx - 1];
   };
 
-  const getSchema = (schema: string) => {
-    return (getConnection() && getConnection().schema[schema]) ?? {};
+  const getSchema = () => {
+    return getConnection().selectedSchema;
   };
 
   const getContent = () => contentStore.tabs[contentStore.idx];
@@ -273,6 +260,23 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
+  const updateSchemas = (conn_id: string, data: Schema) => {
+    const tab = getConnection();
+    const schema = tab.selectedSchema;
+    if (!tab) return;
+    setConnectionStore(
+      produce((s) => {
+        s.tabs = s.tabs.map((t) => {
+          if (conn_id === t.id) {
+            t.schemas[schema] = { ...t.schemas[schema], ...data };
+          }
+          return t;
+        });
+      })
+    );
+    updateStore();
+  };
+
   const updateContentTab = <T extends keyof ContentTab>(key: T, data: ContentTab[T], idx?: number) => {
     const tab = getContent();
     if (!tab) return;
@@ -293,31 +297,12 @@ export const ConnectionsService = () => {
     }));
   };
 
-  const getSchemaEntity = (schema: string, entity: 'schema' | 'routines' | 'triggers') => {
-    return getConnection().schemas[schema][entity];
-  };
-
-  // TODO: compress these 3 functions into single one that retrieves a specific entity
-  const getSchemaTables = (sch = connectionStore.schema): Table[] => {
-    const _tables = Object.entries(getSchema(sch)).reduce(
-      (acc: Table[], [name, columns]) => [
-        ...acc,
-        {
-          name,
-          columns: Object.entries(columns).reduce((cols: Column[], [name, props]) => [...cols, { name, props }], []),
-        },
-      ],
-      []
-    );
-    return _tables;
-  };
-
-  const getSchemaRoutines = (): Row[] => {
-    return getConnection().routines;
-  };
-
-  const getSchemaTriggers = (): Row[] => {
-    return getConnection().triggers;
+  const getSchemaEntity = <T extends keyof Schema>(entity: T): Schema[T] => {
+    const schema = getConnection().selectedSchema;
+    if (entity === 'tables') {
+      return getConnection().schemas[schema]?.['tables'] ?? [];
+    }
+    return getConnection().schemas[schema]?.[entity] ?? [];
   };
 
   const selectPrevQuery = () => {
@@ -331,14 +316,16 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    const [{ result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
+    const [{ result: dbs }, { result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
+      invoke<RawQueryResult>('get_databases', { connId }),
       invoke<RawQueryResult>('get_columns', { connId }),
       invoke<RawQueryResult>('get_procedures', { connId }),
       invoke<RawQueryResult>('get_triggers', { connId }),
     ]);
 
-    const schema = columnsToSchema(columns, dialect);
-    return { schema, routines, columns, triggers };
+    const tables = columnsToTable(columns, dialect) ?? [];
+    const databases = dbs.map((d) => String(d['Database']));
+    return { databases, tables, routines, columns, triggers };
   };
 
   return {
@@ -360,18 +347,16 @@ export const ConnectionsService = () => {
     updateContentTab,
     removeContentTab,
     updateConnectionTab,
-    getSchemaTables,
     selectPrevQuery,
     selectNextQuery,
     queryIdx,
     updateResultSet,
     getSchema,
     insertColumnName,
-    getSchemaRoutines,
-    getSchemaTriggers,
     getSchemaEntity,
     fetchSchemaEntities,
     loading,
     setLoading,
+    updateSchemas,
   };
 };

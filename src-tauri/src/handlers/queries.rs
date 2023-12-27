@@ -27,11 +27,15 @@ pub async fn enqueue_query(
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
-    let statements: Result<Vec<String>, Error> =
-        match Parser::parse_sql(dialect_from_str(conn.config.dialect.to_string()).unwrap().as_ref(), sql) {
-            Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
-            Err(e) => Err(Error::from(e)),
-        };
+    let statements: Result<Vec<String>, Error> = match Parser::parse_sql(
+        dialect_from_str(conn.config.dialect.to_string())
+            .unwrap()
+            .as_ref(),
+        sql,
+    ) {
+        Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
+        Err(e) => Err(Error::from(e)),
+    };
     match statements {
         Ok(statements) => {
             let statements: Vec<(String, String)> = statements
@@ -78,6 +82,13 @@ pub struct QueryResultParams {
     pub path: String,
     pub page: usize,
     pub page_size: usize,
+}
+
+#[command]
+pub async fn get_databases(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let result = connection.get_databases().await?;
+    Ok(result)
 }
 
 #[command]
@@ -158,4 +169,16 @@ pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandRe
     let connection = app_handle.acquire_connection(conn_id);
     let stats = connection.get_procedures().await?;
     Ok(stats)
+}
+
+#[command]
+pub async fn set_schema(
+    app_handle: AppHandle,
+    conn_id: String,
+    schema: String,
+) -> CommandResult<()> {
+    info!(?conn_id, ?schema, "set_schema");
+    let conn = app_handle.acquire_connection(conn_id);
+    let conn = conn.set_schema(schema.clone());
+    Ok(app_handle.update_connection(conn)?)
 }

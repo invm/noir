@@ -82,6 +82,8 @@ fn main() {
             queries::get_table_structure,
             queries::get_query_metadata,
             queries::query_results,
+            queries::get_databases,
+            queries::set_schema,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

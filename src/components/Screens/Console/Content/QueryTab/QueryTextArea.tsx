@@ -25,7 +25,7 @@ const SQLDialects = {
 
 export const QueryTextArea = () => {
   const {
-    connections: { updateContentTab, getConnection, getContentData, getSchemaTables, contentStore },
+    connections: { updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
     app: { vimModeOn, toggleVimModeOn },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -120,7 +120,7 @@ export const QueryTextArea = () => {
     setCode(data.query ?? '');
     setAutoLimit(data.auto_limit ?? true);
     setSchema(
-      getSchemaTables().reduce(
+      getSchemaEntity('tables').reduce(
         (acc, table) => ({
           ...acc,
           [table.name]: table.columns.map(({ name }) => name),
