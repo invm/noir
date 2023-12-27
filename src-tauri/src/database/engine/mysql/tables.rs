@@ -95,6 +95,7 @@ pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Va
 pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
     let db_name = conn.get_schema();
     let mut _conn = pool.get_conn()?;
+
     let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", db_name);
     let procedures = raw_query(_conn, query)?;
     Ok(procedures)
@@ -135,6 +136,13 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
+    let triggers = raw_query(_conn, query)?;
+    Ok(triggers)
+}
+
+pub async fn get_databases(pool: &Pool) -> Result<Value> {
+    let mut _conn = pool.get_conn()?;
+    let query = "SHOW DATABASES".to_string();
     let triggers = raw_query(_conn, query)?;
     Ok(triggers)
 }

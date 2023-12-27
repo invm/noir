@@ -172,6 +172,11 @@ impl InitiatedConnection {
         self.schema.clone()
     }
 
+    pub fn set_schema(mut self, schema: String) -> Self {
+        self.schema = schema;
+        self
+    }
+
     pub async fn get_table_structure(&self, table: String) -> Result<Value> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
@@ -233,6 +238,14 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_triggers(self, pool, None).await
             }
+            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Sqlite => todo!(),
+        }
+    }
+
+    pub async fn get_databases(&self) -> Result<Value> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_databases(pool).await,
             ConnectionPool::Postgresql => todo!(),
             ConnectionPool::Sqlite => todo!(),
         }
