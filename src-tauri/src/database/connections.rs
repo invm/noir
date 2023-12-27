@@ -105,7 +105,7 @@ impl ConnectionConfig {
     pub fn new(
         dialect: Dialect,
         mode: Mode,
-        credentials: HashMap<String, String>,
+        mut credentials: HashMap<String, String>,
         name: &str,
         color: &str,
     ) -> Result<Self> {
@@ -115,6 +115,26 @@ impl ConnectionConfig {
         if color.is_empty() {
             return Err(anyhow::anyhow!("Color cannot be empty"));
         }
+        let available_keys = vec![
+            "pool_min",
+            "pool_max",
+            "user",
+            "password",
+            "host",
+            "port",
+            "socket",
+            "db_name",
+            "prefer_socket",
+            "tcp_keepalive_time_ms",
+            "tcp_keepalive_probe_interval_secs",
+            "tcp_keepalive_probe_count",
+            "tcp_user_timeout_ms",
+            "compress",
+            "tcp_connect_timeout_ms",
+            "stmt_cache_size",
+            "secure_auth",
+        ];
+        let creds = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
         Ok(ConnectionConfig {
             id: Uuid::new_v4(),
             dialect,
@@ -125,7 +145,7 @@ impl ConnectionConfig {
         })
     }
 
-    pub async fn init(&self) -> Result<InitiatedConnection> {
+    pub async fn init(&mut self) -> Result<InitiatedConnection> {
         match &self.dialect {
             Dialect::Mysql => {
                 if self.mode == Mode::File {
@@ -134,7 +154,8 @@ impl ConnectionConfig {
                 let builder = OptsBuilder::new();
                 let builder = builder
                     .from_hash_map(&self.credentials)?
-                    .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)));
+                    .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
+                    .prefer_socket(self.mode == Mode::Socket);
                 let opts = Opts::from(builder);
                 let cloned = opts.clone();
                 match MysqlPool::new(opts.clone()) {
