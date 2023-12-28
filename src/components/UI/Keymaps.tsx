@@ -1,8 +1,7 @@
 import { For } from 'solid-js';
 
 const keymaps = [
-  // TODO:
-  // { action: 'Help', keys: ['F1'] },
+  { action: 'Help', keys: ['F1'] },
   { action: 'Execute query', keys: ['Ctrl', 'e'] },
   { action: 'Select tab', keys: ['Meta', 'number'] },
   { action: 'New tab', keys: ['Meta', 'w'] },

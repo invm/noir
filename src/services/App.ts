@@ -1,3 +1,4 @@
+import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';
 import { debounce } from 'utils/utils';
@@ -27,6 +28,8 @@ export const AppService = () => {
     vimModeOn: true,
   });
 
+  const [component, setComponent] = createSignal(0);
+
   const updateStore = debounce(async () => {
     await store.set(APP_KEY, JSON.stringify(appStore));
     await store.save();
@@ -51,5 +54,7 @@ export const AppService = () => {
     vimModeOn,
     toggleVimModeOn,
     restoreAppStore,
+    component,
+    setComponent,
   };
 };

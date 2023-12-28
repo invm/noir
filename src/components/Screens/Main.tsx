@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 import { CloseIcon, HomeIcon, QuestionMark, UserSettings } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
-import { createSignal, For, Match, Show, Switch } from 'solid-js';
+import { For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
@@ -12,10 +12,9 @@ import { Help } from './Help/Help';
 
 export const Main = () => {
   const {
+    app: { setComponent, component },
     connections: { removeConnectionTab, connectionStore, setConnectionStore },
   } = useAppSelector();
-
-  const [component, setComponent] = createSignal(0);
 
   const handleCloseConnection = async (id: string) => {
     await invoke<string>('disconnect', { id });
