@@ -16,6 +16,7 @@ import { search } from '@codemirror/search';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
+import { moveCompletionSelection } from '@codemirror/autocomplete';
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
@@ -59,14 +60,6 @@ export const QueryTextArea = () => {
   createExtension(() => (vimModeOn() ? vim() : []));
   createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));
   const { setFocused, focused } = createEditorFocus(editorView);
-  // TODO: add option to scroll inside autocompletion list with c-l and c-k
-  // defaultKeymap.push({ keys: "gq", type: "operator", operator: "hardWrap" });
-  // Vim.defineOperator(
-  //   "hardWrap",
-  //   function(cm, operatorArgs, ranges, oldAnchor, newHead) {
-  //     console.log('hardwrap')
-  //   }
-  // );
 
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
@@ -130,6 +123,19 @@ export const QueryTextArea = () => {
     );
   });
 
+  createShortcut(['Control', 'k'], () => {
+    if (focused() && vimModeOn()) {
+      const fn = moveCompletionSelection(false);
+      fn(editorView());
+    }
+  });
+
+  createShortcut(['Control', 'j'], () => {
+    if (focused() && vimModeOn()) {
+      const fn = moveCompletionSelection(true);
+      fn(editorView());
+    }
+  });
   createShortcut(['Control', 'e'], onExecute);
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
@@ -186,7 +192,7 @@ export const QueryTextArea = () => {
         </div>
       </div>
       <div class="overflow-hidden w-full h-full">
-        <div ref={ref} class="w-full h-full" />
+        <div ref={ref} class="w-full h-full" id="asd" />
       </div>
     </div>
   );
