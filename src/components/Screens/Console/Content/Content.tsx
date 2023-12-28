@@ -4,26 +4,11 @@ import { AddIcon, CloseIcon } from 'components/UI/Icons';
 import { QueryTab } from './QueryTab/QueryTab';
 import { TableStructureTab } from './TableStructure/TableStructureTab';
 import { ContentTab } from 'services/Connections';
-import { createShortcut } from '@solid-primitives/keyboard';
 
 export const Content = () => {
   const {
     connections: { contentStore, setContentIdx, addContentTab, removeContentTab },
   } = useAppSelector();
-
-  createShortcut(['Meta', 'w'], () => {
-    removeContentTab(contentStore.idx);
-  });
-
-  createShortcut(['Meta', 't'], () => {
-    addContentTab();
-  });
-
-  for (let i = 1; i <= 9; i++) {
-    createShortcut(['Meta', String(i)], () => {
-      setContentIdx(i - 1);
-    });
-  }
 
   return (
     <div class="flex flex-col h-full">
