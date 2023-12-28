@@ -48,7 +48,7 @@
         "previous_page": "Previous page"
       },
       "zero_results": "0 rows retuned",
-      "result_set": "Result set: ",
+      "result_set": "Result set ",
       "out_of": " out of "
     },
     "sidebar": {
@@ -66,8 +66,11 @@
       "show_process_list": "Show process list",
       "process_list": "Process list"
     },
-    "settings":{
+    "settings": {
       "settings": "Settings"
+    },
+    "help": {
+      "help": "Help"
     },
     "theme_switch": {
       "theme": "Theme"

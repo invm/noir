@@ -12,4 +12,5 @@ export * from "./QuestionMark";
 export * from "./Refresh";
 export * from "./Terminal";
 export * from "./ThreeDots";
+export * from "./UserSettings";
 export * from "./Vim";

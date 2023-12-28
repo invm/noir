@@ -19,6 +19,7 @@ export const MessageType = {
 export const ContentTab = {
   Query: 'Query',
   TableStructure: 'TableStructure',
+  Data: 'Data',
 } as const;
 
 type ContentComponentKeys = keyof typeof ContentTab;
@@ -26,6 +27,7 @@ type ContentComponentKeys = keyof typeof ContentTab;
 type ContentTabData = {
   [ContentTab.Query]: QueryContentTabData;
   [ContentTab.TableStructure]: TableStructureContentTabData;
+  [ContentTab.Data]: DataContentTabData;
 };
 
 export const newContentTab = <T extends ContentComponentKeys>(label: string, key: T, data?: ContentTabData[T]) => {
@@ -34,6 +36,12 @@ export const newContentTab = <T extends ContentComponentKeys>(label: string, key
       return {
         label,
         data: data ?? { query: '', result_sets: [] },
+        key,
+      };
+    case ContentTab.Data:
+      return {
+        label,
+        data: data ?? { result_sets: [] },
         key,
       };
     case ContentTab.TableStructure:
@@ -68,7 +76,11 @@ export type TableStructureContentTabData = {
   [TableEntity.constraints]: Row[];
 };
 
-export type ContentTab = {
+export type DataContentTabData = {
+  result_sets: ResultSet[];
+};
+
+export type ContentTabType = {
   label: string;
   error?: string;
 } & (
@@ -79,6 +91,10 @@ export type ContentTab = {
     | {
       key: typeof ContentTab.TableStructure;
       data: Partial<TableStructureContentTabData>;
+    }
+    | {
+      key: typeof ContentTab.Data;
+      data: Partial<DataContentTabData>;
     }
   );
 
@@ -123,7 +139,7 @@ type ConnectionStore = {
 };
 
 type ContentStore = {
-  tabs: ContentTab[];
+  tabs: ContentTabType[];
   idx: number;
 };
 
@@ -219,7 +235,7 @@ export const ConnectionsService = () => {
     return contentStore.tabs[contentStore.idx].data as ContentTabData[T];
   };
 
-  const addContentTab = (tab?: ContentTab) => {
+  const addContentTab = (tab?: ContentTabType) => {
     setContentStore(
       produce((s) => {
         s.tabs.push(tab ?? newContentTab('Query', ContentTab.Query));
@@ -277,7 +293,7 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const updateContentTab = <T extends keyof ContentTab>(key: T, data: ContentTab[T], idx?: number) => {
+  const updateContentTab = <T extends keyof ContentTabType>(key: T, data: ContentTabType[T], idx?: number) => {
     const tab = getContent();
     if (!tab) return;
     setContentStore('tabs', idx ?? contentStore.idx, key, data);

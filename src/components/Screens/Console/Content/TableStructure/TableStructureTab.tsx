@@ -17,7 +17,7 @@ export const TableStructureTab = () => {
   );
 
   return (
-    <div class="bg-base-100 rounded-tl-md p-2 h-full">
+    <div class="bg-base-100 rounded-tl-md p-2 h-full pb-[100px] overflow-y-scroll">
       <div>
         <div class="flex justify-center">
           <div class="tabs tabs-boxed gap-3">

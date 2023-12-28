@@ -4,10 +4,11 @@ import { AddIcon, CloseIcon } from 'components/UI/Icons';
 import { QueryTab } from './QueryTab/QueryTab';
 import { TableStructureTab } from './TableStructure/TableStructureTab';
 import { ContentTab } from 'services/Connections';
+import { DataTab } from './DataTab/DataTab';
 
 export const Content = () => {
   const {
-    connections: { contentStore, setContentIdx, addContentTab, removeContentTab },
+    connections: { contentStore, setContentIdx, addContentTab, removeContentTab, getContent },
   } = useAppSelector();
 
   return (
@@ -33,21 +34,18 @@ export const Content = () => {
           </button>
         </div>
       </div>
-      <div class="flex-1">
-        <For each={contentStore.tabs}>
-          {(tab, idx) => (
-            <Show when={contentStore.idx === idx()}>
-              <Switch>
-                <Match when={tab.key === ContentTab.Query}>
-                  <QueryTab />
-                </Match>
-                <Match when={tab.key === ContentTab.TableStructure}>
-                  <TableStructureTab />
-                </Match>
-              </Switch>
-            </Show>
-          )}
-        </For>
+      <div class="h-full w-full">
+        <Switch>
+          <Match when={getContent().key === ContentTab.Query}>
+            <QueryTab />
+          </Match>
+          <Match when={getContent().key === ContentTab.TableStructure}>
+            <TableStructureTab />
+          </Match>
+          <Match when={getContent().key === ContentTab.Data}>
+            <DataTab />
+          </Match>
+        </Switch>
       </div>
     </div>
   );

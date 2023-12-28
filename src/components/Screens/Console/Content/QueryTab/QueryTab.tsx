@@ -1,15 +1,15 @@
-import { ResultsTable } from "./ResultesTable";
-import { createEffect, onCleanup } from "solid-js";
-import Split from "split.js";
-import { QueryTextArea } from "./QueryTextArea";
+import { ResultsTable } from './ResultesTable';
+import { createEffect, onCleanup } from 'solid-js';
+import Split from 'split.js';
+import { QueryTextArea } from './QueryTextArea';
 
 export const QueryTab = () => {
   createEffect(() => {
-    const q = Split(["#query", "#results"], {
+    const q = Split(['#query', '#results'], {
       sizes: [30, 70],
       minSize: [200, 400],
       maxSize: [500, Infinity],
-      direction: "vertical",
+      direction: 'vertical',
       gutterSize: 4,
     });
 
