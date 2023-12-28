@@ -143,7 +143,6 @@ export const ResultsTable = () => {
       //   navRight: ["ctrl + shift + l", 39],
       // },
     });
-    console.log('render');
   });
 
   const onNextPage = async () => {

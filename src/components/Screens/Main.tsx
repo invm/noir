@@ -1,20 +1,21 @@
 import { Alerts } from 'components/UI';
 import { invoke } from '@tauri-apps/api';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
-import { CloseIcon, HomeIcon, QuestionMark } from 'components/UI/Icons';
+import { CloseIcon, HomeIcon, QuestionMark, UserSettings } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { createSignal, For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
+import { Help } from './Help/Help';
 
 export const Main = () => {
   const {
     connections: { removeConnectionTab, connectionStore, setConnectionStore },
   } = useAppSelector();
 
-  const [showSettings, setShowSettings] = createSignal(false);
+  const [component, setComponent] = createSignal(0);
 
   const handleCloseConnection = async (id: string) => {
     await invoke<string>('disconnect', { id });
@@ -27,7 +28,7 @@ export const Main = () => {
         <div class="tabs tabs-boxed gap-2">
           <button
             onClick={() => {
-              setShowSettings(false);
+              setComponent(0);
               setConnectionStore('idx', 0);
             }}
             class="tab tab-md"
@@ -42,7 +43,7 @@ export const Main = () => {
               <div class="flex items-center">
                 <button
                   onClick={() => {
-                    setShowSettings(false);
+                    setComponent(0);
                     setConnectionStore('idx', idx() + 1);
                   }}
                   class="tab tab-md pt-1"
@@ -63,8 +64,13 @@ export const Main = () => {
         </div>
         <div class="flex items-center">
           <ThemeSwitch />
-          <div class="tooltip tooltip-primary tooltip-left px-3" data-tip={t('settings.settings')}>
-            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setShowSettings((s) => !s)}>
+          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
+            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
+              <UserSettings />
+            </button>
+          </div>
+          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('help.help')}>
+            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 2 ? 0 : 2))}>
               <QuestionMark />
             </button>
           </div>
@@ -72,10 +78,10 @@ export const Main = () => {
       </div>
       <div class="flex-1 overflow-hidden flex">
         <Switch>
-          <Match when={showSettings()}>
+          <Match when={component() === 1}>
             <Settings />
           </Match>
-          <Match when={!showSettings()}>
+          <Match when={!component()}>
             <Switch>
               <Match when={connectionStore.idx === 0}>
                 <Home />
@@ -84,6 +90,9 @@ export const Main = () => {
                 <Console />
               </Match>
             </Switch>
+          </Match>
+          <Match when={component() === 2}>
+            <Help />
           </Match>
         </Switch>
       </div>

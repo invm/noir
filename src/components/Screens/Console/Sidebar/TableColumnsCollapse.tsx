@@ -38,12 +38,8 @@ export const TableColumnsCollapse = (props: { title: string; children: JSXElemen
     try {
       const activeConnection = getConnection();
       const query = 'SELECT * from ' + table;
-      const data = {
-        query,
-        cursor: 0,
-        result_sets: [],
-      };
-      addContentTab(newContentTab(table, 'Query', data));
+      const data = { result_sets: [] };
+      addContentTab(newContentTab(table, 'Data', data));
       const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
         connId: activeConnection.id,
         sql: query,

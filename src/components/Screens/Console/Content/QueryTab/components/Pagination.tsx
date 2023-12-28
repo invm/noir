@@ -36,7 +36,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="container flex justify-between items-top p-1 my-1 gap-2 bg-base-200">
+    <div class="container flex justify-between items-top p-1 gap-2 bg-base-200">
       <div class="flex gap-2">
         <div class="join">
           <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.previous_result_set')}>
@@ -44,9 +44,9 @@ export const Pagination = (props: PaginationProps) => {
               <ChevronLeft />
             </button>
           </div>
-          <button class="join-item btn btn-sm btn-disabled !text-info">
+          <button class="join-item !text-info text-md text-upper">
             <span class="mt-1">
-              {t('console.result_set')} {queryIdx() + 1}
+              {t('console.result_set')} #{queryIdx() + 1}
             </span>
           </button>
           <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.next_result_set')}>

@@ -16,7 +16,6 @@ export const Sidebar = () => {
       insertColumnName,
       getConnection,
       updateConnectionTab,
-      connectionStore,
       addContentTab,
       getSchemaEntity,
       fetchSchemaEntities,
@@ -96,7 +95,8 @@ export const Sidebar = () => {
 
   const showTrigger = async (trigger: string) => {
     try {
-      const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${connectionStore.schema}" and TRIGGER_NAME = "${trigger}"`;
+      const schema = getConnection().selectedSchema;
+      const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${schema}" and TRIGGER_NAME = "${trigger}"`;
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
