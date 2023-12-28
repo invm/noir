@@ -38,7 +38,6 @@ pub fn upgrade_database_if_needed(
 }
 
 pub fn get_db_path() -> String {
-    // TODO: check what tauri provides for this
     let app_path = get_app_path();
     format!("{}/.app.db", app_path)
 }

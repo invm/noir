@@ -41,12 +41,6 @@ pub fn create_app_dir(dir: &String) -> Result<()> {
     Ok(fs::create_dir_all(dir)?)
 }
 
-pub fn create_app_config(app_path: &String) -> Result<()> {
-    let config_path = format!("{}/config.yaml", app_path);
-    let config = r#""#;
-    Ok(fs::write(config_path, config)?)
-}
-
 pub fn paginate_file(path: &str, page: usize, limit: usize) -> Vec<String> {
     let file = fs::read_to_string(path).expect("Error reading file");
     let lines = file
