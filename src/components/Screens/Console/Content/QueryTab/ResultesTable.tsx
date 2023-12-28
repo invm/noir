@@ -8,6 +8,7 @@ import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror'
 import { Pagination } from './components/Pagination';
 import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
+import Keymaps from 'components/UI/Keymaps';
 
 type TableColumn = { title: string; field: string; resizeable: boolean };
 
@@ -78,7 +79,7 @@ export const ResultsTable = () => {
 
   createEffect(updateRows);
 
-  createEffect(async () => {
+  createEffect(() => {
     let columns: TableColumn[] = [];
     if (rows().length) {
       columns = Object.keys(rows()[0]).map((k) => ({
@@ -91,6 +92,8 @@ export const ResultsTable = () => {
 
     new Tabulator('#results-table', {
       data: rows(),
+      placeholder: <Keymaps /> as HTMLElement,
+      // autoColumns: true,
       columns,
       columnDefaults: {
         title: '',
@@ -99,8 +102,10 @@ export const ResultsTable = () => {
       layout: 'fitDataStretch',
       autoResize: true,
       clipboard: true,
+      renderHorizontal: 'virtual',
       pagination: false,
       maxHeight: '100%',
+      minHeight: '100%',
       height: '100%',
       paginationCounter: 'rows',
       debugInvalidOptions: false,
@@ -138,6 +143,7 @@ export const ResultsTable = () => {
       //   navRight: ["ctrl + shift + l", 39],
       // },
     });
+    console.log('render');
   });
 
   const onNextPage = async () => {
