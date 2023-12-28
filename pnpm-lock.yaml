@@ -10,6 +10,9 @@ patchedDependencies:
     path: patches/solid-contextmenu@0.0.2.patch
 
 dependencies:
+  '@codemirror/autocomplete':
+    specifier: ^6.11.1
+    version: 6.11.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3)
   '@codemirror/commands':
     specifier: ^6.2.5
     version: 6.2.5
@@ -681,8 +684,8 @@ packages:
       prettier: 2.8.8
     dev: false
 
-  /@codemirror/autocomplete@6.9.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3):
-    resolution: {integrity: sha512-yma56tqD7khIZK4gy4X5lX3/k5ArMiCGat7HEWRF/8L2kqOjVdp2qKZqpcJjwTIjSj6fqKAHqi7IjtH3QFE+Bw==}
+  /@codemirror/autocomplete@6.11.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3):
+    resolution: {integrity: sha512-L5UInv8Ffd6BPw0P3EF7JLYAMeEbclY7+6Q11REt8vhih8RuLreKtPy/xk8wPxs4EQgYqzI7cdgpiYwWlbS/ow==}
     peerDependencies:
       '@codemirror/language': ^6.0.0
       '@codemirror/state': ^6.0.0
@@ -714,7 +717,7 @@ packages:
   /@codemirror/lang-sql@6.5.2(@codemirror/view@6.14.1)(@lezer/common@1.0.3):
     resolution: {integrity: sha512-VYiCbApDDRUVx3k0jtZ+b5h2hMkMKZpPR9tx+VgVA3Euuf2MVjVsjx/S2+4AlJjKjS5J6z9+4bEvtponK96e4A==}
     dependencies:
-      '@codemirror/autocomplete': 6.9.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3)
+      '@codemirror/autocomplete': 6.11.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3)
       '@codemirror/language': 6.8.0
       '@codemirror/state': 6.2.1
       '@lezer/highlight': 1.1.6
@@ -1839,7 +1842,7 @@ packages:
   /codemirror@6.0.1(@lezer/common@1.0.3):
     resolution: {integrity: sha512-J8j+nZ+CdWmIeFIGXEFbFPtpiYacFMDR8GlHK3IyHQJMCaVRfGx9NT+Hxivv1ckLWPvNdZqndbr/7lVhrf/Svg==}
     dependencies:
-      '@codemirror/autocomplete': 6.9.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3)
+      '@codemirror/autocomplete': 6.11.1(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(@lezer/common@1.0.3)
       '@codemirror/commands': 6.2.5
       '@codemirror/language': 6.8.0
       '@codemirror/lint': 6.4.2
@@ -4437,7 +4440,7 @@ packages:
     dev: false
 
   github.com/tauri-apps/tauri-plugin-store/7d2632996f290b0f18cc5f8a2b2791046400690e:
-    resolution: {commit: 7d2632996f290b0f18cc5f8a2b2791046400690e, repo: git+ssh://git@github.com/tauri-apps/tauri-plugin-store.git, type: git}
+    resolution: {tarball: https://codeload.github.com/tauri-apps/tauri-plugin-store/tar.gz/7d2632996f290b0f18cc5f8a2b2791046400690e}
     name: tauri-plugin-store-api
     version: 0.0.0
     dependencies:
