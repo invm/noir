@@ -45,7 +45,7 @@ pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionCon
 #[command]
 pub async fn init_connection(
     mut app_handle: AppHandle,
-    config: ConnectionConfig,
+    mut config: ConnectionConfig,
 ) -> CommandResult<()> {
     info!(?config, "init_connection");
     let conn = config.init().await?;

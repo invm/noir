@@ -134,7 +134,7 @@ impl ConnectionConfig {
             "stmt_cache_size",
             "secure_auth",
         ];
-        let creds = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+        let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
         Ok(ConnectionConfig {
             id: Uuid::new_v4(),
             dialect,
