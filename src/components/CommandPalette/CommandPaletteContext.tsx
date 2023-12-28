@@ -10,6 +10,7 @@ export interface ActionsContext {
 
 export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   const {
+    app: { setComponent },
     connections: { addContentTab, removeContentTab, setContentIdx, contentStore },
   } = useAppSelector();
 
@@ -17,6 +18,10 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
 
   createShortcut(['Meta', 'w'], () => {
     removeContentTab(contentStore.idx);
+  });
+
+  createShortcut(['F1'], () => {
+    setComponent(s => (s === 2 ? 0 : 2));
   });
 
   createShortcut(['Meta', 't'], () => {

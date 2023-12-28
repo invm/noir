@@ -15,7 +15,7 @@ pub fn get_tmp_dir() -> Result<String> {
     if let Err(res) = res {
         error!("Error: {:?}", res);
     }
-    return Ok(temp_dir.to_str().unwrap().to_string());
+    return Ok(temp_dir.to_str().unwrap_or("").to_string());
 }
 
 pub fn get_app_path() -> String {
