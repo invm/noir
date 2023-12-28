@@ -1,19 +1,22 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use query_noir::{
-    handlers::{connections, queries},
-    queues::query::{async_process_model, rs2js},
-    state::{self, AsyncState},
-    utils::init, database::queries::initialize_database,
-};
-
+use chrono;
+use log::error;
+use state::AppState;
+use std::{fs, panic};
+use tauri::{Manager, State};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
 use tracing_subscriber;
 
-use state::AppState;
-use tauri::{Manager, State};
+use query_noir::{
+    database::queries::initialize_database,
+    handlers::{connections, queries},
+    queues::query::{async_process_model, rs2js},
+    state::{self, AsyncState},
+    utils::{fs::get_app_path, init},
+};
 
 #[derive(Clone, serde::Serialize)]
 struct Payload {
@@ -23,6 +26,17 @@ struct Payload {
 
 fn main() {
     tracing_subscriber::fmt::init();
+
+    panic::set_hook(Box::new(|info| {
+        error!("Panicked: {:?}", info);
+        let path = get_app_path();
+        let ts = chrono::offset::Utc::now();
+        fs::write(
+            format!("{}/error.log", path),
+            format!("{} - {:?}", ts, info),
+        )
+        .unwrap();
+    }));
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
     let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);

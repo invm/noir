@@ -18,6 +18,14 @@ function App() {
     messages: { notify },
   } = useAppSelector();
 
+  addEventListener('unhandledrejection', (e) => {
+    console.log({ message: 'Unhandled rejection', info: (e.reason?.message || e.reason || e).toString() });
+  });
+
+  window.addEventListener('error', (e) => {
+    console.log({ message: 'Unhandled error', error: e.error });
+  });
+
   const compareAndAssign = async (event: QueryTaskResult) => {
     const { status, query_idx, tab_idx, conn_id } = event;
     if (getConnection().id === conn_id && contentStore.idx === tab_idx) {
