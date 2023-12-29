@@ -9,7 +9,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: world_x
+      MYSQL_DATABASE: world_x # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
     ports:
       - 3306:3306
     volumes:
@@ -20,7 +20,7 @@ services:
   #   environment:
   #     POSTGRES_USER: postgres
   #     POSTGRES_PASSWORD: example
-  #     POSTGRES_DB: noir
+  #     POSTGRES_DB: sample # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
   #   volumes:
   #     - psql:/var/lib/postgresql/data
   #   ports:

@@ -26,7 +26,7 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
         connection: config,
       });
     } catch (error) {
-      notify(String(error));
+      notify(error);
     } finally {
       setLoading(false);
     }

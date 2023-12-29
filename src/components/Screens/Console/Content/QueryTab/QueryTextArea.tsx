@@ -28,6 +28,7 @@ export const QueryTextArea = () => {
   const {
     connections: { updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
     app: { vimModeOn, toggleVimModeOn },
+    messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
@@ -81,7 +82,6 @@ export const QueryTextArea = () => {
     if (loading() || !code()) return;
     setLoading(true);
     const selectedText = getSelection();
-    updateContentTab('error', undefined);
     const activeConnection = getConnection();
     try {
       const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
@@ -98,7 +98,7 @@ export const QueryTextArea = () => {
         })),
       });
     } catch (error) {
-      updateContentTab('error', String(error));
+      notify(error);
     } finally {
       setLoading(false);
     }
@@ -136,6 +136,7 @@ export const QueryTextArea = () => {
       fn(editorView());
     }
   });
+
   createShortcut(['Control', 'e'], onExecute);
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);

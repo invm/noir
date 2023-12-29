@@ -38,28 +38,30 @@ export const Pagination = (props: PaginationProps) => {
   return (
     <div class="container flex justify-between items-top p-1 gap-2 bg-base-200">
       <div class="flex gap-2">
-        <div class="join">
-          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.previous_result_set')}>
-            <button class="join-item btn btn-sm" onClick={selectPrevQuery}>
-              <ChevronLeft />
+        <Show when={getContentData('Query').result_sets.length > 1}>
+          <div class="join">
+            <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.previous_result_set')}>
+              <button class="join-item btn btn-sm" onClick={selectPrevQuery}>
+                <ChevronLeft />
+              </button>
+            </div>
+            <button class="join-item !text-info text-md text-upper">
+              <span class="mt-1">
+                {t('console.result_set')} #{queryIdx() + 1}
+              </span>
             </button>
+            <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.next_result_set')}>
+              <button class="join-item btn btn-sm" onClick={selectNextQuery}>
+                <ChevronRight />
+              </button>
+            </div>
           </div>
-          <button class="join-item !text-info text-md text-upper">
-            <span class="mt-1">
-              {t('console.result_set')} #{queryIdx() + 1}
-            </span>
-          </button>
-          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.next_result_set')}>
-            <button class="join-item btn btn-sm" onClick={selectNextQuery}>
-              <ChevronRight />
-            </button>
+          <div class="flex-1">
+            <Show when={resultSet?.status === 'Completed' && resultSet.info}>
+              <Alert color="info">{resultSet?.status === 'Completed' && resultSet?.info}</Alert>
+            </Show>
           </div>
-        </div>
-        <div class="flex-1">
-          <Show when={resultSet?.status === 'Completed' && resultSet.info}>
-            <Alert color="info">{resultSet?.status === 'Completed' && resultSet?.info}</Alert>
-          </Show>
-        </div>
+        </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="join flex items-center">

@@ -10,7 +10,7 @@ import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 import Keymaps from 'components/UI/Keymaps';
 
-type TableColumn = { title: string; field: string; resizeable: boolean };
+type TableColumn = { title: string; field: string; resizeable?: boolean };
 
 const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
   if (typeof obj === 'object') {
@@ -85,24 +85,27 @@ export const ResultsTable = () => {
       columns = Object.keys(rows()[0]).map((k) => ({
         title: k,
         field: k,
-        resizeable: true,
+        // resizeable: true,
         // editor: "input" as const, // this will make the whole table navigable
       }));
     }
+    if (columns.length === 0) return;
 
     new Tabulator('#results-table', {
+      spreadSheet: true,
       data: rows(),
-      placeholder: <Keymaps /> as HTMLElement,
+      placeholder: (<Keymaps />) as HTMLElement,
       // autoColumns: true,
       columns,
       columnDefaults: {
         title: '',
-        width: 350,
+        width: 300,
       },
-      layout: 'fitDataStretch',
-      autoResize: true,
+      // layout: 'fitDataStretch',
+      autoResize: false,
       clipboard: true,
       renderHorizontal: 'virtual',
+      renderVertical: 'virtual',
       pagination: false,
       maxHeight: '100%',
       minHeight: '100%',

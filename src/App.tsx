@@ -8,7 +8,6 @@ import { onMount } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
-import { log } from 'utils/utils';
 
 function App() {
   const {
@@ -42,7 +41,7 @@ function App() {
 
   onMount(async () => {
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
-      log(event);
+      console.log({ event });
       await compareAndAssign(event.payload);
     });
   });

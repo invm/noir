@@ -1,9 +1,5 @@
 import { Dialect, DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
 
-export const log = (msg: unknown) => {
-  console.log(`[${new Date().toISOString()}]`, msg);
-};
-
 export const get = (obj: Record<string, unknown>, path: string, defaultValue = undefined) => {
   const travel = (regexp: RegExp) =>
     String.prototype.split // eslint-disable-line

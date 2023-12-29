@@ -52,7 +52,7 @@ export const Sidebar = () => {
       updateConnectionTab('databases', databases);
       updateSchemas(config.id, { triggers, routines, columns, tables });
     } catch (error) {
-      notify(String(error), 'info');
+      notify(error);
     } finally {
       setLoading(false);
     }
