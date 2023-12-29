@@ -17,7 +17,7 @@ pub enum Error {
     Send(#[from] SendError<QueryTask>),
     #[error("Mysql error: {0}")]
     Mysql(#[from] mysql::Error),
-    #[error("SQL parse error: {0}")]
+    #[error("{0}")]
     SQLParse(#[from] sqlparser::parser::ParserError),
 }
 
