@@ -54,22 +54,19 @@ export const sortTableStructure = (
 
 // TODO: handle all dialects
 export const columnsToTable = (allColumns: Row[], dialect: DialectType) => {
-  if (dialect === Dialect.Mysql) {
+  if (dialect === Dialect.Mysql || dialect === Dialect.Postgresql) {
     const schema = allColumns.reduce((acc, col) => {
-      return {
-        ...acc,
-        [String(col.TABLE_NAME)]: {
-          // @ts-ignore
-          ...acc[String(col.TABLE_NAME)],
-          [String(col.COLUMN_NAME)]: col,
-        },
-      };
+      const table_name = String(col.table_name ?? col.TABLE_NAME);
+      const column_name = String(col.column_name ?? col.COLUMN_NAME);
+      acc[table_name] = { ...(acc[table_name] as Record<string, string>), [column_name]: col };
+      return acc;
     }, {});
 
     return Object.keys(schema).map((name) => {
       const columns = Object.values(schema[name]).map((col) => {
+        const name = String(col.column_name ?? col.COLUMN_NAME);
         return {
-          name: String(col.COLUMN_NAME),
+          name,
           props: col,
         };
       });

@@ -315,7 +315,6 @@ export const ConnectionsService = () => {
 
   const getSchemaEntity = <T extends keyof Schema>(entity: T): Schema[T] => {
     const schema = getConnection().selectedSchema;
-    console.log({ schema, entity });
     if (entity === 'tables') {
       return getConnection().definition[schema]?.['tables'] ?? [];
     }

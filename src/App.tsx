@@ -41,7 +41,7 @@ function App() {
 
   onMount(async () => {
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
-      console.log({ event });
+      console.log(event);
       await compareAndAssign(event.payload);
     });
   });
