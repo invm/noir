@@ -40,7 +40,7 @@ tracing-subscriber = "0.3.17"
 sqlparser = "0.38.0"
 md-5 = "0.10.6"
 chrono = "0.4.31"
-postgres = { version = "0.19.7", features = ["array-impls", "with-serde_json-1"] }
+postgres = { version = "0.19.7", features = ["array-impls", "with-serde_json-1", "with-chrono-0_4"] }
 deadpool-postgres = "0.12.1"
 
 [features]

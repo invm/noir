@@ -26,6 +26,16 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
         // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
 
         // single types
+        Type::TIMESTAMP => {
+            get_basic(row, column, column_i, |a: chrono::NaiveDateTime| {
+                Ok(Value::String(a.to_string()))
+            })?
+        }
+        Type::TIMESTAMPTZ => {
+            get_basic(row, column, column_i, |a: chrono::DateTime<chrono::Utc>| {
+                Ok(Value::String(a.to_string()))
+            })?
+        }
         Type::BOOL => get_basic(row, column, column_i, |a: bool| Ok(Value::Bool(a)))?,
         Type::INT2 => get_basic(row, column, column_i, |a: i16| {
             Ok(Value::Number(serde_json::Number::from(a)))
@@ -36,7 +46,7 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
         Type::INT8 => get_basic(row, column, column_i, |a: i64| {
             Ok(Value::Number(serde_json::Number::from(a)))
         })?,
-        Type::TEXT | Type::VARCHAR => {
+        Type::TEXT | Type::VARCHAR | Type::NAME | Type::CHAR | Type::UNKNOWN => {
             get_basic(row, column, column_i, |a: String| Ok(Value::String(a)))?
         }
         Type::JSON | Type::JSONB => get_basic(row, column, column_i, |a: Value| Ok(a))?,
