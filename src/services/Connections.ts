@@ -109,8 +109,8 @@ type ConnectionTab = {
   label: string;
   id: string;
   selectedSchema: string;
-  schemas: { [key: string]: Schema };
-  databases: string[];
+  definition: { [key: string]: Schema };
+  schemas: string[];
   connection: ConnectionConfig;
 };
 
@@ -276,7 +276,7 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const updateSchemas = (conn_id: string, data: Schema) => {
+  const updateSchemaDefinition = (conn_id: string, data: Schema) => {
     const tab = getConnection();
     const schema = tab.selectedSchema;
     if (!tab) return;
@@ -284,7 +284,7 @@ export const ConnectionsService = () => {
       produce((s) => {
         s.tabs = s.tabs.map((t) => {
           if (conn_id === t.id) {
-            t.schemas[schema] = { ...t.schemas[schema], ...data };
+            t.definition[schema] = { ...t.definition[schema], ...data };
           }
           return t;
         });
@@ -315,10 +315,11 @@ export const ConnectionsService = () => {
 
   const getSchemaEntity = <T extends keyof Schema>(entity: T): Schema[T] => {
     const schema = getConnection().selectedSchema;
+    console.log({ schema, entity });
     if (entity === 'tables') {
-      return getConnection().schemas[schema]?.['tables'] ?? [];
+      return getConnection().definition[schema]?.['tables'] ?? [];
     }
-    return getConnection().schemas[schema]?.[entity] ?? [];
+    return getConnection().definition[schema]?.[entity] ?? [];
   };
 
   const selectPrevQuery = () => {
@@ -332,16 +333,16 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    const [{ result: dbs }, { result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
-      invoke<RawQueryResult>('get_databases', { connId }),
+    const [{ result: _schemas }, { result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
+      invoke<RawQueryResult>('get_schemas', { connId }),
       invoke<RawQueryResult>('get_columns', { connId }),
       invoke<RawQueryResult>('get_procedures', { connId }),
       invoke<RawQueryResult>('get_triggers', { connId }),
     ]);
 
     const tables = columnsToTable(columns, dialect) ?? [];
-    const databases = dbs.map((d) => String(d['Database']));
-    return { databases, tables, routines, columns, triggers };
+    const schemas = _schemas.map((d) => String(d['schema']));
+    return { schemas, tables, routines, columns, triggers };
   };
 
   return {
@@ -373,6 +374,6 @@ export const ConnectionsService = () => {
     fetchSchemaEntities,
     loading,
     setLoading,
-    updateSchemas,
+    updateSchemaDefinition,
   };
 };

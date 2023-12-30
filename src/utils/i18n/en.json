@@ -67,7 +67,9 @@
       "process_list": "Process list"
     },
     "settings": {
-      "settings": "Settings"
+      "settings": "Settings",
+      "clear_cache": "Clear cache",
+      "shortcuts": "Shortcuts"
     },
     "help": {
       "help": "Help"

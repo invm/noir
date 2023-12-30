@@ -1,6 +1,7 @@
-use mysql::Value;
+use mysql::{Row, Value};
+use serde_json::json;
 
-pub fn convert_value(value: &mysql::Value) -> serde_json::Value {
+fn convert_value(value: &mysql::Value) -> serde_json::Value {
     match value {
         Value::Bytes(v) => serde_json::Value::String(String::from_utf8_lossy(v).to_string()),
         Value::Int(v) => serde_json::Value::Number((*v).into()),
@@ -20,4 +21,15 @@ pub fn convert_value(value: &mysql::Value) -> serde_json::Value {
         )),
         _ => serde_json::Value::Null,
     }
+}
+
+pub fn row_to_object(row: Row) -> serde_json::Value {
+    let mut object = json!({});
+    for column in row.columns_ref() {
+        let column_value = &row[column.name_str().as_ref()];
+        let value = convert_value(column_value);
+        object[column.name_str().as_ref()] = value;
+    }
+
+    return object;
 }

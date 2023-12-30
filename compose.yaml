@@ -1,27 +1,27 @@
 volumes:
-  mysql:
-  # psql:
+  # mysql:
+  psql:
 
 services:
-  mysql:
-    image: mysql:8.0.33
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: world_x # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql:/var/lib/mysql
-      - ./dev/:/docker-entrypoint-initdb.d
-  # psql:
-  #   image: postgres:15
+  # mysql:
+  #   image: mysql:8.0.33
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   restart: always
   #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: example
-  #     POSTGRES_DB: sample # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
-  #   volumes:
-  #     - psql:/var/lib/postgresql/data
+  #     MYSQL_ROOT_PASSWORD: example
+  #     MYSQL_DATABASE: world_x # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
   #   ports:
-  #     - 5432:5432
+  #     - 3306:3306
+  #   volumes:
+  #     - mysql:/var/lib/mysql
+  #     - ./dev/:/docker-entrypoint-initdb.d
+  psql:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: dvdrental # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
+    volumes:
+      - psql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432

@@ -13,6 +13,7 @@ export const MessageService = () => {
   const [messages, setMessages] = errorStore;
 
   const notify = (message: string | unknown, type: AlertTypes = 'error') => {
+    console.log(message);
     const id = randomId();
     setMessages(messages.concat({ message: String(message), id, type }));
 
