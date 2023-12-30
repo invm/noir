@@ -15,14 +15,14 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
     setLoading(true);
     try {
       await invoke('init_connection', { config });
-      const { triggers, columns, routines, tables, databases } = await fetchSchemaEntities(config.id, config.dialect);
+      const { triggers, columns, routines, tables, schemas } = await fetchSchemaEntities(config.id, config.dialect);
       const db_name = config.credentials.db_name;
       await addConnectionTab({
         id: config.id,
         label: config.name,
         selectedSchema: db_name,
-        schemas: { [db_name]: { columns, routines, triggers, tables } },
-        databases,
+        definition: { [db_name]: { columns, routines, triggers, tables } },
+        schemas,
         connection: config,
       });
     } catch (error) {

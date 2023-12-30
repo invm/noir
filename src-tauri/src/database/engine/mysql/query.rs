@@ -5,18 +5,7 @@ use serde_json::json;
 
 use crate::database::connections::ResultSet;
 
-use super::utils::convert_value;
-
-fn row_to_object(row: Row) -> serde_json::Value {
-    let mut object = json!({});
-    for column in row.columns_ref() {
-        let column_value = &row[column.name_str().as_ref()];
-        let value = convert_value(column_value);
-        object[column.name_str().as_ref()] = value;
-    }
-
-    return object;
-}
+use super::utils::row_to_object;
 
 pub fn raw_query(mut conn: PooledConn, query: String) -> Result<serde_json::Value> {
     let rows: Vec<Row> = conn.query(&query)?;

@@ -1,6 +1,6 @@
 use anyhow::Result;
+use deadpool_postgres::Pool;
 use futures::try_join;
-use mysql::Pool;
 use serde_json::{json, Value};
 
 use crate::database::connections::InitiatedConnection;
@@ -36,22 +36,17 @@ pub async fn get_columns(
     table: Option<&str>,
 ) -> Result<Value> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
         TABLE_SCHEMA,
         TABLE_NAME,
         COLUMN_NAME, 
-        COLUMN_TYPE, 
+        ORDINAL_POSITION, 
+        COLUMN_DEFAULT,
+        IS_NULLABLE,
         DATA_TYPE, 
         CHARACTER_MAXIMUM_LENGTH,
-        IS_NULLABLE,
-        CHARACTER_OCTET_LENGTH,
-        CHARACTER_SET_NAME,
-        COLLATION_NAME,
-        COLUMN_COMMENT,
-        COLUMN_DEFAULT,
-        COLUMN_KEY
+        CHARACTER_OCTET_LENGTH
         FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{}'",
         schema
     );
@@ -59,7 +54,7 @@ pub async fn get_columns(
         Some(table) => format!("{} AND TABLE_NAME = '{}';", query, table),
         None => format!("{};", query),
     };
-    let columns = raw_query(_conn, query)?;
+    let columns = raw_query(pool.clone(), &query).await?;
     Ok(columns)
 }
 
@@ -69,35 +64,35 @@ pub async fn get_constraints(
     table: Option<&str>,
 ) -> Result<Value> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
-        "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION,
-                         CONSTRAINT_NAME, REFERENCED_COLUMN_NAME, REFERENCED_TABLE_NAME FROM
-                         INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
+        "SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
         schema
     );
     let query = match table {
         Some(table) => format!("{} AND TABLE_NAME = '{}'", query, table),
         None => format!("{};", query),
     };
-    let columns = raw_query(_conn, query)?;
+    let columns = raw_query(pool.clone(), &query).await?;
     Ok(columns)
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
-    let db = conn.config.credentials.get("db_name").unwrap().as_str();
-    let mut _conn = pool.get_conn()?;
-    let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db);
-    let functions = raw_query(_conn, query)?;
+    let schema = conn.get_schema();
+    let query = format!(
+        "SELECT routine_name, routine_definition
+        FROM information_schema.routines
+        WHERE routine_type = 'FUNCTION' AND routine_schema = '{}';",
+        schema
+    );
+    let functions = raw_query(pool.clone(), &query).await?;
     Ok(functions)
 }
 
 pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
-
-    let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
-    let procedures = raw_query(_conn, query)?;
+    let query = format!("SELECT routine_name, routine_definition FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
+    let procedures = raw_query(pool.clone(), &query).await?;
     Ok(procedures)
 }
 
@@ -107,7 +102,6 @@ pub async fn get_indices(
     table: Option<&str>,
 ) -> Result<Value> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM
                         information_schema.statistics WHERE non_unique = 1 AND table_schema = '{}'",
@@ -117,7 +111,7 @@ pub async fn get_indices(
         Some(table) => format!("{} and TABLE_NAME = '{}';", query, table),
         None => format!("{};", query),
     };
-    let procedures = raw_query(_conn, query)?;
+    let procedures = raw_query(pool.clone(), &query).await?;
     Ok(procedures)
 }
 
@@ -126,7 +120,6 @@ pub async fn get_triggers(
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Value> {
-    let mut _conn = pool.get_conn()?;
     let schema = conn.get_schema();
     let query = format!(
         "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
@@ -136,13 +129,12 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    let triggers = raw_query(_conn, query)?;
+    let triggers = raw_query(pool.clone(), &query).await?;
     Ok(triggers)
 }
 
 pub async fn get_schemas(pool: &Pool) -> Result<Value> {
-    let mut _conn = pool.get_conn()?;
-    let query = "select schema_name 'schema' from information_schema.schemata;".to_string();
-    let triggers = raw_query(_conn, query)?;
+    let query = "SELECT schema_name schema FROM information_schema.schemata;".to_string();
+    let triggers = raw_query(pool.clone(), &query).await?;
     Ok(triggers)
 }

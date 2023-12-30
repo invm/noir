@@ -1,4 +1,7 @@
 use anyhow::Result;
+use deadpool_postgres::{
+    tokio_postgres::NoTls, Config, ManagerConfig, Pool as PostgresqlPool, RecyclingMethod,
+};
 use log::info;
 use mysql::{Opts, OptsBuilder, Pool as MysqlPool};
 use rusqlite::types::{self, FromSql, FromSqlResult, ValueRef};
@@ -82,14 +85,14 @@ pub struct ConnectionConfig {
 #[derive(Debug, Clone)]
 pub enum ConnectionPool {
     Mysql(MysqlPool),
-    Postgresql,
+    Postgresql(PostgresqlPool),
     Sqlite,
 }
 
 #[derive(Debug, Clone)]
 pub enum ConnectionOpts {
     Mysql(Opts),
-    Postgres,
+    Postgresql(Config),
     Sqlite,
 }
 
@@ -115,41 +118,72 @@ impl ConnectionConfig {
         if color.is_empty() {
             return Err(anyhow::anyhow!("Color cannot be empty"));
         }
-        let available_keys = vec![
-            "pool_min",
-            "pool_max",
-            "user",
-            "password",
-            "host",
-            "port",
-            "socket",
-            "db_name",
-            "prefer_socket",
-            "tcp_keepalive_time_ms",
-            "tcp_keepalive_probe_interval_secs",
-            "tcp_keepalive_probe_count",
-            "tcp_user_timeout_ms",
-            "compress",
-            "tcp_connect_timeout_ms",
-            "stmt_cache_size",
-            "secure_auth",
-        ];
-        let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
-        Ok(ConnectionConfig {
-            id: Uuid::new_v4(),
-            dialect,
-            mode,
-            credentials,
-            name: name.to_string(),
-            color: color.to_string(),
-        })
+        match dialect {
+            Dialect::Mysql => {
+                let available_keys = vec![
+                    "pool_min",
+                    "pool_max",
+                    "user",
+                    "password",
+                    "host",
+                    "port",
+                    "socket",
+                    "db_name",
+                    "prefer_socket",
+                    "tcp_keepalive_time_ms",
+                    "tcp_keepalive_probe_interval_secs",
+                    "tcp_keepalive_probe_count",
+                    "tcp_user_timeout_ms",
+                    "compress",
+                    "tcp_connect_timeout_ms",
+                    "stmt_cache_size",
+                    "secure_auth",
+                ];
+                let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                Ok(ConnectionConfig {
+                    id: Uuid::new_v4(),
+                    dialect,
+                    mode,
+                    credentials,
+                    name: name.to_string(),
+                    color: color.to_string(),
+                })
+            }
+            Dialect::Postgresql => {
+                let available_keys = vec![
+                    "user",
+                    "password",
+                    "db_name",
+                    "options",
+                    "application_name",
+                    "sslmode",
+                    "host",
+                    "port",
+                    "connect_timeout",
+                    "keepalives",
+                    "keepalives_idle",
+                    "target_session_attrs",
+                    "transaction_read_write",
+                ];
+                let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                Ok(ConnectionConfig {
+                    id: Uuid::new_v4(),
+                    dialect,
+                    mode,
+                    credentials,
+                    name: name.to_string(),
+                    color: color.to_string(),
+                })
+            }
+            Dialect::Sqlite => todo!(),
+        }
     }
 
     pub async fn init(&mut self) -> Result<InitiatedConnection> {
         match &self.dialect {
             Dialect::Mysql => {
                 if self.mode == Mode::File {
-                    return Err(anyhow::anyhow!("File mode is not supported for mysql"));
+                    return Err(anyhow::anyhow!("File mode is not supported for Mysql"));
                 }
                 let builder = OptsBuilder::new();
                 let builder = builder
@@ -174,7 +208,41 @@ impl ConnectionConfig {
                     }
                 }
             }
-            Dialect::Postgresql => todo!(),
+            Dialect::Postgresql => {
+                if self.mode == Mode::File {
+                    return Err(anyhow::anyhow!("File mode is not supported for Postgresql"));
+                }
+                let mut config = Config::new();
+                config.user = self.credentials.get("user").cloned();
+                config.password = self.credentials.get("password").cloned();
+                config.dbname = self.credentials.get("db_name").cloned();
+                config.host = self.credentials.get("host").cloned();
+                config.port = self
+                    .credentials
+                    .get("port")
+                    .cloned()
+                    .map(|p| p.parse::<u16>().expect("Port should be a valid number"));
+                config.connect_timeout = Some(std::time::Duration::from_secs(15));
+                config.manager = Some(ManagerConfig {
+                    recycling_method: RecyclingMethod::Fast,
+                });
+                match config.create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls) {
+                    // in case of sockets, the url should be percent-encoded
+                    Ok(pool) => {
+                        let cfg = config.clone();
+                        Ok(InitiatedConnection {
+                            config: self.clone(),
+                            pool: ConnectionPool::Postgresql(pool),
+                            opts: ConnectionOpts::Postgresql(cfg),
+                            schema: "public".to_string(),
+                        })
+                    }
+                    Err(e) => {
+                        info!("Error connecting to postgresql: {}", e);
+                        Err(anyhow::anyhow!("Error connecting to postgresql: {}", e))
+                    }
+                }
+            }
             Dialect::Sqlite => todo!(),
         }
     }
@@ -203,7 +271,9 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_table_structure(self, pool, table).await
             }
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_table_structure(self, pool, table).await
+            }
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -213,7 +283,10 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_indices(self, pool, table).await
             }
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_indices(self, pool, table).await
+            }
+
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -223,7 +296,10 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_columns(self, pool, None).await
             }
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_columns(&self, pool, None).await
+            }
+
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -233,7 +309,10 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_constraints(self, pool, None).await
             }
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_constraints(self, pool, None).await
+            }
+
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -241,7 +320,9 @@ impl InitiatedConnection {
     pub async fn get_functions(&self) -> Result<Value> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_functions(self, pool).await,
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_functions(self, pool).await
+            }
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -249,7 +330,7 @@ impl InitiatedConnection {
     pub async fn get_procedures(&self) -> Result<Value> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_procedures(self, pool).await,
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) =>engine::postgresql::tables::get_procedures(self, pool).await,
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -259,15 +340,17 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_triggers(self, pool, None).await
             }
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::tables::get_triggers(self, pool, None).await
+            }
             ConnectionPool::Sqlite => todo!(),
         }
     }
 
-    pub async fn get_databases(&self) -> Result<Value> {
+    pub async fn get_schemas(&self) -> Result<Value> {
         match &self.pool {
-            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_databases(pool).await,
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_schemas(pool).await,
+            ConnectionPool::Postgresql(pool) => engine::postgresql::tables::get_schemas(pool).await,
             ConnectionPool::Sqlite => todo!(),
         }
     }
@@ -275,7 +358,9 @@ impl InitiatedConnection {
     pub async fn execute_query(&self, q: &str) -> Result<ResultSet> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),
-            ConnectionPool::Postgresql => todo!(),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::query::execute_query(pool, q).await
+            }
             ConnectionPool::Sqlite => todo!(),
         }
     }

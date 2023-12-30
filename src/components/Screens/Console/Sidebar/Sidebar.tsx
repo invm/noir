@@ -19,7 +19,7 @@ export const Sidebar = () => {
       addContentTab,
       getSchemaEntity,
       fetchSchemaEntities,
-      updateSchemas,
+      updateSchemaDefinition,
     },
   } = useAppSelector();
   const [loading, setLoading] = createSignal(false);
@@ -35,12 +35,12 @@ export const Sidebar = () => {
     updateConnectionTab('selectedSchema', schema);
     const config = getConnection();
     await invoke('set_schema', { connId: config.id, schema, dialect: config.connection.dialect });
-    const { triggers, routines, tables, databases, columns } = await fetchSchemaEntities(
+    const { triggers, routines, tables, schemas, columns } = await fetchSchemaEntities(
       config.id,
       config.connection.dialect
     );
-    updateConnectionTab('databases', databases);
-    updateSchemas(config.id, { triggers, routines, columns, tables });
+    updateConnectionTab('schemas', schemas);
+    updateSchemaDefinition(config.id, { triggers, routines, columns, tables });
   };
 
   const refreshEntities = async () => {
@@ -48,9 +48,9 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const { triggers, routines, tables, databases, columns } = await fetchSchemaEntities(config.id, config.dialect);
-      updateConnectionTab('databases', databases);
-      updateSchemas(config.id, { triggers, routines, columns, tables });
+      const { triggers, routines, tables, schemas, columns } = await fetchSchemaEntities(config.id, config.dialect);
+      updateConnectionTab('schemas', schemas);
+      updateSchemaDefinition(config.id, { triggers, routines, columns, tables });
     } catch (error) {
       notify(error);
     } finally {
@@ -117,7 +117,7 @@ export const Sidebar = () => {
           value={getConnection().selectedSchema}
           onChange={(e) => select(e.currentTarget.value)}
           class="select select-accent select-bordered select-xs w-full">
-          <For each={getConnection().databases}>
+          <For each={getConnection().schemas}>
             {(db) => (
               <option class="py-1" value={db}>
                 {db}
