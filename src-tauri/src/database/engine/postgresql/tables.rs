@@ -45,6 +45,15 @@ pub async fn get_columns(
         COLUMN_DEFAULT,
         IS_NULLABLE,
         DATA_TYPE, 
+        CASE
+            WHEN character_maximum_length is not null  and udt_name != 'text'
+              THEN CONCAT(udt_name, concat('(', concat(character_maximum_length::varchar(255), ')')))
+            WHEN numeric_precision is not null
+                    THEN CONCAT(udt_name, concat('(', concat(numeric_precision::varchar(255),',',numeric_scale::varchar(255), ')')))
+            WHEN datetime_precision is not null AND udt_name != 'date' THEN
+              CONCAT(udt_name, concat('(', concat(datetime_precision::varchar(255), ')')))
+            ELSE udt_name
+        END as COLUMN_TYPE,
         CHARACTER_MAXIMUM_LENGTH,
         CHARACTER_OCTET_LENGTH
         FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{}'",
@@ -73,8 +82,8 @@ pub async fn get_constraints(
         Some(table) => format!("{} AND TABLE_NAME = '{}'", query, table),
         None => format!("{};", query),
     };
-    let columns = raw_query(pool.clone(), &query).await?;
-    Ok(columns)
+    let fks = raw_query(pool.clone(), &query).await?;
+    Ok(fks)
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
@@ -111,8 +120,8 @@ pub async fn get_indices(
         Some(table) => format!("{} and TABLE_NAME = '{}';", query, table),
         None => format!("{};", query),
     };
-    let procedures = raw_query(pool.clone(), &query).await?;
-    Ok(procedures)
+    let indices = raw_query(pool.clone(), &query).await?;
+    Ok(indices)
 }
 
 pub async fn get_triggers(
@@ -135,6 +144,16 @@ pub async fn get_triggers(
 
 pub async fn get_schemas(pool: &Pool) -> Result<Value> {
     let query = "SELECT schema_name schema FROM information_schema.schemata;".to_string();
-    let triggers = raw_query(pool.clone(), &query).await?;
-    Ok(triggers)
+    let schemas = raw_query(pool.clone(), &query).await?;
+    Ok(schemas)
+}
+
+pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
+    let schema = conn.get_schema();
+    let query = format!(
+        "SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_schema = '{}'",
+        schema
+    );
+    let views = raw_query(pool.clone(), &query).await?;
+    Ok(views)
 }

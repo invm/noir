@@ -359,6 +359,14 @@ impl InitiatedConnection {
         }
     }
 
+    pub async fn get_views(&self) -> Result<Value> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::tables::get_views(&self, pool).await,
+            ConnectionPool::Postgresql(pool) => engine::postgresql::tables::get_views(&self, pool).await,
+            ConnectionPool::Sqlite => todo!(),
+        }
+    }
+
     pub async fn execute_query(&self, q: &str) -> Result<ResultSet> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),

@@ -1,4 +1,4 @@
-import { Dialect, DialectType, Row, SORT_ORDER, TableStrucureEntityType } from 'interfaces';
+import { Dialect, DialectType, Row, SORT_ORDER, Table, TableStrucureEntityType } from 'interfaces';
 
 export const get = (obj: Record<string, unknown>, path: string, defaultValue = undefined) => {
   const travel = (regexp: RegExp) =>
@@ -53,7 +53,7 @@ export const sortTableStructure = (
 };
 
 // TODO: handle all dialects
-export const columnsToTable = (allColumns: Row[], dialect: DialectType) => {
+export const columnsToTables = (allColumns: Row[], views: Row[], dialect: DialectType) => {
   if (dialect === Dialect.Mysql || dialect === Dialect.Postgresql) {
     const schema = allColumns.reduce((acc, col) => {
       const table_name = String(col.table_name ?? col.TABLE_NAME);
@@ -61,16 +61,30 @@ export const columnsToTable = (allColumns: Row[], dialect: DialectType) => {
       acc[table_name] = { ...(acc[table_name] as Record<string, string>), [column_name]: col };
       return acc;
     }, {});
+    const viewNames = views.map(({ table_name }) => table_name);
 
-    return Object.keys(schema).map((name) => {
-      const columns = Object.values(schema[name]).map((col) => {
-        const name = String(col.column_name ?? col.COLUMN_NAME);
-        return {
-          name,
-          props: col,
-        };
-      });
-      return { name, columns };
-    });
+    return Object.keys(schema).reduce(
+      (acc, name) => {
+        const columns = Object.values(schema[name]).map((props) => {
+          const name = String(props.column_name ?? props.COLUMN_NAME);
+          return { name, props };
+        });
+
+        if (viewNames.includes(name)) {
+          acc['views'].push({ name, columns });
+        } else {
+          acc['tables'].push({ name, columns });
+        }
+        return acc;
+      },
+      {
+        tables: [] as Table[],
+        views: [] as Table[],
+      }
+    );
   }
+  return {
+    tables: [],
+    views: [],
+  };
 };

@@ -80,8 +80,8 @@ pub async fn get_constraints(
         Some(table) => format!("{} AND TABLE_NAME = '{}'", query, table),
         None => format!("{};", query),
     };
-    let columns = raw_query(_conn, query)?;
-    Ok(columns)
+    let fks = raw_query(_conn, query)?;
+    Ok(fks)
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
@@ -136,13 +136,26 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    let triggers = raw_query(_conn, query)?;
-    Ok(triggers)
+    let indices = raw_query(_conn, query)?;
+    Ok(indices)
 }
 
 pub async fn get_schemas(pool: &Pool) -> Result<Value> {
     let mut _conn = pool.get_conn()?;
     let query = "select schema_name 'schema' from information_schema.schemata;".to_string();
-    let triggers = raw_query(_conn, query)?;
-    Ok(triggers)
+    let schemas = raw_query(_conn, query)?;
+    Ok(schemas)
+}
+
+pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Value> {
+    let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
+    let query = format!(
+        "SELECT TABLE_SCHEMA, TABLE_NAME 
+            FROM information_schema.tables 
+            WHERE TABLE_TYPE LIKE 'VIEW' and table_schema = '{}';",
+        schema
+    );
+    let views = raw_query(_conn, query)?;
+    Ok(views)
 }

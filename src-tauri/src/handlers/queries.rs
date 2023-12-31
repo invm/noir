@@ -92,6 +92,13 @@ pub async fn get_schemas(app_handle: AppHandle, conn_id: String) -> CommandResul
 }
 
 #[command]
+pub async fn get_views(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+    let connection = app_handle.acquire_connection(conn_id);
+    let result = connection.get_views().await?;
+    Ok(result)
+}
+
+#[command]
 pub async fn execute_query(
     app_handle: AppHandle,
     conn_id: String,

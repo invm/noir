@@ -99,6 +99,7 @@ fn main() {
             queries::get_query_metadata,
             queries::query_results,
             queries::get_schemas,
+            queries::get_views,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
