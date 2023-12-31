@@ -6,8 +6,9 @@ import { newContentTab, TableStructureContentTabData } from 'services/Connection
 
 import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, ResultSet } from 'interfaces';
+import { Table } from 'components/UI/Icons';
 
-export const TableColumnsCollapse = (props: { title: string; children: JSXElement }) => {
+export const TableColumnsCollapse = (props: { entity: 'routines' | 'tables'; title: string; children: JSXElement }) => {
   const [open, setOpen] = createSignal(false);
 
   const {
@@ -108,7 +109,10 @@ export const TableColumnsCollapse = (props: { title: string; children: JSXElemen
             />
           </svg>
         </label>
-        <span class="ml-1 font-semibold">{props.title}</span>
+        <span class="px-2">
+          <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
+        </span>
+        <span class="font-semibold">{props.title}</span>
       </span>
       <div
         class="pl-2"

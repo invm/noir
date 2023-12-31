@@ -158,15 +158,16 @@ export const Sidebar = () => {
         <For each={getSchemaEntity('tables')}>
           {(table) => (
             <div class="mb-1 px-2 min-w-full w-fit">
-              <TableColumnsCollapse title={table.name}>
+              <TableColumnsCollapse title={table.name} entity="tables">
                 <For each={table.columns}>
                   {(column) => (
                     <button
                       onClick={() => insertColumnName(column.name)}
                       class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                       <span class="text-xs font-semibold">{column.name}</span>
-                      {console.log({ column })}
-                      <span class="text-xs font-medium ml-2">{column.props.COLUMN_TYPE ?? column.props.column_type}</span>
+                      <span class="text-xs font-medium ml-2">
+                        {column.props.COLUMN_TYPE ?? column.props.column_type}
+                      </span>
                     </button>
                   )}
                 </For>
@@ -178,14 +179,16 @@ export const Sidebar = () => {
         <For each={getSchemaEntity('views')}>
           {(table) => (
             <div class="mb-1 px-2 min-w-full w-fit">
-              <TableColumnsCollapse title={table.name}>
+              <TableColumnsCollapse title={table.name} entity="routines">
                 <For each={table.columns}>
                   {(column) => (
                     <button
                       onClick={() => insertColumnName(column.name)}
                       class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                       <span class="text-xs font-semibold">{column.name}</span>
-                      <span class="text-xs font-medium ml-2">{column.props.COLUMN_TYPE}</span>
+                      <span class="text-xs font-medium ml-2">
+                        {column.props.COLUMN_TYPE ?? column.props.column_type}
+                      </span>
                     </button>
                   )}
                 </For>
