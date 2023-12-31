@@ -61,18 +61,20 @@ export const Main = () => {
             )}
           </For>
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center py-2">
           <ThemeSwitch />
-          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
-            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
-              <UserSettings />
-            </button>
-          </div>
-          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('help.help')}>
-            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 2 ? 0 : 2))}>
-              <QuestionMark />
-            </button>
-          </div>
+          <Show when={connectionStore.idx !== 0}>
+            <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
+              <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
+                <UserSettings />
+              </button>
+            </div>
+            <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('help.help')}>
+              <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 2 ? 0 : 2))}>
+                <QuestionMark />
+              </button>
+            </div>
+          </Show>
         </div>
       </div>
       <div class="flex-1 overflow-hidden flex">

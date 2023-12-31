@@ -8,6 +8,8 @@
     },
     "add_connection_form": {
       "title": "Add New Connection",
+      "test": "Test",
+      "success": "Successfully connected to {{name}}",
       "length_validation": "Must be between 2 and 255 characters",
       "labels": {
         "name": "Name",

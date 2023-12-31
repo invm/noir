@@ -2,7 +2,7 @@ import * as z from 'zod';
 import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
-import { Match, onMount, Show, Switch } from 'solid-js';
+import { createSignal, Match, onMount, Show, Switch } from 'solid-js';
 
 import { Alert, TextInput, Select, ColorCircle, FileInput } from 'components/UI';
 import {
@@ -20,6 +20,7 @@ import {
 } from 'interfaces';
 import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
+import { invoke } from '@tauri-apps/api';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -115,6 +116,8 @@ const AddConnectionForm = (props: {
   const {
     messages: { notify },
   } = useAppSelector();
+  const [testing, setTesting] = createSignal(false);
+  const [loading, setLoading] = createSignal(false);
   const formHandler = useFormHandler(zodSchema(ConnectionFormSchema));
   const { formData, setFieldDefaultValue, getFormErrors, setFieldValue } = formHandler;
 
@@ -124,13 +127,29 @@ const AddConnectionForm = (props: {
     }
   });
 
-  const submit = async (event: Event) => {
-    event.preventDefault();
-    await formHandler.validateForm().catch(() => { });
+  const testConnection = async () => {
     try {
+      setTesting(true);
+      await invoke('test_connection', formToConnectionStruct(formData()));
+      const name = formData().db_name;
+      notify(t('add_connection_form.success', { name }), 'success');
+    } catch (error) {
+      notify(error);
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const submit = async (event: Event) => {
+    try {
+      setLoading(true);
+      event.preventDefault();
+      await formHandler.validateForm();
       await props.addConnection(formToConnectionStruct(formData()));
     } catch (error) {
       notify(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -305,14 +324,28 @@ const AddConnectionForm = (props: {
             </Alert>
           </Show>
         </div>
-        <div class="py-4">
-          <button
-            disabled={!!Object.keys(getFormErrors()).length}
-            class="btn
-            btn-primary btn-md btn-block"
-            type="submit">
-            {t('add_connection_form.title')}
-          </button>
+        <div class="py-4 flex items-center justify-end">
+          <div class="gap-4 flex">
+            <button
+              class="btn btn-secondary btn-sm"
+              onClick={testConnection}
+              disabled={!!Object.keys(getFormErrors()).length || testing()}>
+              <Show when={testing()}>
+                <span class="loading loading-spinner"></span>
+              </Show>
+              {t('add_connection_form.test')}
+            </button>
+            <button
+              disabled={!!Object.keys(getFormErrors()).length || loading()}
+              class="btn
+            btn-primary btn-sm"
+              type="submit">
+              <Show when={loading()}>
+                <span class="loading loading-spinner"></span>
+              </Show>
+              {t('add_connection_form.title')}
+            </button>
+          </div>
         </div>
       </form>
     </div>
