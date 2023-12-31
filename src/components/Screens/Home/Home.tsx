@@ -1,34 +1,11 @@
-import { invoke } from '@tauri-apps/api';
-import { createStore } from 'solid-js/store';
-import { onMount } from 'solid-js';
 import { ConnectionsList } from 'components/Screens/Home/Connections/ConnectionsList/ConnectionsList';
 import { AddConnectionForm } from 'components/Screens/Home/Connections/AddConnectionForm';
-import { ConnectionConfig, Credentials, DialectType, ModeType } from 'interfaces';
 
 export const Home = () => {
-  const addConnection = async (conn: {
-    dialect: DialectType;
-    mode: ModeType;
-    credentials: Credentials;
-    name: string;
-    color: string;
-  }) => {
-    await invoke('add_connection', conn);
-    const res = await invoke('get_connections', {});
-    setConnections(res as ConnectionConfig[]);
-  };
-
-  const [connections, setConnections] = createStore<ConnectionConfig[]>([]);
-
-  onMount(async () => {
-    const res = await invoke('get_connections', {});
-    setConnections(res as ConnectionConfig[]);
-  });
-
   return (
     <div class="flex-1 grid grid-cols-2 h-full bg-base-300">
-      <ConnectionsList {...{ connections, setConnections }} />
-      <AddConnectionForm {...{ addConnection }} />
+      <ConnectionsList />
+      <AddConnectionForm />
     </div>
   );
 };

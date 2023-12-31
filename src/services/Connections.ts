@@ -1,5 +1,15 @@
 import { createStore, produce } from 'solid-js/store';
-import { ConnectionConfig, DialectType, RawQueryResult, ResultSet, Row, Table, TableEntity } from '../interfaces';
+import {
+  ConnectionConfig,
+  Credentials,
+  DialectType,
+  ModeType,
+  RawQueryResult,
+  ResultSet,
+  Row,
+  Table,
+  TableEntity,
+} from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
 import { columnsToTable, debounce } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
@@ -154,9 +164,13 @@ export const ConnectionsService = () => {
     tabs: [],
     idx: 0,
   });
+
+  const [connections, setConnections] = createStore<ConnectionConfig[]>([]);
   const [queryIdx, setQueryIdx] = createSignal<number>(0);
 
   const restoreConnectionStore = async () => {
+    const res = await invoke('get_connections', {});
+    setConnections(res as ConnectionConfig[]);
     try {
       const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
       if (!conn_tabs.tabs) return;
@@ -194,7 +208,6 @@ export const ConnectionsService = () => {
     await store.save();
   }, INTERVAL);
 
-  // doing: change this
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
     setContentStore('tabs', [newContentTab('Query', ContentTab.Query)]);
@@ -205,6 +218,22 @@ export const ConnectionsService = () => {
       })
     );
     updateStore();
+  };
+
+  const refreshConnections = async () => {
+    const res = await invoke('get_connections', {});
+    setConnections(res as ConnectionConfig[]);
+  };
+
+  const addConnection = async (conn: {
+    dialect: DialectType;
+    mode: ModeType;
+    credentials: Credentials;
+    name: string;
+    color: string;
+  }) => {
+    await invoke('add_connection', conn);
+    await refreshConnections();
   };
 
   const removeConnectionTab = async (id: string) => {
@@ -374,5 +403,9 @@ export const ConnectionsService = () => {
     loading,
     setLoading,
     updateSchemaDefinition,
+    connections,
+    setConnections,
+    addConnection,
+    refreshConnections,
   };
 };
