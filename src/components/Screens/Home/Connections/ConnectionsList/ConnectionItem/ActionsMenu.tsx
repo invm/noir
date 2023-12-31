@@ -19,12 +19,11 @@ export const ActionsMenu = (props: { connection: ConnectionConfig }) => {
         config.id,
         config.dialect
       );
-      const db_name = config.credentials.db_name;
       await addConnectionTab({
         id: config.id,
         label: config.name,
-        selectedSchema: db_name,
-        definition: { [db_name]: { columns, routines, triggers, tables, views } },
+        selectedSchema: config.schema,
+        definition: { [config.schema]: { columns, routines, triggers, tables, views } },
         schemas,
         connection: config,
       });

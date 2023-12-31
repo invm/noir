@@ -57,6 +57,10 @@
       "show_table_structure": "Show table structure",
       "list_data": "List data",
       "truncate_table": "Truncate table",
+      "tooltips": {
+        "tables": "Table",
+        "views": "View"
+      },
       "tables": "Tables",
       "views": "Views",
       "routines": "Routines",
