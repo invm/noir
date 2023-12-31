@@ -11,7 +11,7 @@ import {
   TableEntity,
 } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { columnsToTable, debounce } from 'utils/utils';
+import { columnsToTables, debounce } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { MessageService } from './Messages';
 import { createSignal } from 'solid-js';
@@ -113,6 +113,7 @@ type Schema = {
   routines: Row[];
   triggers: Row[];
   tables: Table[];
+  views: Table[];
 };
 
 type ConnectionTab = {
@@ -361,16 +362,18 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    const [{ result: _schemas }, { result: columns }, { result: routines }, { result: triggers }] = await Promise.all([
-      invoke<RawQueryResult>('get_schemas', { connId }),
-      invoke<RawQueryResult>('get_columns', { connId }),
-      invoke<RawQueryResult>('get_procedures', { connId }),
-      invoke<RawQueryResult>('get_triggers', { connId }),
-    ]);
+    const [{ result: _schemas }, { result: columns }, { result: routines }, { result: triggers }, { result: _views }] =
+      await Promise.all([
+        invoke<RawQueryResult>('get_schemas', { connId }),
+        invoke<RawQueryResult>('get_columns', { connId }),
+        invoke<RawQueryResult>('get_procedures', { connId }),
+        invoke<RawQueryResult>('get_triggers', { connId }),
+        invoke<RawQueryResult>('get_views', { connId }),
+      ]);
 
-    const tables = columnsToTable(columns, dialect) ?? [];
+    const { views, tables } = columnsToTables(columns, _views, dialect) ?? [];
     const schemas = _schemas.map((d) => String(d['schema']));
-    return { schemas, tables, routines, columns, triggers };
+    return { schemas, tables, views, routines, columns, triggers };
   };
 
   return {

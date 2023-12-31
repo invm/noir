@@ -17,6 +17,7 @@ services:
   #     - ./dev/:/docker-entrypoint-initdb.d
   psql:
     image: postgres:15
+    command: ["postgres", "-c", "log_statement=all"]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example

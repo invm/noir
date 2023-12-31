@@ -58,6 +58,7 @@
       "list_data": "List data",
       "truncate_table": "Truncate table",
       "tables": "Tables",
+      "views": "Views",
       "routines": "Routines",
       "triggers": "Triggers",
       "table_was_truncated": "Table {{table}} was truncated",

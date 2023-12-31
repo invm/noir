@@ -43,6 +43,7 @@ export type ConnectionConfig = {
   dialect: DialectType;
   mode: ModeType;
   credentials: Credentials;
+  schema: string;
   name: string;
   color: ConnectionColor;
 };

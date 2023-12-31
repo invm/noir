@@ -35,12 +35,12 @@ export const Sidebar = () => {
     updateConnectionTab('selectedSchema', schema);
     const config = getConnection();
     await invoke('set_schema', { connId: config.id, schema, dialect: config.connection.dialect });
-    const { triggers, routines, tables, schemas, columns } = await fetchSchemaEntities(
+    const { triggers, routines, tables, schemas, columns, views } = await fetchSchemaEntities(
       config.id,
       config.connection.dialect
     );
     updateConnectionTab('schemas', schemas);
-    updateSchemaDefinition(config.id, { triggers, routines, columns, tables });
+    updateSchemaDefinition(config.id, { triggers, routines, columns, tables, views });
   };
 
   const refreshEntities = async () => {
@@ -48,9 +48,12 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const { triggers, routines, tables, schemas, columns } = await fetchSchemaEntities(config.id, config.dialect);
+      const { triggers, routines, tables, schemas, columns, views } = await fetchSchemaEntities(
+        config.id,
+        config.dialect
+      );
       updateConnectionTab('schemas', schemas);
-      updateSchemaDefinition(config.id, { triggers, routines, columns, tables });
+      updateSchemaDefinition(config.id, { triggers, routines, columns, tables, views });
     } catch (error) {
       notify(error);
     } finally {
@@ -153,6 +156,26 @@ export const Sidebar = () => {
       <div class="overflow-y-auto h-full pb-10">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
         <For each={getSchemaEntity('tables')}>
+          {(table) => (
+            <div class="mb-1 px-2 min-w-full w-fit">
+              <TableColumnsCollapse title={table.name}>
+                <For each={table.columns}>
+                  {(column) => (
+                    <button
+                      onClick={() => insertColumnName(column.name)}
+                      class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
+                      <span class="text-xs font-semibold">{column.name}</span>
+                      {console.log({ column })}
+                      <span class="text-xs font-medium ml-2">{column.props.COLUMN_TYPE ?? column.props.column_type}</span>
+                    </button>
+                  )}
+                </For>
+              </TableColumnsCollapse>
+            </div>
+          )}
+        </For>
+        <div class="text-xs font-bold py-1">{t('sidebar.views')}</div>
+        <For each={getSchemaEntity('views')}>
           {(table) => (
             <div class="mb-1 px-2 min-w-full w-fit">
               <TableColumnsCollapse title={table.name}>
