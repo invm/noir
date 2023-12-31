@@ -8,7 +8,7 @@ import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, ResultSet } from 'interfaces';
 import { Table } from 'components/UI/Icons';
 
-export const TableColumnsCollapse = (props: { entity: 'routines' | 'tables'; title: string; children: JSXElement }) => {
+export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title: string; children: JSXElement }) => {
   const [open, setOpen] = createSignal(false);
 
   const {
@@ -110,7 +110,9 @@ export const TableColumnsCollapse = (props: { entity: 'routines' | 'tables'; tit
           </svg>
         </label>
         <span class="px-2">
-          <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
+          <div class="tooltip tooltip-info tooltip-right tooltip-xs" data-tip={t(`sidebar.tooltips.${props.entity}`)}>
+            <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
+          </div>
         </span>
         <span class="font-semibold">{props.title}</span>
       </span>

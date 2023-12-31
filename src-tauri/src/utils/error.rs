@@ -1,5 +1,4 @@
 use serde::Serialize;
-use tokio::sync::mpsc::error::SendError;
 
 use crate::queues::query::QueryTask;
 // A custom error type that represents all possible in our command
@@ -9,16 +8,26 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("File is not valid utf8: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
-    #[error("General error occurred: {0}")]
-    General(#[from] anyhow::Error),
     #[error("Uuid parse error")]
     UUID(#[from] uuid::Error),
     #[error("Queue send error: {0}")]
-    Send(#[from] SendError<QueryTask>),
-    #[error("Mysql error: {0}")]
+    Send(#[from] tokio::sync::mpsc::error::SendError<QueryTask>),
+    #[error("{0}")]
     Mysql(#[from] mysql::Error),
+    #[error("Mysql error: {0}")]
+    MysqlError(#[from] mysql::MySqlError),
+    #[error("Mysql url error: {0}")]
+    MysqlUrlError(#[from] mysql::UrlError),
+    #[error("Postgresql error: {0}")]
+    Postgresql(#[from] postgres::error::Error),
+    #[error("Pool error: {0}")]
+    DeadpoolPostgresqlPoolError(#[from] deadpool_postgres::PoolError),
+    #[error("Create pool error: {0}")]
+    DeadpoolPostgresqlCreatePoolError(#[from] deadpool_postgres::CreatePoolError),
     #[error("{0}")]
     SQLParse(#[from] sqlparser::parser::ParserError),
+    #[error("General error occurred: {0}")]
+    General(#[from] anyhow::Error),
 }
 
 // we must also implement serde::Serialize

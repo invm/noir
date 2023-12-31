@@ -179,7 +179,7 @@ export const Sidebar = () => {
         <For each={getSchemaEntity('views')}>
           {(table) => (
             <div class="mb-1 px-2 min-w-full w-fit">
-              <TableColumnsCollapse title={table.name} entity="routines">
+              <TableColumnsCollapse title={table.name} entity="views">
                 <For each={table.columns}>
                   {(column) => (
                     <button
