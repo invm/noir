@@ -1,7 +1,10 @@
-use crate::utils::fs::get_app_path;
+use crate::utils::{
+    crypto::{decrypt_data, encrypt_data, get_app_key},
+    fs::get_app_path,
+};
 use anyhow::Result;
 use rusqlite::{named_params, Connection as AppConnection};
-use tracing::info;
+use tracing::{error, info};
 use uuid::Uuid;
 
 use super::connections::{ConnectionConfig, Credentials, Dialect, Mode};
@@ -49,10 +52,11 @@ pub fn create_app_db(app_path: &str) -> Result<()> {
 
     db.execute(
         "create table `connections` (
-          `id`TEXT not null,
+          `id` TEXT not null,
           `dialect` varchar(255) not null,
           `mode` varchar(255) not null,
           `credentials` varchar(255) not null,
+          `schema` varchar(255) not null,
           `name` varchar(255) not null,
           `color` varchar(255) not null
         )",
@@ -60,7 +64,7 @@ pub fn create_app_db(app_path: &str) -> Result<()> {
     )?;
     match db.close() {
         Ok(_) => info!("Successfully created app database"),
-        Err(e) => info!("Failed to create app database: {:?}", e),
+        Err(e) => error!("Failed to create app database: {:?}", e),
     }
     Ok(())
 }
@@ -72,6 +76,7 @@ pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()>
             dialect, 
             mode,
             credentials,
+            schema,
             name,
             color
             ) VALUES (
@@ -79,16 +84,23 @@ pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()>
                 :dialect,
                 :mode,
                 :credentials,
+                :schema,
                 :name,
                 :color
                 )",
     )?;
     let credentials = serde_json::to_string(&conn.credentials)?;
+    let credentials = encrypt_data(&credentials, &get_app_key()?);
+    let schema = match conn.dialect {
+        Dialect::Postgresql => "public",
+        _ => "",
+    };
     statement.execute(named_params! {
-        ":id": conn.id,
+        ":id": conn.id.to_string(),
         ":dialect": conn.dialect.to_string(),
         ":mode": conn.mode.to_string(),
         ":credentials": credentials,
+        ":schema": schema,
         ":name": conn.name,
         ":color": conn.color,
     })?;
@@ -98,7 +110,13 @@ pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()>
 
 pub fn delete_connection(db: &AppConnection, id: &Uuid) -> Result<()> {
     let mut statement = db.prepare("DELETE FROM connections where id = :id")?;
-    statement.execute(named_params! {":id": id})?;
+    statement.execute(named_params! {":id": id.to_string()})?;
+    Ok(())
+}
+
+pub fn update_connection_schema(db: &AppConnection, id: &str, schema: &str) -> Result<()> {
+    let mut statement = db.prepare("UPDATE connections SET schema = :schema where id = :id")?;
+    statement.execute(named_params! {":schema": schema, ":id": id})?;
     Ok(())
 }
 
@@ -107,18 +125,22 @@ pub fn get_all_connections(db: &AppConnection) -> Result<Vec<ConnectionConfig>> 
     let mut rows = statement.query([])?;
     let mut items = Vec::new();
     while let Some(row) = rows.next()? {
-        let credentials: String = row.get("credentials")?;
-        let credentials: Credentials = serde_json::from_str(&credentials)?;
+        let credentials = row.get("credentials")?;
+        let data = String::from_utf8(decrypt_data(&credentials, &get_app_key()?)?)?;
+        let credentials: Credentials = serde_json::from_str(&data)?;
         let dialect: Dialect = row.get("dialect")?;
         let mode: Mode = row.get("mode")?;
+        let schema: String = row.get("schema")?;
+        let id: String = row.get("id")?;
 
         items.push(ConnectionConfig {
-            id: row.get("id")?,
+            id: Uuid::parse_str(&id)?,
             name: row.get("name")?,
             color: row.get("color")?,
             dialect,
             mode,
             credentials,
+            schema,
         });
     }
 

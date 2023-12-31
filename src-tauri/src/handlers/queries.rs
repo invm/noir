@@ -125,7 +125,6 @@ pub async fn get_table_structure(
     conn_id: String,
     table: String,
 ) -> CommandResult<Value> {
-    info!(?conn_id, ?table, "get_table_structure");
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_table_structure(table).await?;
     Ok(result)
@@ -133,7 +132,6 @@ pub async fn get_table_structure(
 
 #[command]
 pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
-    info!(?conn_id, "get_columns");
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_columns().await?;
     Ok(result)
@@ -141,7 +139,6 @@ pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResul
 
 #[command]
 pub async fn get_constraints(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
-    info!(?conn_id, "get_constraints");
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_constraints().await?;
     Ok(result)
@@ -149,7 +146,6 @@ pub async fn get_constraints(app_handle: AppHandle, conn_id: String) -> CommandR
 
 #[command]
 pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
-    info!(?conn_id, "get_triggers");
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_triggers().await?;
     Ok(result)
@@ -157,7 +153,6 @@ pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResu
 
 #[command]
 pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
-    info!(?conn_id, "get_functions");
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.get_functions().await?;
     Ok(result)
@@ -165,20 +160,7 @@ pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandRes
 
 #[command]
 pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
-    info!(?conn_id, "get_procedures");
     let connection = app_handle.acquire_connection(conn_id);
     let stats = connection.get_procedures().await?;
     Ok(stats)
-}
-
-#[command]
-pub async fn set_schema(
-    app_handle: AppHandle,
-    conn_id: String,
-    schema: String,
-) -> CommandResult<()> {
-    info!(?conn_id, ?schema, "set_schema");
-    let conn = app_handle.acquire_connection(conn_id);
-    let conn = conn.set_schema(schema.clone());
-    Ok(app_handle.update_connection(conn)?)
 }

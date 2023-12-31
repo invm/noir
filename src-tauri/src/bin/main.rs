@@ -81,11 +81,13 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            connections::test_connection,
             connections::add_connection,
             connections::delete_connection,
             connections::get_connections,
             connections::init_connection,
             connections::disconnect,
+            connections::set_schema,
             queries::execute_query,
             queries::enqueue_query,
             queries::get_columns,
@@ -97,7 +99,6 @@ fn main() {
             queries::get_query_metadata,
             queries::query_results,
             queries::get_schemas,
-            queries::set_schema,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -26,6 +26,24 @@ pub fn add_connection(
 }
 
 #[command]
+pub async fn test_connection(
+    mut app_handle: AppHandle,
+    dialect: Dialect,
+    mode: Mode,
+    credentials: Credentials,
+    name: &str,
+    color: &str,
+) -> CommandResult<()> {
+    info!(?name, ?dialect, ?mode, ?color, "test_connection");
+    let mut conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    let conn = conn.init().await?;
+    app_handle.connect(&conn.clone())?;
+    let id = conn.config.id.clone().to_string();
+    app_handle.disconnect(&id)?;
+    Ok(())
+}
+
+#[command]
 pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()> {
     info!(?id, "delete_connection");
     let id = uuid::Uuid::parse_str(id.as_str()).map_err(Error::from)?;
@@ -47,7 +65,7 @@ pub async fn init_connection(
     mut app_handle: AppHandle,
     mut config: ConnectionConfig,
 ) -> CommandResult<()> {
-    info!(?config, "init_connection");
+    info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
     let conn = config.init().await?;
     app_handle.connect(&conn)?;
     Ok(())
@@ -59,3 +77,17 @@ pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()
     app_handle.disconnect(&id)?;
     Ok(())
 }
+
+#[command]
+pub async fn set_schema(
+    app_handle: AppHandle,
+    conn_id: String,
+    schema: String,
+) -> CommandResult<()> {
+    info!(?conn_id, ?schema, "set_schema");
+    let conn = app_handle.acquire_connection(conn_id.clone());
+    let conn = conn.set_schema(schema.clone());
+    app_handle.db(|db| queries::update_connection_schema(db, &conn_id, &schema))?;
+    Ok(app_handle.update_connection(conn)?)
+}
+

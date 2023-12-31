@@ -2,11 +2,11 @@ use anyhow::Result;
 use deadpool_postgres::{
     tokio_postgres::NoTls, Config, ManagerConfig, Pool as PostgresqlPool, RecyclingMethod,
 };
-use log::info;
 use mysql::{Opts, OptsBuilder, Pool as MysqlPool};
 use rusqlite::types::{self, FromSql, FromSqlResult, ValueRef};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tracing::error;
 use std::{collections::HashMap, fmt};
 use uuid::Uuid;
 
@@ -78,6 +78,7 @@ pub struct ConnectionConfig {
     pub dialect: Dialect,
     pub mode: Mode,
     pub credentials: Credentials,
+    pub schema: String,
     pub name: String,
     pub color: String,
 }
@@ -140,6 +141,7 @@ impl ConnectionConfig {
                     "secure_auth",
                 ];
                 let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                let schema = credentials.get("db_name").cloned().unwrap_or("".to_string());
                 Ok(ConnectionConfig {
                     id: Uuid::new_v4(),
                     dialect,
@@ -147,6 +149,7 @@ impl ConnectionConfig {
                     credentials,
                     name: name.to_string(),
                     color: color.to_string(),
+                    schema,
                 })
             }
             Dialect::Postgresql => {
@@ -173,6 +176,7 @@ impl ConnectionConfig {
                     credentials,
                     name: name.to_string(),
                     color: color.to_string(),
+                    schema: "public".to_string(),
                 })
             }
             Dialect::Sqlite => todo!(),
@@ -203,7 +207,7 @@ impl ConnectionConfig {
                         })
                     }
                     Err(e) => {
-                        info!("Error connecting to mysql: {}", e);
+                        error!("Error connecting to mysql: {}", e);
                         Err(anyhow::anyhow!("Error connecting to mysql: {}", e))
                     }
                 }
@@ -238,7 +242,7 @@ impl ConnectionConfig {
                         })
                     }
                     Err(e) => {
-                        info!("Error connecting to postgresql: {}", e);
+                        error!("Error connecting to postgresql: {}", e);
                         Err(anyhow::anyhow!("Error connecting to postgresql: {}", e))
                     }
                 }
