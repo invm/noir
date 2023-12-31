@@ -10,6 +10,7 @@ export * from "./Home";
 export * from "./Pen";
 export * from "./QuestionMark";
 export * from "./Refresh";
+export * from "./Table";
 export * from "./Terminal";
 export * from "./ThreeDots";
 export * from "./UserSettings";
