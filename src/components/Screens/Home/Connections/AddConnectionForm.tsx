@@ -14,9 +14,6 @@ import {
   Mode,
   connectionModes,
   dialects,
-  DialectType,
-  ModeType,
-  Credentials,
 } from 'interfaces';
 import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
@@ -104,16 +101,9 @@ const defaultValues = {
   db_name: 'dev_NAME',
 };
 
-const AddConnectionForm = (props: {
-  addConnection: (args: {
-    dialect: DialectType;
-    mode: ModeType;
-    credentials: Credentials;
-    name: string;
-    color: string;
-  }) => Promise<void>;
-}) => {
+const AddConnectionForm = () => {
   const {
+    connections: { addConnection },
     messages: { notify },
   } = useAppSelector();
   const [testing, setTesting] = createSignal(false);
@@ -145,7 +135,7 @@ const AddConnectionForm = (props: {
       setLoading(true);
       event.preventDefault();
       await formHandler.validateForm();
-      await props.addConnection(formToConnectionStruct(formData()));
+      await addConnection(formToConnectionStruct(formData()));
     } catch (error) {
       notify(error);
     } finally {
