@@ -59,7 +59,9 @@
       "truncate_table": "Truncate table",
       "tooltips": {
         "tables": "Table",
-        "views": "View"
+        "views": "View",
+        "routines": "Routine",
+        "triggers": "Trigger"
       },
       "tables": "Tables",
       "views": "Views",

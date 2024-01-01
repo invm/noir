@@ -1,17 +1,5 @@
 import { Dialect, DialectType, Row, SORT_ORDER, Table, TableStrucureEntityType } from 'interfaces';
 
-export const get = (obj: Record<string, unknown>, path: string, defaultValue = undefined) => {
-  const travel = (regexp: RegExp) =>
-    String.prototype.split // eslint-disable-line
-      .call(path, regexp)
-      .filter(Boolean)
-      // @ts-ignore
-      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
-  const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
-  // @ts-ignore
-  return result === undefined || result === obj ? defaultValue : result;
-};
-
 export const randomId = () => {
   const length = 36;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

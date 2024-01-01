@@ -1,14 +1,13 @@
 import { Alerts } from 'components/UI';
 import { invoke } from '@tauri-apps/api';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
-import { CloseIcon, HomeIcon, QuestionMark, UserSettings } from 'components/UI/Icons';
+import { CloseIcon, HomeIcon, QuestionMark } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
-import { Help } from './Help/Help';
 
 export const Main = () => {
   const {
@@ -23,7 +22,7 @@ export const Main = () => {
 
   return (
     <div class="w-full h-full flex flex-col">
-      <div class="px-2 pt-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
+      <div class="px-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
         <div class="tabs tabs-boxed gap-2">
           <button
             onClick={() => {
@@ -66,11 +65,6 @@ export const Main = () => {
           <Show when={connectionStore.idx !== 0}>
             <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
               <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
-                <UserSettings />
-              </button>
-            </div>
-            <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('help.help')}>
-              <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 2 ? 0 : 2))}>
                 <QuestionMark />
               </button>
             </div>
@@ -91,9 +85,6 @@ export const Main = () => {
                 <Console />
               </Match>
             </Switch>
-          </Match>
-          <Match when={component() === 2}>
-            <Help />
           </Match>
         </Switch>
       </div>
