@@ -1,13 +1,13 @@
 import { TableColumnsCollapse } from './TableColumnsCollapse';
 import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
-import { createSignal, For, Match, Switch } from 'solid-js';
+import { createSignal, For, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
-import { Refresh, Terminal } from 'components/UI/Icons';
+import { Function, Refresh, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet } from 'interfaces';
-import { get } from 'utils/utils';
 import { newContentTab } from 'services/Connections';
+import MindShare from 'components/UI/Icons/MindShare';
 
 export const Sidebar = () => {
   const {
@@ -153,19 +153,19 @@ export const Sidebar = () => {
           </button>
         </div>
       </div>
-      <div class="overflow-y-auto h-full pb-10">
+      <div class="overflow-y-auto h-full pb-10 pr-2">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
         <For each={getSchemaEntity('tables')}>
           {(table) => (
-            <div class="mb-1 px-2 min-w-full w-fit">
+            <div class="min-w-full w-fit">
               <TableColumnsCollapse title={table.name} entity="tables">
                 <For each={table.columns}>
                   {(column) => (
                     <button
                       onClick={() => insertColumnName(column.name)}
                       class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
-                      <span class="text-xs font-semibold">{column.name}</span>
-                      <span class="text-xs font-medium ml-2">
+                      <span class="text-xs font-medium">{column.name}</span>
+                      <span class="text-xs font-light ml-2">
                         {column.props.COLUMN_TYPE ?? column.props.column_type}
                       </span>
                     </button>
@@ -175,65 +175,95 @@ export const Sidebar = () => {
             </div>
           )}
         </For>
-        <div class="text-xs font-bold py-1">{t('sidebar.views')}</div>
-        <For each={getSchemaEntity('views')}>
-          {(table) => (
-            <div class="mb-1 px-2 min-w-full w-fit">
-              <TableColumnsCollapse title={table.name} entity="views">
-                <For each={table.columns}>
-                  {(column) => (
-                    <button
-                      onClick={() => insertColumnName(column.name)}
-                      class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
-                      <span class="text-xs font-semibold">{column.name}</span>
-                      <span class="text-xs font-medium ml-2">
-                        {column.props.COLUMN_TYPE ?? column.props.column_type}
-                      </span>
-                    </button>
-                  )}
-                </For>
-              </TableColumnsCollapse>
-            </div>
-          )}
-        </For>
-        <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
-        <For each={getSchemaEntity('routines')}>
-          {(routine) => (
-            <div class="px-2 min-w-full w-fit">
-              <div class="" onContextMenu={(e) => show(e)}>
-                <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-                  <Item onClick={() => showRoutine(routine.ROUTINE_NAME as string)}>{t('sidebar.show_routine')}</Item>
-                  <Item
-                    onClick={() =>
-                      showCreateStatement(routine.ROUTINE_NAME as string, routine.ROUTINE_DEFINITION as string)
-                    }>
-                    {t('sidebar.show_create_statement')}
-                  </Item>
-                </Menu>
-                {<span class="text-xs font-semibold">{get(routine, 'ROUTINE_NAME')}</span>}
+        <Show when={getSchemaEntity('views').length > 0}>
+          <div class="text-xs font-bold py-1">{t('sidebar.views')}</div>
+          <For each={getSchemaEntity('views')}>
+            {(table) => (
+              <div class="min-w-full w-fit">
+                <TableColumnsCollapse title={table.name} entity="views">
+                  <For each={table.columns}>
+                    {(column) => (
+                      <button
+                        onClick={() => insertColumnName(column.name)}
+                        class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
+                        <span class="text-xs font-semibold">{column.name}</span>
+                        <span class="text-xs font-medium ml-2">
+                          {column.props.COLUMN_TYPE ?? column.props.column_type}
+                        </span>
+                      </button>
+                    )}
+                  </For>
+                </TableColumnsCollapse>
               </div>
-            </div>
-          )}
-        </For>
-        <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
-        <For each={getSchemaEntity('triggers')}>
-          {(trigger) => (
-            <div class="px-2 min-w-full w-fit">
-              <div class="" onContextMenu={(e) => show(e)}>
-                <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-                  <Item onClick={() => showTrigger(trigger.TRIGGER_NAME as string)}>{t('sidebar.show_trigger')}</Item>
-                  <Item
-                    onClick={() =>
-                      showCreateStatement(trigger.TRIGGER_NAME as string, trigger.ACTION_STATEMENT as string)
-                    }>
-                    {t('sidebar.show_create_statement')}
-                  </Item>
-                </Menu>
-                {<span class="text-xs font-semibold">{get(trigger, 'TRIGGER_NAME')}</span>}
+            )}
+          </For>
+        </Show>
+        <Show when={getSchemaEntity('routines').length > 0}>
+          <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
+          <For each={getSchemaEntity('routines')}>
+            {(routine) => (
+              <div class="px-2 min-w-full w-fit">
+                <div onContextMenu={(e) => show(e)}>
+                  <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
+                    <Item onClick={() => showRoutine(routine.ROUTINE_NAME as string)}>{t('sidebar.show_routine')}</Item>
+                    <Item
+                      onClick={() =>
+                        showCreateStatement(routine.ROUTINE_NAME as string, routine.ROUTINE_DEFINITION as string)
+                      }>
+                      {t('sidebar.show_create_statement')}
+                    </Item>
+                  </Menu>
+
+                  <span class="px-2">
+                    <div
+                      class="tooltip tooltip-info tooltip-right tooltip-xs"
+                      data-tip={t(`sidebar.tooltips.routines`)}>
+                      <Function />
+                    </div>
+                  </span>
+                  <span class="text-xs font-semibold">
+                    {String(routine['ROUTINE_NAME'] ?? routine['routine_name'])}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
-        </For>
+            )}
+          </For>
+        </Show>
+        <Show when={getSchemaEntity('triggers').length > 0}>
+          <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
+          <For each={getSchemaEntity('triggers')}>
+            {(trigger) => (
+              <div class="px-2 min-w-full w-fit">
+                <div class="" onContextMenu={(e) => show(e)}>
+                  <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
+                    <Item onClick={() => showTrigger(trigger.TRIGGER_NAME as string)}>{t('sidebar.show_trigger')}</Item>
+                    <Item
+                      onClick={() =>
+                        showCreateStatement(trigger.TRIGGER_NAME as string, trigger.ACTION_STATEMENT as string)
+                      }>
+                      {t('sidebar.show_create_statement')}
+                    </Item>
+                  </Menu>
+                  <span class="px-2">
+                    <div
+                      class="tooltip tooltip-info tooltip-right tooltip-xs"
+                      data-tip={t(`sidebar.tooltips.triggers`)}>
+                      <MindShare />
+                    </div>
+                  </span>
+                  {
+                    <span class="text-xs font-semibold">
+                      {String(trigger['TRIGGER_NAME'] ?? trigger['trigger_name']) +
+                        ' (' +
+                        String(trigger['EVENT_OBJECT_TABLE'] ?? trigger['event_object_table']) +
+                        ')'}
+                    </span>
+                  }
+                </div>
+              </div>
+            )}
+          </For>
+        </Show>
       </div>
     </div>
   );

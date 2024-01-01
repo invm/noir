@@ -70,52 +70,56 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
   };
 
   return (
-    <div class="w-full" onContextMenu={(e) => show(e)}>
+    <>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
         <Item onClick={({ props }) => addTableStructureTab(props.table)}>{t('sidebar.show_table_structure')}</Item>
         <Item onClick={({ props }) => listData(props.table)}>{t('sidebar.list_data')}</Item>
         <Item onClick={({ props }) => truncateTable(props.table)}>{t('sidebar.truncate_table')}</Item>
       </Menu>
-      <span
-        onClick={() => setOpen(!open())}
-        class="collapse flex items-center text-sm text-base-content font-medium cursor-pointer rounded-none border-b-[1px] border-base-300">
-        <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
-          <svg
-            class="w-2 h-2 swap-off"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 6 10">
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 9 4-4-4-4"
-            />
-          </svg>
-          <svg
-            class="w-2 h-2 swap-on"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6">
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </label>
-        <span class="px-2">
-          <div class="tooltip tooltip-info tooltip-right tooltip-xs" data-tip={t(`sidebar.tooltips.${props.entity}`)}>
-            <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
-          </div>
-        </span>
-        <span class="font-semibold">{props.title}</span>
-      </span>
+      <div class="w-full flex items-center" onContextMenu={(e) => show(e)}>
+        <div class="flex items-center">
+          <span onClick={() => setOpen(!open())} class="collapse">
+            <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
+              <svg
+                class="w-2 h-2 swap-off"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 6 10">
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m1 9 4-4-4-4"
+                />
+              </svg>
+              <svg
+                class="w-2 h-2 swap-on"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 6">
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m1 1 4 4 4-4"
+                />
+              </svg>
+            </label>
+          </span>
+
+          <span class="px-2">
+            <div class="tooltip tooltip-info tooltip-right tooltip-xs" data-tip={t(`sidebar.tooltips.${props.entity}`)}>
+              <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
+            </div>
+          </span>
+          <span class="text-xs font-semibold">{props.title}</span>
+        </div>
+      </div>
+
       <div
         class="pl-2"
         classList={{
@@ -125,6 +129,6 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
         }}>
         {open() && props.children}
       </div>
-    </div>
+    </>
   );
 };

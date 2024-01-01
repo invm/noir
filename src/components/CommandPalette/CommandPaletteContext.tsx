@@ -21,7 +21,7 @@ export const CommandPaletteContext = (props: { children: JSX.Element }) => {
   });
 
   createShortcut(['F1'], () => {
-    setComponent(s => (s === 2 ? 0 : 2));
+    setComponent(s => (s === 1 ? 0 : 1));
   });
 
   createShortcut(['Meta', 't'], () => {
