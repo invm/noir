@@ -3,11 +3,10 @@ import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { createSignal, For, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
-import { Function, Refresh, Terminal } from 'components/UI/Icons';
+import { Function, Refresh, ShareNodes, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet } from 'interfaces';
 import { newContentTab } from 'services/Connections';
-import MindShare from 'components/UI/Icons/MindShare';
 
 export const Sidebar = () => {
   const {
@@ -63,7 +62,11 @@ export const Sidebar = () => {
 
   const showProcessList = async () => {
     try {
-      const query = 'SHOW PROCESSLIST';
+      const conn = getConnection();
+      let query = 'SHOW PROCESSLIST';
+      if (conn.connection.dialect === 'Postgresql') {
+        query = 'SELECT * FROM pg_stat_activity';
+      }
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
@@ -186,7 +189,7 @@ export const Sidebar = () => {
                       <button
                         onClick={() => insertColumnName(column.name)}
                         class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
-                        <span class="text-xs font-semibold">{column.name}</span>
+                        <span class="text-xs font-semibold ">{column.name}</span>
                         <span class="text-xs font-medium ml-2">
                           {column.props.COLUMN_TYPE ?? column.props.column_type}
                         </span>
@@ -202,7 +205,7 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
           <For each={getSchemaEntity('routines')}>
             {(routine) => (
-              <div class="px-2 min-w-full w-fit">
+              <div class="px-2 w-fit truncate">
                 <div onContextMenu={(e) => show(e)}>
                   <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
                     <Item onClick={() => showRoutine(routine.ROUTINE_NAME as string)}>{t('sidebar.show_routine')}</Item>
@@ -221,7 +224,7 @@ export const Sidebar = () => {
                       <Function />
                     </div>
                   </span>
-                  <span class="text-xs font-semibold">
+                  <span class="text-xs font-semibold truncate">
                     {String(routine['ROUTINE_NAME'] ?? routine['routine_name'])}
                   </span>
                 </div>
@@ -233,7 +236,7 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
           <For each={getSchemaEntity('triggers')}>
             {(trigger) => (
-              <div class="px-2 min-w-full w-fit">
+              <div class="px-2 w-fit truncate">
                 <div class="" onContextMenu={(e) => show(e)}>
                   <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
                     <Item onClick={() => showTrigger(trigger.TRIGGER_NAME as string)}>{t('sidebar.show_trigger')}</Item>
@@ -248,17 +251,15 @@ export const Sidebar = () => {
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
                       data-tip={t(`sidebar.tooltips.triggers`)}>
-                      <MindShare />
+                      <ShareNodes />
                     </div>
                   </span>
-                  {
-                    <span class="text-xs font-semibold">
-                      {String(trigger['TRIGGER_NAME'] ?? trigger['trigger_name']) +
-                        ' (' +
-                        String(trigger['EVENT_OBJECT_TABLE'] ?? trigger['event_object_table']) +
-                        ')'}
-                    </span>
-                  }
+                  <span class="text-xs font-semibold">
+                    {String(trigger['TRIGGER_NAME'] ?? trigger['trigger_name']) +
+                      ' (' +
+                      String(trigger['EVENT_OBJECT_TABLE'] ?? trigger['event_object_table']) +
+                      ')'}
+                  </span>
                 </div>
               </div>
             )}

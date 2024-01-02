@@ -192,3 +192,6 @@ dialog {
   width: 6rem;
 }
 
+.tooltip::before {
+  @apply z-50;
+}
