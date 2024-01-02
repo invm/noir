@@ -24,13 +24,15 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
     Ok(match *column.type_() {
         // for rust-postgres <> postgres type-mappings: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html#types
         // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
-
-        // single types
-        Type::TIMESTAMP => {
-            get_basic(row, column, column_i, |a: chrono::NaiveDateTime| {
-                Ok(Value::String(a.to_string()))
-            })?
-        }
+        Type::OID => get_basic(row, column, column_i, |a: u32| {
+            Ok(Value::Number(serde_json::Number::from(a)))
+        })?,
+        Type::INET => get_basic(row, column, column_i, |a: std::net::IpAddr| {
+            Ok(Value::String(a.to_string()))
+        })?,
+        Type::TIMESTAMP => get_basic(row, column, column_i, |a: chrono::NaiveDateTime| {
+            Ok(Value::String(a.to_string()))
+        })?,
         Type::TIMESTAMPTZ => {
             get_basic(row, column, column_i, |a: chrono::DateTime<chrono::Utc>| {
                 Ok(Value::String(a.to_string()))
@@ -78,12 +80,30 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
             get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?
         }
 
-        _ => anyhow::bail!(
-            "Cannot convert pg-cell \"{}\" of type \"{}\" to a Value.",
-            column.name(),
-            column.type_().name()
-        ),
+        _ => {
+            let val: Option<GenericEnum> = row.get(1);
+            if let Some(_i) = val {
+                return Ok(Value::String(_i.0));
+            }
+            Value::Null
+        }
     })
+}
+#[derive(Debug)]
+struct GenericEnum(String);
+
+impl FromSql<'_> for GenericEnum {
+    fn from_sql(
+        _: &Type,
+        raw: &[u8],
+    ) -> Result<GenericEnum, Box<dyn std::error::Error + Sync + Send>> {
+        let result = std::str::from_utf8(raw).unwrap();
+        let val = GenericEnum(result.to_owned());
+        Ok(val)
+    }
+    fn accepts(_ty: &Type) -> bool {
+        true
+    }
 }
 
 fn get_basic<'a, T: FromSql<'a>>(

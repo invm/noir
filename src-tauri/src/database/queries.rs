@@ -91,16 +91,12 @@ pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()>
     )?;
     let credentials = serde_json::to_string(&conn.credentials)?;
     let credentials = encrypt_data(&credentials, &get_app_key()?);
-    let schema = match conn.dialect {
-        Dialect::Postgresql => "public",
-        _ => "",
-    };
     statement.execute(named_params! {
         ":id": conn.id.to_string(),
         ":dialect": conn.dialect.to_string(),
         ":mode": conn.mode.to_string(),
         ":credentials": credentials,
-        ":schema": schema,
+        ":schema": conn.schema,
         ":name": conn.name,
         ":color": conn.color,
     })?;
