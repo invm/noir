@@ -43,6 +43,7 @@ pub async fn get_columns(
         TABLE_NAME,
         COLUMN_NAME, 
         COLUMN_TYPE, 
+        ORDINAL_POSITION,
         DATA_TYPE, 
         CHARACTER_MAXIMUM_LENGTH,
         IS_NULLABLE,
