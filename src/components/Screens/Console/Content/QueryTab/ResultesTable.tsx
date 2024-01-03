@@ -9,6 +9,7 @@ import { Pagination } from './components/Pagination';
 import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 import Keymaps from 'components/UI/Keymaps';
+import { NoResults } from './components/NoResults';
 
 type TableColumn = { title: string; field: string; resizeable?: boolean };
 
@@ -48,12 +49,14 @@ export const ResultsTable = () => {
   createExtension(lineWrapping);
 
   const [rows, setRows] = createSignal<Row[]>([]);
+  const [loaded, setLoaded] = createSignal(false);
   const [page, setPage] = createSignal(0);
   const [loading, setLoading] = createSignal(false);
 
   const updateRows = async () => {
     try {
       setLoading(true);
+      setLoaded(false);
       const result_set = getContentData('Query').result_sets[queryIdx()];
       if (result_set?.rows) {
         setRows(result_set.rows);
@@ -61,15 +64,18 @@ export const ResultsTable = () => {
       }
       if (result_set?.status !== 'Completed') {
         setRows([]);
+        setLoaded(true);
         return;
       }
       const _rows = await getQueryResults(result_set.path!, page());
       setRows(_rows);
+      setLoaded(true);
     } finally {
       setLoading(false);
     }
   };
 
+  // on initial render, this update rows is called twice
   createEffect(
     on(queryIdx, () => {
       setPage(0);
@@ -89,12 +95,11 @@ export const ResultsTable = () => {
         // editor: "input" as const, // this will make the whole table navigable
       }));
     }
-    if (columns.length === 0) return;
 
     new Tabulator('#results-table', {
       spreadSheet: true,
       data: rows(),
-      placeholder: (<Keymaps />) as HTMLElement,
+      placeholder: (loaded() ? <NoResults /> : <Keymaps />) as HTMLElement,
       // autoColumns: true,
       columns,
       columnDefaults: {
@@ -104,7 +109,7 @@ export const ResultsTable = () => {
       // layout: 'fitDataStretch',
       autoResize: false,
       clipboard: true,
-      renderHorizontal: 'virtual',
+      renderHorizontal: rows().length > 0 ? 'virtual' : 'basic',
       renderVertical: 'virtual',
       pagination: false,
       maxHeight: '100%',
