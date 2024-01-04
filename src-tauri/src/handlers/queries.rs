@@ -41,9 +41,9 @@ pub async fn enqueue_query(
             let statements: Vec<(String, String)> = statements
                 .into_iter()
                 .map(|s| {
-                    let query_hash = md5_hash(&s);
-                    let id = conn.config.id.to_string() + &tab_idx.to_string() + &query_hash;
-                    return (s, id);
+                    let id = conn.config.id.to_string() + &tab_idx.to_string() + &s;
+                    let hash = md5_hash(&id);
+                    return (s, hash);
                 })
                 .collect();
             if statements.is_empty() {
