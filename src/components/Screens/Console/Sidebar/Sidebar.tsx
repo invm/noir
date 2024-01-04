@@ -7,6 +7,7 @@ import { Function, Refresh, ShareNodes, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet } from 'interfaces';
 import { newContentTab } from 'services/Connections';
+import { getAnyCase } from 'utils/utils';
 
 export const Sidebar = () => {
   const {
@@ -23,12 +24,12 @@ export const Sidebar = () => {
   } = useAppSelector();
   const [loading, setLoading] = createSignal(false);
 
-  const menu_id = 'sidebar-routine-menu';
+  const routine_menu = 'sidebar-routine-menu';
+  const trigger_menu = 'sidebar-trigger-menu';
 
-  const { show } = useContextMenu({
-    id: menu_id,
-    props: {},
-  });
+  const { show: show_routine_menu } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
+
+  const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
 
   const select = async (schema: string) => {
     updateConnectionTab('selectedSchema', schema);
@@ -168,9 +169,7 @@ export const Sidebar = () => {
                       onClick={() => insertColumnName(column.name)}
                       class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                       <span class="text-xs font-medium">{column.name}</span>
-                      <span class="text-xs font-light ml-2">
-                        {column.props.COLUMN_TYPE ?? column.props.column_type}
-                      </span>
+                      <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'COLUMN_TYPE')}</span>
                     </button>
                   )}
                 </For>
@@ -190,9 +189,7 @@ export const Sidebar = () => {
                         onClick={() => insertColumnName(column.name)}
                         class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                         <span class="text-xs font-semibold ">{column.name}</span>
-                        <span class="text-xs font-medium ml-2">
-                          {column.props.COLUMN_TYPE ?? column.props.column_type}
-                        </span>
+                        <span class="text-xs font-medium ml-2">{getAnyCase(column.props, 'COLUMN_TYPE')}</span>
                       </button>
                     )}
                   </For>
@@ -203,20 +200,21 @@ export const Sidebar = () => {
         </Show>
         <Show when={getSchemaEntity('routines').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
+          <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
+            <Item onClick={({ props }) => showRoutine(getAnyCase(props.routine, 'ROUTINE_NAME'))}>
+              {t('sidebar.show_routine')}
+            </Item>
+            <Item
+              onClick={({ props: { routine } }) =>
+                showCreateStatement(getAnyCase(routine, 'ROUTINE_NAME'), getAnyCase(routine, 'ROUTINE_DEFINITION'))
+              }>
+              {t('sidebar.show_create_statement')}
+            </Item>
+          </Menu>
           <For each={getSchemaEntity('routines')}>
             {(routine) => (
               <div class="px-2 w-fit truncate">
-                <div onContextMenu={(e) => show(e)}>
-                  <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-                    <Item onClick={() => showRoutine(routine.ROUTINE_NAME as string)}>{t('sidebar.show_routine')}</Item>
-                    <Item
-                      onClick={() =>
-                        showCreateStatement(routine.ROUTINE_NAME as string, routine.ROUTINE_DEFINITION as string)
-                      }>
-                      {t('sidebar.show_create_statement')}
-                    </Item>
-                  </Menu>
-
+                <div onContextMenu={(e) => show_routine_menu(e, { props: { routine } })}>
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
@@ -224,9 +222,7 @@ export const Sidebar = () => {
                       <Function />
                     </div>
                   </span>
-                  <span class="text-xs font-semibold truncate">
-                    {String(routine['ROUTINE_NAME'] ?? routine['routine_name'])}
-                  </span>
+                  <span class="text-xs font-semibold truncate">{getAnyCase(routine, 'ROUTINE_NAME')}</span>
                 </div>
               </div>
             )}
@@ -234,19 +230,21 @@ export const Sidebar = () => {
         </Show>
         <Show when={getSchemaEntity('triggers').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
+          <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
+            <Item onClick={({ props: { trigger } }) => showTrigger(getAnyCase(trigger, 'TRIGGER_NAME'))}>
+              {t('sidebar.show_trigger')}
+            </Item>
+            <Item
+              onClick={({ props: { trigger } }) =>
+                showCreateStatement(getAnyCase(trigger, 'TRIGGER_NAME'), getAnyCase(trigger, 'ACTION_STATEMENT'))
+              }>
+              {t('sidebar.show_create_statement')}
+            </Item>
+          </Menu>
           <For each={getSchemaEntity('triggers')}>
             {(trigger) => (
               <div class="px-2 w-fit truncate">
-                <div class="" onContextMenu={(e) => show(e)}>
-                  <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-                    <Item onClick={() => showTrigger(trigger.TRIGGER_NAME as string)}>{t('sidebar.show_trigger')}</Item>
-                    <Item
-                      onClick={() =>
-                        showCreateStatement(trigger.TRIGGER_NAME as string, trigger.ACTION_STATEMENT as string)
-                      }>
-                      {t('sidebar.show_create_statement')}
-                    </Item>
-                  </Menu>
+                <div onContextMenu={(e) => show_trigger_menu(e, { props: { trigger } })}>
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
@@ -255,10 +253,7 @@ export const Sidebar = () => {
                     </div>
                   </span>
                   <span class="text-xs font-semibold">
-                    {String(trigger['TRIGGER_NAME'] ?? trigger['trigger_name']) +
-                      ' (' +
-                      String(trigger['EVENT_OBJECT_TABLE'] ?? trigger['event_object_table']) +
-                      ')'}
+                    {getAnyCase(trigger, 'TRIGGER_NAME') + ' (' + getAnyCase(trigger, 'EVENT_OBJECT_TABLE') + ')'}
                   </span>
                 </div>
               </div>
