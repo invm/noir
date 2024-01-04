@@ -1,11 +1,6 @@
 {
   "translation": {
     "query_noir_titlecase": "Query Noir",
-    "command_palette": {
-      "toggle_theme_switcher": "Toggle Theme Switcher",
-      "focus_on": "Focus on",
-      "focus_query_text_area": "Focus On Query Text Area"
-    },
     "add_connection_form": {
       "title": "Add New Connection",
       "test": "Test",

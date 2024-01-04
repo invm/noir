@@ -1,21 +1,48 @@
 import 'utils/i18n';
 import 'tabulator-tables/dist/css/tabulator_midnight.min.css';
-import 'solid-command-palette/pkg-dist/style.css';
 import { Main } from 'components/Screens/Main';
-import { CommandPaletteContext } from 'components/CommandPalette/CommandPaletteContext';
 import { Loader } from 'components/UI';
-import { onMount } from 'solid-js';
+import { onMount, Switch, Match } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
+import { createShortcut } from '@solid-primitives/keyboard';
 
 function App() {
   const {
-    connections: { restoreConnectionStore, getConnection, updateResultSet, contentStore, loading },
-    app: { restoreAppStore },
+    connections: {
+      addContentTab,
+      removeContentTab,
+      setContentIdx,
+      restoreConnectionStore,
+      getConnection,
+      updateResultSet,
+      contentStore,
+      loading,
+      setLoading,
+    },
+    app: { restoreAppStore, setComponent },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
+
+  createShortcut(['Meta', 'w'], () => {
+    removeContentTab(contentStore.idx);
+  });
+
+  createShortcut(['F1'], () => {
+    setComponent((s) => (s === 1 ? 0 : 1));
+  });
+
+  createShortcut(['Meta', 't'], () => {
+    addContentTab();
+  });
+
+  for (let i = 1; i <= 9; i++) {
+    createShortcut(['Meta', String(i)], () => {
+      setContentIdx(i - 1);
+    });
+  }
 
   addEventListener('unhandledrejection', (e) => {
     console.log({ message: 'Unhandled rejection', info: (e.reason?.message || e.reason || e).toString() });
@@ -51,18 +78,20 @@ function App() {
     document.documentElement.dataset.theme = theme;
     await restoreAppStore();
     await restoreConnectionStore();
+    setLoading(false);
   });
 
   return (
-    <CommandPaletteContext>
-      {loading() ? (
+    <Switch>
+      <Match when={loading()}>
         <div class="flex justify-center items-center h-full bg-base-200 w-full">
           <Loader />
         </div>
-      ) : (
+      </Match>
+      <Match when={!loading()}>
         <Main />
-      )}
-    </CommandPaletteContext>
+      </Match>
+    </Switch>
   );
 }
 
