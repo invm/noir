@@ -1,9 +1,9 @@
-import { ResultsTable } from '../QueryTab/ResultesTable';
+import { Results } from '../QueryTab/Results';
 
 const DataTab = () => {
   return (
     <div id="results">
-      <ResultsTable />
+      <Results />
     </div>
   );
 };
