@@ -64,7 +64,6 @@ export const ResultsTable = () => {
       }
       if (result_set?.status !== 'Completed') {
         setRows([]);
-        setLoaded(true);
         return;
       }
       const _rows = await getQueryResults(result_set.path!, page());

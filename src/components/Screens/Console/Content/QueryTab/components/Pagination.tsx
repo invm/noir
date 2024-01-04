@@ -36,7 +36,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="container flex justify-between items-top p-1 gap-2 bg-base-200">
+    <div class="container flex justify-between items-top gap-2 bg-base-200">
       <div class="flex gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">

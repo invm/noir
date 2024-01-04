@@ -1,19 +1,17 @@
-import Split from "split.js";
-import { createEffect, onCleanup } from "solid-js";
-import { Sidebar } from "components/Screens/Console/Sidebar/Sidebar";
-import { Content } from "components/Screens/Console/Content/Content";
+import Split from 'split.js';
+import { createEffect, onCleanup } from 'solid-js';
+import { Sidebar } from 'components/Screens/Console/Sidebar/Sidebar';
+import { Content } from 'components/Screens/Console/Content/Content';
 
 export const Console = () => {
   createEffect(() => {
-    const s = Split(["#sidebar", "#main"], {
-      sizes: [20, 80],
-      minSize: [200, 200],
+    const s = Split(['#sidebar', '#main'], {
+      sizes: [15, 85],
+      minSize: [150, 200],
       maxSize: [400, Infinity],
       gutterSize: 4,
     });
-    onCleanup(() => {
-      s.destroy();
-    });
+    onCleanup(() => s.destroy());
   });
 
   return (
