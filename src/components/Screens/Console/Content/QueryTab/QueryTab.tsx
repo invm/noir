@@ -1,4 +1,4 @@
-import { ResultsTable } from './ResultesTable';
+import { Results } from './Results';
 import { createEffect, onCleanup } from 'solid-js';
 import Split from 'split.js';
 import { Editor } from './Editor';
@@ -22,7 +22,7 @@ export const QueryTab = () => {
         <Editor />
       </div>
       <div id="results">
-        <ResultsTable />
+        <Results />
       </div>
     </div>
   );
