@@ -171,7 +171,11 @@ dialog {
 }
 
 .tabulator .tabulator-tableholder {
-  @apply bg-base-200 !important;
+  @apply bg-base-200 h-full !important;
+}
+
+.tabulator-placeholder{ 
+  @apply h-full !important;
 }
 
 #results {

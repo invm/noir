@@ -25,7 +25,7 @@ const getSavedData = async (key: string) => {
 
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
-    vimModeOn: true,
+    vimModeOn: false,
   });
 
   const [component, setComponent] = createSignal(0);

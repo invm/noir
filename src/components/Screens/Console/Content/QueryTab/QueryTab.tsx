@@ -13,9 +13,7 @@ export const QueryTab = () => {
       gutterSize: 4,
     });
 
-    onCleanup(() => {
-      q.destroy();
-    });
+    onCleanup(() => q.destroy());
   });
 
   return (
