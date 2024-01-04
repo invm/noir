@@ -1,7 +1,7 @@
 import { ResultsTable } from './ResultesTable';
 import { createEffect, onCleanup } from 'solid-js';
 import Split from 'split.js';
-import { QueryTextArea } from './QueryTextArea';
+import { Editor } from './Editor';
 
 export const QueryTab = () => {
   createEffect(() => {
@@ -21,7 +21,7 @@ export const QueryTab = () => {
   return (
     <div class="flex flex-col h-full">
       <div id="query" class="flex flex-col">
-        <QueryTextArea />
+        <Editor />
       </div>
       <div id="results">
         <ResultsTable />

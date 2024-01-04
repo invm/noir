@@ -33,7 +33,7 @@ const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | 
 
 export const ResultsTable = () => {
   const {
-    connections: { queryIdx, getContentData },
+    connections: { queryIdx, getContentData, contentStore },
     backend: { getQueryResults },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -83,7 +83,7 @@ export const ResultsTable = () => {
     })
   );
 
-  createEffect(updateRows);
+  createEffect(updateRows, contentStore.idx);
 
   createEffect(() => {
     let columns: TableColumn[] = [];

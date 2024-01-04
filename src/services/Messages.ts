@@ -9,8 +9,7 @@ type Error = {
 };
 
 export const MessageService = () => {
-  const errorStore = createStore<Error[]>([]);
-  const [messages, setMessages] = errorStore;
+  const [messages, setMessages] = createStore<Error[]>([]);
 
   const notify = (message: string | unknown, type: AlertTypes = 'error') => {
     console.log(message);

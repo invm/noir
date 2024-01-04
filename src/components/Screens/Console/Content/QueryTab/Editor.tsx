@@ -24,9 +24,9 @@ const SQLDialects = {
   [Dialect.Sqlite]: SQLite,
 };
 
-export const QueryTextArea = () => {
+export const Editor = () => {
   const {
-    connections: { updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
+    connections: { connectionStore, updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
@@ -52,18 +52,17 @@ export const QueryTextArea = () => {
     onValueChange: updateQueryText,
   });
   createEditorControlledValue(editorView, code);
+  const lineWrapping = EditorView.lineWrapping;
+  createExtension(lineWrapping);
   createExtension(drawSelection);
   createExtension(highlightWhitespace);
   createExtension(highlightActiveLine);
   createExtension(dracula);
   createExtension(search);
-  createExtension(() => basicSetup);
+  createExtension(basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
   createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));
   const { setFocused, focused } = createEditorFocus(editorView);
-
-  const lineWrapping = EditorView.lineWrapping;
-  createExtension(lineWrapping);
 
   const onFormat = () => {
     const formatted = format(code());
@@ -112,25 +111,27 @@ export const QueryTextArea = () => {
     const data = getContentData('Query');
     setCode(data.query ?? '');
     setAutoLimit(data.auto_limit ?? true);
-    setSchema(
-      getSchemaEntity('tables').reduce(
-        (acc, table) => ({
-          ...acc,
-          [table.name]: table.columns.map(({ name }) => name),
-        }),
-        {}
-      )
-    );
-  });
+  }, contentStore.idx);
 
-  createShortcut(['Control', 'k'], () => {
+  createEffect(() => {
+    const _schema = getSchemaEntity('tables').reduce(
+      (acc, table) => ({
+        ...acc,
+        [table.name]: table.columns.map(({ name }) => name),
+      }),
+      {}
+    );
+    setSchema(_schema);
+  }, connectionStore.idx);
+
+  createShortcut(['Meta', 'k'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(false);
       fn(editorView());
     }
   });
 
-  createShortcut(['Control', 'j'], () => {
+  createShortcut(['Meta', 'j'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(true);
       fn(editorView());
@@ -193,7 +194,7 @@ export const QueryTextArea = () => {
         </div>
       </div>
       <div class="overflow-hidden w-full h-full">
-        <div ref={ref} class="w-full h-full" id="asd" />
+        <div ref={ref} class="w-full h-full" />
       </div>
     </div>
   );
