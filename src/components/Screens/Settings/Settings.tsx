@@ -1,3 +1,4 @@
+import Keymaps from 'components/UI/Keymaps';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
@@ -14,7 +15,10 @@ export const Settings = () => {
           {t('settings.clear_cache')}
         </button>
       </div>
-      <h2 class="text-xl font-bold mt-4">{t('settings.shortcuts')}</h2>
+      <div class="flex flex-col items-center">
+        <h2 class="text-xl font-bold mt-4">{t('settings.shortcuts')}</h2>
+        <Keymaps />
+      </div>
     </div>
   );
 };
