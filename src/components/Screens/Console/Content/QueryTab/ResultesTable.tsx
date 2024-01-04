@@ -87,8 +87,10 @@ export const ResultsTable = () => {
 
   createEffect(() => {
     let columns: TableColumn[] = [];
-    if (rows().length) {
-      columns = Object.keys(rows()[0]).map((k) => ({
+    const _loaded = loaded();
+    const _rows = rows();
+    if (_rows.length) {
+      columns = Object.keys(_rows[0]).map((k) => ({
         title: k,
         field: k,
         // resizeable: true,
@@ -97,9 +99,8 @@ export const ResultsTable = () => {
     }
 
     new Tabulator('#results-table', {
-      spreadSheet: true,
-      data: rows(),
-      placeholder: (loaded() ? <NoResults /> : <Keymaps />) as HTMLElement,
+      data: _rows,
+      placeholder: (_loaded ? <NoResults /> : <Keymaps />) as HTMLElement,
       // autoColumns: true,
       columns,
       columnDefaults: {
@@ -109,7 +110,7 @@ export const ResultsTable = () => {
       // layout: 'fitDataStretch',
       autoResize: false,
       clipboard: true,
-      renderHorizontal: rows().length > 0 ? 'virtual' : 'basic',
+      renderHorizontal: _rows.length > 0 ? 'virtual' : 'basic',
       renderVertical: 'virtual',
       pagination: false,
       maxHeight: '100%',
