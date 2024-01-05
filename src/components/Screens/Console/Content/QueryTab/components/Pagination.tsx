@@ -13,6 +13,7 @@ type PaginationProps = {
   setPage: (n: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
+  onBtnExport: () => void;
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -36,7 +37,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="container flex justify-between items-top gap-2 bg-base-200">
+    <div class="container flex justify-between items-top gap-2 bg-base-100">
       <div class="flex gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">
@@ -64,7 +65,8 @@ export const Pagination = (props: PaginationProps) => {
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
-        <div class="join flex items-center">
+        <div class="flex items-center">
+          <button onClick={props.onBtnExport}>{t('console.table.csv')}</button>
           <div class="px-3">
             <select
               value={pageSize()}
@@ -73,38 +75,34 @@ export const Pagination = (props: PaginationProps) => {
                 props.setPage(0);
               }}
               class="select select-accent select-bordered select-xs w-full">
-              <For each={PAGE_SIZE_OPTIONS}>
-                {(n) => (
-                  <option class="py-1" value={n}>
-                    {n}
-                  </option>
-                )}
-              </For>
+              <For each={PAGE_SIZE_OPTIONS}>{(n) => <option value={n}>{n}</option>}</For>
             </select>
           </div>
-          <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.previous_page')}>
-            <button class="join-item btn btn-sm" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
-              <ChevronLeft />
+          <div class="join">
+            <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.previous_page')}>
+              <button class="join-item btn btn-sm" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
+                <ChevronLeft />
+              </button>
+            </div>
+            <button disabled class="join-item btn btn-sm btn-disabled !text-base-content w-[50px]">
+              <Switch>
+                <Match when={props.loading}>
+                  <span class="loading text-primary loading-bars loading-xs"></span>
+                </Match>
+                <Match when={!props.loading}>
+                  <span>{props.page() + 1}</span>
+                </Match>
+              </Switch>
             </button>
-          </div>
-          <button disabled class="join-item btn btn-sm btn-disabled !text-base-content w-[50px]">
-            <Switch>
-              <Match when={props.loading}>
-                <span class="loading text-primary loading-bars loading-xs"></span>
-              </Match>
-              <Match when={!props.loading}>
-                <span>{props.page() + 1}</span>
-              </Match>
-            </Switch>
-          </button>
 
-          <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_page')}>
-            <button
-              class="join-item btn btn-sm"
-              disabled={props.loading || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
-              onClick={props.onNextPage}>
-              <ChevronRight />
-            </button>
+            <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_page')}>
+              <button
+                class="join-item btn btn-sm"
+                disabled={props.loading || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
+                onClick={props.onNextPage}>
+                <ChevronRight />
+              </button>
+            </div>
           </div>
         </div>
       </Show>

@@ -49,7 +49,8 @@
       "out_of": " out of ",
       "table": {
         "show_row": "Show row",
-        "copy_to_clipboard": "Copy row to clipboard as json"
+        "copy_to_clipboard": "Copy row to clipboard as json",
+        "csv": "Export to CSV"
       }
     },
     "sidebar": {
