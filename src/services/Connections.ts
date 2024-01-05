@@ -34,7 +34,7 @@ export const ContentTab = {
 
 type ContentComponentKeys = keyof typeof ContentTab;
 
-type ContentTabData = {
+export type ContentTabData = {
   [ContentTab.Query]: QueryContentTabData;
   [ContentTab.TableStructure]: TableStructureContentTabData;
   [ContentTab.Data]: DataContentTabData;

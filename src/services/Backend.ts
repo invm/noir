@@ -14,11 +14,11 @@ export const BackendService = () => {
       params: { path, page, page_size },
     });
     const rows = JSON.parse('[' + res + ']') as unknown as Row[];
-    if (rows.length > 0 && rows.length < page_size) {
-      // pad the results with empty rows
-      const empty_rows = Array(page_size - rows.length).fill({});
-      rows.push(...empty_rows);
-    }
+    // if (rows.length > 0 && rows.length < page_size) {
+    //   // pad the results with empty rows
+    //   const empty_rows = Array(page_size - rows.length).fill({});
+    //   rows.push(...empty_rows);
+    // }
     return rows;
   };
 

@@ -23,6 +23,8 @@
     "@solid-primitives/keyboard": "^1.2.5",
     "@tauri-apps/api": "^1.4.0",
     "@uiw/codemirror-theme-dracula": "^4.21.7",
+    "ag-grid-community": "^31.0.1",
+    "ag-grid-solid": "^31.0.1",
     "codemirror": "^6.0.1",
     "fuse.js": "^6.6.2",
     "i18next": "^23.1.0",
