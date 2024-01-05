@@ -80,3 +80,21 @@ export const columnsToTables = (allColumns: Row[], views: Row[], dialect: Dialec
     views: [],
   };
 };
+
+export const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
+  if (typeof obj === 'object') {
+    if (Array.isArray(obj)) {
+      return obj.map(parseObjRecursive);
+    } else if (obj !== null) {
+      return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)]));
+    } else {
+      return obj;
+    }
+  } else {
+    try {
+      return JSON.parse(obj as string);
+    } catch (e) {
+      return obj;
+    }
+  }
+};

@@ -35,7 +35,6 @@
     "solid-transition-group": "^0.2.2",
     "split.js": "^1.6.5",
     "sql-formatter": "^12.2.3",
-    "tabulator-tables": "^5.5.1",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
     "tinykeys": "^2.1.0",
@@ -44,7 +43,6 @@
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
     "@types/node": "^20.3.2",
-    "@types/tabulator-tables": "^5.4.10",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
     "autoprefixer": "^10.4.14",

@@ -79,9 +79,6 @@ dependencies:
   sql-formatter:
     specifier: ^12.2.3
     version: 12.2.3
-  tabulator-tables:
-    specifier: ^5.5.1
-    version: 5.5.1
   tauri-plugin-store-api:
     specifier: github:tauri-apps/tauri-plugin-store#v1
     version: github.com/tauri-apps/tauri-plugin-store/7d2632996f290b0f18cc5f8a2b2791046400690e
@@ -102,9 +99,6 @@ devDependencies:
   '@types/node':
     specifier: ^20.3.2
     version: 20.3.2
-  '@types/tabulator-tables':
-    specifier: ^5.4.10
-    version: 5.4.10
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.7.5
     version: 6.7.5(@typescript-eslint/parser@6.7.5)(eslint@8.51.0)(typescript@4.9.5)
@@ -1371,10 +1365,6 @@ packages:
 
   /@types/semver@7.5.0:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
-
-  /@types/tabulator-tables@5.4.10:
-    resolution: {integrity: sha512-ale/wbhA7zsmSSz6lTnxferRCCbKq3oZtxaNY8osb7YND2k27ZlEhfZzlVfRq8b5t7shhP8M53HyAgm1M0O+FA==}
-    dev: true
 
   /@typescript-eslint/eslint-plugin@6.7.5(@typescript-eslint/parser@6.7.5)(eslint@8.51.0)(typescript@4.9.5):
     resolution: {integrity: sha512-JhtAwTRhOUcP96D0Y6KYnwig/MRQbOoLGXTON2+LlyB/N35SP9j1boai2zzwXb7ypKELXMx3DVk9UTaEq1vHEw==}
@@ -3942,10 +3932,6 @@ packages:
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  /tabulator-tables@5.5.1:
-    resolution: {integrity: sha512-YxWVXbWVgUOMhU/g2xnf7y4Vrk1grYpDftQigbY/yAOKMEfgCRYzNaNEpMZbaimWdCt7KdpIp+lpp+HM5DY5sQ==}
-    dev: false
 
   /tailwindcss@3.3.2:
     resolution: {integrity: sha512-9jPkMiIBXvPc2KywkraqsUfbfj+dHDb+JPWtSJa9MLFdrPyazI7q6WX2sUrm7R9eVR7qqv3Pas7EvQFzxKnI6w==}

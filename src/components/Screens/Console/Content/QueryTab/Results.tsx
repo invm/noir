@@ -4,24 +4,29 @@ import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
 import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
-import { Pagination } from './components/Pagination';
-import { useAppSelector } from 'services/Context';
-import { Row } from 'interfaces';
-
 import { ColDef } from 'ag-grid-community';
 import AgGridSolid from 'ag-grid-solid';
+import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
+
+import { useAppSelector } from 'services/Context';
+import { Row } from 'interfaces';
 import { ContentTabData } from 'services/Connections';
+import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
+import { t } from 'utils/i18n';
+import { parseObjRecursive } from 'utils/utils';
 
 const getColumnDefs = (rows: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
     return [];
   }
-  return Object.keys(rows[0]).map((field) => ({
-    editable: true,
+  return Object.keys(rows[0]).map((field, _i) => ({
+    // editable: true,
+    // checkboxSelection: _i === 0,
     filter: true,
+    sortable: true,
     field,
     headerName: field,
   }));
@@ -45,6 +50,10 @@ export const Results = () => {
   createExtension(lineWrapping);
 
   const [page, setPage] = createSignal(0);
+
+  const menu_id = 'table-row-menu';
+
+  const { show } = useContextMenu({ id: menu_id, props: { rows: {} as Row } });
 
   const [data] = createResource(
     () =>
@@ -95,7 +104,7 @@ export const Results = () => {
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
-      <dialog id="my_modal_1" class="modal">
+      <dialog id="row_modal" class="modal">
         <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
           <div class="h-full">
             <div ref={ref} class="h-full" />
@@ -106,14 +115,33 @@ export const Results = () => {
         </form>
       </dialog>
       <Pagination {...{ page, onNextPage, onPrevPage, loading: data.loading, setPage }} />
+
+      <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
+        <Item
+          onClick={({ props: { row } }) => {
+            const data = parseObjRecursive(row);
+            setCode(JSON.stringify(data, null, 4));
+            document.getElementById('row_modal').showModal();
+          }}>
+          {t('console.table.show_row')}
+        </Item>
+        <Item
+          onClick={({ props: { row } }) => {
+            navigator.clipboard.writeText(JSON.stringify(row));
+          }}>
+          {t('console.table.copy_to_clipboard')}
+        </Item>
+      </Menu>
       <div class="ag-theme-alpine-dark" style={{ height: '100%' }}>
         <AgGridSolid
           noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults />)}
           loadingOverlayComponent={() => <Loader />}
           onCellContextMenu={(e) => {
-            console.log(e);
+            e.event.preventDefault();
+            show(e.event, { props: { row: e.data } });
           }}
           columnDefs={data()?.columns}
+          rowSelection="multiple"
           rowData={data()?.rows}
           defaultColDef={defaultColDef}
         />
