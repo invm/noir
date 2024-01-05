@@ -46,7 +46,11 @@
       },
       "no_results": "No results returned",
       "result_set": "Result set ",
-      "out_of": " out of "
+      "out_of": " out of ",
+      "table": {
+        "show_row": "Show row",
+        "copy_to_clipboard": "Copy row to clipboard as json"
+      }
     },
     "sidebar": {
       "show_table_structure": "Show table structure",
