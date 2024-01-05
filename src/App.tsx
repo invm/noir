@@ -1,5 +1,9 @@
 import 'utils/i18n';
 import 'tabulator-tables/dist/css/tabulator_midnight.min.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
+import './index.css';
 import { Main } from 'components/Screens/Main';
 import { Loader } from 'components/UI';
 import { onMount, Switch, Match } from 'solid-js';

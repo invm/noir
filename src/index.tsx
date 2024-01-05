@@ -3,7 +3,6 @@ import { render } from 'solid-js/web';
 import 'solid-contextmenu/dist/style.css';
 import { ErrorBoundary } from 'solid-js';
 
-import './index.css';
 import App from './App';
 import { StoreProvider } from 'services/Context';
 import { Error } from 'components/Error';

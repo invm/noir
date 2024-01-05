@@ -9,7 +9,7 @@ import { ResultSet } from 'interfaces';
 
 type PaginationProps = {
   page: Accessor<number>;
-  loading: Accessor<boolean>;
+  loading: boolean;
   setPage: (n: number) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
@@ -83,16 +83,16 @@ export const Pagination = (props: PaginationProps) => {
             </select>
           </div>
           <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.previous_page')}>
-            <button class="join-item btn btn-sm" disabled={props.loading() || !props.page()} onClick={props.onPrevPage}>
+            <button class="join-item btn btn-sm" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
               <ChevronLeft />
             </button>
           </div>
           <button disabled class="join-item btn btn-sm btn-disabled !text-base-content w-[50px]">
             <Switch>
-              <Match when={props.loading()}>
+              <Match when={props.loading}>
                 <span class="loading text-primary loading-bars loading-xs"></span>
               </Match>
-              <Match when={!props.loading()}>
+              <Match when={!props.loading}>
                 <span>{props.page() + 1}</span>
               </Match>
             </Switch>
@@ -101,7 +101,7 @@ export const Pagination = (props: PaginationProps) => {
           <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_page')}>
             <button
               class="join-item btn btn-sm"
-              disabled={props.loading() || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
+              disabled={props.loading || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
               onClick={props.onNextPage}>
               <ChevronRight />
             </button>

@@ -43,6 +43,12 @@ dependencies:
   '@uiw/codemirror-theme-dracula':
     specifier: ^4.21.7
     version: 4.21.7(@codemirror/language@6.8.0)(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)
+  ag-grid-community:
+    specifier: ^31.0.1
+    version: 31.0.1
+  ag-grid-solid:
+    specifier: ^31.0.1
+    version: 31.0.1(solid-js@1.7.7)
   codemirror:
     specifier: ^6.0.1
     version: 6.0.1(@lezer/common@1.0.3)
@@ -1536,6 +1542,19 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
     dev: true
+
+  /ag-grid-community@31.0.1:
+    resolution: {integrity: sha512-RZQlW1DTOJHsUR/tnbnTJQKgAnDlHi05YYyTe5AgNor/1TlX1hoYdcqrGsJjvcHQgTjeEgzWOL0yf+KcqXZzxg==}
+    dev: false
+
+  /ag-grid-solid@31.0.1(solid-js@1.7.7):
+    resolution: {integrity: sha512-3vvCv4814UIcJUS8qYVPAEAuFupTolVQPJFaenang2oZBCnd9hiKiFuGEeH71MKydghdL/F2B+aphDnqPaUk2A==}
+    peerDependencies:
+      solid-js: '>=1.0.0'
+    dependencies:
+      ag-grid-community: 31.0.1
+      solid-js: 1.7.7
+    dev: false
 
   /ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}

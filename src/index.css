@@ -199,3 +199,10 @@ dialog {
 .tooltip::before {
   @apply z-50;
 }
+
+
+/* ag-grid */
+.ag-theme-alpine, .ag-theme-alpine-dark {
+    --ag-grid-size: 5px;
+    --ag-list-item-height: 20px;
+}
