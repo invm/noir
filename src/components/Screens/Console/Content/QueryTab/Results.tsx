@@ -35,6 +35,7 @@ const getColumnDefs = (rows: Row[]): ColDef[] => {
     // editable: true,
     // checkboxSelection: _i === 0,
     filter: true,
+    headerComponent: () => <span>{field}</span>,
     sortable: true,
     field,
     headerName: field,
@@ -130,8 +131,7 @@ export const Results = () => {
           onClick={({ props: { row } }) => {
             const data = parseObjRecursive(row);
             setCode(JSON.stringify(data, null, 4));
-            // @ts-ignore
-            document.getElementById('row_modal').showModal();
+            (document.getElementById('row_modal') as HTMLDialogElement).showModal();
           }}>
           {t('console.table.show_row')}
         </Item>
