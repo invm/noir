@@ -27,9 +27,9 @@ export const Sidebar = () => {
   const routine_menu = 'sidebar-routine-menu';
   const trigger_menu = 'sidebar-trigger-menu';
 
-  const { show: show_routine_menu } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
+  const { show: show_routine_menu, hideAll: hideAll1 } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
 
-  const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
+  const { show: show_trigger_menu, hideAll: hideAll2 } = useContextMenu({ id: trigger_menu });
 
   const select = async (schema: string) => {
     updateConnectionTab('selectedSchema', schema);
@@ -114,6 +114,11 @@ export const Sidebar = () => {
     } catch (error) {
       notify(error);
     }
+  };
+
+  const hide = () => {
+    hideAll1();
+    hideAll2();
   };
 
   return (
@@ -201,13 +206,18 @@ export const Sidebar = () => {
         <Show when={getSchemaEntity('routines').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
           <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
-            <Item onClick={({ props }) => showRoutine(getAnyCase(props.routine, 'ROUTINE_NAME'))}>
+            <Item
+              onClick={({ props }) => {
+                showRoutine(getAnyCase(props.routine, 'ROUTINE_NAME'));
+                hide();
+              }}>
               {t('sidebar.show_routine')}
             </Item>
             <Item
-              onClick={({ props: { routine } }) =>
-                showCreateStatement(getAnyCase(routine, 'ROUTINE_NAME'), getAnyCase(routine, 'ROUTINE_DEFINITION'))
-              }>
+              onClick={({ props: { routine } }) => {
+                showCreateStatement(getAnyCase(routine, 'ROUTINE_NAME'), getAnyCase(routine, 'ROUTINE_DEFINITION'));
+                hide();
+              }}>
               {t('sidebar.show_create_statement')}
             </Item>
           </Menu>
@@ -231,13 +241,18 @@ export const Sidebar = () => {
         <Show when={getSchemaEntity('triggers').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
           <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
-            <Item onClick={({ props: { trigger } }) => showTrigger(getAnyCase(trigger, 'TRIGGER_NAME'))}>
+            <Item
+              onClick={({ props: { trigger } }) => {
+                showTrigger(getAnyCase(trigger, 'TRIGGER_NAME'));
+                hide();
+              }}>
               {t('sidebar.show_trigger')}
             </Item>
             <Item
-              onClick={({ props: { trigger } }) =>
-                showCreateStatement(getAnyCase(trigger, 'TRIGGER_NAME'), getAnyCase(trigger, 'ACTION_STATEMENT'))
-              }>
+              onClick={({ props: { trigger } }) => {
+                showCreateStatement(getAnyCase(trigger, 'TRIGGER_NAME'), getAnyCase(trigger, 'ACTION_STATEMENT'));
+                hide();
+              }}>
               {t('sidebar.show_create_statement')}
             </Item>
           </Menu>

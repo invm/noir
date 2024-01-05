@@ -16,9 +16,10 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
     messages: { notify },
   } = useAppSelector();
 
-  const menu_id = 'sidebar-table-menu';
+  const menu_id = 'sidebar-table-menu_' + props.entity + props.title;
+  const modal_id = 'table-modal_' + props.entity + props.title;
 
-  const { show } = useContextMenu({
+  const { show, hideAll } = useContextMenu({
     id: menu_id,
     props: { table: props.title },
   });
@@ -48,7 +49,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
         tabIdx: contentStore.idx,
       });
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id })),
+        result_sets: result_sets.map((id) => ({ id, constraints })),
       });
     } catch (error) {
       notify(error);
@@ -71,10 +72,44 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
 
   return (
     <>
+      <dialog id={modal_id} class="modal">
+        <form method="dialog" class="modal-box">
+          <h3 class="font-bold text-lg">{t('connections_list.actions.confirm_action')}</h3>
+          <p class="py-4">{t('sidebar.confirm_truncate', { table: props.title })}</p>
+          <div class="flex justify-between w-full gap-3">
+            <button
+              class="btn btn-error btn-sm"
+              onClick={() => {
+                truncateTable(props.title);
+                hideAll();
+              }}>
+              {t('sidebar.yes')}
+            </button>
+            <button class="btn btn-primary btn-sm">{t('sidebar.cancel')}</button>
+          </div>
+        </form>
+        <form method="dialog" class="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-        <Item onClick={({ props }) => addTableStructureTab(props.table)}>{t('sidebar.show_table_structure')}</Item>
-        <Item onClick={({ props }) => listData(props.table)}>{t('sidebar.list_data')}</Item>
-        <Item onClick={({ props }) => truncateTable(props.table)}>{t('sidebar.truncate_table')}</Item>
+        <Item
+          onClick={({ props }) => {
+            addTableStructureTab(props.table);
+            hideAll();
+          }}>
+          {t('sidebar.show_table_structure')}
+        </Item>
+        <Item
+          onClick={({ props }) => {
+            listData(props.table);
+            hideAll();
+          }}>
+          {t('sidebar.list_data')}
+        </Item>
+        <Item onClick={() => (document.getElementById(modal_id) as HTMLDialogElement).showModal()}>
+          {t('sidebar.truncate_table')}
+        </Item>
       </Menu>
       <div class="w-full flex items-center" onContextMenu={(e) => show(e)}>
         <div class="flex items-center">
