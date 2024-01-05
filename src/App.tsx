@@ -49,10 +49,12 @@ function App() {
 
   addEventListener('unhandledrejection', (e) => {
     console.log({ message: 'Unhandled rejection', info: (e.reason?.message || e.reason || e).toString() });
+    notify(e.reason?.message || e, 'error');
   });
 
   window.addEventListener('error', (e) => {
     console.log({ message: 'Unhandled error', error: e.error });
+    notify(e.message);
   });
 
   const compareAndAssign = async (event: QueryTaskResult) => {

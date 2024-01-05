@@ -5,7 +5,7 @@ import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
 import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
 import { ColDef } from 'ag-grid-community';
-import AgGridSolid from 'ag-grid-solid';
+import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 
 import { useAppSelector } from 'services/Context';
@@ -17,6 +17,15 @@ import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
 import { t } from 'utils/i18n';
 import { parseObjRecursive } from 'utils/utils';
+
+import { save } from '@tauri-apps/api/dialog';
+import { writeTextFile } from '@tauri-apps/api/fs';
+
+export const downloadFile = async (filename: string, text: string) => {
+  const filePath = (await save({ defaultPath: filename })) ?? '';
+  if (!filePath) return;
+  await writeTextFile(filePath, text);
+};
 
 const getColumnDefs = (rows: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
@@ -66,14 +75,8 @@ export const Results = () => {
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
       // Reruns when either signal updates
       const result_set = result_sets[queryIdxVal];
-      console.log('rerun', { result_set: result_set?.id });
       if (!result_set || result_set?.status !== 'Completed') {
         return { rows: [], columns: [], exhausted: true, notReady: true };
-      }
-      if (result_set.rows) {
-        // check this exhausted prop
-        const columns = getColumnDefs(result_set.rows);
-        return { rows: result_set.rows, columns, exhausted: true };
       }
       const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
       const columns = getColumnDefs(rows);
@@ -102,6 +105,13 @@ export const Results = () => {
     minWidth: 320,
   };
 
+  let gridRef: AgGridSolidRef;
+
+  const onBtnExport = async () => {
+    const d = gridRef?.api.getDataAsCsv();
+    await downloadFile(new Date().toISOString() + '.csv', d!);
+  };
+
   return (
     <div class="flex flex-col h-full overflow-hidden">
       <dialog id="row_modal" class="modal">
@@ -114,13 +124,13 @@ export const Results = () => {
           <button>close</button>
         </form>
       </dialog>
-      <Pagination {...{ page, onNextPage, onPrevPage, loading: data.loading, setPage }} />
-
+      <Pagination {...{ page, onNextPage, onPrevPage, loading: data.loading, setPage, onBtnExport }} />
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
         <Item
           onClick={({ props: { row } }) => {
             const data = parseObjRecursive(row);
             setCode(JSON.stringify(data, null, 4));
+            // @ts-ignore
             document.getElementById('row_modal').showModal();
           }}>
           {t('console.table.show_row')}
@@ -137,13 +147,16 @@ export const Results = () => {
           noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults />)}
           loadingOverlayComponent={() => <Loader />}
           onCellContextMenu={(e) => {
-            e.event.preventDefault();
-            show(e.event, { props: { row: e.data } });
+            e.event?.preventDefault();
+            show(e.event as MouseEvent, { props: { row: e.data } });
           }}
+          ref={gridRef!}
           columnDefs={data()?.columns}
           rowSelection="multiple"
           rowData={data()?.rows}
           defaultColDef={defaultColDef}
+          suppressExcelExport={true}
+          suppressCsvExport={false}
         />
       </div>
     </div>
