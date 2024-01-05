@@ -309,13 +309,13 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_constraints(&self) -> Result<Value> {
+    pub async fn get_constraints(&self, table: &str) -> Result<Value> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
-                engine::mysql::tables::get_constraints(self, pool, None).await
+                engine::mysql::tables::get_constraints(self, pool, Some(table)).await
             }
             ConnectionPool::Postgresql(pool) => {
-                engine::postgresql::tables::get_constraints(self, pool, None).await
+                engine::postgresql::tables::get_constraints(self, pool, Some(table)).await
             }
 
             ConnectionPool::Sqlite => todo!(),
