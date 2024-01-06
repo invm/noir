@@ -1,7 +1,7 @@
 use anyhow::Result;
 use mysql::prelude::Queryable;
 use mysql::{from_row, Pool, PooledConn, Row};
-use serde_json::json;
+use serde_json::{json, Value};
 
 use crate::database::connections::ResultSet;
 
@@ -33,6 +33,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
             warnings,
             info: info.to_string(),
             rows,
+            constraints: Value::Array(vec![]),
         };
         return Ok(set);
     }
@@ -42,5 +43,6 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings: 0,
         info: "".to_string(),
         rows: Vec::new(),
+        constraints: Value::Array(vec![]),
     });
 }

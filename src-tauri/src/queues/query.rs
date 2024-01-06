@@ -32,6 +32,12 @@ impl Default for QueryTaskStatus {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TableQuery {
+    pub table: String,
+    pub with_constraints: bool,
+}
+
 #[derive(Debug, Clone)]
 pub struct QueryTask {
     pub conn: InitiatedConnection,
@@ -40,6 +46,7 @@ pub struct QueryTask {
     pub status: QueryTaskStatus,
     pub tab_idx: usize,
     pub query_idx: usize,
+    pub table: Option<TableQuery>,
 }
 
 impl QueryTask {
@@ -49,6 +56,7 @@ impl QueryTask {
         query_id: String,
         tab_idx: usize,
         query_idx: usize,
+        table: Option<TableQuery>,
     ) -> Self {
         QueryTask {
             conn,
@@ -57,6 +65,7 @@ impl QueryTask {
             query_idx,
             query: query.to_string(),
             status: QueryTaskStatus::Progress,
+            table,
         }
     }
 }
@@ -92,40 +101,46 @@ pub async fn async_process_model(
         // so what happened is that this ran too fast and the UI didn't have time to update, a single millisecond is enough
         tokio::time::sleep(tokio::time::Duration::from_nanos(1)).await;
         match task.conn.execute_query(&task.query).await {
-            Ok(result_set) => match write_query(&task.id, &result_set) {
-                Ok(path) => {
-                    output_tx
-                        .send(QueryTaskResult {
-                            conn_id: task.conn.config.id.to_string(),
-                            count: Some(result_set.rows.len()),
-                            status: QueryTaskStatus::Completed,
-                            query: task.query,
-                            id: task.id,
-                            query_idx: task.query_idx,
-                            tab_idx: task.tab_idx,
-                            path: Some(path),
-                            error: None,
-                            info: Some(result_set.info),
-                        })
-                        .await?
+            Ok(mut result_set) => {
+                if let Some(table) = task.table {
+                    let constraints = task.conn.get_constraints(&table.table).await?;
+                    result_set.constraints = constraints;
                 }
-                Err(e) => {
-                    output_tx
-                        .send(QueryTaskResult {
-                            conn_id: task.conn.config.id.to_string(),
-                            count: None,
-                            status: QueryTaskStatus::Error,
-                            query: task.query,
-                            id: task.id,
-                            query_idx: task.query_idx,
-                            tab_idx: task.tab_idx,
-                            path: None,
-                            error: Some(e.to_string()),
-                            info: None,
-                        })
-                        .await?
+                match write_query(&task.id, &result_set) {
+                    Ok(path) => {
+                        output_tx
+                            .send(QueryTaskResult {
+                                conn_id: task.conn.config.id.to_string(),
+                                count: Some(result_set.rows.len()),
+                                status: QueryTaskStatus::Completed,
+                                query: task.query,
+                                id: task.id,
+                                query_idx: task.query_idx,
+                                tab_idx: task.tab_idx,
+                                path: Some(path),
+                                error: None,
+                                info: Some(result_set.info),
+                            })
+                            .await?
+                    }
+                    Err(e) => {
+                        output_tx
+                            .send(QueryTaskResult {
+                                conn_id: task.conn.config.id.to_string(),
+                                count: None,
+                                status: QueryTaskStatus::Error,
+                                query: task.query,
+                                id: task.id,
+                                query_idx: task.query_idx,
+                                tab_idx: task.tab_idx,
+                                path: None,
+                                error: Some(e.to_string()),
+                                info: None,
+                            })
+                            .await?
+                    }
                 }
-            },
+            }
             Err(e) => {
                 output_tx
                     .send(QueryTaskResult {

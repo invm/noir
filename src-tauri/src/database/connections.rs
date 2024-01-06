@@ -259,6 +259,7 @@ pub struct ResultSet {
     pub warnings: u16,
     pub info: String,
     pub rows: Vec<serde_json::Value>,
+    pub constraints: Value,
 }
 
 impl InitiatedConnection {

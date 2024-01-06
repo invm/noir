@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 use crate::{
-    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
+    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus, TableQuery},
     state::{AsyncState, ServiceAccess},
     utils::{
         crypto::md5_hash,
@@ -16,6 +16,7 @@ use sqlparser::{dialect::dialect_from_str, parser::Parser};
 use tauri::{command, AppHandle, State};
 use tracing::info;
 
+
 #[command]
 pub async fn enqueue_query(
     app_handle: AppHandle,
@@ -24,6 +25,7 @@ pub async fn enqueue_query(
     tab_idx: usize,
     sql: &str,
     auto_limit: bool,
+    table: Option<TableQuery>,
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
@@ -60,8 +62,8 @@ pub async fn enqueue_query(
                 if auto_limit && !statement.to_lowercase().contains("limit") {
                     statement = format!("{} LIMIT 1000", statement);
                 }
-                let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx);
-                let res = async_proc_input_tx.send(task.clone()).await;
+                let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx, table.clone());
+                let res = async_proc_input_tx.send(task).await;
                 if let Err(e) = res {
                     return Err(Error::from(e));
                 }
@@ -123,7 +125,10 @@ pub async fn query_results(
 ) -> CommandResult<Value> {
     info!(?params, "query_results");
     let data = paginate_file(&params.path, params.page, params.page_size);
-    Ok(Value::from(data))
+    match data {
+        Ok(data) => Ok(Value::from(data)),
+        Err(..) => Err(Error::from(Error::QueryExpired)),
+    }
 }
 
 #[command]
