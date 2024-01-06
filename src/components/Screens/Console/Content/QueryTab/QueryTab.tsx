@@ -22,7 +22,7 @@ export const QueryTab = () => {
         <Editor />
       </div>
       <div id="results">
-        <Results />
+        <Results editable={false} />
       </div>
     </div>
   );

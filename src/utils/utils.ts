@@ -1,13 +1,13 @@
-import { Dialect, DialectType, Row, SORT_ORDER, Table, TableStrucureEntityType } from 'interfaces';
+import { Dialect, DialectType, Row, Table } from 'interfaces';
 
 export const randomId = () => {
   const length = 36;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  let id = '';
   for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return result;
+  return id;
 };
 
 export const getAnyCase = (obj: Row, key: string) => {
@@ -26,22 +26,6 @@ export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
     clearTimeout(timer);
     timer = setTimeout(later, wait);
   };
-};
-
-export const sortTableStructure = (
-  order: string[],
-  dialect: DialectType,
-  tableStructureEntity: TableStrucureEntityType
-) => {
-  return order.sort((a, b) => {
-    const sortOrder = SORT_ORDER[dialect][tableStructureEntity];
-    if (!sortOrder) return 0;
-    const aIndex = sortOrder.indexOf(a as never);
-    const bIndex = sortOrder.indexOf(b as never);
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-    return aIndex - bIndex;
-  });
 };
 
 // TODO: handle all dialects

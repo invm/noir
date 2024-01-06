@@ -104,7 +104,9 @@ pub async fn async_process_model(
             Ok(mut result_set) => {
                 if let Some(table) = task.table {
                     let constraints = task.conn.get_constraints(&table.table).await?;
-                    result_set.constraints = constraints;
+                    let columns = task.conn.get_columns(Some(&table.table)).await?;
+                    result_set.constraints = Some(constraints);
+                    result_set.columns = Some(columns);
                 }
                 match write_query(&task.id, &result_set) {
                     Ok(path) => {

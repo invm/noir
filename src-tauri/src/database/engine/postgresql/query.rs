@@ -1,13 +1,13 @@
 use anyhow::Result;
 use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
-use serde_json::{json, Value};
+use serde_json::Value;
 
 use crate::database::connections::ResultSet;
 
 use super::utils::row_to_object;
 
-pub async fn raw_query(pool: Pool, query: &str) -> Result<serde_json::Value> {
+pub async fn raw_query(pool: Pool, query: &str) -> Result<Vec<Value>> {
     let conn = pool.get().await?;
     let params = vec![];
     let rows = conn.query(query, &params).await?;
@@ -15,8 +15,7 @@ pub async fn raw_query(pool: Pool, query: &str) -> Result<serde_json::Value> {
     for row in rows {
         result.push(row_to_object(row)?);
     }
-    let result = json!({ "result": result });
-    return Ok(result);
+    Ok(result)
 }
 
 pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
@@ -36,7 +35,8 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings,
         info: info.to_string(),
         rows,
-        constraints: Value::Array(vec![]),
+        constraints: None,
+        columns: None,
     };
-    return Ok(set);
+    Ok(set)
 }

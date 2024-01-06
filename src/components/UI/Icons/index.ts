@@ -8,6 +8,7 @@ export * from './Enter';
 export * from './Fire';
 export * from './Function';
 export * from './Home';
+export * from './Key';
 export * from './Pen';
 export * from './QuestionMark';
 export * from './Refresh';
