@@ -299,6 +299,17 @@ export const ConnectionsService = () => {
     }
   };
 
+  const setNextContentIdx = () => {
+    setContentStore('idx', (contentStore.idx + 1) % contentStore.tabs.length);
+  };
+
+  const setPrevContentIdx = () => {
+    setContentStore(
+      'idx',
+      (contentStore.idx - 1 >= 0 ? contentStore.idx - 1 : contentStore.tabs.length - 1) % contentStore.tabs.length
+    );
+  };
+
   const updateConnectionTab = <T extends keyof ConnectionTab>(key: T, data: ConnectionTab[T], idx?: number) => {
     const tab = getConnection();
     if (!tab) return;
@@ -362,14 +373,13 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    const [_schemas, columns, routines, triggers, _views] =
-      await Promise.all([
-        invoke<RawQueryResult>('get_schemas', { connId }),
-        invoke<RawQueryResult>('get_columns', { connId }),
-        invoke<RawQueryResult>('get_procedures', { connId }),
-        invoke<RawQueryResult>('get_triggers', { connId }),
-        invoke<RawQueryResult>('get_views', { connId }),
-      ]);
+    const [_schemas, columns, routines, triggers, _views] = await Promise.all([
+      invoke<RawQueryResult>('get_schemas', { connId }),
+      invoke<RawQueryResult>('get_columns', { connId }),
+      invoke<RawQueryResult>('get_procedures', { connId }),
+      invoke<RawQueryResult>('get_triggers', { connId }),
+      invoke<RawQueryResult>('get_views', { connId }),
+    ]);
 
     const { views, tables } = columnsToTables(columns, _views, dialect) ?? [];
     const schemas = _schemas.map((d) => String(d['schema']));
@@ -410,5 +420,7 @@ export const ConnectionsService = () => {
     setConnections,
     addConnection,
     refreshConnections,
+    setPrevContentIdx,
+    setNextContentIdx,
   };
 };

@@ -23,10 +23,14 @@ export const BackendService = () => {
     return JSON.parse(res) as unknown as QueryMetadataResult;
   };
 
+  const downloadCsv = async (source: string, destination: string) =>
+    invoke<string>('download_csv', { source, destination });
+
   return {
     pageSize,
     setPageSize,
     getQueryResults,
     getQueryMetadata,
+    downloadCsv
   };
 };

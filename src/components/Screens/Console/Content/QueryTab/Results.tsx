@@ -17,16 +17,8 @@ import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
 import { t } from 'utils/i18n';
 import { getAnyCase, parseObjRecursive } from 'utils/utils';
-
 import { save } from '@tauri-apps/api/dialog';
-import { writeTextFile } from '@tauri-apps/api/fs';
 import { Key } from 'components/UI/Icons';
-
-export const downloadFile = async (filename: string, text: string) => {
-  const filePath = (await save({ defaultPath: filename })) ?? '';
-  if (!filePath) return;
-  await writeTextFile(filePath, text);
-};
 
 const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
@@ -69,7 +61,7 @@ const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[
 export const Results = (props: { editable: boolean }) => {
   const {
     connections: { queryIdx, contentStore },
-    backend: { getQueryResults, pageSize },
+    backend: { getQueryResults, pageSize, downloadCsv },
     messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -111,7 +103,7 @@ export const Results = (props: { editable: boolean }) => {
           result_set.columns ?? [],
           props.editable ? result_set.constraints ?? [] : []
         );
-        return { rows, columns, exhausted: rows.length < pageSizeVal };
+        return { rows, columns, exhausted: rows.length < pageSizeVal, path: result_set.path };
       } catch (error) {
         notify(error);
         return { rows: [], columns: [], exhausted: true, error };
@@ -143,8 +135,11 @@ export const Results = (props: { editable: boolean }) => {
   let gridRef: AgGridSolidRef;
 
   const onBtnExport = async () => {
-    const d = gridRef?.api.getDataAsCsv();
-    await downloadFile(new Date().toISOString() + '.csv', d!);
+    const filename = new Date().toISOString() + '.csv';
+    const filePath = (await save({ defaultPath: filename })) ?? '';
+    const dataPath = data()?.path;
+    if (!filePath || !dataPath) return;
+    await downloadCsv(dataPath, filePath).catch((err) => notify(err));
   };
 
   return (

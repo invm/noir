@@ -30,7 +30,7 @@ pub fn get_app_path() -> String {
     } else {
         format!("{}/.config", home)
     };
-    format!("{}/query-noir", path)
+    format!("{}/noir", path)
 }
 
 pub fn check_if_app_dir_exists(app_path: &str) -> bool {
@@ -82,4 +82,13 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
     write_file(&PathBuf::from(&path), &rows)?;
     write_file(&PathBuf::from(&metadata_path), &metadata)?;
     Ok(path)
+}
+
+pub fn copy_file(src: &str, dest: &str) -> Result<()> {
+    debug!("Copying file: {:?} to {:?}", src, dest);
+    let res = fs::copy(src, dest);
+    if let Err(res) = res {
+        error!("Error: {:?}", res);
+    }
+    Ok(())
 }

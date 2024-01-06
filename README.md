@@ -1,1 +1,1 @@
-# Query Noir
+# Noir

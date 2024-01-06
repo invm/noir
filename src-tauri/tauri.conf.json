@@ -7,12 +7,14 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "query-noir",
-    "version": "0.0.0"
+    "productName": "noir"
   },
   "tauri": {
     "allowlist": {
       "all": false,
+      "shell": {
+        "open": true
+      },
       "dialog": {
         "all": true
       },
@@ -39,7 +41,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Query Noir",
+        "title": "Noir",
         "minHeight": 600,
         "minWidth": 800,
         "width": 1200,
