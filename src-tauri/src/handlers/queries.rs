@@ -16,7 +16,6 @@ use sqlparser::{dialect::dialect_from_str, parser::Parser};
 use tauri::{command, AppHandle, State};
 use tracing::info;
 
-
 #[command]
 pub async fn enqueue_query(
     app_handle: AppHandle,
@@ -87,17 +86,15 @@ pub struct QueryResultParams {
 }
 
 #[command]
-pub async fn get_schemas(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_schemas(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_schemas().await?;
-    Ok(result)
+    Ok(connection.get_schemas().await?)
 }
 
 #[command]
-pub async fn get_views(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_views(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_views().await?;
-    Ok(result)
+    Ok(connection.get_views().await?)
 }
 
 #[command]
@@ -143,10 +140,9 @@ pub async fn get_table_structure(
 }
 
 #[command]
-pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_columns().await?;
-    Ok(result)
+    Ok(connection.get_columns(None).await?)
 }
 
 #[command]
@@ -154,29 +150,25 @@ pub async fn get_constraints(
     app_handle: AppHandle,
     conn_id: String,
     table: String,
-) -> CommandResult<Value> {
+) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_constraints(&table).await?;
-    Ok(result)
+    Ok(connection.get_constraints(&table).await?)
 }
 
 #[command]
-pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_triggers(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_triggers().await?;
-    Ok(result)
+    Ok(connection.get_triggers().await?)
 }
 
 #[command]
-pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_functions(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.get_functions().await?;
-    Ok(result)
+    Ok(connection.get_functions().await?)
 }
 
 #[command]
-pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandResult<Value> {
+pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    let stats = connection.get_procedures().await?;
-    Ok(stats)
+    Ok(connection.get_procedures().await?)
 }

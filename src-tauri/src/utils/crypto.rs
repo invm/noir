@@ -38,8 +38,8 @@ pub fn get_app_key() -> Result<String> {
 pub fn md5_hash(data: &str) -> String {
     let mut hasher = Md5::new();
     hasher.update(data);
-    let result = hasher.finalize();
-    format!("{:x}", result)
+    let hash = hasher.finalize();
+    format!("{:x}", hash)
 }
 
 #[cfg(test)]

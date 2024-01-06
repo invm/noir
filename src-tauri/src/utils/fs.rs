@@ -73,6 +73,7 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         "warnings": result_set.warnings,
         "info": result_set.info,
         "constraints": result_set.constraints,
+        "columns": result_set.columns,
     })
     .to_string();
     let tmp_dir = get_tmp_dir()?;

@@ -259,7 +259,8 @@ pub struct ResultSet {
     pub warnings: u16,
     pub info: String,
     pub rows: Vec<serde_json::Value>,
-    pub constraints: Value,
+    pub constraints: Option<Vec<serde_json::Value>>,
+    pub columns: Option<Vec<serde_json::Value>>,
 }
 
 impl InitiatedConnection {
@@ -284,7 +285,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_indices(&self, table: Option<&str>) -> Result<Value> {
+    pub async fn get_indices(&self, table: Option<&str>) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_indices(self, pool, table).await
@@ -297,20 +298,20 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_columns(&self) -> Result<Value> {
+    pub async fn get_columns(&self, table:Option<&str>) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
-                engine::mysql::tables::get_columns(self, pool, None).await
+                engine::mysql::tables::get_columns(self, pool, table).await
             }
             ConnectionPool::Postgresql(pool) => {
-                engine::postgresql::tables::get_columns(&self, pool, None).await
+                engine::postgresql::tables::get_columns(&self, pool, table).await
             }
 
             ConnectionPool::Sqlite => todo!(),
         }
     }
 
-    pub async fn get_constraints(&self, table: &str) -> Result<Value> {
+    pub async fn get_constraints(&self, table: &str) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_constraints(self, pool, Some(table)).await
@@ -323,7 +324,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_functions(&self) -> Result<Value> {
+    pub async fn get_functions(&self) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_functions(self, pool).await,
             ConnectionPool::Postgresql(pool) => {
@@ -333,7 +334,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_procedures(&self) -> Result<Value> {
+    pub async fn get_procedures(&self) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_procedures(self, pool).await,
             ConnectionPool::Postgresql(pool) => {
@@ -343,7 +344,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_triggers(&self) -> Result<Value> {
+    pub async fn get_triggers(&self) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_triggers(self, pool, None).await
@@ -355,7 +356,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_schemas(&self) -> Result<Value> {
+    pub async fn get_schemas(&self) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_schemas(pool).await,
             ConnectionPool::Postgresql(pool) => engine::postgresql::tables::get_schemas(pool).await,
@@ -363,7 +364,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_views(&self) -> Result<Value> {
+    pub async fn get_views(&self) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::tables::get_views(&self, pool).await,
             ConnectionPool::Postgresql(pool) => {

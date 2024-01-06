@@ -362,7 +362,7 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    const [{ result: _schemas }, { result: columns }, { result: routines }, { result: triggers }, { result: _views }] =
+    const [_schemas, columns, routines, triggers, _views] =
       await Promise.all([
         invoke<RawQueryResult>('get_schemas', { connId }),
         invoke<RawQueryResult>('get_columns', { connId }),

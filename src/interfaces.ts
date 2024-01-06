@@ -85,6 +85,8 @@ export type ResultSet = {
   affected_rows?: number;
   warnings?: number;
   rows?: Row[];
+  constraints?: Row[];
+  columns?: Row[];
 } & (
     | {
       path?: string;
@@ -131,9 +133,7 @@ export type QueryTaskResult = {
     }
   );
 
-export type RawQueryResult = {
-  result: Row[];
-};
+export type RawQueryResult = Row[];
 
 export const TableEntity = {
   columns: 'columns',
@@ -150,57 +150,6 @@ export const TableStrucureEntities = [
   TableEntity.constraints,
   TableEntity.triggers,
 ] as const;
-
-export const SORT_ORDER = {
-  [Dialect.Mysql]: {
-    [TableEntity.columns]: ['COLUMN_NAME', 'COLUMN_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
-    [TableEntity.indices]: ['INDEX_NAME', 'NON_UNIQUE', 'COLUMN_NAME'],
-    [TableEntity.constraints]: [
-      'CONSTRAINT_NAME',
-      'TABLE_NAME',
-      'COLUMN_NAME',
-      'REFERENCED_COLUMN_NAME',
-      'REFERENCED_TABLE_NAME',
-    ],
-    [TableEntity.triggers]: [
-      'TRIGGER_NAME',
-      'EVENT_MANIPULATION',
-      'EVENT_OBJECT_TABLE',
-      'ACTION_TIMING',
-      'ACTION_STATEMENT',
-    ],
-  },
-  [Dialect.Postgresql]: {
-    [TableEntity.columns]: ['column_name', 'data_type', 'is_nullable', 'character_maximum_length'],
-    [TableEntity.indices]: ['index_name', 'column_name'],
-    [TableEntity.constraints]: ['constraint_name', 'table_name', 'column_name'],
-    [TableEntity.triggers]: [
-      'trigger_name',
-      'event_manipulation',
-      'event_object_table',
-      'action_timing',
-      'action_statement',
-    ],
-  },
-  [Dialect.Sqlite]: {
-    [TableEntity.columns]: ['COLUMN_NAME', 'DATA_TYPE', 'IS_NULLABLE', 'CHARACTER_MAXIMUM_LENGTH'],
-    [TableEntity.indices]: ['INDEX_NAME', 'COLUMN_NAME'],
-    [TableEntity.constraints]: [
-      'CONSTRAINT_NAME',
-      'TABLE_NAME',
-      'COLUMN_NAME',
-      'REFERENCED_COLUMN_NAME',
-      'REFERENCED_TABLE_NAME',
-    ],
-    [TableEntity.triggers]: [
-      'TRIGGER_NAME',
-      'EVENT_MANIPULATION',
-      'EVENT_OBJECT_TABLE',
-      'ACTION_TIMING',
-      'ACTION_STATEMENT',
-    ],
-  },
-} as const;
 
 export type Column = {
   name: string;

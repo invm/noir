@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, on } from 'solid-js';
+import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
@@ -16,10 +16,11 @@ import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
 import { t } from 'utils/i18n';
-import { parseObjRecursive } from 'utils/utils';
+import { getAnyCase, parseObjRecursive } from 'utils/utils';
 
 import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
+import { Key } from 'components/UI/Icons';
 
 export const downloadFile = async (filename: string, text: string) => {
   const filePath = (await save({ defaultPath: filename })) ?? '';
@@ -27,22 +28,45 @@ export const downloadFile = async (filename: string, text: string) => {
   await writeTextFile(filePath, text);
 };
 
-const getColumnDefs = (rows: Row[]): ColDef[] => {
+const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
     return [];
   }
-  return Object.keys(rows[0]).map((field, _i) => ({
-    editable: true,
-    // checkboxSelection: _i === 0,
-    filter: true,
-    headerComponent: () => <span>{field}</span>,
-    sortable: true,
-    field,
-    headerName: field,
-  }));
+  return Object.keys(rows[0]).map((field, _i) => {
+    const key = constraints.find((c) => {
+      const t = getAnyCase(c, 'COLUMN_NAME');
+      return t === field;
+    });
+    const col =
+      columns.find((c) => {
+        const t = getAnyCase(c, 'COLUMN_NAME');
+        if (t === field) {
+          return true;
+        }
+      }) ?? {};
+    return {
+      editable: !key,
+      // checkboxSelection: _i === 0,
+      filter: true,
+      headerComponent: () => (
+        <div class="flex items-center justify-between w-full">
+          <div>
+            <span class="mr-2 text-sm">{field}</span>
+            <span class="text-xs text-base-content">{getAnyCase(col, 'COLUMN_TYPE')}</span>
+          </div>
+          <Show when={key}>
+            <Key />
+          </Show>
+        </div>
+      ),
+      sortable: true,
+      field,
+      headerName: field,
+    };
+  });
 };
 
-export const Results = () => {
+export const Results = (props: { editable: boolean }) => {
   const {
     connections: { queryIdx, contentStore },
     backend: { getQueryResults, pageSize },
@@ -82,7 +106,11 @@ export const Results = () => {
           return { rows: [], columns: [], exhausted: true, notReady: true };
         }
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
-        const columns = getColumnDefs(rows);
+        const columns = getColumnDefs(
+          rows,
+          result_set.columns ?? [],
+          props.editable ? result_set.constraints ?? [] : []
+        );
         return { rows, columns, exhausted: rows.length < pageSizeVal };
       } catch (error) {
         notify(error);

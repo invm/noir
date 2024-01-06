@@ -1,20 +1,19 @@
 use anyhow::Result;
 use mysql::prelude::Queryable;
 use mysql::{from_row, Pool, PooledConn, Row};
-use serde_json::{json, Value};
+use serde_json::Value;
 
 use crate::database::connections::ResultSet;
 
 use super::utils::row_to_object;
 
-pub fn raw_query(mut conn: PooledConn, query: String) -> Result<serde_json::Value> {
+pub fn raw_query(mut conn: PooledConn, query: String) -> Result<Vec<Value>> {
     let rows: Vec<Row> = conn.query(&query)?;
     let mut result = Vec::new();
     for row in rows {
         result.push(row_to_object(row));
     }
-    let result = json!({ "result": result });
-    return Ok(result);
+    Ok(result)
 }
 
 pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
@@ -33,7 +32,8 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
             warnings,
             info: info.to_string(),
             rows,
-            constraints: Value::Array(vec![]),
+            constraints: None,
+            columns: None,
         };
         return Ok(set);
     }
@@ -43,6 +43,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings: 0,
         info: "".to_string(),
         rows: Vec::new(),
-        constraints: Value::Array(vec![]),
+        constraints: None,
+        columns: None,
     });
 }
