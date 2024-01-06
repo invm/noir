@@ -10,7 +10,7 @@ use tokio::sync::mpsc;
 use tokio::sync::Mutex;
 use tracing_subscriber;
 
-use query_noir::{
+use noir::{
     database::queries::initialize_database,
     handlers::{connections, queries},
     queues::query::{async_process_model, rs2js},
@@ -100,6 +100,7 @@ fn main() {
             queries::query_results,
             queries::get_schemas,
             queries::get_views,
+            queries::download_csv,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

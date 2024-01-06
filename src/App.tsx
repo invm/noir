@@ -23,6 +23,8 @@ function App() {
       contentStore,
       loading,
       setLoading,
+      setNextContentIdx,
+      setPrevContentIdx,
     },
     app: { restoreAppStore, setComponent },
     backend: { getQueryMetadata },
@@ -39,6 +41,14 @@ function App() {
 
   createShortcut(['Meta', 't'], () => {
     addContentTab();
+  });
+
+  createShortcut(['Control', 'Tab'], () => {
+    setNextContentIdx();
+  });
+
+  createShortcut(['Control', 'Shift', 'Tab'], () => {
+    setPrevContentIdx();
   });
 
   for (let i = 1; i <= 9; i++) {
@@ -63,7 +73,6 @@ function App() {
       if (status === 'Completed') {
         const md = await getQueryMetadata(event.path);
         const metadata = { ...md, path: event.path, status };
-        console.log({ metadata });
         updateResultSet(tab_idx, query_idx, metadata);
       } else if (status === 'Error') {
         updateResultSet(tab_idx, query_idx, { status, error: event.error });

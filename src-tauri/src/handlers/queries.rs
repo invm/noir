@@ -6,7 +6,7 @@ use crate::{
     utils::{
         crypto::md5_hash,
         error::{CommandResult, Error},
-        fs::paginate_file,
+        fs::paginate_file, self,
     },
 };
 use anyhow::anyhow;
@@ -111,8 +111,11 @@ pub async fn execute_query(
 
 #[command]
 pub async fn get_query_metadata(_app_handle: AppHandle, path: String) -> CommandResult<Value> {
-    let file = read_to_string(path + ".metadata").expect("Error reading file");
-    Ok(Value::from(file))
+    let data = read_to_string(path + ".metadata");
+    match data {
+        Ok(data) => Ok(Value::from(data)),
+        Err(..) => Err(Error::from(Error::QueryExpired)),
+    }
 }
 
 #[command]
@@ -172,3 +175,10 @@ pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandRe
     let connection = app_handle.acquire_connection(conn_id);
     Ok(connection.get_procedures().await?)
 }
+
+#[command]
+pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> {
+    utils::fs::copy_file(source, destination)?;
+    Ok(())
+}
+
