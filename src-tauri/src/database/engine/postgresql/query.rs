@@ -36,6 +36,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings,
         info: info.to_string(),
         rows,
+        constraints: Value::Array(vec![]),
     };
     return Ok(set);
 }

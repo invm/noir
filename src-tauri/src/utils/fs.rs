@@ -41,15 +41,15 @@ pub fn create_app_dir(dir: &String) -> Result<()> {
     Ok(fs::create_dir_all(dir)?)
 }
 
-pub fn paginate_file(path: &str, page: usize, limit: usize) -> Vec<String> {
-    let file = fs::read_to_string(path).expect("Error reading file");
+pub fn paginate_file(path: &str, page: usize, limit: usize) -> Result<Vec<String>> {
+    let file = fs::read_to_string(path)?;
     let lines = file
         .lines()
         .skip(page * limit)
         .take(limit)
         .map(|s| s.to_string())
         .collect();
-    return lines;
+    return Ok(lines);
 }
 
 pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
@@ -72,6 +72,7 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         "affected_rows": result_set.affected_rows,
         "warnings": result_set.warnings,
         "info": result_set.info,
+        "constraints": result_set.constraints,
     })
     .to_string();
     let tmp_dir = get_tmp_dir()?;

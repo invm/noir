@@ -47,9 +47,13 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
         sql: query,
         autoLimit: true,
         tabIdx: contentStore.idx,
+        table: {
+          table,
+          with_constraints: true,
+        },
       });
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id, constraints })),
+        result_sets: result_sets.map((id) => ({ id })),
       });
     } catch (error) {
       notify(error);

@@ -19,7 +19,7 @@ const Keymaps = () => {
         <For each={keymaps}>
           {({ action }) => (
             <div class="h-[40px] flex items-center align-middle">
-              <span class="text-lg font-medium ">{action}</span>
+              <span class="text-lg font-medium">{action}</span>
             </div>
           )}
         </For>
@@ -29,7 +29,7 @@ const Keymaps = () => {
           {({ keys }) => (
             <div class="h-[40px] flex items-center">
               <span class="flex gap-2">
-                <For each={keys}>{(key) => <kbd class="kbd kbd-sm">{key}</kbd>}</For>
+                <For each={keys}>{(key) => <kbd class="kbd kbd-sm text-base-content">{key}</kbd>}</For>
               </span>
             </div>
           )}

@@ -5,11 +5,7 @@ import { createSignal } from 'solid-js';
 export const BackendService = () => {
   const [pageSize, setPageSize] = createSignal<number>(25);
 
-  const getQueryResults = async (
-    path: string,
-    page = 0,
-    page_size = pageSize()
-  ) => {
+  const getQueryResults = async (path: string, page = 0, page_size = pageSize()) => {
     const res = await invoke<string>('query_results', {
       params: { path, page, page_size },
     });

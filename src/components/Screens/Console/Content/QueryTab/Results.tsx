@@ -32,7 +32,7 @@ const getColumnDefs = (rows: Row[]): ColDef[] => {
     return [];
   }
   return Object.keys(rows[0]).map((field, _i) => ({
-    // editable: true,
+    editable: true,
     // checkboxSelection: _i === 0,
     filter: true,
     headerComponent: () => <span>{field}</span>,
@@ -46,6 +46,7 @@ export const Results = () => {
   const {
     connections: { queryIdx, contentStore },
     backend: { getQueryResults, pageSize },
+    messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
   const { ref, editorView, createExtension } = createCodeMirror({
@@ -74,14 +75,19 @@ export const Results = () => {
         (contentStore.tabs[contentStore.idx].data as ContentTabData['Query']).result_sets,
       ] as const,
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
-      // Reruns when either signal updates
-      const result_set = result_sets[queryIdxVal];
-      if (!result_set || result_set?.status !== 'Completed') {
-        return { rows: [], columns: [], exhausted: true, notReady: true };
+      try {
+        // Reruns when either signal updates
+        const result_set = result_sets[queryIdxVal];
+        if (!result_set || result_set?.status !== 'Completed') {
+          return { rows: [], columns: [], exhausted: true, notReady: true };
+        }
+        const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
+        const columns = getColumnDefs(rows);
+        return { rows, columns, exhausted: rows.length < pageSizeVal };
+      } catch (error) {
+        notify(error);
+        return { rows: [], columns: [], exhausted: true, error };
       }
-      const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
-      const columns = getColumnDefs(rows);
-      return { rows, columns, exhausted: rows.length < pageSizeVal };
     }
   );
 
@@ -144,7 +150,7 @@ export const Results = () => {
       </Menu>
       <div class="ag-theme-alpine-dark" style={{ height: '100%' }}>
         <AgGridSolid
-          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults />)}
+          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={String(data()?.error)} />)}
           loadingOverlayComponent={() => <Loader />}
           onCellContextMenu={(e) => {
             e.event?.preventDefault();
@@ -157,6 +163,9 @@ export const Results = () => {
           defaultColDef={defaultColDef}
           suppressExcelExport={true}
           suppressCsvExport={false}
+          onCellEditingStopped={(e) => {
+            console.log({ e });
+          }}
         />
       </div>
     </div>
