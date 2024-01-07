@@ -85,6 +85,7 @@ export type ResultSet = {
   affected_rows?: number;
   warnings?: number;
   rows?: Row[];
+  table?: string;
   constraints?: Row[];
   columns?: Row[];
 } & (

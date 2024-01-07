@@ -1,9 +1,12 @@
 use anyhow::Result;
-use deadpool_postgres::Pool;
+use deadpool_postgres::{GenericClient, Pool};
 use futures::{pin_mut, TryStreamExt};
 use serde_json::Value;
 
-use crate::database::connections::ResultSet;
+use crate::{
+    database::connections::{PreparedStatement, ResultSet, TableMetadata},
+    utils::error::Error,
+};
 
 use super::utils::row_to_object;
 
@@ -35,8 +38,27 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings,
         info: info.to_string(),
         rows,
-        constraints: None,
-        columns: None,
+        table: TableMetadata {
+            table: String::from(""),
+            constraints: None,
+            columns: None,
+        },
     };
     Ok(set)
+}
+
+pub async fn execute_tx(pool: &Pool, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+    let mut conn = pool.get().await?;
+    let tx = conn.transaction().await?;
+    for q in queries {
+        match tx.execute_raw(&q.statement, &q.params).await {
+            Ok(..) => {}
+            Err(e) => {
+                tx.rollback().await?;
+                return Err(Error::TxError(e.to_string()));
+            }
+        }
+    }
+    tx.commit().await?;
+    Ok(())
 }

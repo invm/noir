@@ -1,4 +1,5 @@
 use crate::database::connections::InitiatedConnection;
+use crate::database::connections::TableMetadata;
 use crate::utils::fs::write_query;
 use anyhow::Result;
 use serde::Deserialize;
@@ -105,8 +106,11 @@ pub async fn async_process_model(
                 if let Some(table) = task.table {
                     let constraints = task.conn.get_constraints(&table.table).await?;
                     let columns = task.conn.get_columns(Some(&table.table)).await?;
-                    result_set.constraints = Some(constraints);
-                    result_set.columns = Some(columns);
+                    result_set.table = TableMetadata {
+                        table: table.table,
+                        constraints: Some(constraints),
+                        columns: Some(columns),
+                    }
                 }
                 match write_query(&task.id, &result_set) {
                     Ok(path) => {

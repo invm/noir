@@ -65,8 +65,12 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
       const query = 'TRUNCATE TABLE ' + table;
       await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
-        query,
-        autoLimit: false,
+        queries: [
+          {
+            statement: query,
+            params: [],
+          },
+        ],
       });
       notify(t('sidebar.table_was_truncated', { table }), 'success');
     } catch (error) {

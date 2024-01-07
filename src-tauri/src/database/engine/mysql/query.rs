@@ -1,9 +1,11 @@
 use anyhow::Result;
 use mysql::prelude::Queryable;
-use mysql::{from_row, Pool, PooledConn, Row};
+use mysql::{from_row, Pool, PooledConn, Row, TxOpts};
 use serde_json::Value;
+use tracing::info;
 
-use crate::database::connections::ResultSet;
+use crate::database::connections::{PreparedStatement, ResultSet, TableMetadata};
+use crate::utils::error::Error;
 
 use super::utils::row_to_object;
 
@@ -32,8 +34,11 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
             warnings,
             info: info.to_string(),
             rows,
-            constraints: None,
-            columns: None,
+            table: TableMetadata {
+                table: String::from(""),
+                constraints: None,
+                columns: None,
+            },
         };
         return Ok(set);
     }
@@ -43,7 +48,37 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         warnings: 0,
         info: "".to_string(),
         rows: Vec::new(),
-        constraints: None,
-        columns: None,
+        table: TableMetadata {
+            table: String::from(""),
+            constraints: None,
+            columns: None,
+        },
     });
+}
+
+pub fn execute_tx(pool: &Pool, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+    match pool
+        .start_transaction(TxOpts::default())
+        .and_then(|mut tx| {
+            let mut error = None;
+            for q in queries {
+                info!(?q.statement, ?q.params, "Executing query");
+                let success = tx.exec_iter(q.statement, q.params);
+                if success.is_err() {
+                    error = Some(success.err().unwrap());
+                    break;
+                }
+            }
+            if error.is_some() {
+                info!("Rolling back transaction {:?}", error);
+                tx.rollback()?;
+                return Err(error.unwrap());
+            }
+            info!("Committing transaction");
+            tx.commit()?;
+            Ok(())
+        }) {
+        Ok(..) => Ok(()),
+        Err(e) => Err(Error::TxError(e.to_string())),
+    }
 }

@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, Show } from 'solid-js';
 import { dracula } from '@uiw/codemirror-theme-dracula';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
@@ -19,6 +19,7 @@ import { t } from 'utils/i18n';
 import { getAnyCase, parseObjRecursive } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { Key } from 'components/UI/Icons';
+import { invoke } from '@tauri-apps/api';
 
 const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
@@ -58,9 +59,19 @@ const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[
   });
 };
 
+type Changes = {
+  [rowIndes: string]: {
+    updateKey: string;
+    updateVal: string;
+    changes: {
+      [key: string]: string | number | boolean;
+    };
+  };
+};
+
 export const Results = (props: { editable: boolean }) => {
   const {
-    connections: { queryIdx, contentStore },
+    connections: { queryIdx, contentStore, getConnection },
     backend: { getQueryResults, pageSize, downloadCsv },
     messages: { notify },
   } = useAppSelector();
@@ -77,6 +88,9 @@ export const Results = (props: { editable: boolean }) => {
   createExtension(lineWrapping);
 
   const [page, setPage] = createSignal(0);
+  const [table, setTable] = createSignal('');
+  const [changes, setChanges] = createSignal<Changes>({});
+  const [constraints, setConstraints] = createSignal<Row[]>([]);
 
   const menu_id = 'table-row-menu';
 
@@ -98,6 +112,8 @@ export const Results = (props: { editable: boolean }) => {
           return { rows: [], columns: [], exhausted: true, notReady: true };
         }
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
+        setConstraints(result_set.constraints ?? []);
+        setTable(result_set.table ?? '');
         const columns = getColumnDefs(
           rows,
           result_set.columns ?? [],
@@ -111,11 +127,12 @@ export const Results = (props: { editable: boolean }) => {
     }
   );
 
-  createEffect(
-    on(queryIdx, () => {
-      setPage(0);
-    })
-  );
+  createEffect(() => {
+    setPage(0);
+    setConstraints([]);
+    setChanges({});
+    setTable('');
+  }, [queryIdx, contentStore.idx]);
 
   const onNextPage = async () => {
     if (data()?.exhausted) return;
@@ -125,6 +142,10 @@ export const Results = (props: { editable: boolean }) => {
   const onPrevPage = async () => {
     if (page() === 0) return;
     setPage(page() - 1);
+  };
+
+  const onPageSizeChange = () => {
+    setPage(0);
   };
 
   const defaultColDef: ColDef = {
@@ -142,6 +163,34 @@ export const Results = (props: { editable: boolean }) => {
     await downloadCsv(dataPath, filePath).catch((err) => notify(err));
   };
 
+  const applyChanges = async () => {
+    const allChanges = changes();
+    try {
+      const queries = Object.keys(allChanges).map((rowIndex) => {
+        let statement = `UPDATE ${table()} SET `;
+        const row = allChanges[rowIndex];
+        const params = Object.values(row.changes)
+          .reduce((acc, val) => [...acc, val], [] as (string | number | boolean)[])
+          .concat(row.updateVal);
+        const _changes = Object.keys(row.changes).map((key) => key + ' = ?');
+        statement += _changes.join(', ') + ` WHERE ${row.updateKey} = ?`;
+        return { statement, params };
+      });
+      const conn = getConnection();
+      await invoke('execute_tx', { queries, connId: conn.id });
+      setChanges({});
+      await invoke('invalidate_query', { path: data()?.path });
+      // TODO: refresh query
+    } catch (error) {
+      notify(error);
+    }
+  };
+
+  const resetChanges = async () => {
+    gridRef.api?.undoCellEditing();
+    setChanges({});
+  };
+
   return (
     <div class="flex flex-col h-full overflow-hidden">
       <dialog id="row_modal" class="modal">
@@ -154,7 +203,20 @@ export const Results = (props: { editable: boolean }) => {
           <button>close</button>
         </form>
       </dialog>
-      <Pagination {...{ page, onNextPage, onPrevPage, loading: data.loading, setPage, onBtnExport }} />
+      <Pagination
+        {...{
+          changesCount: Object.keys(changes()).length,
+          resetChanges,
+          applyChanges,
+          page,
+          onNextPage,
+          onPrevPage,
+          loading: data.loading,
+          hasResults: !!data()?.rows.length,
+          onPageSizeChange,
+          onBtnExport,
+        }}
+      />
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
         <Item
           onClick={({ props: { row } }) => {
@@ -173,7 +235,7 @@ export const Results = (props: { editable: boolean }) => {
       </Menu>
       <div class="ag-theme-alpine-dark" style={{ height: '100%' }}>
         <AgGridSolid
-          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={String(data()?.error)} />)}
+          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={data()?.error} />)}
           loadingOverlayComponent={() => <Loader />}
           onCellContextMenu={(e) => {
             e.event?.preventDefault();
@@ -184,10 +246,28 @@ export const Results = (props: { editable: boolean }) => {
           rowSelection="multiple"
           rowData={data()?.rows}
           defaultColDef={defaultColDef}
+          enableCellChangeFlash={true}
+          undoRedoCellEditing={true}
           suppressExcelExport={true}
           suppressCsvExport={false}
           onCellEditingStopped={(e) => {
-            console.log({ e });
+            if (e.valueChanged) {
+              const updateCol = constraints().find((c) => +getAnyCase(c, 'ORDINAL_POSITION') === 1);
+              const updateKey = updateCol ? getAnyCase(updateCol, 'COLUMN_NAME') : Object.keys(e.data)[0];
+              const change = e.column.getColId();
+              const _changes = changes();
+              setChanges({
+                ..._changes,
+                [e.rowIndex ?? '']: {
+                  updateKey,
+                  updateVal: e.data[updateKey],
+                  changes: {
+                    ..._changes[e.rowIndex ?? '']?.changes,
+                    [change]: e.newValue,
+                  },
+                },
+              });
+            }
           }}
         />
       </div>

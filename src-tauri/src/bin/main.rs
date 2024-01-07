@@ -90,6 +90,7 @@ fn main() {
             connections::set_schema,
             queries::execute_query,
             queries::enqueue_query,
+            queries::execute_tx,
             queries::get_columns,
             queries::get_constraints,
             queries::get_functions,
@@ -101,6 +102,7 @@ fn main() {
             queries::get_schemas,
             queries::get_views,
             queries::download_csv,
+            queries::invalidate_query,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

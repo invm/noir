@@ -1,12 +1,14 @@
 use std::fs::read_to_string;
 
 use crate::{
+    database::connections::PreparedStatement,
     queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus, TableQuery},
     state::{AsyncState, ServiceAccess},
     utils::{
+        self,
         crypto::md5_hash,
         error::{CommandResult, Error},
-        fs::paginate_file, self,
+        fs::paginate_file,
     },
 };
 use anyhow::anyhow;
@@ -98,6 +100,17 @@ pub async fn get_views(app_handle: AppHandle, conn_id: String) -> CommandResult<
 }
 
 #[command]
+pub async fn execute_tx(
+    app_handle: AppHandle,
+    conn_id: String,
+    queries: Vec<PreparedStatement>,
+) -> CommandResult<()> {
+    let connection = app_handle.acquire_connection(conn_id);
+    connection.execute_tx(queries).await?;
+    Ok(())
+}
+
+#[command]
 pub async fn execute_query(
     app_handle: AppHandle,
     conn_id: String,
@@ -182,3 +195,8 @@ pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> 
     Ok(())
 }
 
+#[command]
+pub async fn invalidate_query(path: &str) -> CommandResult<()> {
+    utils::fs::remove_dir(path)?;
+    Ok(())
+}

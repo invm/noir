@@ -42,7 +42,9 @@
         "next_result_set": "Next result set",
         "previous_result_set": "Previous result set",
         "next_page": "Next page",
-        "previous_page": "Previous page"
+        "previous_page": "Previous page",
+        "reset": "Reset",
+        "apply": "Apply"
       },
       "no_results": "No results returned",
       "result_set": "Result set ",
