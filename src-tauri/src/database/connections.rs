@@ -106,6 +106,12 @@ pub struct InitiatedConnection {
     pub schema: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PreparedStatement {
+    pub statement: String,
+    pub params: Vec<String>,
+}
+
 impl ConnectionConfig {
     pub fn new(
         dialect: Dialect,
@@ -254,13 +260,19 @@ impl ConnectionConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct TableMetadata {
+    pub table: String,
+    pub constraints: Option<Vec<serde_json::Value>>,
+    pub columns: Option<Vec<serde_json::Value>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ResultSet {
     pub affected_rows: u64,
     pub warnings: u16,
     pub info: String,
     pub rows: Vec<serde_json::Value>,
-    pub constraints: Option<Vec<serde_json::Value>>,
-    pub columns: Option<Vec<serde_json::Value>>,
+    pub table: TableMetadata,
 }
 
 impl InitiatedConnection {
@@ -298,7 +310,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn get_columns(&self, table:Option<&str>) -> Result<Vec<Value>> {
+    pub async fn get_columns(&self, table: Option<&str>) -> Result<Vec<Value>> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => {
                 engine::mysql::tables::get_columns(self, pool, table).await
@@ -379,6 +391,16 @@ impl InitiatedConnection {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_query(pool, q),
             ConnectionPool::Postgresql(pool) => {
                 engine::postgresql::query::execute_query(pool, q).await
+            }
+            ConnectionPool::Sqlite => todo!(),
+        }
+    }
+
+    pub async fn execute_tx(&self, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+        match &self.pool {
+            ConnectionPool::Mysql(pool) => engine::mysql::query::execute_tx(pool, queries),
+            ConnectionPool::Postgresql(pool) => {
+                engine::postgresql::query::execute_tx(pool, queries).await
             }
             ConnectionPool::Sqlite => todo!(),
         }

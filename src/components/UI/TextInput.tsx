@@ -26,6 +26,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
           <input type={props.type ?? 'text'} class="app-input"
             {...rest}
             {...field.props}
+            autocapitalize="off"
             classList={{
               'is-invalid': field.helpers.error,
               'form-control': true,

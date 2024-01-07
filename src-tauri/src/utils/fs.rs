@@ -72,8 +72,9 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         "affected_rows": result_set.affected_rows,
         "warnings": result_set.warnings,
         "info": result_set.info,
-        "constraints": result_set.constraints,
-        "columns": result_set.columns,
+        "table": result_set.table.table,
+        "constraints": result_set.table.constraints,
+        "columns": result_set.table.columns,
     })
     .to_string();
     let tmp_dir = get_tmp_dir()?;
@@ -87,6 +88,17 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
 pub fn copy_file(src: &str, dest: &str) -> Result<()> {
     debug!("Copying file: {:?} to {:?}", src, dest);
     let res = fs::copy(src, dest);
+    if let Err(res) = res {
+        error!("Error: {:?}", res);
+    }
+    Ok(())
+}
+
+pub fn remove_dir(file_path: &str) -> Result<()> {
+    let file_path = PathBuf::from(file_path);
+    let dir = file_path.parent().unwrap();
+    debug!("Removing dir: {:?}", dir);
+    let res = fs::remove_dir_all(dir);
     if let Err(res) = res {
         error!("Error: {:?}", res);
     }

@@ -10,10 +10,14 @@ import { ResultSet } from 'interfaces';
 type PaginationProps = {
   page: Accessor<number>;
   loading: boolean;
-  setPage: (n: number) => void;
+  changesCount: number;
+  hasResults: boolean;
+  onPageSizeChange: () => void;
   onPrevPage: () => void;
   onNextPage: () => void;
   onBtnExport: () => void;
+  applyChanges: () => void;
+  resetChanges: () => void;
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -37,7 +41,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="container flex justify-between items-top gap-2 bg-base-100">
+    <div class="w-full flex justify-between items-top gap-2 bg-base-100 px-2 py-1">
       <div class="flex gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">
@@ -66,13 +70,25 @@ export const Pagination = (props: PaginationProps) => {
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="flex items-center">
-          <button onClick={props.onBtnExport}>{t('console.table.csv')}</button>
+          <Show when={props.changesCount > 0}>
+            <div class="px-2">
+              <button class="join-item btn btn-xs" onClick={props.resetChanges}>
+                {t('console.actions.reset')}
+              </button>
+              <button onClick={props.applyChanges} class="join-item btn btn-xs !text-error text-md text-upper">
+                {t('console.actions.apply')}
+              </button>
+            </div>
+          </Show>
+          <Show when={props.hasResults}>
+            <button class="btn btn-ghost btn-xs" onClick={props.onBtnExport}>{t('console.table.csv')}</button>
+          </Show>
           <div class="px-3">
             <select
               value={pageSize()}
               onChange={(e) => {
                 setPageSize(+e.currentTarget.value);
-                props.setPage(0);
+                props.onPageSizeChange();
               }}
               class="select select-accent select-bordered select-xs w-full">
               <For each={PAGE_SIZE_OPTIONS}>{(n) => <option value={n}>{n}</option>}</For>
@@ -80,11 +96,11 @@ export const Pagination = (props: PaginationProps) => {
           </div>
           <div class="join">
             <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.previous_page')}>
-              <button class="join-item btn btn-sm" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
+              <button class="join-item btn btn-xs" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
                 <ChevronLeft />
               </button>
             </div>
-            <button disabled class="join-item btn btn-sm btn-disabled !text-base-content w-[50px]">
+            <button disabled class="join-item btn btn-xs btn-disabled !text-base-content w-[50px]">
               <Switch>
                 <Match when={props.loading}>
                   <span class="loading text-primary loading-bars loading-xs"></span>
@@ -97,7 +113,7 @@ export const Pagination = (props: PaginationProps) => {
 
             <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_page')}>
               <button
-                class="join-item btn btn-sm"
+                class="join-item btn btn-xs"
                 disabled={props.loading || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
                 onClick={props.onNextPage}>
                 <ChevronRight />

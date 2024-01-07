@@ -70,8 +70,12 @@ export const Sidebar = () => {
       }
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
-        query,
-        autoLimit: false,
+        queries: [
+          {
+            statement: query,
+            params: [],
+          },
+        ],
       });
       const data = { query, result_sets: [res], cursor: 0, auto_limit: false };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
@@ -85,8 +89,12 @@ export const Sidebar = () => {
       const query = 'SHOW CREATE PROCEDURE ' + routine;
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
-        query,
-        autoLimit: false,
+        queries: [
+          {
+            statement: query,
+            params: [],
+          },
+        ],
       });
       const data = { query, result_sets: [res], cursor: 0 };
       addContentTab(newContentTab(routine, 'Query', data));
@@ -106,8 +114,12 @@ export const Sidebar = () => {
       const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${schema}" and TRIGGER_NAME = "${trigger}"`;
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
-        query,
-        autoLimit: false,
+        queries: [
+          {
+            statement: query,
+            params: [],
+          },
+        ],
       });
       const data = { query, result_sets: [res], cursor: 0 };
       addContentTab(newContentTab(trigger, 'Query', data));

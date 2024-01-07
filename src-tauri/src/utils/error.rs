@@ -30,6 +30,8 @@ pub enum Error {
     General(#[from] anyhow::Error),
     #[error("Query results expired, please re-run the query.")]
     QueryExpired,
+    #[error("Transaction failed: {0}")]
+    TxError(String),
 }
 
 // we must also implement serde::Serialize
