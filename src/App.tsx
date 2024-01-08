@@ -31,7 +31,7 @@ function App() {
     messages: { notify },
   } = useAppSelector();
 
-  createShortcut(['Meta', 'w'], () => {
+  createShortcut(['Control', 'w'], () => {
     removeContentTab(contentStore.idx);
   });
 
@@ -39,20 +39,22 @@ function App() {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
 
-  createShortcut(['Meta', 't'], () => {
+  createShortcut(['Control', 't'], () => {
     addContentTab();
   });
 
   createShortcut(['Control', 'Tab'], () => {
+    console.log('createShortcut');
     setNextContentIdx();
   });
 
   createShortcut(['Control', 'Shift', 'Tab'], () => {
+    console.log('createShortcut');
     setPrevContentIdx();
   });
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut(['Meta', String(i)], () => {
+    createShortcut(['Control', String(i)], () => {
       setContentIdx(i - 1);
     });
   }

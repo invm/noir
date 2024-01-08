@@ -88,6 +88,7 @@ export type TableStructureContentTabData = {
 
 export type DataContentTabData = {
   result_sets: ResultSet[];
+  table: string;
 };
 
 export type ContentTabType = {

@@ -52,9 +52,6 @@ dependencies:
   codemirror:
     specifier: ^6.0.1
     version: 6.0.1(@lezer/common@1.0.3)
-  fuse.js:
-    specifier: ^6.6.2
-    version: 6.6.2
   i18next:
     specifier: ^23.1.0
     version: 23.1.0
@@ -63,16 +60,13 @@ dependencies:
     version: 2.3.0(@codemirror/state@6.2.1)(@codemirror/view@6.14.1)(solid-js@1.7.7)
   solid-contextmenu:
     specifier: ^0.0.2
-    version: 0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.2.2)
+    version: 0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.0.10)
   solid-form-handler:
     specifier: ^1.2.0
     version: 1.2.0(solid-js@1.7.7)
   solid-js:
     specifier: ^1.7.7
     version: 1.7.7
-  solid-transition-group:
-    specifier: ^0.2.2
-    version: 0.2.2(solid-js@1.7.7)
   split.js:
     specifier: ^1.6.5
     version: 1.6.5
@@ -85,9 +79,6 @@ dependencies:
   tauri-plugin-window-state-api:
     specifier: github:tauri-apps/tauri-plugin-window-state#v1
     version: github.com/tauri-apps/tauri-plugin-window-state/91fafb628cd0c83ad52bdf9029cad212381f740a
-  tinykeys:
-    specifier: ^2.1.0
-    version: 2.1.0
   zod:
     specifier: ^3.21.4
     version: 3.21.4
@@ -1149,37 +1140,12 @@ packages:
       solid-js: 1.7.7
     dev: false
 
-  /@solid-primitives/refs@1.0.4(solid-js@1.7.7):
-    resolution: {integrity: sha512-BxZKkct0OIyADWIoA9UITm+3G5Xb3IkOa0nZd40SgOK5DtMqpXFIEPUkJ/woPB90WqlM9UvvuiJHUyAjMeAmCw==}
-    peerDependencies:
-      solid-js: ^1.6.12
-    dependencies:
-      '@solid-primitives/utils': 6.2.0(solid-js@1.7.7)
-      solid-js: 1.7.7
-    dev: false
-
   /@solid-primitives/rootless@1.4.2(solid-js@1.7.7):
     resolution: {integrity: sha512-ynI/2aEOPyc14IKCX6yDBqnsAYCoLbaP9V/jejEWMVKOT2ZdV2ZxdftaLimOpWPpvjyti5DUJIGTOfLaNb7jlg==}
     peerDependencies:
       solid-js: ^1.6.12
     dependencies:
       '@solid-primitives/utils': 6.2.1(solid-js@1.7.7)
-      solid-js: 1.7.7
-    dev: false
-
-  /@solid-primitives/transition-group@1.0.2(solid-js@1.7.7):
-    resolution: {integrity: sha512-+o3J7TnU0/Sok+LKA0z0wvhim88dpd2eFBk8/05adE6wVypVlME8sKqTMO+xRv8HoT4Kq3sczmvwV07FKg2n+g==}
-    peerDependencies:
-      solid-js: ^1.6.12
-    dependencies:
-      solid-js: 1.7.7
-    dev: false
-
-  /@solid-primitives/utils@6.2.0(solid-js@1.7.7):
-    resolution: {integrity: sha512-T62WlLwKkbmicsw/xpwMQyv9MmZRSaVyutXfS5icc9v0cb8qGMUxRxr5LVvZHYQCZ9DEFboZB0r711xsbVBbeA==}
-    peerDependencies:
-      solid-js: ^1.6.12
-    dependencies:
       solid-js: 1.7.7
     dev: false
 
@@ -2485,11 +2451,6 @@ packages:
   /functions-have-names@1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
-  /fuse.js@6.6.2:
-    resolution: {integrity: sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==}
-    engines: {node: '>=10'}
-    dev: false
-
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -3710,7 +3671,7 @@ packages:
       solid-js: 1.7.7
     dev: false
 
-  /solid-contextmenu@0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.2.2):
+  /solid-contextmenu@0.0.2(patch_hash=df2yvz34tducgiwp4thl3akrsu)(solid-js@1.7.7)(solid-transition-group@0.0.10):
     resolution: {integrity: sha512-TmOhIvVpZmQdoiydSP07d9rT0xu/wvRSH6TJqbGPd+2XZz0wOualbm5CvLiHbOGnOU5tBrbe4q0cU/EMvG7u+w==}
     peerDependencies:
       solid-js: ^1.4.8
@@ -3719,7 +3680,7 @@ packages:
       clsx: 1.2.1
       mitt: 3.0.1
       solid-js: 1.7.7
-      solid-transition-group: 0.2.2(solid-js@1.7.7)
+      solid-transition-group: 0.0.10(solid-js@1.7.7)
     dev: false
     patched: true
 
@@ -3748,13 +3709,11 @@ packages:
       solid-js: 1.7.7
     dev: true
 
-  /solid-transition-group@0.2.2(solid-js@1.7.7):
-    resolution: {integrity: sha512-6nB90UM2PB6VsIo/UCkmZmlIJb9mnmP7QPGrePqQJWtpUiRs5PbhkB8fvdyv9g/RPHWYpdJhQgxL6n++WmTt5A==}
+  /solid-transition-group@0.0.10(solid-js@1.7.7):
+    resolution: {integrity: sha512-b3O9z6BUP60CG1WnTdqFuvHms0reDNYwQF+eAEEaSaoDEmiOu9+Lu7zQgWGySJjaAdSAClhmFCmx/eAjQgfIoA==}
     peerDependencies:
-      solid-js: ^1.6.12
+      solid-js: ^1.0.0
     dependencies:
-      '@solid-primitives/refs': 1.0.4(solid-js@1.7.7)
-      '@solid-primitives/transition-group': 1.0.2(solid-js@1.7.7)
       solid-js: 1.7.7
     dev: false
 
@@ -3986,10 +3945,6 @@ packages:
     dependencies:
       any-promise: 1.3.0
     dev: true
-
-  /tinykeys@2.1.0:
-    resolution: {integrity: sha512-/MESnqBD1xItZJn5oGQ4OsNORQgJfPP96XSGoyu4eLpwpL0ifO0SYR5OD76u0YMhMXsqkb0UqvI9+yXTh4xv8Q==}
-    dev: false
 
   /tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}

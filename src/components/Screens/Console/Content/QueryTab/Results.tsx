@@ -9,7 +9,7 @@ import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 
 import { useAppSelector } from 'services/Context';
-import { Row } from 'interfaces';
+import { QueryTaskEnqueueResult, Row } from 'interfaces';
 import { ContentTabData } from 'services/Connections';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
@@ -37,15 +37,29 @@ const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[
           return true;
         }
       }) ?? {};
+    const visible_type = getAnyCase(col, 'COLUMN_TYPE');
+    // const type = visible_type?.split('(')[0];
+    // let gridType = 'text';
+    // if (type.includes('int') || type === 'decimal' || type === 'float' || type === 'double') {
+    //   gridType = 'number';
+    // } else if (type === 'date' || type === 'datetime' || type === 'timestamp') {
+    //   gridType = 'dateString';
+    // } else if (type === 'tinyint' || type === 'boolean') {
+    //   gridType = 'boolean';
+    // } else if (type === 'json' || type === 'jsonb') {
+    //   gridType = 'object';
+    // }
+
     return {
-      editable: !key,
+      // editable: !key,
       // checkboxSelection: _i === 0,
       filter: true,
+      // type: gridType,
       headerComponent: () => (
         <div class="flex items-center justify-between w-full">
           <div>
             <span class="mr-2 text-sm">{field}</span>
-            <span class="text-xs text-base-content">{getAnyCase(col, 'COLUMN_TYPE')}</span>
+            <span class="text-xs text-base-content">{visible_type}</span>
           </div>
           <Show when={key}>
             <Key />
@@ -64,14 +78,14 @@ type Changes = {
     updateKey: string;
     updateVal: string;
     changes: {
-      [key: string]: string | number | boolean;
+      [key: string]: string;
     };
   };
 };
 
-export const Results = (props: { editable: boolean }) => {
+export const Results = (props: { editable?: boolean; table?: string }) => {
   const {
-    connections: { queryIdx, contentStore, getConnection },
+    connections: { queryIdx, contentStore, getConnection, updateContentTab },
     backend: { getQueryResults, pageSize, downloadCsv },
     messages: { notify },
   } = useAppSelector();
@@ -170,8 +184,9 @@ export const Results = (props: { editable: boolean }) => {
         let statement = `UPDATE ${table()} SET `;
         const row = allChanges[rowIndex];
         const params = Object.values(row.changes)
-          .reduce((acc, val) => [...acc, val], [] as (string | number | boolean)[])
-          .concat(row.updateVal);
+          .reduce((acc, val) => [...acc, val], [] as string[])
+          .concat(row.updateVal)
+          .map(String);
         const _changes = Object.keys(row.changes).map((key) => key + ' = ?');
         statement += _changes.join(', ') + ` WHERE ${row.updateKey} = ?`;
         return { statement, params };
@@ -180,7 +195,20 @@ export const Results = (props: { editable: boolean }) => {
       await invoke('execute_tx', { queries, connId: conn.id });
       setChanges({});
       await invoke('invalidate_query', { path: data()?.path });
-      // TODO: refresh query
+      const query = 'SELECT * from ' + props.table!;
+      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
+        connId: conn.id,
+        sql: query,
+        autoLimit: true,
+        tabIdx: contentStore.idx,
+        table: {
+          table,
+          with_constraints: true,
+        },
+      });
+      updateContentTab('data', {
+        result_sets: result_sets.map((id) => ({ id })),
+      });
     } catch (error) {
       notify(error);
     }
