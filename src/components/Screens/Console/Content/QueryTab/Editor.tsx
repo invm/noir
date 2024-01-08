@@ -124,14 +124,14 @@ export const Editor = () => {
     setSchema(_schema);
   }, connectionStore.idx);
 
-  createShortcut(['Meta', 'k'], () => {
+  createShortcut(['Control', 'k'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(false);
       fn(editorView());
     }
   });
 
-  createShortcut(['Meta', 'j'], () => {
+  createShortcut(['Control', 'j'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(true);
       fn(editorView());

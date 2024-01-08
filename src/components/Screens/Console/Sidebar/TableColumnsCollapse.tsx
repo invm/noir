@@ -40,7 +40,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
     try {
       const activeConnection = getConnection();
       const query = 'SELECT * from ' + table;
-      const data = { result_sets: [] };
+      const data = { result_sets: [], table };
       addContentTab(newContentTab(table, 'Data', data));
       const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
         connId: activeConnection.id,

@@ -1,7 +1,11 @@
+import { useAppSelector } from 'services/Context';
 import { Results } from '../QueryTab/Results';
 
 const DataTab = () => {
-  return <Results editable={true} />;
+  const {
+    connections: { getContentData },
+  } = useAppSelector();
+  return <Results editable={true} table={getContentData('Data').table} />;
 };
 
 export { DataTab };
