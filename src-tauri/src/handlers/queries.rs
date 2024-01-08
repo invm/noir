@@ -115,7 +115,6 @@ pub async fn execute_query(
     app_handle: AppHandle,
     conn_id: String,
     query: String,
-    _auto_limit: bool,
 ) -> CommandResult<Value> {
     let connection = app_handle.acquire_connection(conn_id);
     let result = connection.execute_query(&query).await?;

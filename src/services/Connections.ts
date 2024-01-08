@@ -250,6 +250,7 @@ export const ConnectionsService = () => {
 
   const clearStore = async () => {
     await store.clear();
+    location.reload();
   };
 
   const getConnection = () => {

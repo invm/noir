@@ -14,7 +14,7 @@ const keymaps = [
 
 const Keymaps = () => {
   return (
-    <div class="flex items-center justify-center">
+    <div class="grid grid-cols-2">
       <div class="flex flex-col items-end pr-1">
         <For each={keymaps}>
           {({ action }) => (

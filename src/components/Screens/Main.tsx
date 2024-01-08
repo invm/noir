@@ -1,6 +1,5 @@
 import { Alerts } from 'components/UI';
 import { invoke } from '@tauri-apps/api';
-import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 import { CloseIcon, HomeIcon, QuestionMark } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
@@ -61,14 +60,11 @@ export const Main = () => {
           </For>
         </div>
         <div class="flex items-center py-2">
-          <ThemeSwitch />
-          <Show when={connectionStore.idx !== 0}>
-            <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
-              <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
-                <QuestionMark />
-              </button>
-            </div>
-          </Show>
+          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
+            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
+              <QuestionMark />
+            </button>
+          </div>
         </div>
       </div>
       <div class="flex-1 overflow-hidden flex">

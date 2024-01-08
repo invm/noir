@@ -22,7 +22,7 @@ export const ThemeSwitch = () => {
 
   return (
     <div class="dropdown dropdown-end">
-      <label id="theme-switch" tabindex="0" class="btn btn-xs btn-secondary">
+      <label id="theme-switch" tabindex="0" class="btn btn-md btn-secondary btn-wide btn-outline">
         {t('theme_switch.theme')}
       </label>
       <ul
