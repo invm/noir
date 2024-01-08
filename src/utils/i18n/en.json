@@ -82,14 +82,14 @@
     },
     "settings": {
       "settings": "Settings",
-      "clear_cache": "Clear cache",
+      "clear_cache": "Clear app cache",
       "shortcuts": "Shortcuts"
     },
     "help": {
       "help": "Help"
     },
     "theme_switch": {
-      "theme": "Theme"
+      "theme": "Change theme"
     },
     "file_input": {
       "choose_file": "Choose file"
