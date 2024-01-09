@@ -73,12 +73,16 @@ pub async fn get_constraints(
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!(
-        "SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION
-            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
+    "SELECT c.column_name, c.table_name, tc.constraint_name, c.table_schema, c.ordinal_position
+        FROM information_schema.table_constraints tc 
+        JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) 
+        JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+          AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+        WHERE constraint_type = 'PRIMARY KEY' and c.table_schema = '{}'",
         schema
     );
     let query = match table {
-        Some(table) => format!("{} AND TABLE_NAME = '{}'", query, table),
+        Some(table) => format!("{} AND c.table_name = '{}'", query, table),
         None => format!("{};", query),
     };
     Ok(raw_query(pool.clone(), &query).await?)

@@ -30,7 +30,7 @@ pub enum Error {
     General(#[from] anyhow::Error),
     #[error("Query results expired, please re-run the query.")]
     QueryExpired,
-    #[error("Transaction failed: {0}")]
+    #[error("{0}")]
     TxError(String),
 }
 

@@ -1,6 +1,8 @@
 import { invoke } from '@tauri-apps/api';
-import { QueryMetadataResult, Row } from 'interfaces';
+import { QueryMetadataResult, QueryTaskEnqueueResult, RawQueryResult, Row } from 'interfaces';
 import { createSignal } from 'solid-js';
+import { select } from 'sql-bricks';
+import { getAnyCase } from 'utils/utils';
 
 export const BackendService = () => {
   const [pageSize, setPageSize] = createSignal<number>(25);
@@ -23,6 +25,22 @@ export const BackendService = () => {
     return JSON.parse(res) as unknown as QueryMetadataResult;
   };
 
+  const selectAllFrom = async (table: string, connId: string, tabIdx: number) => {
+    const [pkey] = await invoke<RawQueryResult>('get_constraints', {
+      connId,
+      table,
+    });
+    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString();
+    const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
+      connId,
+      sql,
+      autoLimit: true,
+      tabIdx,
+      table,
+    });
+    return result_sets;
+  };
+
   const downloadCsv = async (source: string, destination: string) =>
     invoke<string>('download_csv', { source, destination });
 
@@ -31,6 +49,7 @@ export const BackendService = () => {
     setPageSize,
     getQueryResults,
     getQueryMetadata,
-    downloadCsv
+    downloadCsv,
+    selectAllFrom,
   };
 };

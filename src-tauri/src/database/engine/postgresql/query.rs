@@ -1,11 +1,11 @@
 use anyhow::Result;
-use deadpool_postgres::{GenericClient, Pool};
+use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
 use serde_json::Value;
 use tracing::debug;
 
 use crate::{
-    database::connections::{PreparedStatement, ResultSet, TableMetadata},
+    database::connections::{ResultSet, TableMetadata},
     utils::error::Error,
 };
 
@@ -48,32 +48,13 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     Ok(set)
 }
 
-pub async fn execute_tx(pool: &Pool, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
     let mut conn = pool.get().await?;
     let tx = conn.transaction().await?;
     for q in queries {
-        debug!(?q.statement, ?q.params, "Executing query");
-        // replace each occurence of ? in string with $1, $2, $3, etc.
-        let mut i = 0;
-        let query = q
-            .statement
-            .clone()
-            .split("")
-            .enumerate()
-            .map(|(_, c)| {
-                if c == "?" {
-                    i += 1;
-                    format!("${}", i)
-                } else {
-                    c.to_string()
-                }
-            })
-            .collect::<Vec<String>>()
-            .join("");
-
-        debug!(?query, "Executing query");
-
-        match tx.execute_raw(&query, &q.params).await {
+        debug!(?q, "Executing query");
+        let params: Vec<String> = vec![];
+        match tx.execute_raw(q, &params).await {
             Ok(..) => {}
             Err(e) => {
                 tx.rollback().await?;

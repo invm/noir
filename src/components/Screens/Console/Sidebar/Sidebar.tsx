@@ -171,7 +171,7 @@ export const Sidebar = () => {
                       onClick={() => insertColumnName(column.name)}
                       class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                       <span class="text-xs font-medium">{column.name}</span>
-                      <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'COLUMN_TYPE')}</span>
+                      <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'column_type')}</span>
                     </button>
                   )}
                 </For>
@@ -191,7 +191,7 @@ export const Sidebar = () => {
                         onClick={() => insertColumnName(column.name)}
                         class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
                         <span class="text-xs font-semibold ">{column.name}</span>
-                        <span class="text-xs font-medium ml-2">{getAnyCase(column.props, 'COLUMN_TYPE')}</span>
+                        <span class="text-xs font-medium ml-2">{getAnyCase(column.props, 'column_type')}</span>
                       </button>
                     )}
                   </For>
@@ -205,14 +205,14 @@ export const Sidebar = () => {
           <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
             <Item
               onClick={({ props }) => {
-                showRoutine(getAnyCase(props.routine, 'ROUTINE_NAME'));
+                showRoutine(getAnyCase(props.routine, 'routine_name'));
                 hide();
               }}>
               {t('sidebar.show_routine')}
             </Item>
             <Item
               onClick={({ props: { routine } }) => {
-                showCreateStatement(getAnyCase(routine, 'ROUTINE_NAME'), getAnyCase(routine, 'ROUTINE_DEFINITION'));
+                showCreateStatement(getAnyCase(routine, 'routine_name'), getAnyCase(routine, 'routine_definition'));
                 hide();
               }}>
               {t('sidebar.show_create_statement')}
@@ -229,7 +229,7 @@ export const Sidebar = () => {
                       <Function />
                     </div>
                   </span>
-                  <span class="text-xs font-semibold truncate">{getAnyCase(routine, 'ROUTINE_NAME')}</span>
+                  <span class="text-xs font-semibold truncate">{getAnyCase(routine, 'routine_name')}</span>
                 </div>
               </div>
             )}
@@ -240,14 +240,14 @@ export const Sidebar = () => {
           <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
             <Item
               onClick={({ props: { trigger } }) => {
-                showTrigger(getAnyCase(trigger, 'TRIGGER_NAME'));
+                showTrigger(getAnyCase(trigger, 'trigger_name'));
                 hide();
               }}>
               {t('sidebar.show_trigger')}
             </Item>
             <Item
               onClick={({ props: { trigger } }) => {
-                showCreateStatement(getAnyCase(trigger, 'TRIGGER_NAME'), getAnyCase(trigger, 'ACTION_STATEMENT'));
+                showCreateStatement(getAnyCase(trigger, 'trigger_name'), getAnyCase(trigger, 'action_statement'));
                 hide();
               }}>
               {t('sidebar.show_create_statement')}
@@ -265,7 +265,7 @@ export const Sidebar = () => {
                     </div>
                   </span>
                   <span class="text-xs font-semibold">
-                    {getAnyCase(trigger, 'TRIGGER_NAME') + ' (' + getAnyCase(trigger, 'EVENT_OBJECT_TABLE') + ')'}
+                    {getAnyCase(trigger, 'trigger_name') + ' (' + getAnyCase(trigger, 'event_object_table') + ')'}
                   </span>
                 </div>
               </div>
