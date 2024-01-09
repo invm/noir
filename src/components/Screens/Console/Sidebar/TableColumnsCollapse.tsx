@@ -1,18 +1,18 @@
 import { createSignal, JSXElement } from 'solid-js';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
+import { invoke } from '@tauri-apps/api';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
 import { newContentTab, TableStructureContentTabData } from 'services/Connections';
-
-import { invoke } from '@tauri-apps/api';
-import { QueryTaskEnqueueResult, ResultSet } from 'interfaces';
 import { Table } from 'components/UI/Icons';
+import { ResultSet } from 'interfaces';
 
 export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title: string; children: JSXElement }) => {
   const [open, setOpen] = createSignal(false);
 
   const {
     connections: { contentStore, addContentTab, getConnection, updateContentTab },
+    backend: { selectAllFrom },
     messages: { notify },
   } = useAppSelector();
 
@@ -38,20 +38,10 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
 
   const listData = async (table: string) => {
     try {
-      const activeConnection = getConnection();
-      const query = 'SELECT * from ' + table;
+      const conn = getConnection();
       const data = { result_sets: [], table };
       addContentTab(newContentTab(table, 'Data', data));
-      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
-        connId: activeConnection.id,
-        sql: query,
-        autoLimit: true,
-        tabIdx: contentStore.idx,
-        table: {
-          table,
-          with_constraints: true,
-        },
-      });
+      const result_sets = await selectAllFrom(table, conn.id, contentStore.idx);
       updateContentTab('data', {
         result_sets: result_sets.map((id) => ({ id })),
       });

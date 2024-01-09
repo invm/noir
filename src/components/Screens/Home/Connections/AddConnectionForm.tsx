@@ -89,16 +89,16 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
 export * from './AddConnectionForm';
 
 const defaultValues = {
-  name: 'Local',
+  name: '',
   dialect: Dialect.Mysql,
   port: 3306,
-  color: 'cyan',
+  color: 'orange',
   mode: AvailableModes[Dialect.Mysql][0],
   file: '',
   host: 'localhost',
   user: 'root',
-  password: 'localR00t!',
-  db_name: 'dev_NAME',
+  password: '',
+  db_name: '',
 };
 
 const AddConnectionForm = () => {

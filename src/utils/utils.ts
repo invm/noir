@@ -11,7 +11,7 @@ export const randomId = () => {
 };
 
 export const getAnyCase = (obj: Row, key: string) => {
-  return (obj[key] ? obj[key] : obj[key.toLowerCase()]) as string;
+  return (obj[key] ? obj[key] : obj[key.toUpperCase()]) as string;
 };
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
@@ -32,8 +32,8 @@ export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
 export const columnsToTables = (allColumns: Row[], views: Row[], dialect: DialectType) => {
   if (dialect === Dialect.Mysql || dialect === Dialect.Postgresql) {
     const schema = allColumns.reduce((acc, col) => {
-      const table_name = getAnyCase(col, 'TABLE_NAME');
-      const column_name = getAnyCase(col, 'COLUMN_NAME');
+      const table_name = getAnyCase(col, 'table_name');
+      const column_name = getAnyCase(col, 'column_name');
       acc[table_name] = { ...(acc[table_name] as Record<string, string>), [column_name]: col };
       return acc;
     }, {});
@@ -42,7 +42,7 @@ export const columnsToTables = (allColumns: Row[], views: Row[], dialect: Dialec
     return Object.keys(schema).reduce(
       (acc, name) => {
         const columns = Object.values(schema[name]).map((props) => {
-          const name = getAnyCase(props, 'COLUMN_NAME');
+          const name = getAnyCase(props, 'column_name');
           return { name, props };
         });
 

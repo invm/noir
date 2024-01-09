@@ -9,7 +9,7 @@ import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 
 import { useAppSelector } from 'services/Context';
-import { QueryTaskEnqueueResult, Row } from 'interfaces';
+import { Row } from 'interfaces';
 import { ContentTabData } from 'services/Connections';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
@@ -20,6 +20,7 @@ import { getAnyCase, parseObjRecursive } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { Key } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
+import { update } from 'sql-bricks';
 
 const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
@@ -27,17 +28,17 @@ const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[
   }
   return Object.keys(rows[0]).map((field, _i) => {
     const key = constraints.find((c) => {
-      const t = getAnyCase(c, 'COLUMN_NAME');
+      const t = getAnyCase(c, 'column_name');
       return t === field;
     });
     const col =
       columns.find((c) => {
-        const t = getAnyCase(c, 'COLUMN_NAME');
+        const t = getAnyCase(c, 'column_name');
         if (t === field) {
           return true;
         }
       }) ?? {};
-    const visible_type = getAnyCase(col, 'COLUMN_TYPE');
+    const visible_type = getAnyCase(col, 'column_type');
     // const type = visible_type?.split('(')[0];
     // let gridType = 'text';
     // if (type.includes('int') || type === 'decimal' || type === 'float' || type === 'double') {
@@ -51,7 +52,7 @@ const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[
     // }
 
     return {
-      // editable: !key,
+      editable: !key,
       // checkboxSelection: _i === 0,
       filter: true,
       // type: gridType,
@@ -86,7 +87,7 @@ type Changes = {
 export const Results = (props: { editable?: boolean; table?: string }) => {
   const {
     connections: { queryIdx, contentStore, getConnection, updateContentTab },
-    backend: { getQueryResults, pageSize, downloadCsv },
+    backend: { getQueryResults, pageSize, downloadCsv, selectAllFrom },
     messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -180,35 +181,21 @@ export const Results = (props: { editable?: boolean; table?: string }) => {
   const applyChanges = async () => {
     const allChanges = changes();
     try {
-      const queries = Object.keys(allChanges).map((rowIndex) => {
-        let statement = `UPDATE ${table()} SET `;
-        const row = allChanges[rowIndex];
-        const params = Object.values(row.changes)
-          .reduce((acc, val) => [...acc, val], [] as string[])
-          .concat(row.updateVal)
-          .map(String);
-        const _changes = Object.keys(row.changes).map((key) => key + ' = ?');
-        statement += _changes.join(', ') + ` WHERE ${row.updateKey} = ?`;
-        return { statement, params };
-      });
       const conn = getConnection();
+      const t = table();
+      const queries = Object.keys(allChanges).map((rowIndex) => {
+        const row = allChanges[rowIndex];
+        return update(t, row.changes)
+          .where({ [row.updateKey]: row.updateVal })
+          .toString();
+      });
       await invoke('execute_tx', { queries, connId: conn.id });
-      setChanges({});
       await invoke('invalidate_query', { path: data()?.path });
-      const query = 'SELECT * from ' + props.table!;
-      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
-        connId: conn.id,
-        sql: query,
-        autoLimit: true,
-        tabIdx: contentStore.idx,
-        table: {
-          table,
-          with_constraints: true,
-        },
-      });
+      const results_sets = await selectAllFrom(props.table!, conn.id, contentStore.idx);
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id })),
+        result_sets: results_sets.map((id) => ({ id })),
       });
+      setChanges({});
     } catch (error) {
       notify(error);
     }
@@ -280,8 +267,8 @@ export const Results = (props: { editable?: boolean; table?: string }) => {
           suppressCsvExport={false}
           onCellEditingStopped={(e) => {
             if (e.valueChanged) {
-              const updateCol = constraints().find((c) => +getAnyCase(c, 'ORDINAL_POSITION') === 1);
-              const updateKey = updateCol ? getAnyCase(updateCol, 'COLUMN_NAME') : Object.keys(e.data)[0];
+              const updateCol = constraints().find((c) => +getAnyCase(c, 'ordinal_position') === 1);
+              const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
               const change = e.column.getColId();
               const _changes = changes();
               setChanges({

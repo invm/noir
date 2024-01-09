@@ -4,7 +4,7 @@ use mysql::{from_row, Pool, PooledConn, Row, TxOpts};
 use serde_json::Value;
 use tracing::info;
 
-use crate::database::connections::{PreparedStatement, ResultSet, TableMetadata};
+use crate::database::connections::{ResultSet, TableMetadata};
 use crate::utils::error::Error;
 
 use super::utils::row_to_object;
@@ -56,14 +56,13 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     });
 }
 
-pub fn execute_tx(pool: &Pool, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+pub fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
     match pool
         .start_transaction(TxOpts::default())
         .and_then(|mut tx| {
             let mut error = None;
             for q in queries {
-                info!(?q.statement, ?q.params, "Executing query");
-                let success = tx.exec_iter(q.statement, q.params);
+                let success = tx.query_iter(q);
                 if success.is_err() {
                     error = Some(success.err().unwrap());
                     break;

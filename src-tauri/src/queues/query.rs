@@ -33,12 +33,6 @@ impl Default for QueryTaskStatus {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TableQuery {
-    pub table: String,
-    pub with_constraints: bool,
-}
-
 #[derive(Debug, Clone)]
 pub struct QueryTask {
     pub conn: InitiatedConnection,
@@ -47,7 +41,7 @@ pub struct QueryTask {
     pub status: QueryTaskStatus,
     pub tab_idx: usize,
     pub query_idx: usize,
-    pub table: Option<TableQuery>,
+    pub table: Option<String>,
 }
 
 impl QueryTask {
@@ -57,7 +51,7 @@ impl QueryTask {
         query_id: String,
         tab_idx: usize,
         query_idx: usize,
-        table: Option<TableQuery>,
+        table: Option<String>,
     ) -> Self {
         QueryTask {
             conn,
@@ -104,10 +98,10 @@ pub async fn async_process_model(
         match task.conn.execute_query(&task.query).await {
             Ok(mut result_set) => {
                 if let Some(table) = task.table {
-                    let constraints = task.conn.get_constraints(&table.table).await?;
-                    let columns = task.conn.get_columns(Some(&table.table)).await?;
+                    let constraints = task.conn.get_constraints(&table).await?;
+                    let columns = task.conn.get_columns(Some(&table)).await?;
                     result_set.table = TableMetadata {
-                        table: table.table,
+                        table,
                         constraints: Some(constraints),
                         columns: Some(columns),
                     }

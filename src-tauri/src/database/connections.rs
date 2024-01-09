@@ -106,12 +106,6 @@ pub struct InitiatedConnection {
     pub schema: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PreparedStatement {
-    pub statement: String,
-    pub params: Vec<String>,
-}
-
 impl ConnectionConfig {
     pub fn new(
         dialect: Dialect,
@@ -396,7 +390,7 @@ impl InitiatedConnection {
         }
     }
 
-    pub async fn execute_tx(&self, queries: Vec<PreparedStatement>) -> Result<(), Error> {
+    pub async fn execute_tx(&self, queries: Vec<&str>) -> Result<(), Error> {
         match &self.pool {
             ConnectionPool::Mysql(pool) => engine::mysql::query::execute_tx(pool, queries),
             ConnectionPool::Postgresql(pool) => {

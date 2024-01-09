@@ -32,6 +32,7 @@
     "solid-form-handler": "^1.2.0",
     "solid-js": "^1.7.7",
     "split.js": "^1.6.5",
+    "sql-bricks": "^3.0.1",
     "sql-formatter": "^12.2.3",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",

@@ -71,17 +71,20 @@ export const Pagination = (props: PaginationProps) => {
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="flex items-center">
           <Show when={props.changesCount > 0}>
-            <div class="px-2">
-              <button class="join-item btn btn-xs" onClick={props.resetChanges}>
+            <div class="px-2 gap-4 flex">
+              <button class="btn btn-xs btn-outline" onClick={props.resetChanges}>
                 {t('console.actions.reset')}
               </button>
-              <button onClick={props.applyChanges} class="join-item btn btn-xs !text-error text-md text-upper">
-                {t('console.actions.apply')}
+              <button onClick={props.applyChanges} class="btn btn-xs btn-outline btn-error">
+                {t('console.actions.apply')} {props.changesCount}{' '}
+                {t(`console.actions.${props.changesCount > 1 ? 'changes' : 'change'}`)}
               </button>
             </div>
           </Show>
           <Show when={props.hasResults}>
-            <button class="btn btn-ghost btn-xs" onClick={props.onBtnExport}>{t('console.table.csv')}</button>
+            <button class="btn btn-ghost btn-xs" onClick={props.onBtnExport}>
+              {t('console.table.csv')}
+            </button>
           </Show>
           <div class="px-3">
             <select

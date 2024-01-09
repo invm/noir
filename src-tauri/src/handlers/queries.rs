@@ -1,8 +1,7 @@
 use std::fs::read_to_string;
 
 use crate::{
-    database::connections::PreparedStatement,
-    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus, TableQuery},
+    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
     state::{AsyncState, ServiceAccess},
     utils::{
         self,
@@ -26,7 +25,7 @@ pub async fn enqueue_query(
     tab_idx: usize,
     sql: &str,
     auto_limit: bool,
-    table: Option<TableQuery>,
+    table: Option<String>,
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
@@ -103,7 +102,7 @@ pub async fn get_views(app_handle: AppHandle, conn_id: String) -> CommandResult<
 pub async fn execute_tx(
     app_handle: AppHandle,
     conn_id: String,
-    queries: Vec<PreparedStatement>,
+    queries: Vec<&str>,
 ) -> CommandResult<()> {
     let connection = app_handle.acquire_connection(conn_id);
     connection.execute_tx(queries).await?;

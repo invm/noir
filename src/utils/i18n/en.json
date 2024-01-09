@@ -44,7 +44,9 @@
         "next_page": "Next page",
         "previous_page": "Previous page",
         "reset": "Reset",
-        "apply": "Apply"
+        "apply": "Apply",
+        "change": "change",
+        "changes": "changes"
       },
       "no_results": "No results returned",
       "result_set": "Result set ",
