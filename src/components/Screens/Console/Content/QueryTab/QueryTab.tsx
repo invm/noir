@@ -29,7 +29,7 @@ export const QueryTab = () => {
         </Show>
       </div>
       <div id="results">
-        <Results editable={false} gridTheme={gridTheme()} />
+        <Results editable={false} gridTheme={gridTheme()} editorTheme={appStore.editorTheme} />
       </div>
     </div>
   );
