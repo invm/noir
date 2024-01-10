@@ -365,8 +365,9 @@ export const ConnectionsService = () => {
   };
 
   const selectPrevQuery = () => {
-    if (getContentData('Query').result_sets.length)
-      setQueryIdx((s) => (s - 1) % getContentData('Query').result_sets.length);
+    if (getContentData('Query').result_sets.length) {
+      setQueryIdx((s) => (s - 1 >= 0 ? s - 1 : getContentData('Query').result_sets.length - 1));
+    }
   };
 
   const selectNextQuery = () => {

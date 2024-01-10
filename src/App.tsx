@@ -37,6 +37,24 @@ function App() {
     removeContentTab(contentStore.idx);
   });
 
+  const disableMenu = () => {
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      return false;
+    });
+
+    document.addEventListener(
+      'selectstart',
+      (e) => {
+        e.preventDefault();
+        return false;
+      },
+      { capture: true }
+    );
+  };
+
+  disableMenu();
+
   createShortcut(['F1'], () => {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
@@ -46,12 +64,10 @@ function App() {
   });
 
   createShortcut(['Control', 'Tab'], () => {
-    console.log('createShortcut');
     setNextContentIdx();
   });
 
   createShortcut(['Control', 'Shift', 'Tab'], () => {
-    console.log('createShortcut');
     setPrevContentIdx();
   });
 

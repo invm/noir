@@ -20,6 +20,8 @@ import { save } from '@tauri-apps/api/dialog';
 import { Key } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { update } from 'sql-bricks';
+import { editorThemes } from './Editor';
+import { EditorTheme } from 'services/App';
 
 const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
   if (!rows || rows.length === 0) {
@@ -83,7 +85,7 @@ type Changes = {
   };
 };
 
-export const Results = (props: { gridTheme: string; editable?: boolean; table?: string }) => {
+export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; editable?: boolean; table?: string }) => {
   const {
     connections: { queryIdx, contentStore, getConnection, updateContentTab },
     backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
@@ -97,6 +99,7 @@ export const Results = (props: { gridTheme: string; editable?: boolean; table?: 
   createExtension(() => search());
   createExtension(basicSetup);
   createExtension(json);
+  createExtension(editorThemes[props.editorTheme]);
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
   // TODO: update theme here as well
@@ -170,7 +173,7 @@ export const Results = (props: { gridTheme: string; editable?: boolean; table?: 
   let gridRef: AgGridSolidRef;
 
   const onBtnExport = async (t: 'csv' | 'json') => {
-    const filename = new Date().toISOString() + '.' + t;
+    const filename = props.table + '_' + new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;
     if (!filePath || !dataPath) return;

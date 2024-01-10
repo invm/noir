@@ -45,17 +45,21 @@ export const Pagination = (props: PaginationProps) => {
       <div class="flex gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">
-            <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.previous_result_set')}>
+            <div
+              class="join-item tooltip tooltip-primary tooltip-right"
+              data-tip={t('console.actions.previous_result_set')}>
               <button class="join-item btn btn-sm" onClick={selectPrevQuery}>
                 <ChevronLeft />
               </button>
             </div>
-            <button class="join-item !text-info text-md text-upper">
+            <button class="join-item !text-info text-md text-upper px-4 mx-1">
               <span class="mt-1">
                 {t('console.result_set')} #{queryIdx() + 1}
               </span>
             </button>
-            <div class="tooltip tooltip-primary tooltip-right" data-tip={t('console.actions.next_result_set')}>
+            <div
+              class="join-item tooltip tooltip-primary tooltip-right"
+              data-tip={t('console.actions.next_result_set')}>
               <button class="join-item btn btn-sm" onClick={selectNextQuery}>
                 <ChevronRight />
               </button>
