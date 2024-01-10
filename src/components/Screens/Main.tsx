@@ -7,6 +7,7 @@ import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
+import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 
 export const Main = () => {
   const {
@@ -60,6 +61,7 @@ export const Main = () => {
           </For>
         </div>
         <div class="flex items-center py-2">
+          <ThemeSwitch />
           <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
             <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
               <QuestionMark />

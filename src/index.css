@@ -151,7 +151,7 @@ dialog {
 
 
 /* ag-grid */
-.ag-theme-alpine, .ag-theme-alpine-dark {
+.ag-theme-* {
     --ag-grid-size: 5px;
     --ag-list-item-height: 20px;
 }

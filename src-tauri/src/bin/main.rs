@@ -101,6 +101,7 @@ fn main() {
             queries::query_results,
             queries::get_schemas,
             queries::get_views,
+            queries::download_json,
             queries::download_csv,
             queries::invalidate_query,
         ])

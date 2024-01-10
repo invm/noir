@@ -1,15 +1,30 @@
+import { editorThemes } from 'components/Screens/Console/Content/QueryTab/Editor';
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';
 import { debounce } from 'utils/utils';
+import { type } from '@tauri-apps/api/os';
 
+type OsType = 'Linux' | 'Darwin' | 'Windows_NT';
 const store = new Store('.app.dat');
 const INTERVAL = 2000;
 
 const APP_KEY = '__app__';
 
+export const THEMES = {
+  ui: ['retro', 'forest', 'autumn', 'garden', 'business', 'synthwave', 'dracula', 'dark', 'night', 'cupcake'],
+  editor: Object.keys(editorThemes) as EditorTheme[],
+  grid: ['alpine', 'alpine-dark', 'balham', 'balham-dark', 'material', 'quartz', 'quartz-dark'],
+} as const;
+
+export type EditorTheme = keyof typeof editorThemes;
+export type ThemeCategory = keyof typeof THEMES;
+
 type AppStore = {
-  vimModeOn?: boolean;
+  vimModeOn: boolean;
+  gridTheme: string;
+  editorTheme: EditorTheme;
+  osType: OsType;
 };
 
 const getSavedData = async (key: string) => {
@@ -26,6 +41,9 @@ const getSavedData = async (key: string) => {
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     vimModeOn: false,
+    gridTheme: 'alpine-dark',
+    editorTheme: 'Dracula',
+    osType: 'Linux',
   });
 
   const [component, setComponent] = createSignal(0);
@@ -36,14 +54,32 @@ export const AppService = () => {
   }, INTERVAL);
 
   const vimModeOn = () => appStore.vimModeOn;
+  const gridTheme = () => appStore.gridTheme;
 
   const toggleVimModeOn = () => {
     setAppStore('vimModeOn', !appStore.vimModeOn);
     updateStore();
   };
 
+  const updateTheme = <T extends ThemeCategory>(t: T, theme: (typeof THEMES)[T][number]) => {
+    if (t === 'ui') {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem('theme', theme);
+    } else if (t === 'editor') {
+      setAppStore('editorTheme', theme as EditorTheme);
+    } else if (t === 'grid') {
+      setAppStore('gridTheme', theme);
+    }
+    updateStore();
+  };
+
+  const ControlOrCommand = (short = false) =>
+    appStore.osType === 'Darwin' ? (short ? 'Cmd' : 'Meta') : short ? 'Ctrl' : 'Control';
+
   const restoreAppStore = async () => {
     const app_store: AppStore = await getSavedData(APP_KEY);
+    const osType = await type();
+    app_store.osType = osType;
     if (!app_store) return;
     setAppStore(() => app_store);
   };
@@ -56,5 +92,8 @@ export const AppService = () => {
     restoreAppStore,
     component,
     setComponent,
+    gridTheme,
+    updateTheme,
+    ControlOrCommand,
   };
 };

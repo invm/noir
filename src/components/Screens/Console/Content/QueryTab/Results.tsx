@@ -1,5 +1,4 @@
 import { createEffect, createResource, createSignal, Show } from 'solid-js';
-import { dracula } from '@uiw/codemirror-theme-dracula';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
@@ -84,10 +83,10 @@ type Changes = {
   };
 };
 
-export const Results = (props: { editable?: boolean; table?: string }) => {
+export const Results = (props: { gridTheme: string; editable?: boolean; table?: string }) => {
   const {
     connections: { queryIdx, contentStore, getConnection, updateContentTab },
-    backend: { getQueryResults, pageSize, downloadCsv, selectAllFrom },
+    backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
     messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -96,11 +95,11 @@ export const Results = (props: { editable?: boolean; table?: string }) => {
   });
   createEditorControlledValue(editorView, code);
   createExtension(() => search());
-  createExtension(dracula);
   createExtension(basicSetup);
   createExtension(json);
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
+  // TODO: update theme here as well
 
   const [page, setPage] = createSignal(0);
   const [table, setTable] = createSignal('');
@@ -170,12 +169,16 @@ export const Results = (props: { editable?: boolean; table?: string }) => {
 
   let gridRef: AgGridSolidRef;
 
-  const onBtnExport = async () => {
-    const filename = new Date().toISOString() + '.csv';
+  const onBtnExport = async (t: 'csv' | 'json') => {
+    const filename = new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;
     if (!filePath || !dataPath) return;
-    await downloadCsv(dataPath, filePath).catch((err) => notify(err));
+    if (t === 'json') {
+      await downloadJSON(dataPath, filePath).catch((err) => notify(err));
+    } else {
+      await downloadCsv(dataPath, filePath).catch((err) => notify(err));
+    }
   };
 
   const applyChanges = async () => {
@@ -248,7 +251,7 @@ export const Results = (props: { editable?: boolean; table?: string }) => {
           {t('console.table.copy_to_clipboard')}
         </Item>
       </Menu>
-      <div class="ag-theme-alpine-dark" style={{ height: '100%' }}>
+      <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <AgGridSolid
           noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={data()?.error} />)}
           loadingOverlayComponent={() => <Loader />}

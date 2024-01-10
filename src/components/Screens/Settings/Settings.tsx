@@ -1,7 +1,6 @@
 import Keymaps from 'components/UI/Keymaps';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
-import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 
 import { version } from '../../../../package.json';
 import { OpenIssue } from './OpenIssue';
@@ -14,9 +13,6 @@ export const Settings = () => {
   return (
     <div class="p-4 bg-base-300 flex-1">
       <div class="flex flex-col items-center">
-        <div class="py-6">
-          <ThemeSwitch />
-        </div>
         <div>
           <span class="text-md font-semibold text-primary">
             🕵️ Noir - keyboard driven database management client for Postgresql and MySQL

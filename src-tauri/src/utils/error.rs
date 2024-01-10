@@ -32,6 +32,8 @@ pub enum Error {
     QueryExpired,
     #[error("{0}")]
     TxError(String),
+    #[error("Serdejson error: {0}")]
+    SerdeJsonError(#[from] serde_json::Error),
 }
 
 // we must also implement serde::Serialize
