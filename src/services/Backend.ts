@@ -41,6 +41,9 @@ export const BackendService = () => {
     return result_sets;
   };
 
+  const downloadJSON = async (source: string, destination: string) =>
+    invoke<string>('download_json', { source, destination });
+
   const downloadCsv = async (source: string, destination: string) =>
     invoke<string>('download_csv', { source, destination });
 
@@ -50,6 +53,7 @@ export const BackendService = () => {
     getQueryResults,
     getQueryMetadata,
     downloadCsv,
+    downloadJSON,
     selectAllFrom,
   };
 };

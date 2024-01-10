@@ -8,7 +8,7 @@ Noir is a cross-platform keyboard-driven database management client available fo
 - Keyboard-driven, almost everything can be accomplished without using a mouse.
 - Modern SQL editor with batteries included.
 - Fast, slick and modern UI, with many dark and light themes.
-- CSV Export.
+- JSON & CSV Export.
 
 Noir currently supports:
 

@@ -1,4 +1,4 @@
-use std::fs::read_to_string;
+use std::{fs::read_to_string, path::PathBuf};
 
 use crate::{
     queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
@@ -14,6 +14,7 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlparser::{dialect::dialect_from_str, parser::Parser};
+use std::str;
 use tauri::{command, AppHandle, State};
 use tracing::info;
 
@@ -188,9 +189,55 @@ pub async fn get_procedures(app_handle: AppHandle, conn_id: String) -> CommandRe
 }
 
 #[command]
+pub async fn download_json(source: &str, destination: &str) -> CommandResult<()> {
+    let data = read_to_string(source)?;
+    let content: String = data
+        .lines()
+        .map(|line| format!("{},", line))
+        .collect::<Vec<String>>()
+        .join("\n");
+    let content = content[..content.len() - 1].to_string();
+    let content = format!("[\n{}\n]", content);
+
+    Ok(utils::fs::write_file(
+        &PathBuf::from(destination),
+        &content,
+    )?)
+}
+
+#[command]
 pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> {
-    utils::fs::copy_file(source, destination)?;
-    Ok(())
+    let data = read_to_string(source)?;
+    let content: String = data
+        .lines()
+        .map(|line| format!("{},", line))
+        .collect::<Vec<String>>()
+        .join("\n");
+    let content = content[..content.len() - 1].to_string();
+    let content: Vec<Value> = serde_json::from_str(&format!("[{}]", content))?;
+    let keys = content[0]
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(|k| k.to_string())
+        .collect::<Vec<String>>();
+
+    let csv = keys.join(",") + "\n";
+    let rows = content
+        .iter()
+        .map(|row| {
+            keys.iter()
+                .map(|k| row.get(k).unwrap().to_string())
+                .collect::<Vec<String>>()
+                .join(",")
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    Ok(utils::fs::write_file(
+        &PathBuf::from(destination),
+        &format!("{}{}", csv, rows),
+    )?)
 }
 
 #[command]

@@ -2,7 +2,7 @@ import { createCodeMirror, createEditorControlledValue, createEditorFocus } from
 import { createEffect, createSignal } from 'solid-js';
 import { EditorView, drawSelection, highlightWhitespace, highlightActiveLine } from '@codemirror/view';
 import { MySQL, sql, SQLite, PostgreSQL } from '@codemirror/lang-sql';
-import { dracula } from '@uiw/codemirror-theme-dracula';
+
 import { vim } from '@replit/codemirror-vim';
 import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api';
@@ -18,16 +18,51 @@ import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
 import { moveCompletionSelection } from '@codemirror/autocomplete';
 
+import { androidstudio } from '@uiw/codemirror-theme-androidstudio';
+import { andromeda } from '@uiw/codemirror-theme-andromeda';
+import { atomone } from '@uiw/codemirror-theme-atomone';
+import { copilot } from '@uiw/codemirror-theme-copilot';
+import { dracula } from '@uiw/codemirror-theme-dracula';
+import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
+import { gruvboxDark, gruvboxLight } from '@uiw/codemirror-theme-gruvbox-dark';
+import { materialDark, materialLight, material } from '@uiw/codemirror-theme-material';
+import { nord } from '@uiw/codemirror-theme-nord';
+import { tokyoNight } from '@uiw/codemirror-theme-tokyo-night';
+import { tokyoNightDay } from '@uiw/codemirror-theme-tokyo-night-day';
+import { tokyoNightStorm } from '@uiw/codemirror-theme-tokyo-night-storm';
+import { vscodeDark } from '@uiw/codemirror-theme-vscode';
+import { EditorTheme } from 'services/App';
+
+export const editorThemes = {
+  'Android Studio': androidstudio,
+  Dracula: dracula,
+  'Github Dark': githubDark,
+  'Github Light': githubLight,
+  'Gruvbox Dark': gruvboxDark,
+  'Gruvbox Light': gruvboxLight,
+  'Material Dark': materialDark,
+  'Material Light': materialLight,
+  'Tokyo Night Day': tokyoNightDay,
+  'Tokyo Night Storm': tokyoNightStorm,
+  'Tokyo Night': tokyoNight,
+  'VS Code': vscodeDark,
+  Andromeda: andromeda,
+  Atomone: atomone,
+  Copilot: copilot,
+  Material: material,
+  Nord: nord,
+};
+
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
   [Dialect.Postgresql]: PostgreSQL,
   [Dialect.Sqlite]: SQLite,
 };
 
-export const Editor = () => {
+export const Editor = (props: { editorTheme: EditorTheme }) => {
   const {
     connections: { connectionStore, updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
-    app: { vimModeOn, toggleVimModeOn },
+    app: { vimModeOn, toggleVimModeOn, ControlOrCommand },
     messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -57,7 +92,7 @@ export const Editor = () => {
   createExtension(drawSelection);
   createExtension(highlightWhitespace);
   createExtension(highlightActiveLine);
-  createExtension(dracula);
+  createExtension(editorThemes[props.editorTheme]);
   createExtension(search);
   createExtension(basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
@@ -139,10 +174,12 @@ export const Editor = () => {
   });
 
   createShortcut(['Control', 'e'], onExecute);
+  createShortcut([ControlOrCommand(), 'Enter'], onExecute);
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
-  // const dummyAction = () => { };
+  // const dummyAction = () => {
+  // };
 
   return (
     <div class="flex-1 flex flex-col h-full">

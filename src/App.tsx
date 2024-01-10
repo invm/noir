@@ -1,7 +1,9 @@
 import 'utils/i18n';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
+import 'ag-grid-community/styles/ag-theme-material.css';
 import './index.css';
 import { Main } from 'components/Screens/Main';
 import { Loader } from 'components/UI';
@@ -26,12 +28,12 @@ function App() {
       setNextContentIdx,
       setPrevContentIdx,
     },
-    app: { restoreAppStore, setComponent },
+    app: { restoreAppStore, setComponent, ControlOrCommand },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
 
-  createShortcut(['Control', 'w'], () => {
+  createShortcut([ControlOrCommand(), 'w'], () => {
     removeContentTab(contentStore.idx);
   });
 
@@ -39,7 +41,7 @@ function App() {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
 
-  createShortcut(['Control', 't'], () => {
+  createShortcut([ControlOrCommand(), 't'], () => {
     addContentTab();
   });
 
@@ -54,7 +56,7 @@ function App() {
   });
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut(['Control', String(i)], () => {
+    createShortcut([ControlOrCommand(), String(i)], () => {
       setContentIdx(i - 1);
     });
   }

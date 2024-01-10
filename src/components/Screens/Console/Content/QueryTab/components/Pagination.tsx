@@ -15,7 +15,7 @@ type PaginationProps = {
   onPageSizeChange: () => void;
   onPrevPage: () => void;
   onNextPage: () => void;
-  onBtnExport: () => void;
+  onBtnExport: (t: 'csv' | 'json') => void;
   applyChanges: () => void;
   resetChanges: () => void;
 };
@@ -82,8 +82,11 @@ export const Pagination = (props: PaginationProps) => {
             </div>
           </Show>
           <Show when={props.hasResults}>
-            <button class="btn btn-ghost btn-xs" onClick={props.onBtnExport}>
+            <button class="btn btn-ghost btn-xs" onClick={(_) => props.onBtnExport('csv')}>
               {t('console.table.csv')}
+            </button>
+            <button class="btn btn-ghost btn-xs" onClick={(_) => props.onBtnExport('json')}>
+              {t('console.table.json')}
             </button>
           </Show>
           <div class="px-3">

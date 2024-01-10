@@ -16,9 +16,10 @@
         "open": true
       },
       "dialog": {
-        "all": true
+        "all": false,
+        "save": true
       },
-      "fs": {
+      "os": {
         "all": true
       }
     },
