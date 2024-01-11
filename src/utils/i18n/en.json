@@ -76,6 +76,7 @@
       "routines": "Routines",
       "triggers": "Triggers",
       "table_was_truncated": "Table {{table}} was truncated",
+      "select_schema": "Select schema",
       "refresh_schema": "Refresh schema",
       "show_routine": "Show routine",
       "show_trigger": "Show trigger",

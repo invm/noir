@@ -13,6 +13,8 @@ export * from './Pen';
 export * from './QuestionMark';
 export * from './Refresh';
 export * from './ShareNodes';
+export * from './SwapChevronDown';
+export * from './SwapChevronRight';
 export * from './Table';
 export * from './Terminal';
 export * from './ThreeDots';

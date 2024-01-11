@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
 import { newContentTab, TableStructureContentTabData } from 'services/Connections';
-import { Table } from 'components/UI/Icons';
+import { SwapChevronDown, SwapChevronRight, Table } from 'components/UI/Icons';
 import { ResultSet } from 'interfaces';
 
 export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title: string; children: JSXElement }) => {
@@ -19,7 +19,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
   const menu_id = 'sidebar-table-menu_' + props.entity + props.title;
   const modal_id = 'table-modal_' + props.entity + props.title;
 
-  const { show, hideAll } = useContextMenu({
+  const { show } = useContextMenu({
     id: menu_id,
     props: { table: props.title },
   });
@@ -74,7 +74,6 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
               class="btn btn-error btn-sm"
               onClick={() => {
                 truncateTable(props.title);
-                hideAll();
               }}>
               {t('sidebar.yes')}
             </button>
@@ -89,14 +88,12 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
         <Item
           onClick={({ props }) => {
             addTableStructureTab(props.table);
-            hideAll();
           }}>
           {t('sidebar.show_table_structure')}
         </Item>
         <Item
           onClick={({ props }) => {
             listData(props.table);
-            hideAll();
           }}>
           {t('sidebar.list_data')}
         </Item>
@@ -104,54 +101,30 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
           {t('sidebar.truncate_table')}
         </Item>
       </Menu>
-      <div class="w-full flex items-center" onContextMenu={(e) => show(e)}>
+      <div class="w-full flex items-center pt-1" onContextMenu={(e) => show(e)}>
         <div class="flex items-center">
           <span onClick={() => setOpen(!open())} class="collapse">
             <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
-              <svg
-                class="w-2 h-2 swap-off"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 6 10">
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="m1 9 4-4-4-4"
-                />
-              </svg>
-              <svg
-                class="w-2 h-2 swap-on"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 10 6">
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="m1 1 4 4 4-4"
-                />
-              </svg>
+              <SwapChevronRight />
+              <SwapChevronDown />
             </label>
           </span>
 
-          <span class="px-2">
+          <span class="px-2 flex items-center">
             <div class="tooltip tooltip-info tooltip-right tooltip-xs" data-tip={t(`sidebar.tooltips.${props.entity}`)}>
               <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
             </div>
           </span>
-          <span class="text-xs font-semibold">{props.title}</span>
+          <span onClick={() => setOpen(!open())} class="text-xs font-semibold cursor-pointer">
+            {props.title}
+          </span>
         </div>
       </div>
 
       <div
-        class="pl-2"
+        class="pl-4 pt-1"
         classList={{
-          'mb-4': open(),
+          'mb-2': open(),
           'border-b-[1px]': open(),
           'border-base-200': open(),
         }}>
