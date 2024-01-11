@@ -62,7 +62,7 @@ const SQLDialects = {
 export const Editor = (props: { editorTheme: EditorTheme }) => {
   const {
     connections: { connectionStore, updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
-    app: { vimModeOn, toggleVimModeOn, ControlOrCommand },
+    app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
   const [code, setCode] = createSignal('');
@@ -174,7 +174,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   });
 
   createShortcut(['Control', 'e'], onExecute);
-  createShortcut([ControlOrCommand(), 'Enter'], onExecute);
+  createShortcut(['Control', 'Enter'], onExecute);
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
