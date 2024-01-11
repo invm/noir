@@ -26,6 +26,6 @@ services:
       POSTGRES_DB: dvdrental # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
     volumes:
       - psql:/var/lib/postgresql/data
-      # - ./db.tar:/tmp/db.tar // pg_restore -U postgres -d dvdrental -1 /tmp/db.tar
+      # - ./db.tar:/tmp/db.tar # pg_restore -U postgres -d dvdrental -1 /tmp/db.tar
     ports:
       - 5432:5432

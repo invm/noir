@@ -27,11 +27,11 @@ export const Sidebar = () => {
   const routine_menu = 'sidebar-routine-menu';
   const trigger_menu = 'sidebar-trigger-menu';
 
-  const { show: show_routine_menu, hideAll: hideAll1 } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
+  const { show: show_routine_menu } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
 
-  const { show: show_trigger_menu, hideAll: hideAll2 } = useContextMenu({ id: trigger_menu });
+  const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
 
-  const select = async (schema: string) => {
+  const selectSchema = async (schema: string) => {
     updateConnectionTab('selectedSchema', schema);
     const config = getConnection();
     await invoke('set_schema', { connId: config.id, schema, dialect: config.connection.dialect });
@@ -101,7 +101,7 @@ export const Sidebar = () => {
   const showTrigger = async (trigger: string) => {
     try {
       const schema = getConnection().selectedSchema;
-      const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = "${schema}" and TRIGGER_NAME = "${trigger}"`;
+      const query = `SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '${schema}' and TRIGGER_NAME = '${trigger}'`;
       const res = await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
@@ -113,28 +113,25 @@ export const Sidebar = () => {
     }
   };
 
-  const hide = () => {
-    hideAll1();
-    hideAll2();
-  };
-
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md flex justify-center items-center">
-        <select
-          id="schema"
-          value={getConnection().selectedSchema}
-          onChange={(e) => select(e.currentTarget.value)}
-          class="select select-accent select-bordered select-xs w-full">
-          <For each={getConnection().schemas}>
-            {(db) => (
-              <option class="py-1" value={db}>
-                {db}
-              </option>
-            )}
-          </For>
-        </select>
-        <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('sidebar.show_process_list')}>
+        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.select_schema')}>
+          <select
+            id="schema"
+            value={getConnection().selectedSchema}
+            onChange={(e) => selectSchema(e.currentTarget.value)}
+            class="select select-accent select-bordered select-xs w-full">
+            <For each={getConnection().schemas}>
+              {(db) => (
+                <option class="py-1" value={db}>
+                  {db}
+                </option>
+              )}
+            </For>
+          </select>
+        </div>
+        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>
           <button onClick={showProcessList} disabled={loading()} class="ml-2 btn btn-xs">
             <Switch>
               <Match when={loading()}>
@@ -146,7 +143,7 @@ export const Sidebar = () => {
             </Switch>
           </button>
         </div>
-        <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('sidebar.refresh_schema')}>
+        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.refresh_schema')}>
           <button onClick={refreshEntities} disabled={loading()} class="ml-2 btn btn-xs">
             <Switch>
               <Match when={loading()}>
@@ -200,24 +197,22 @@ export const Sidebar = () => {
             )}
           </For>
         </Show>
+        <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
+          <Item
+            onClick={({ props }) => {
+              showRoutine(getAnyCase(props.routine, 'routine_name'));
+            }}>
+            {t('sidebar.show_routine')}
+          </Item>
+          <Item
+            onClick={({ props: { routine } }) => {
+              showCreateStatement(getAnyCase(routine, 'routine_name'), getAnyCase(routine, 'routine_definition'));
+            }}>
+            {t('sidebar.show_create_statement')}
+          </Item>
+        </Menu>
         <Show when={getSchemaEntity('routines').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
-          <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
-            <Item
-              onClick={({ props }) => {
-                showRoutine(getAnyCase(props.routine, 'routine_name'));
-                hide();
-              }}>
-              {t('sidebar.show_routine')}
-            </Item>
-            <Item
-              onClick={({ props: { routine } }) => {
-                showCreateStatement(getAnyCase(routine, 'routine_name'), getAnyCase(routine, 'routine_definition'));
-                hide();
-              }}>
-              {t('sidebar.show_create_statement')}
-            </Item>
-          </Menu>
           <For each={getSchemaEntity('routines')}>
             {(routine) => (
               <div class="px-2 w-fit truncate">
@@ -229,30 +224,30 @@ export const Sidebar = () => {
                       <Function />
                     </div>
                   </span>
-                  <span class="text-xs font-semibold truncate">{getAnyCase(routine, 'routine_name')}</span>
+                  <span class="text-xs cursor-pointer font-semibold truncate">
+                    {getAnyCase(routine, 'routine_name')}
+                  </span>
                 </div>
               </div>
             )}
           </For>
         </Show>
+        <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
+          <Item
+            onClick={({ props: { trigger } }) => {
+              showTrigger(getAnyCase(trigger, 'trigger_name'));
+            }}>
+            {t('sidebar.show_trigger')}
+          </Item>
+          <Item
+            onClick={({ props: { trigger } }) => {
+              showCreateStatement(getAnyCase(trigger, 'trigger_name'), getAnyCase(trigger, 'action_statement'));
+            }}>
+            {t('sidebar.show_create_statement')}
+          </Item>
+        </Menu>
         <Show when={getSchemaEntity('triggers').length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
-          <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
-            <Item
-              onClick={({ props: { trigger } }) => {
-                showTrigger(getAnyCase(trigger, 'trigger_name'));
-                hide();
-              }}>
-              {t('sidebar.show_trigger')}
-            </Item>
-            <Item
-              onClick={({ props: { trigger } }) => {
-                showCreateStatement(getAnyCase(trigger, 'trigger_name'), getAnyCase(trigger, 'action_statement'));
-                hide();
-              }}>
-              {t('sidebar.show_create_statement')}
-            </Item>
-          </Menu>
           <For each={getSchemaEntity('triggers')}>
             {(trigger) => (
               <div class="px-2 w-fit truncate">
@@ -264,7 +259,7 @@ export const Sidebar = () => {
                       <ShareNodes />
                     </div>
                   </span>
-                  <span class="text-xs font-semibold">
+                  <span class="text-xs font-semibold cursor-pointer">
                     {getAnyCase(trigger, 'trigger_name') + ' (' + getAnyCase(trigger, 'event_object_table') + ')'}
                   </span>
                 </div>

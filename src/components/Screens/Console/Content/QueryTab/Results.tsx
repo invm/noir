@@ -125,6 +125,10 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       try {
         // Reruns when either signal updates
         const result_set = result_sets[queryIdxVal];
+        if (result_set?.rows) {
+          const columns = getColumnDefs(result_set.rows, result_set.columns ?? [], []);
+          return { rows: result_set.rows, columns };
+        }
         if (!result_set || result_set?.status !== 'Completed') {
           return { rows: [], columns: [], exhausted: true, notReady: true };
         }
