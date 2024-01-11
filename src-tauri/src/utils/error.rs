@@ -20,7 +20,7 @@ pub enum Error {
     MysqlUrlError(#[from] mysql::UrlError),
     #[error("Postgresql error: {0}")]
     Postgresql(#[from] postgres::error::Error),
-    #[error("Pool error: {0}")]
+    #[error("{0}")]
     DeadpoolPostgresqlPoolError(#[from] deadpool_postgres::PoolError),
     #[error("Create pool error: {0}")]
     DeadpoolPostgresqlCreatePoolError(#[from] deadpool_postgres::CreatePoolError),

@@ -28,12 +28,12 @@ function App() {
       setNextContentIdx,
       setPrevContentIdx,
     },
-    app: { restoreAppStore, setComponent, ControlOrCommand },
+    app: { restoreAppStore, setComponent },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
 
-  createShortcut([ControlOrCommand(), 'w'], () => {
+  createShortcut(['Control', 'w'], () => {
     removeContentTab(contentStore.idx);
   });
 
@@ -59,7 +59,7 @@ function App() {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
 
-  createShortcut([ControlOrCommand(), 't'], () => {
+  createShortcut(['Control', 't'], () => {
     addContentTab();
   });
 
@@ -72,7 +72,7 @@ function App() {
   });
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut([ControlOrCommand(), String(i)], () => {
+    createShortcut(['Control', String(i)], () => {
       setContentIdx(i - 1);
     });
   }

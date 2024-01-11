@@ -95,19 +95,19 @@ export type ContentTabType = {
   label: string;
   error?: string;
 } & (
-    | {
+      | {
       key: typeof ContentTab.Query;
       data: Partial<QueryContentTabData>;
     }
-    | {
+      | {
       key: typeof ContentTab.TableStructure;
       data: Partial<TableStructureContentTabData>;
     }
-    | {
+      | {
       key: typeof ContentTab.Data;
       data: Partial<DataContentTabData>;
     }
-  );
+    );
 
 type Schema = {
   columns: Row[];
@@ -345,8 +345,10 @@ export const ConnectionsService = () => {
 
   const insertColumnName = (column: string) => {
     const { query, cursor } = getContentData('Query');
-    const _query = query.slice(0, cursor) + column + ', ' + query.slice(cursor);
-    setContentStore('tabs', contentStore.idx, 'data', { query: _query, cursor: cursor + column.length + 2 }); // 2 for ', '
+    if (query) {
+      const _query = query.slice(0, cursor) + column + ', ' + query.slice(cursor);
+      setContentStore('tabs', contentStore.idx, 'data', { query: _query, cursor: cursor + column.length + 2 }); // 2 for ', '
+    }
   };
 
   const updateResultSet = (tab_idx: number, query_idx: number, data: Partial<ResultSet>) => {

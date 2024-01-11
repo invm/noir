@@ -3,7 +3,6 @@ import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';
 import { debounce } from 'utils/utils';
-import { type } from '@tauri-apps/api/os';
 
 type OsType = 'Linux' | 'Darwin' | 'Windows_NT';
 const store = new Store('.app.dat');
@@ -73,13 +72,8 @@ export const AppService = () => {
     updateStore();
   };
 
-  const ControlOrCommand = (short = false) =>
-    appStore.osType === 'Darwin' ? (short ? 'Cmd' : 'Meta') : short ? 'Ctrl' : 'Control';
-
   const restoreAppStore = async () => {
     const app_store: AppStore = await getSavedData(APP_KEY);
-    const osType = await type();
-    app_store.osType = osType;
     if (!app_store) return;
     setAppStore(() => app_store);
   };
@@ -94,6 +88,5 @@ export const AppService = () => {
     setComponent,
     gridTheme,
     updateTheme,
-    ControlOrCommand,
   };
 };
