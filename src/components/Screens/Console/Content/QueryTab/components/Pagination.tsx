@@ -18,6 +18,7 @@ type PaginationProps = {
   onBtnExport: (t: 'csv' | 'json') => void;
   applyChanges: () => void;
   resetChanges: () => void;
+  count: number;
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -74,6 +75,11 @@ export const Pagination = (props: PaginationProps) => {
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="flex items-center">
+          <Show when={props.count > 0}>
+            <span class="text-sm text-base-content">
+              {t('console.table.total')} {props.count}
+            </span>
+          </Show>
           <Show when={props.changesCount > 0}>
             <div class="px-2 gap-4 flex">
               <button class="btn btn-xs btn-outline" onClick={props.resetChanges}>

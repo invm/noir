@@ -30,7 +30,9 @@ export const BackendService = () => {
       connId,
       table,
     });
-    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString();
+    const t = new RegExp(`\\"${table}\\"`, 'i');
+    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString().replace(t, table);
+    // remove escape characters
     const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
       connId,
       sql,

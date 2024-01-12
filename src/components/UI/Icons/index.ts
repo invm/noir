@@ -3,6 +3,7 @@ export * from './ChevronLeft';
 export * from './ChevronRight';
 export * from './Close';
 export * from './Copy';
+export * from './DotsVertical';
 export * from './Edit';
 export * from './Enter';
 export * from './Fire';

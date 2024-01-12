@@ -55,7 +55,10 @@
         "show_row": "Show row",
         "copy_to_clipboard": "Copy row to clipboard as json",
         "csv": "Export to CSV",
-        "json": "Export to JSON"
+        "json": "Export to JSON",
+        "num_col": "Show row number",
+        "actions_col": "Show row actions",
+        "total": "Total: "
       }
     },
     "sidebar": {

@@ -22,7 +22,6 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
-    indent: ['error', 2, { SwitchCase: 1 }],
     'linebreak-style': ['error', 'unix'],
     semi: ['error', 'always'],
     'no-unused-vars': 'off',
