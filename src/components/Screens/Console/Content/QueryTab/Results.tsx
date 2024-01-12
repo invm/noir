@@ -3,10 +3,8 @@ import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
 import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
-import { ColDef } from 'ag-grid-community';
+import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
-import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
-
 import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 import { ContentTabData } from 'services/Connections';
@@ -14,65 +12,84 @@ import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
-import { t } from 'utils/i18n';
-import { getAnyCase, parseObjRecursive } from 'utils/utils';
+import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { Key } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { update } from 'sql-bricks';
 import { editorThemes } from './Editor';
 import { EditorTheme } from 'services/App';
+import PopupCellRenderer, { PopupCellRendererProps } from './Table/PopupCellRenderer';
+import { tippy } from 'solid-tippy';
+tippy;
 
-const getColumnDefs = (rows: Row[], columns: Row[], constraints: Row[]): ColDef[] => {
+const getColumnDefs = (
+  rows: Row[],
+  {
+    columns,
+    constraints,
+    setCode,
+  }: {
+    setCode: (code: string) => void;
+    columns: Row[];
+    constraints: Row[];
+  }
+): ColDef[] => {
   if (!rows || rows.length === 0) {
     return [];
   }
-  return Object.keys(rows[0]).map((field, _i) => {
-    const key = constraints.find((c) => {
-      const t = getAnyCase(c, 'column_name');
-      return t === field;
-    });
-    const col =
-      columns.find((c) => {
-        const t = getAnyCase(c, 'column_name');
-        if (t === field) {
-          return true;
-        }
-      }) ?? {};
-    const visible_type = getAnyCase(col, 'column_type');
-    // const type = visible_type?.split('(')[0];
-    // let gridType = 'text';
-    // if (type.includes('int') || type === 'decimal' || type === 'float' || type === 'double') {
-    //   gridType = 'number';
-    // } else if (type === 'date' || type === 'datetime' || type === 'timestamp') {
-    //   gridType = 'dateString';
-    // } else if (type === 'tinyint' || type === 'boolean') {
-    //   gridType = 'boolean';
-    // } else if (type === 'json' || type === 'jsonb') {
-    //   gridType = 'object';
-    // }
+  const cols: ColDef[] = [];
 
-    return {
-      editable: !key,
-      // checkboxSelection: _i === 0,
-      filter: true,
-      // type: gridType,
-      headerComponent: () => (
-        <div class="flex items-center justify-between w-full">
-          <div>
-            <span class="mr-2 text-sm">{field}</span>
-            <span class="text-xs text-base-content">{visible_type}</span>
-          </div>
-          <Show when={key}>
-            <Key />
-          </Show>
-        </div>
-      ),
-      sortable: true,
-      field,
-      headerName: field,
-    };
+  cols.push({
+    headerName: '',
+    width: 30,
+    cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} setCode={setCode} />,
+    resizable: false,
+    pinned: 'left',
+    lockPinned: true,
+    cellClass: 'lock-pinned',
   });
+  const c = Object.keys(rows[0]);
+
+  return cols.concat(
+    c.map((field, _i) => {
+      const key = constraints.find((c) => {
+        const t = getAnyCase(c, 'column_name');
+        return t === field;
+      });
+      const col =
+        columns.find((c) => {
+          const t = getAnyCase(c, 'column_name');
+          if (t === field) {
+            return true;
+          }
+        }) ?? {};
+      const visible_type = getAnyCase(col, 'column_type');
+
+      return {
+        editable: !key,
+        // checkboxSelection: _i === 0,
+        resizable: true,
+        filter: true,
+        ...(c.length === 1 && { flex: 1 }),
+        width: 300,
+        headerComponent: () => (
+          <div class="flex items-center justify-between w-full">
+            <div>
+              <span class="mr-2 text-sm">{field}</span>
+              <span class="text-xs text-base-content">{visible_type}</span>
+            </div>
+            <Show when={key}>
+              <Key />
+            </Show>
+          </div>
+        ),
+        sortable: true,
+        field,
+        headerName: field,
+      };
+    })
+  );
 };
 
 type Changes = {
@@ -91,7 +108,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
     messages: { notify },
   } = useAppSelector();
+
   const [code, setCode] = createSignal('');
+  const [page, setPage] = createSignal(0);
+  const [table, setTable] = createSignal('');
+  const [changes, setChanges] = createSignal<Changes>({});
+  const [constraints, setConstraints] = createSignal<Row[]>([]);
+
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
   });
@@ -102,16 +125,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   createExtension(editorThemes[props.editorTheme]);
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
-  // TODO: update theme here as well
-
-  const [page, setPage] = createSignal(0);
-  const [table, setTable] = createSignal('');
-  const [changes, setChanges] = createSignal<Changes>({});
-  const [constraints, setConstraints] = createSignal<Row[]>([]);
-
-  const menu_id = 'table-row-menu';
-
-  const { show } = useContextMenu({ id: menu_id, props: { rows: {} as Row } });
 
   const [data] = createResource(
     () =>
@@ -125,9 +138,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       try {
         // Reruns when either signal updates
         const result_set = result_sets[queryIdxVal];
-        if (result_set?.rows) {
-          const columns = getColumnDefs(result_set.rows, result_set.columns ?? [], []);
-          return { rows: result_set.rows, columns };
+        if (result_set?.rows?.length) {
+          const columns = getColumnDefs(result_set.rows, {
+            columns: result_set.columns ?? [],
+            constraints: [],
+            setCode,
+          });
+          return { rows: result_set.rows, columns, count: result_set.count };
         }
         if (!result_set || result_set?.status !== 'Completed') {
           return { rows: [], columns: [], exhausted: true, notReady: true };
@@ -135,12 +152,19 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
         setConstraints(result_set.constraints ?? []);
         setTable(result_set.table ?? '');
-        const columns = getColumnDefs(
+        const columns = getColumnDefs(rows, {
+          columns: result_set.columns ?? [],
+          constraints: result_set.constraints ?? [],
+          setCode,
+        });
+        console.log({ columns });
+        return {
           rows,
-          result_set.columns ?? [],
-          props.editable ? result_set.constraints ?? [] : []
-        );
-        return { rows, columns, exhausted: rows.length < pageSizeVal, path: result_set.path };
+          columns,
+          count: result_set.count,
+          exhausted: rows.length < pageSizeVal,
+          path: result_set.path,
+        };
       } catch (error) {
         notify(error);
         return { rows: [], columns: [], exhausted: true, error };
@@ -170,8 +194,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   };
 
   const defaultColDef: ColDef = {
-    flex: 1,
-    minWidth: 320,
+    minWidth: 30,
+    suppressMovable: true,
   };
 
   let gridRef: AgGridSolidRef;
@@ -195,9 +219,11 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       const t = table();
       const queries = Object.keys(allChanges).map((rowIndex) => {
         const row = allChanges[rowIndex];
+        const rg = new RegExp(`\\"${table}\\"`, 'i');
         return update(t, row.changes)
           .where({ [row.updateKey]: row.updateVal })
-          .toString();
+          .toString()
+          .replace(rg, t);
       });
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
@@ -214,6 +240,26 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const resetChanges = async () => {
     gridRef.api?.undoCellEditing();
     setChanges({});
+  };
+
+  const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
+    if (e.valueChanged) {
+      const updateCol = constraints().find((c) => +getAnyCase(c, 'ordinal_position') === 1);
+      const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
+      const change = e.column.getColId();
+      const _changes = changes();
+      setChanges({
+        ..._changes,
+        [e.rowIndex ?? '']: {
+          updateKey,
+          updateVal: e.data[updateKey],
+          changes: {
+            ..._changes[e.rowIndex ?? '']?.changes,
+            [change]: e.newValue,
+          },
+        },
+      });
+    }
   };
 
   return (
@@ -240,32 +286,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           hasResults: !!data()?.rows.length,
           onPageSizeChange,
           onBtnExport,
+          count: data()?.count ?? 0,
         }}
       />
-      <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
-        <Item
-          onClick={({ props: { row } }) => {
-            const data = parseObjRecursive(row);
-            setCode(JSON.stringify(data, null, 4));
-            (document.getElementById('row_modal') as HTMLDialogElement).showModal();
-          }}>
-          {t('console.table.show_row')}
-        </Item>
-        <Item
-          onClick={({ props: { row } }) => {
-            navigator.clipboard.writeText(JSON.stringify(row));
-          }}>
-          {t('console.table.copy_to_clipboard')}
-        </Item>
-      </Menu>
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <AgGridSolid
           noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={data()?.error} />)}
           loadingOverlayComponent={() => <Loader />}
-          onCellContextMenu={(e) => {
-            e.event?.preventDefault();
-            show(e.event as MouseEvent, { props: { row: e.data } });
-          }}
           ref={gridRef!}
           columnDefs={data()?.columns}
           rowSelection="multiple"
@@ -275,25 +302,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           undoRedoCellEditing={true}
           suppressExcelExport={true}
           suppressCsvExport={false}
-          onCellEditingStopped={(e) => {
-            if (e.valueChanged) {
-              const updateCol = constraints().find((c) => +getAnyCase(c, 'ordinal_position') === 1);
-              const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
-              const change = e.column.getColId();
-              const _changes = changes();
-              setChanges({
-                ..._changes,
-                [e.rowIndex ?? '']: {
-                  updateKey,
-                  updateVal: e.data[updateKey],
-                  changes: {
-                    ..._changes[e.rowIndex ?? '']?.changes,
-                    [change]: e.newValue,
-                  },
-                },
-              });
-            }
-          }}
+          onCellEditingStopped={onCellEditingStopped}
         />
       </div>
     </div>
