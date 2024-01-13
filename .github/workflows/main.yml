@@ -16,10 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Changelog
-        id: build_changelog
-        run: cat CHANGELOG.md >> $GITHUB_OUTPUT
-
       - name: Node.js setup
         uses: actions/setup-node@v4
         with:
@@ -52,7 +48,6 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "Noir v__VERSION__"
           releaseBody: |
-            ${{steps.build_changelog.outputs.changelog}}
             See the assets to download this version and install.
           releaseDraft: true
           prerelease: false
