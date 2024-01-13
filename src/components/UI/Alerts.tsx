@@ -8,7 +8,7 @@ export const Alerts = () => {
   } = useAppSelector();
   return (
     <div class="absolute">
-      <div class="toast whitespace-normal min-w-[300px] w-[600px] z-50">
+      <div class="toast whitespace-normal min-w-[300px] max-w-[600px] z-50">
         <For each={messages}>
           {(msg) => (
             <Alert color={msg.type}>

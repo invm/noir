@@ -129,6 +129,9 @@ dependencies:
     version: 3.21.4
 
 devDependencies:
+  '@iarna/toml':
+    specifier: ^2.2.5
+    version: 2.2.5
   '@tauri-apps/cli':
     specifier: ^1.4.0
     version: 1.4.0
@@ -1060,6 +1063,10 @@ packages:
   /@hutson/parse-repository-url@3.0.2:
     resolution: {integrity: sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==}
     engines: {node: '>=6.9.0'}
+    dev: true
+
+  /@iarna/toml@2.2.5:
+    resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
     dev: true
 
   /@jridgewell/gen-mapping@0.3.3:

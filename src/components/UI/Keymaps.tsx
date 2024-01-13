@@ -30,7 +30,7 @@ const Keymaps = () => {
           {({ keys }) => (
             <div class="h-[40px] flex items-center">
               <span class="flex gap-2">
-                <For each={keys}>{(key) => <kbd class="kbd kbd-sm text-base-content">{key}</kbd>}</For>
+                <For each={keys}>{(key) => <kbd class="kbd kbd-sm text-base-content -z-50">{key}</kbd>}</For>
               </span>
             </div>
           )}
