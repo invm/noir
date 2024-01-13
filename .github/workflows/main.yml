@@ -1,0 +1,58 @@
+name: App Builder
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Changelog
+        id: build_changelog
+        run: cat CHANGELOG.md >> $GITHUB_OUTPUT
+
+      - name: Node.js setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Rust toolchain
+        run: |
+          rustup update --no-self-update
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          xargs sudo apt install -y < environment/apt_packages.txt
+
+      - name: Install app dependencies from lockfile and build web
+        run: pnpm i
+
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Noir v__VERSION__"
+          releaseBody: |
+            ${{steps.build_changelog.outputs.changelog}}
+            See the assets to download this version and install.
+          releaseDraft: true
+          prerelease: false
