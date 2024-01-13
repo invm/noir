@@ -43,7 +43,7 @@ export const Pagination = (props: PaginationProps) => {
 
   return (
     <div class="w-full flex justify-between items-top gap-2 bg-base-100 px-2 py-1">
-      <div class="flex gap-2">
+      <div class="flex items-center gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">
             <div
@@ -72,14 +72,15 @@ export const Pagination = (props: PaginationProps) => {
             </Show>
           </div>
         </Show>
+
+        <Show when={props.count > 0}>
+          <span class="text-sm text-base-content">
+            {t('console.table.total_rows')} {props.count}
+          </span>
+        </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>
         <div class="flex items-center">
-          <Show when={props.count > 0}>
-            <span class="text-sm text-base-content">
-              {t('console.table.total')} {props.count}
-            </span>
-          </Show>
           <Show when={props.changesCount > 0}>
             <div class="px-2 gap-4 flex">
               <button class="btn btn-xs btn-outline" onClick={props.resetChanges}>

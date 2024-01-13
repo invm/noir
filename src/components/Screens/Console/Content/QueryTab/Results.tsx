@@ -21,6 +21,7 @@ import { editorThemes } from './Editor';
 import { EditorTheme } from 'services/App';
 import PopupCellRenderer, { PopupCellRendererProps } from './Table/PopupCellRenderer';
 import { tippy } from 'solid-tippy';
+import { t } from 'utils/i18n';
 tippy;
 
 const getColumnDefs = (
@@ -35,20 +36,11 @@ const getColumnDefs = (
     constraints: Row[];
   }
 ): ColDef[] => {
-  if (!rows || rows.length === 0) {
-    return [];
-  }
   const cols: ColDef[] = [];
+  if (!rows || rows.length === 0) {
+    return cols;
+  }
 
-  cols.push({
-    headerName: '',
-    width: 30,
-    cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} setCode={setCode} />,
-    resizable: false,
-    pinned: 'left',
-    lockPinned: true,
-    cellClass: 'lock-pinned',
-  });
   const c = Object.keys(rows[0]);
 
   return cols.concat(
@@ -67,9 +59,10 @@ const getColumnDefs = (
       const visible_type = getAnyCase(col, 'column_type');
 
       return {
-        editable: !key,
+        editable: !key && columns.length > 0,
         // checkboxSelection: _i === 0,
         resizable: true,
+        cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} setCode={setCode} />,
         filter: true,
         ...(c.length === 1 && { flex: 1 }),
         width: 300,
@@ -216,14 +209,14 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     const allChanges = changes();
     try {
       const conn = getConnection();
-      const t = table();
+      const _table = table();
       const queries = Object.keys(allChanges).map((rowIndex) => {
         const row = allChanges[rowIndex];
         const rg = new RegExp(`\\"${table}\\"`, 'i');
-        return update(t, row.changes)
+        return update(_table, row.changes)
           .where({ [row.updateKey]: row.updateVal })
           .toString()
-          .replace(rg, t);
+          .replace(rg, _table);
       });
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
@@ -232,6 +225,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         result_sets: results_sets.map((id) => ({ id })),
       });
       setChanges({});
+      notify(t('console.table.successfully_updated', { count: Object.keys(allChanges).length }), 'success');
     } catch (error) {
       notify(error);
     }

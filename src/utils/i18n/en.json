@@ -52,13 +52,18 @@
       "result_set": "Result set ",
       "out_of": " out of ",
       "table": {
-        "show_row": "Show row",
-        "copy_to_clipboard": "Copy row to clipboard as json",
+        "row_actions": {
+          "view": "View in JSON mode",
+          "copy_row": "Copy row to clipboard as json",
+          "copy_cell": "Copy cell to clipboard as json",
+          "edit_cell": "Edit cell",
+          "create_row": "Create row",
+          "delete_row": "Delete row"
+        },
+        "successfully_updated": "Successfully updated {{count}} row/s",
         "csv": "Export to CSV",
         "json": "Export to JSON",
-        "num_col": "Show row number",
-        "actions_col": "Show row actions",
-        "total": "Total: "
+        "total_rows": "Total rows: "
       }
     },
     "sidebar": {

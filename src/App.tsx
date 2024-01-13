@@ -13,6 +13,7 @@ import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
 import { createShortcut } from '@solid-primitives/keyboard';
+import { isDev } from 'solid-js/web';
 
 function App() {
   const {
@@ -28,15 +29,13 @@ function App() {
       setLoading,
       setNextContentIdx,
       setPrevContentIdx,
+      setConnectionIdx,
     },
     app: { restoreAppStore, setComponent },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
 
-  createShortcut(['Control', 'w'], () => {
-    removeContentTab(contentStore.idx);
-  });
 
   const disableMenu = () => {
     document.addEventListener('contextmenu', (e) => {
@@ -54,14 +53,20 @@ function App() {
     );
   };
 
-  disableMenu();
+  if (!isDev) {
+    disableMenu();
+  }
 
   createShortcut(['F1'], () => {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
 
-  createShortcut(['Control', 't'], () => {
+  createShortcut(['Meta', 't'], () => {
     addContentTab();
+  });
+
+  createShortcut(['Meta', 'w'], () => {
+    removeContentTab(contentStore.idx);
   });
 
   createShortcut(['Control', 'Tab'], () => {
@@ -73,8 +78,14 @@ function App() {
   });
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut(['Control', String(i)], () => {
+    createShortcut(['Meta', String(i)], () => {
       setContentIdx(i - 1);
+    });
+  }
+
+  for (let i = 1; i <= 9; i++) {
+    createShortcut(['Control', String(i)], () => {
+      setConnectionIdx(i - 1);
     });
   }
 
