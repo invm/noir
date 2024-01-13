@@ -68,7 +68,7 @@
     },
     "sidebar": {
       "show_table_structure": "Show table structure",
-      "list_data": "List data",
+      "show_data": "Show data",
       "truncate_table": "Truncate table",
       "confirm_truncate": "Are you sure you want to truncate table {{table}}?",
       "yes": "Yes",

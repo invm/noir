@@ -95,7 +95,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
           onClick={({ props }) => {
             listData(props.table);
           }}>
-          {t('sidebar.list_data')}
+          {t('sidebar.show_data')}
         </Item>
         <Item onClick={() => (document.getElementById(modal_id) as HTMLDialogElement).showModal()}>
           {t('sidebar.truncate_table')}

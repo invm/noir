@@ -30,10 +30,12 @@ const getColumnDefs = (
     columns,
     constraints,
     setCode,
+    editable,
   }: {
     setCode: (code: string) => void;
     columns: Row[];
     constraints: Row[];
+    editable: boolean;
   }
 ): ColDef[] => {
   const cols: ColDef[] = [];
@@ -62,7 +64,7 @@ const getColumnDefs = (
         editable: !key && columns.length > 0,
         // checkboxSelection: _i === 0,
         resizable: true,
-        cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} setCode={setCode} />,
+        cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} editable={editable} setCode={setCode} />,
         filter: true,
         ...(c.length === 1 && { flex: 1 }),
         width: 300,
@@ -136,6 +138,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             columns: result_set.columns ?? [],
             constraints: [],
             setCode,
+            editable: !!props.editable,
           });
           return { rows: result_set.rows, columns, count: result_set.count };
         }
@@ -149,8 +152,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           columns: result_set.columns ?? [],
           constraints: result_set.constraints ?? [],
           setCode,
+          editable: !!props.editable,
         });
-        console.log({ columns });
         return {
           rows,
           columns,
