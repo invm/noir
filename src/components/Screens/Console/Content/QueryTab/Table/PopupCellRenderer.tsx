@@ -26,6 +26,7 @@ export type PopupCellRendererProps = {
   node: { id: string };
   value: string;
   column: { getColId: () => string };
+  editable: boolean;
 };
 
 const PopupCellRenderer = (props: PopupCellRendererProps) => {
@@ -33,7 +34,13 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
 
   const dropDownContent = (
     <ul class="menu menu-xs rounded-box">
-      <For each={rowsActions}>
+      <For
+        each={rowsActions.filter((r) => {
+          if (r.action === 'edit') {
+            return props.editable;
+          }
+          return true;
+        })}>
         {({ action, label }) => (
           <li>
             <a onClick={() => onClickHandler(action)}>{label}</a>
@@ -67,7 +74,6 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     // }
 
     if (option === 'edit') {
-      console.log(props.column);
       props.api.startEditingCell({
         rowIndex: props.rowIndex,
         colKey: props.column.getColId(),
