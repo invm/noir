@@ -41,13 +41,30 @@ jobs:
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
+        if: matrix.platform != 'macos-latest'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         with:
-          tagName: ${{ github.ref_name }}
+          tagName: v__VERSION__
           releaseName: "Noir v__VERSION__"
           releaseBody: |
             See the assets to download this version and install.
+          releaseDraft: true
+          prerelease: false
+          
+      - name: Add Mac Universal Target
+        if: matrix.platform == 'macos-latest'
+        run: rustup target add aarch64-apple-darwin
+      - name: Tauri Build and Release (MacOS Universal Build)
+        uses: tauri-apps/tauri-action@v0
+        if: matrix.platform == 'macos-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Noir v__VERSION__'
+          args: '--target universal-apple-darwin'
+          releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true
           prerelease: false
