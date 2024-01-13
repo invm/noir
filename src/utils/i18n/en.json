@@ -114,6 +114,12 @@
       "indices": "Indices",
       "constraints": "Constraints",
       "triggers": "Triggers"
+    },
+    "update_toast": {
+      "title": "New version available",
+      "download": "Click here to update and relaod",
+      "release_notes": "Release notes",
+      "close": "Close"
     }
   }
 }

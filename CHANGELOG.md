@@ -2,78 +2,117 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### 0.0.1 (2024-01-13) (Initial release)
+## 0.1.0 (2024-01-13)
 
 
 ### Features
 
-* home screen
-    * connections form
-        * add mysql connection
-        * add postgres connection
-    * connections list
-* header
-    * connections tabs
-    * theme toggle
-        * ui
-        * editor
-        * grid
-    * settings page
-* console screen
-    * entities sidebar (tables, views, routine, triggers)
-        * schema selection
-        * quick actions (show process list, refresh schema entities)
-        * on entity context menu
-            * table / view
-                * show table structure
-                * show data
-                * truncate table
-            * trigger / routine
-                * show entity
-                * show create statement
-    * query tab
-        * editor
-            * execute query
-            * format query
-            * copy query
-            * toggle editor vim mode
-            * set auto limit on queries
-        * results grid
-            * pagination
-                * show total rows in the result set
-                * paginate result sets
-                * paginate rows
-                * export to csv
-                * export to json array
-                * change page size
-                * when in edit mode
-                    * apply changes
-                    * reset changes
-            * table
-                * show data
-                * on context menu 
-                    * view in json mode in a modal
-                    * copy row
-                    * copy cell
-    * table structure tab
-        * show columns
-        * show indices
-        * show constraints
-        * show triggers
-    * data tab
-        * table
-            * same functions as in the query tab
-            * show key on constraint columns
-            * edit cell by double click or on context menu
-* keyboard shortcuts
-    * f1 - show settings page containing keymaps
-    * execute query
-    * select query tab
-    * select connection tab
-    * new tab
-    * close tab
-    * focus on editor input
-    * format query
-    * select prev/next result set
-    * select prev/next page
-    
+* add ag-grid ([c2e01a1](https://github.com/invm/noir/commit/c2e01a1f81551105c5c8d2d2b31b9c8944b944d0))
+* add alerts component and global alerts store ([d994898](https://github.com/invm/noir/commit/d994898b60dde880cbaf51625e76c9ee1779c041))
+* add basic mods ([8c0ff7c](https://github.com/invm/noir/commit/8c0ff7cb71cfd2a6694b706921f560847eb788d1))
+* add basic opertaions ([e45784a](https://github.com/invm/noir/commit/e45784a1e80fe1873ca6425f248c5f46d1285db9))
+* add cmd+t and cmd+w shortcuts and add prefer_socket ([f2454c0](https://github.com/invm/noir/commit/f2454c0314a36fd614a75457b194cb08e1287211))
+* add codemirror commands ([7e5b7bc](https://github.com/invm/noir/commit/7e5b7bc721cda4ba44ce972d123105218255e124))
+* add command palette and style table ([b72a586](https://github.com/invm/noir/commit/b72a5863cc380cf39bf2e48f79a73bcb9d17ea73))
+* add confirm modal on truncate ([26d4c46](https://github.com/invm/noir/commit/26d4c4638dd3cd9f842ac8cd6815eab8a84ef028))
+* add connection form ui ([c8a5fc4](https://github.com/invm/noir/commit/c8a5fc4bb4f76d29a034ed194b9885f47355170e))
+* add connection handlers, custom errors ([751ce49](https://github.com/invm/noir/commit/751ce494e694bf502b8ede8bc6a1e6d70ec819b2))
+* add connection timeout ([a4fcea7](https://github.com/invm/noir/commit/a4fcea7492136b3aed9be66b811f648caa253aff))
+* add context menu on rows ([b663cac](https://github.com/invm/noir/commit/b663cacbc4c56f910b0c763f26cc42016ca8d829))
+* add context menu, console ui ([75d3706](https://github.com/invm/noir/commit/75d37067472dc9da1e61082886e6d74a9f1224d7))
+* add csv export ([2dd4ec6](https://github.com/invm/noir/commit/2dd4ec626ea0d4b6954a3ab9c2147e6abe310b05))
+* add ctrl-j ctrl-k shortcuts in focused vim mode ([e3cfc05](https://github.com/invm/noir/commit/e3cfc05d725084fe563161415d5341fb6f749699))
+* add data query tab, add help page ([6da8647](https://github.com/invm/noir/commit/6da8647045abcbbdeb4369ad81c8e61a4f9bee14))
+* add dialect to conn config ([9baa9e2](https://github.com/invm/noir/commit/9baa9e29dacc778b4a1593bd09460d1eb416910b))
+* add disconnect function ([b073ef8](https://github.com/invm/noir/commit/b073ef8c3f414d00e8bf1c27683c12ed4c9d2852))
+* add editor extensions ([fe36f40](https://github.com/invm/noir/commit/fe36f40efbf176c385a291d5e8330280ddbfb91d))
+* add enqueue query method ([90833cd](https://github.com/invm/noir/commit/90833cd0cf602d4316ae4d3a137b5fd665ce71bb))
+* add event bus and refactor command palette ([fea444b](https://github.com/invm/noir/commit/fea444b10ee7f27f9e8cceca358ad0fb232e9c80))
+* add execute and result sets global shortcuts ([b6540fb](https://github.com/invm/noir/commit/b6540fb833267bd3cea8c8ff1713a23673bbaae7))
+* add execute query ([e1a2915](https://github.com/invm/noir/commit/e1a2915091c5a02129a33e692d5325bbdb953fe4))
+* add execute selected text only ([d1ccd3a](https://github.com/invm/noir/commit/d1ccd3af28bdd2a09c069d687f43748c6d519387))
+* add execute tx ([83a0837](https://github.com/invm/noir/commit/83a083787c46681eacb00ce13b08e557946f2e6b))
+* add f1 shortcut ([1982550](https://github.com/invm/noir/commit/1982550710a1b5515f53ae1dff86bec73ba05b91))
+* add focusable elements, add keyboard shortcuts for query input ([d6d918d](https://github.com/invm/noir/commit/d6d918d7c6a92e8fd892aaf0a8db0fbf9fe67d51))
+* add get table structure function ([82fee0d](https://github.com/invm/noir/commit/82fee0dc3fcb3d4706a7efc707246c5101e004da))
+* add get tables and show tables in sidebar ([cdfeaf6](https://github.com/invm/noir/commit/cdfeaf66cdce8f8f08f427a1a8913f9854a50989))
+* add i18n and initial screens ([fb8a07c](https://github.com/invm/noir/commit/fb8a07c09c692ad4d0355de9bec9d0b33d5628d6))
+* add icons ([9858f78](https://github.com/invm/noir/commit/9858f780f0a0048b67e4d4a4775a3fd218f51734))
+* add icons for entities ([134db87](https://github.com/invm/noir/commit/134db8717964df18f4c35fa02e52040a09cd337a))
+* add json viewer for row data and search ([92974c1](https://github.com/invm/noir/commit/92974c1151abdb19cef3832b4e26a7d0ca24eaa7))
+* add keyboard shortcuts ([c18350e](https://github.com/invm/noir/commit/c18350e23b388f34ff29e428499911236d988fff))
+* add keyboard shortcuts, remove event-bus ([0f47831](https://github.com/invm/noir/commit/0f47831c60754ce749f1e34c8cb9fc7cdb69b4b0))
+* add keymaps component ([4761a78](https://github.com/invm/noir/commit/4761a782d7b518fd00614b844b55b0aff84984ad))
+* add list data and truncate table actions ([4984155](https://github.com/invm/noir/commit/498415593752708fdbf4d6d2b20c850dc1de0309))
+* add loading states ([a5d67b2](https://github.com/invm/noir/commit/a5d67b23b65ef127d127c2afd02638bfed4c7fd0))
+* add modal with row data, add row actions ([4b298c4](https://github.com/invm/noir/commit/4b298c4a88ec2d61b05db07ea527d0e832610fe3))
+* add open issue link ([f000b90](https://github.com/invm/noir/commit/f000b90be84e5497760ab32e5e67e8bfaf3927ed))
+* add panic logs on backend ([3e49520](https://github.com/invm/noir/commit/3e49520c667698120a3dc9de448fe8e06b11ad4a))
+* add postgres support ([a85d758](https://github.com/invm/noir/commit/a85d7586ca20654c962393b6c04cde34fe540390))
+* add preserve_order to serde_json ([ff49bac](https://github.com/invm/noir/commit/ff49bac9d9aab3c9b6299c93138c1bbee2cbe192))
+* add primary key and column type to table ([a9663da](https://github.com/invm/noir/commit/a9663da2ddaf6e67e4771862d917308f446870fb))
+* add query metadata route ([e6c4c2f](https://github.com/invm/noir/commit/e6c4c2f518abf5176d3e2c1a5e7199928ae3209d))
+* add result sets selection and pagination ([9416798](https://github.com/invm/noir/commit/941679835b2a7612b6f277b66a50004708b1094e))
+* add routines and triggers ([bab4f3a](https://github.com/invm/noir/commit/bab4f3aa0c9653bd68ac7b3775fadf012a999ab5))
+* add rows action with tooltip ([1d2a030](https://github.com/invm/noir/commit/1d2a030b0606dda56b116ca4d7c9c83116842bdc))
+* add search in json modal ([3abfbb7](https://github.com/invm/noir/commit/3abfbb73567bb86f1d11a055759515a663936d40))
+* add settings page ([3312876](https://github.com/invm/noir/commit/331287652d491fb80fd5ce2161e6fb4730f17daf))
+* add sqlparser ([56e2efb](https://github.com/invm/noir/commit/56e2efb19e5339c5c73aee4330fc9a7a5041749b))
+* add sqlx drivers, add connection struct ([813cf67](https://github.com/invm/noir/commit/813cf67a0259366db7f978d364daafc3257b546f))
+* add store, log, window state and single instance plugins ([4a873ea](https://github.com/invm/noir/commit/4a873ea5fe9c8c8051f7da32aa11c38cd573147b))
+* add table data tab ([35d7683](https://github.com/invm/noir/commit/35d768374f97f90465a78b9770fc75fc3923503c))
+* add table struct tab ([a89d57e](https://github.com/invm/noir/commit/a89d57e51c13e2bd40588837baf019934443515d))
+* add tabs and shortcut navigation ([d3916a4](https://github.com/invm/noir/commit/d3916a479cccba5a8605a323c9141bad6925ae05))
+* add tabulator table ([bf292bb](https://github.com/invm/noir/commit/bf292bb62fbbd58f6bde95eae195b65582a1ea07))
+* add test connection ([9511722](https://github.com/invm/noir/commit/951172210b5161c6549fbef5ec771988e0e269d4))
+* add themes and theme switcher ([0b80a12](https://github.com/invm/noir/commit/0b80a12284a577c43bf7599029b9c68b9f02feca))
+* add themes, csv and json export ([e08b666](https://github.com/invm/noir/commit/e08b66610e8df063aea0eaf7047a39b49cab6c3b))
+* add tooltips, fix minor issues ([03be41d](https://github.com/invm/noir/commit/03be41d897cdc737f3cbe7be3fa975beeca806c9))
+* add update mechanism ([487db53](https://github.com/invm/noir/commit/487db539c77b687899e075699adbc9f721722c2d))
+* add views ([18be5b0](https://github.com/invm/noir/commit/18be5b0c1b70bcb2bfee5ace2761a7fbc6aaac3d))
+* add vim mode ([d05ef6a](https://github.com/invm/noir/commit/d05ef6a177fa345444d96f75196639e84202eed5))
+* autocomplete columns and tables ([0cb42a5](https://github.com/invm/noir/commit/0cb42a5957930bb79102eb283976f9dc34257496))
+* change connections vector to hashmap and add ping method ([f3a72cf](https://github.com/invm/noir/commit/f3a72cf4fa9b38e60ac180c0d425fe7fa793a8ca))
+* change id to uuid, fix handlers ([ba07739](https://github.com/invm/noir/commit/ba07739f77854b23f3694bf972c7ddb9d590cc17))
+* change results to result sets ([537f44e](https://github.com/invm/noir/commit/537f44ecb473ea1e6a07b78fd2195bf6571ab1fe))
+* change results to result sets, show info message ([70238e9](https://github.com/invm/noir/commit/70238e99dee4496df2ee83084329d3c31e2812dd))
+* finalize state structure ([227faa3](https://github.com/invm/noir/commit/227faa3de010fa38e8ae7d6db5fccc4bb8e38b11))
+* finish table structure ([7fbd7fb](https://github.com/invm/noir/commit/7fbd7fbe1af052dadc5d06626c7405bd12ba7fd5))
+* format and save queries state ([c06ff53](https://github.com/invm/noir/commit/c06ff53637f0464c878a9c897db9227aa0d33986))
+* handle execute query result ([ed74233](https://github.com/invm/noir/commit/ed74233d475dd2f4b2e50e6560d6e9c89340da7c))
+* handle pagination ([849ef04](https://github.com/invm/noir/commit/849ef0410822fbfef6b19f1f7713aca61acdfa88))
+* hash query ([27c6e55](https://github.com/invm/noir/commit/27c6e55d9ee7504d9f60a45b5905212efd02ed3b))
+* init db file ([b598044](https://github.com/invm/noir/commit/b598044715b56e3825994fe31d62d3f25147272b))
+* line wrap for json editor and handle null ([f7c1f75](https://github.com/invm/noir/commit/f7c1f752e59066fc343b979669c00358f5803d44))
+* pass data to frontend ([a1f07f9](https://github.com/invm/noir/commit/a1f07f96276f91be0b2cf3b2788c65489243a099))
+* pass dynamic dialect from config to sql parser ([5f5b4c8](https://github.com/invm/noir/commit/5f5b4c871b0aa26ee484743a9ac2139610607e24))
+* refresh connection list after adding connection ([eb6e641](https://github.com/invm/noir/commit/eb6e64133aca5ebc89853dc9bd9f9b56b431799b))
+* render connections ([099312c](https://github.com/invm/noir/commit/099312cd706ff702c295cf5604255d504aa66473))
+* render results ([b6952a9](https://github.com/invm/noir/commit/b6952a924e84b8915be47278f2c5e8d17a7bd441))
+* replace sqlx with mysql client ([686ee55](https://github.com/invm/noir/commit/686ee5574b6fc38e1dade027e69c46a64697fe42))
+* run query and save in file ([7eb7d86](https://github.com/invm/noir/commit/7eb7d86604a60f13126d488720eeeeff22b8c087))
+* save query rows and query metadata ([7d641ef](https://github.com/invm/noir/commit/7d641eff09f42efacfa1bd7e59154f2915fa894e))
+* save query tabs to store, move all text to en.json ([4561d1c](https://github.com/invm/noir/commit/4561d1c2ecf05bc94e202468e9446ce615e842b7))
+* simple error boundary ([91fd567](https://github.com/invm/noir/commit/91fd56734209f501864236dd3adae6720a8bd4d1))
+* solve large data rendering ([c5bbcfe](https://github.com/invm/noir/commit/c5bbcfeba88dd7002570fe414c000693bfab5759))
+* upgrade connection config struct, add tests ([8ab6895](https://github.com/invm/noir/commit/8ab689562839df90e1c38619118382a668584172))
+
+
+### Bug Fixes
+
+* column resize, focus after command palette action, line wrap for editor ([6b5b92c](https://github.com/invm/noir/commit/6b5b92cc664b2ced7cc6852d8a1459100dbe1e2e))
+* contenteditable on webkit bs ([79ebf81](https://github.com/invm/noir/commit/79ebf8161d41da349fb7cf4a4cf93940b7ba64ac))
+* context menus on routines and triggers ([8c1cf16](https://github.com/invm/noir/commit/8c1cf160a3969256b59333b43a1e8100d25b36a2))
+* do not parse null ([376f968](https://github.com/invm/noir/commit/376f968c05fef8337e1b18efe9d96d296af0beab))
+* download whole result set ([e3a58da](https://github.com/invm/noir/commit/e3a58da3c63d2525a128d21aeddd490744faf1f3))
+* handle edge cases in psql types ([e47bd27](https://github.com/invm/noir/commit/e47bd272ea897fa94b9d8dd3ea79650e4d0ccedc))
+* horizontal scroll ([580fe58](https://github.com/invm/noir/commit/580fe588dd990c3b4cab695c584721cc4cdb5788))
+* missing mut declaration ([85cd379](https://github.com/invm/noir/commit/85cd3798667a3c449b057f018270421b38967d21))
+* pg types ([d77a94e](https://github.com/invm/noir/commit/d77a94ed58ac8fc37c6d509fd57cc7d00526f783))
+* query finish order ([384a39c](https://github.com/invm/noir/commit/384a39c65f297feadfd00f7fc4501f44198c1fb5))
+* results table ui ([d6e41e5](https://github.com/invm/noir/commit/d6e41e58384ad4a769852b4835a3f282ee984477))
+* schema selection ([cce261f](https://github.com/invm/noir/commit/cce261faebec462b1ea4ae98b2c82a8935fe2e46))
+* styles ([98dcd7e](https://github.com/invm/noir/commit/98dcd7ede9c5fa61f207175f66330d82f0538e47))
+* styles and typos ([61b13a5](https://github.com/invm/noir/commit/61b13a543bcbe2f79bcfc39152e3122b877be5ab))
+* table structure ([656e41a](https://github.com/invm/noir/commit/656e41a0e6d0a5c065ed27f06a980b9db260e853))
+* theme change and connection tabs ([2e370c9](https://github.com/invm/noir/commit/2e370c9489ffbdab5675859f7bed0561c2a1eeeb))
