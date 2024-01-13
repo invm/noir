@@ -2,10 +2,11 @@ import { For } from 'solid-js';
 
 const keymaps = [
   { action: 'Help', keys: ['F1'] },
-  { action: 'Execute query', keys: ['Ctrl', 'e'] },
-  { action: 'Select tab', keys: ['Ctrl', 'number'] },
-  { action: 'New tab', keys: ['Ctrl', 't'] },
-  { action: 'Close current tab', keys: ['Ctrl', 'w'] },
+  { action: 'Execute query', keys: ['Ctrl/Cmd', 'e/Enter'] },
+  { action: 'Select tab', keys: ['Alt/Cmd', 'number'] },
+  { action: 'Select connection tab', keys: ['Ctrl', 'number'] },
+  { action: 'New tab', keys: ['Alt/Cmd', 't'] },
+  { action: 'Close current tab', keys: ['Alt/Cmd', 'w'] },
   { action: 'Focus on editor', keys: ['Ctrl', 'l'] },
   { action: 'Format query', keys: ['Ctrl', 'Shift', 'f'] },
   { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'n/p'] },
