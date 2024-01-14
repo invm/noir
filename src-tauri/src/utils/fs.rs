@@ -30,6 +30,7 @@ pub fn get_app_path() -> String {
     } else {
         format!("{}/.config", home)
     };
+    debug!("get_app_path: {}/noir", path);
     format!("{}/noir", path)
 }
 
