@@ -8,6 +8,7 @@ use std::{fs, panic};
 use tauri::{Manager, State};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
+use tracing::debug;
 use tracing_subscriber;
 
 use noir::{
@@ -27,6 +28,7 @@ struct Payload {
 fn main() {
     tracing_subscriber::fmt::init();
 
+    debug!("setting panic hook");
     panic::set_hook(Box::new(|info| {
         error!("Panicked: {:?}", info);
         let path = get_app_path();
@@ -37,9 +39,12 @@ fn main() {
         )
         .unwrap();
     }));
+    debug!("setting panic hook");
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
     let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);
+
+    debug!("openned mpsc channels");
 
     tauri::Builder::default()
         .manage(AsyncState {
@@ -59,12 +64,15 @@ fn main() {
                 .unwrap();
         }))
         .setup(|app| {
+            debug!("setting up tauri app");
             init::init_app()?;
             let handle = app.handle();
 
+            debug!("initialize_database");
             let app_state: State<AppState> = handle.state();
             let db = initialize_database().expect("Database initialize should succeed");
             *app_state.db.lock().unwrap() = Some(db);
+            debug!("initialized database");
 
             tauri::async_runtime::spawn(async move {
                 async_process_model(async_proc_input_rx, async_proc_output_tx).await
