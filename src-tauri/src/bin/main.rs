@@ -4,10 +4,12 @@
 use chrono;
 use log::error;
 use state::AppState;
+use std::path::PathBuf;
 use std::{fs, panic};
 use tauri::{Manager, State};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
+use tracing::debug;
 use tracing_subscriber;
 
 use noir::{
@@ -31,11 +33,8 @@ fn main() {
         error!("Panicked: {:?}", info);
         let path = get_app_path();
         let ts = chrono::offset::Utc::now();
-        fs::write(
-            format!("{}/error.log", path),
-            format!("{} - {:?}", ts, info),
-        )
-        .unwrap();
+        let dest = format!("{}/error.log", path.to_str().unwrap());
+        fs::write(&PathBuf::from(dest), format!("{} - {:?}", ts, info)).unwrap();
     }));
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
@@ -59,12 +58,15 @@ fn main() {
                 .unwrap();
         }))
         .setup(|app| {
+            debug!("setting up tauri app");
             init::init_app()?;
             let handle = app.handle();
 
+            debug!("initialize_database");
             let app_state: State<AppState> = handle.state();
             let db = initialize_database().expect("Database initialize should succeed");
             *app_state.db.lock().unwrap() = Some(db);
+            debug!("initialized database");
 
             tauri::async_runtime::spawn(async move {
                 async_process_model(async_proc_input_rx, async_proc_output_tx).await

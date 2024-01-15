@@ -22,9 +22,6 @@
         "all": false,
         "save": true
       },
-      "os": {
-        "all": true
-      },
       "clipboard": {
         "all": true
       }
