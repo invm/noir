@@ -2,11 +2,11 @@ use crate::database::connections::ResultSet;
 use anyhow::Result;
 use serde_json::json;
 use std::{fs, path::PathBuf};
-use tauri::api::dir::with_temp_dir;
+use tauri::api::{dir::with_temp_dir, path::app_config_dir};
 use tracing::{debug, error};
 
 pub fn get_tmp_dir() -> Result<String> {
-    let mut temp_dir = PathBuf::from("/tmp/.noir");
+    let mut temp_dir = PathBuf::from("");
     with_temp_dir(|dir| {
         temp_dir = PathBuf::from(dir.path());
         return ();
@@ -18,27 +18,19 @@ pub fn get_tmp_dir() -> Result<String> {
     return Ok(temp_dir.to_str().unwrap_or("").to_string());
 }
 
-pub fn get_app_path() -> String {
-    let xdg_path = std::env::var("XDG_CONFIG_HOME");
-    let xdg_path = match xdg_path {
-        Ok(path) => path,
-        Err(_) => "".to_string(),
-    };
-    let home = std::env!("HOME").to_string();
-    let path = if !xdg_path.is_empty() {
-        xdg_path
-    } else {
-        format!("{}/.config", home)
-    };
-    debug!("get_app_path: {}/noir", path);
-    format!("{}/noir", path)
+pub fn get_app_path() -> PathBuf {
+    let config = tauri::Config::default();
+    let config_dir = app_config_dir(&config).unwrap();
+    let path = PathBuf::from(config_dir.to_str().unwrap().to_string() + "noir");
+    debug!("get_app_path: {}", path.to_str().unwrap());
+    path
 }
 
-pub fn check_if_app_dir_exists(app_path: &str) -> bool {
+pub fn check_if_app_dir_exists(app_path: &PathBuf) -> bool {
     fs::metadata(app_path).is_ok()
 }
 
-pub fn create_app_dir(dir: &String) -> Result<()> {
+pub fn create_app_dir(dir: &PathBuf) -> Result<()> {
     Ok(fs::create_dir_all(dir)?)
 }
 

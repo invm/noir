@@ -12,7 +12,7 @@ pub fn init_app() -> Result<()> {
     if !check_if_app_dir_exists(&app_path) {
         create_app_dir(&app_path)?;
         create_app_key()?;
-        create_app_db(&app_path)?;
+        create_app_db(app_path)?;
     }
     Ok(())
 }
