@@ -7,7 +7,7 @@
       "success": "Successfully connected to {{name}}",
       "length_validation": "Must be between 2 and 255 characters",
       "labels": {
-        "name": "Name",
+        "name": "Connection name",
         "mode": "Mode",
         "color": "Color",
         "dialect": "Dialect",
@@ -16,7 +16,7 @@
         "host": "Host",
         "socket": "Socket path",
         "file": "Database file",
-        "db_name": "Database name",
+        "db_name": "Default schema",
         "port": "Port"
       }
     },

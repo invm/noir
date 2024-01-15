@@ -22,7 +22,6 @@ pub fn get_app_path() -> PathBuf {
     let config = tauri::Config::default();
     let config_dir = app_config_dir(&config).unwrap();
     let path = PathBuf::from(config_dir.to_str().unwrap().to_string() + "noir");
-    debug!("get_app_path: {}", path.to_str().unwrap());
     path
 }
 

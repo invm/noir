@@ -1,17 +1,25 @@
-import { createSignal, JSXElement } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { invoke } from '@tauri-apps/api';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
 import { newContentTab, TableStructureContentTabData } from 'services/Connections';
 import { SwapChevronDown, SwapChevronRight, Table } from 'components/UI/Icons';
-import { ResultSet } from 'interfaces';
+import { Column, ResultSet } from 'interfaces';
+import { getAnyCase } from 'utils/utils';
 
-export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title: string; children: JSXElement }) => {
+type TableColumnsCollapseProps = {
+  entity: 'views' | 'tables';
+  title: string;
+  columns: Column[];
+};
+
+export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   const [open, setOpen] = createSignal(false);
+  const [showModal, setShowModal] = createSignal(false);
 
   const {
-    connections: { contentStore, addContentTab, getConnection, updateContentTab },
+    connections: { insertColumnName, contentStore, addContentTab, getConnection, updateContentTab },
     backend: { selectAllFrom },
     messages: { notify },
   } = useAppSelector();
@@ -19,7 +27,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
   const menu_id = 'sidebar-table-menu_' + props.entity + props.title;
   const modal_id = 'table-modal_' + props.entity + props.title;
 
-  const { show } = useContextMenu({
+  const { show, hideAll } = useContextMenu({
     id: menu_id,
     props: { table: props.title },
   });
@@ -60,30 +68,45 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
       notify(t('sidebar.table_was_truncated', { table }), 'success');
     } catch (error) {
       notify(error);
+    } finally {
+      setShowModal(false);
     }
   };
 
   return (
     <>
-      <dialog id={modal_id} class="modal">
-        <form method="dialog" class="modal-box">
-          <h3 class="font-bold text-lg">{t('connections_list.actions.confirm_action')}</h3>
-          <p class="py-4">{t('sidebar.confirm_truncate', { table: props.title })}</p>
-          <div class="flex justify-between w-full gap-3">
+      <Show when={showModal()}>
+        <dialog id={modal_id} class="modal">
+          <form method="dialog" class="modal-box">
+            <h3 class="font-bold text-lg">{t('connections_list.actions.confirm_action')}</h3>
+            <p class="py-4">{t('sidebar.confirm_truncate', { table: props.title })}</p>
+            <div class="flex justify-between w-full gap-3">
+              <button
+                class="btn btn-error btn-sm"
+                onClick={() => {
+                  truncateTable(props.title);
+                }}>
+                {t('sidebar.yes')}
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                }}
+                class="btn btn-primary btn-sm">
+                {t('sidebar.cancel')}
+              </button>
+            </div>
+          </form>
+          <form method="dialog" class="modal-backdrop">
             <button
-              class="btn btn-error btn-sm"
               onClick={() => {
-                truncateTable(props.title);
+                setShowModal(false);
               }}>
-              {t('sidebar.yes')}
+              close
             </button>
-            <button class="btn btn-primary btn-sm">{t('sidebar.cancel')}</button>
-          </div>
-        </form>
-        <form method="dialog" class="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
+          </form>
+        </dialog>
+      </Show>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>
         <Item
           onClick={({ props }) => {
@@ -97,11 +120,21 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
           }}>
           {t('sidebar.show_data')}
         </Item>
-        <Item onClick={() => (document.getElementById(modal_id) as HTMLDialogElement).showModal()}>
+        <Item
+          onClick={() => {
+            setShowModal(true);
+            (document.getElementById(modal_id) as HTMLDialogElement).showModal();
+          }}>
           {t('sidebar.truncate_table')}
         </Item>
       </Menu>
-      <div class="w-full flex items-center pt-1" onContextMenu={(e) => show(e)}>
+      <div
+        onClick={() => setOpen(!open())}
+        class="cursor-pointer w-full flex items-center mt-1 hover:bg-base-100"
+        onContextMenu={(e) => {
+          hideAll();
+          show(e);
+        }}>
         <div class="flex items-center">
           <span onClick={() => setOpen(!open())} class="collapse">
             <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
@@ -115,7 +148,7 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
               <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
             </div>
           </span>
-          <span onClick={() => setOpen(!open())} class="text-xs font-semibold cursor-pointer">
+          <span tabindex={0} class="text-xs font-semibold">
             {props.title}
           </span>
         </div>
@@ -128,7 +161,19 @@ export const TableColumnsCollapse = (props: { entity: 'views' | 'tables'; title:
           'border-b-[1px]': open(),
           'border-base-200': open(),
         }}>
-        {open() && props.children}
+        <Show when={open()}>
+          <For each={props.columns}>
+            {(column) => (
+              <div
+                tabindex={1}
+                onClick={() => insertColumnName(column.name)}
+                class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
+                <span class="text-xs font-medium">{column.name}</span>
+                <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'column_type')}</span>
+              </div>
+            )}
+          </For>
+        </Show>
       </div>
     </>
   );

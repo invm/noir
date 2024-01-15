@@ -21,7 +21,7 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
       <span class="text-lg pt-10">{props.err.message}</span>
       <br />
       <h4 class="text-xl font-bold text-error">{t('error.stack')}</h4>
-      <span class="text-lg">{props.err.stack}</span>
+      <span class="text-lg">{props.err.stack.substring(0, 2000)}</span>
     </div>
   );
 };

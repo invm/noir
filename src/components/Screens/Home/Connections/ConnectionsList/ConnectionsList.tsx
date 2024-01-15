@@ -50,10 +50,10 @@ export const ConnectionsList = () => {
           <p class="py-4">{t('connections_list.actions.confirm_delete')}</p>
           <p class="py-4 font-bold text-xl">{focusedConnection()?.name}</p>
           <div class="flex justify-between w-full gap-3">
+            <button class="btn btn-primary btn-sm">{t('connections_list.actions.cancel')}</button>
             <button class="btn btn-error btn-sm" onClick={() => deleteConnection(focusedConnection()!.id!)}>
               {t('connections_list.actions.yes')}
             </button>
-            <button class="btn btn-primary btn-sm">{t('connections_list.actions.cancel')}</button>
           </div>
         </form>
         <form method="dialog" class="modal-backdrop">

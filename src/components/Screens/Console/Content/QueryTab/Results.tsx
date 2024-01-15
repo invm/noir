@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, Match, Show, Switch } from 'solid-js';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
@@ -287,20 +287,29 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         }}
       />
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
-        <AgGridSolid
-          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={data()?.error} />)}
-          loadingOverlayComponent={() => <Loader />}
-          ref={gridRef!}
-          columnDefs={data()?.columns}
-          rowSelection="multiple"
-          rowData={data()?.rows}
-          defaultColDef={defaultColDef}
-          enableCellChangeFlash={true}
-          undoRedoCellEditing={true}
-          suppressExcelExport={true}
-          suppressCsvExport={false}
-          onCellEditingStopped={onCellEditingStopped}
-        />
+        <Switch>
+          <Match when={data()?.notReady}>
+            <div class="flex items-center justify-center h-full">
+            <Keymaps />
+            </div>
+          </Match>
+          <Match when={!data()?.notReady}>
+            <AgGridSolid
+              noRowsOverlayComponent={() => <NoResults error={data()?.error} />}
+              loadingOverlayComponent={() => <Loader />}
+              ref={gridRef!}
+              columnDefs={data()?.columns}
+              rowSelection="multiple"
+              rowData={data()?.rows}
+              defaultColDef={defaultColDef}
+              enableCellChangeFlash={true}
+              undoRedoCellEditing={true}
+              suppressExcelExport={true}
+              suppressCsvExport={false}
+              onCellEditingStopped={onCellEditingStopped}
+            />
+          </Match>
+        </Switch>
       </div>
     </div>
   );

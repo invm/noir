@@ -13,7 +13,6 @@ export const Sidebar = () => {
   const {
     messages: { notify },
     connections: {
-      insertColumnName,
       getConnection,
       updateConnectionTab,
       addContentTab,
@@ -27,7 +26,7 @@ export const Sidebar = () => {
   const routine_menu = 'sidebar-routine-menu';
   const trigger_menu = 'sidebar-trigger-menu';
 
-  const { show: show_routine_menu } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
+  const { show: show_routine_menu, hideAll } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
 
   const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
 
@@ -161,18 +160,7 @@ export const Sidebar = () => {
         <For each={getSchemaEntity('tables')}>
           {(table) => (
             <div class="min-w-full w-fit">
-              <TableColumnsCollapse title={table.name} entity="tables">
-                <For each={table.columns}>
-                  {(column) => (
-                    <button
-                      onClick={() => insertColumnName(column.name)}
-                      class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
-                      <span class="text-xs font-medium">{column.name}</span>
-                      <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'column_type')}</span>
-                    </button>
-                  )}
-                </For>
-              </TableColumnsCollapse>
+              <TableColumnsCollapse title={table.name} entity="tables" columns={table.columns} />
             </div>
           )}
         </For>
@@ -181,18 +169,7 @@ export const Sidebar = () => {
           <For each={getSchemaEntity('views')}>
             {(table) => (
               <div class="min-w-full w-fit">
-                <TableColumnsCollapse title={table.name} entity="views">
-                  <For each={table.columns}>
-                    {(column) => (
-                      <button
-                        onClick={() => insertColumnName(column.name)}
-                        class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
-                        <span class="text-xs font-semibold ">{column.name}</span>
-                        <span class="text-xs font-medium ml-2">{getAnyCase(column.props, 'column_type')}</span>
-                      </button>
-                    )}
-                  </For>
-                </TableColumnsCollapse>
+                <TableColumnsCollapse title={table.name} entity="views" columns={table.columns} />
               </div>
             )}
           </For>
@@ -215,8 +192,12 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
           <For each={getSchemaEntity('routines')}>
             {(routine) => (
-              <div class="px-2 w-fit truncate">
-                <div onContextMenu={(e) => show_routine_menu(e, { props: { routine } })}>
+              <div class="px-2 w-fit truncate w-full hover:bg-base-100">
+                <div
+                  onContextMenu={(e) => {
+                    hideAll();
+                    show_routine_menu(e, { props: { routine } });
+                  }}>
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
@@ -250,8 +231,12 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
           <For each={getSchemaEntity('triggers')}>
             {(trigger) => (
-              <div class="px-2 w-fit truncate">
-                <div onContextMenu={(e) => show_trigger_menu(e, { props: { trigger } })}>
+              <div class="px-2 w-fit truncate w-full hover:bg-base-100">
+                <div
+                  onContextMenu={(e) => {
+                    hideAll();
+                    show_trigger_menu(e, { props: { trigger } });
+                  }}>
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"

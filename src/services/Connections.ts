@@ -95,19 +95,19 @@ export type ContentTabType = {
   label: string;
   error?: string;
 } & (
-      | {
+    | {
       key: typeof ContentTab.Query;
       data: Partial<QueryContentTabData>;
     }
-      | {
+    | {
       key: typeof ContentTab.TableStructure;
       data: Partial<TableStructureContentTabData>;
     }
-      | {
+    | {
       key: typeof ContentTab.Data;
       data: Partial<DataContentTabData>;
     }
-    );
+  );
 
 type Schema = {
   columns: Row[];
@@ -211,7 +211,10 @@ export const ConnectionsService = () => {
   }, INTERVAL);
 
   const addConnectionTab = async (tab: ConnectionTab) => {
-    if (connectionStore.tabs.find((t) => t.id === tab.id)) return;
+    if (connectionStore.tabs.find((t) => t.id === tab.id)) {
+      setConnectionStore('idx', connectionStore.tabs.findIndex((t) => t.id === tab.id) + 1);
+      return;
+    }
     setContentStore('tabs', [newContentTab('Query', ContentTab.Query)]);
     setConnectionStore(
       produce((s) => {
