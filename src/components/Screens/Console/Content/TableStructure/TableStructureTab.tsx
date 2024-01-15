@@ -39,7 +39,7 @@ export const TableStructureTab = () => {
               {(item) => (
                 <Match when={item === tab()}>
                   <StructureTable
-                    data={getContentData("TableStructure")[item]}
+                    data={getContentData("TableStructure")[item] ?? []}
                     type={item}
                     dialect={getConnection().connection.dialect}
                   />
