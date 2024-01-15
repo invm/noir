@@ -2,7 +2,7 @@ use anyhow::Result;
 use md5::{Digest, Md5};
 use rand::{distributions::Alphanumeric, Rng};
 use simplecrypt::{decrypt, encrypt};
-use std::fs;
+use std::{fs, path::PathBuf};
 
 use super::fs::get_app_path;
 
@@ -23,13 +23,17 @@ fn random_key_generator() -> String {
         .collect()
 }
 
+fn get_key_path() -> PathBuf {
+    PathBuf::from(format!("{}/.key", get_app_path().to_str().unwrap()))
+}
+
 pub fn create_app_key() -> Result<()> {
-    let key_path = format!("{}/.key", get_app_path());
+    let key_path = get_key_path();
     Ok(fs::write(key_path, random_key_generator())?)
 }
 
 pub fn get_app_key() -> Result<String> {
-    let key_path = format!("{}/.key", get_app_path());
+    let key_path = get_key_path();
     let key = fs::read(key_path)?;
     let key = String::from_utf8_lossy(&key).to_string();
     Ok(key)

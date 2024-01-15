@@ -4,6 +4,7 @@
 use chrono;
 use log::error;
 use state::AppState;
+use std::path::PathBuf;
 use std::{fs, panic};
 use tauri::{Manager, State};
 use tokio::sync::mpsc;
@@ -28,23 +29,16 @@ struct Payload {
 fn main() {
     tracing_subscriber::fmt::init();
 
-    debug!("setting panic hook");
     panic::set_hook(Box::new(|info| {
         error!("Panicked: {:?}", info);
         let path = get_app_path();
         let ts = chrono::offset::Utc::now();
-        fs::write(
-            format!("{}/error.log", path),
-            format!("{} - {:?}", ts, info),
-        )
-        .unwrap();
+        let dest = format!("{}/error.log", path.to_str().unwrap());
+        fs::write(&PathBuf::from(dest), format!("{} - {:?}", ts, info)).unwrap();
     }));
-    debug!("setting panic hook");
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
     let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);
-
-    debug!("openned mpsc channels");
 
     tauri::Builder::default()
         .manage(AsyncState {

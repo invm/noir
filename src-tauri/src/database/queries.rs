@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::utils::{
     crypto::{decrypt_data, encrypt_data, get_app_key},
     fs::get_app_path,
@@ -40,13 +42,13 @@ pub fn upgrade_database_if_needed(
     Ok(())
 }
 
-pub fn get_db_path() -> String {
+pub fn get_db_path() -> PathBuf {
     let app_path = get_app_path();
-    format!("{}/.app.db", app_path)
+    PathBuf::from(format!("{}/.app.db", app_path.to_str().unwrap()))
 }
 
-pub fn create_app_db(app_path: &str) -> Result<()> {
-    info!("Creating app database at {}", app_path);
+pub fn create_app_db(app_path: PathBuf) -> Result<()> {
+    info!("Creating app database at {}", app_path.to_str().unwrap());
     let db_path = get_db_path();
     let db = AppConnection::open(db_path)?;
 
