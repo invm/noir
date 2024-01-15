@@ -22,13 +22,16 @@
         "all": false,
         "save": true
       },
-      "os": {
+      "fs": {
         "all": true,
         "scope": [
           "$CONFIG/noir",
           "$TEMP",
           "$APP"
         ]
+      },
+      "os": {
+        "all": true
       },
       "clipboard": {
         "all": true
