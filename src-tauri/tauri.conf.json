@@ -23,7 +23,12 @@
         "save": true
       },
       "os": {
-        "all": true
+        "all": true,
+        "scope": [
+          "$CONFIG/noir",
+          "$TEMP",
+          "$APP"
+        ]
       },
       "clipboard": {
         "all": true
