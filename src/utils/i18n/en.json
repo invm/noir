@@ -120,6 +120,11 @@
       "download": "Click here to update and relaod",
       "release_notes": "Release notes",
       "close": "Close"
+    },
+    "error":{
+      "something_went_wrong": "Something went wrong",
+      "stack": "Stack",
+      "relaunch_app": "Relaunch app"
     }
   }
 }
