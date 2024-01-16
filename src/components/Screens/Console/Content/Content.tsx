@@ -17,7 +17,6 @@ export const Content = () => {
         <For each={contentStore.tabs}>
           {(_tab, idx) => (
             <div
-              tabindex={0}
               class="tab tab-md tab-lifted !pr-1 !pl-1"
               classList={{ 'tab-active': contentStore.idx === idx() }}>
               <button class="text-xs p-1 px-3" onClick={() => setContentIdx(idx())}>
@@ -43,7 +42,7 @@ export const Content = () => {
             <QueryTab />
           </Match>
           <Match when={getContent().key === ContentTab.TableStructure}>
-            <TableStructureTab />
+            <TableStructureTab tabIdx={contentStore.idx} />
           </Match>
           <Match when={getContent().key === ContentTab.Data}>
             <DataTab />
