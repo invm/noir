@@ -12,7 +12,6 @@ import { onMount, Switch, Match, createSignal, Show } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
-import { createShortcut } from '@solid-primitives/keyboard';
 import { isDev } from 'solid-js/web';
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
 import { relaunch } from '@tauri-apps/api/process';
@@ -20,21 +19,8 @@ import { t } from 'utils/i18n';
 
 function App() {
   const {
-    connections: {
-      addContentTab,
-      removeContentTab,
-      setContentIdx,
-      restoreConnectionStore,
-      getConnection,
-      updateResultSet,
-      contentStore,
-      loading,
-      setLoading,
-      setNextContentIdx,
-      setPrevContentIdx,
-      setConnectionIdx,
-    },
-    app: { restoreAppStore, setComponent },
+    connections: { restoreConnectionStore, getConnection, updateResultSet, contentStore, loading, setLoading },
+    app: { restoreAppStore },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
@@ -89,38 +75,6 @@ function App() {
 
   if (!isDev) {
     disableMenu();
-  }
-
-  createShortcut(['F1'], () => {
-    setComponent((s) => (s === 1 ? 0 : 1));
-  });
-
-  createShortcut(['Meta', 't'], () => {
-    addContentTab();
-  });
-
-  createShortcut(['Meta', 'w'], () => {
-    removeContentTab(contentStore.idx);
-  });
-
-  createShortcut(['Control', 'Tab'], () => {
-    setNextContentIdx();
-  });
-
-  createShortcut(['Control', 'Shift', 'Tab'], () => {
-    setPrevContentIdx();
-  });
-
-  for (let i = 1; i <= 9; i++) {
-    createShortcut(['Meta', String(i)], () => {
-      setContentIdx(i - 1);
-    });
-  }
-
-  for (let i = 1; i <= 9; i++) {
-    createShortcut(['Control', String(i)], () => {
-      setConnectionIdx(i - 1);
-    });
   }
 
   addEventListener('unhandledrejection', (e) => {

@@ -175,7 +175,6 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
 
   createShortcut(['Control', 'e'], onExecute);
   createShortcut(['Control', 'Enter'], onExecute);
-  createShortcut(['Meta', 'Enter'], onExecute);
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 

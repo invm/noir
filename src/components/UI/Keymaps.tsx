@@ -2,15 +2,15 @@ import { For } from 'solid-js';
 
 const keymaps = [
   { action: 'Help', keys: ['F1'] },
-  { action: 'Execute query', keys: ['Ctrl/Cmd', 'e/Enter'] },
-  { action: 'Select tab', keys: ['Alt/Cmd', 'number'] },
-  { action: 'Select connection tab', keys: ['Ctrl', 'number'] },
-  { action: 'New tab', keys: ['Alt/Cmd', 't'] },
-  { action: 'Close current tab', keys: ['Alt/Cmd', 'w'] },
-  { action: 'Focus on editor', keys: ['Ctrl', 'l'] },
-  { action: 'Format query', keys: ['Ctrl', 'Shift', 'f'] },
-  { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'n/p'] },
-  { action: 'Select next/previous page', keys: ['Ctrl', 'n/p'] },
+  { action: 'Execute query', keys: ['Ctrl', 'E/Enter'] },
+  { action: 'Select tab', keys: ['Ctrl/Cmd', 'number'] },
+  { action: 'Select connection tab', keys: ['Ctrl/Cmd', 'Shift', 'number'] },
+  { action: 'New tab', keys: ['Ctrl/Cmd', 'T'] },
+  { action: 'Close current tab', keys: ['Ctrl/Cmd', 'W'] },
+  { action: 'Focus on editor', keys: ['Ctrl', 'L'] },
+  { action: 'Format query', keys: ['Ctrl', 'Shift', 'F'] },
+  { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'N/P'] },
+  { action: 'Select next/previous page', keys: ['Ctrl', 'N/P'] },
 ];
 
 const Keymaps = () => {
