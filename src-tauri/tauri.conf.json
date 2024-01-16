@@ -15,6 +15,9 @@
       "shell": {
         "open": true
       },
+      "os": {
+        "all": true
+      },
       "process": {
         "relaunch": true
       },
@@ -44,7 +47,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://gist.github.com/invm/ac1f81e3842e13cc9b671c639f023d20"
+        "https://gist.github.com/invm/ac1f81e3842e13cc9b671c639f023d20/raw/"
       ],
       "dialog": false,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE0RkMzMDkxRkU4MjA4QjgKUldTNENJTCtrVEQ4cEJIVjFwVW11cEd2S1VKa3NsUjByQ0VyM2dodktaVWZONkNKUW9qSkRUSmcK"
