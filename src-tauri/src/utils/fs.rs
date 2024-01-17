@@ -1,9 +1,9 @@
-use crate::database::connections::ResultSet;
+use crate::database::types::result::ResultSet;
 use anyhow::Result;
 use serde_json::json;
 use std::{fs, path::PathBuf};
 use tauri::api::{dir::with_temp_dir, path::app_config_dir};
-use tracing::{debug, error};
+use tracing::error;
 
 pub fn get_tmp_dir() -> Result<String> {
     let mut temp_dir = PathBuf::from("");
@@ -45,8 +45,6 @@ pub fn paginate_file(path: &str, page: usize, limit: usize) -> Result<Vec<String
 }
 
 pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
-    // let file_path = temp_dir.join(file_name);
-    debug!("Writing to file: {:?}", path);
     let res = fs::write(&path, content);
     if let Err(res) = res {
         error!("Error: {:?}", res);
@@ -78,7 +76,6 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
 }
 
 pub fn copy_file(src: &str, dest: &str) -> Result<()> {
-    debug!("Copying file: {:?} to {:?}", src, dest);
     let res = fs::copy(src, dest);
     if let Err(res) = res {
         error!("Error: {:?}", res);
@@ -89,7 +86,6 @@ pub fn copy_file(src: &str, dest: &str) -> Result<()> {
 pub fn remove_dir(file_path: &str) -> Result<()> {
     let file_path = PathBuf::from(file_path);
     let dir = file_path.parent().unwrap();
-    debug!("Removing dir: {:?}", dir);
     let res = fs::remove_dir_all(dir);
     if let Err(res) = res {
         error!("Error: {:?}", res);

@@ -19,7 +19,7 @@ const Keymaps = () => {
       <div class="flex flex-col items-end pr-1">
         <For each={keymaps}>
           {({ action }) => (
-            <div class="h-[40px] flex items-center align-middle">
+            <div class="h-[40px] flex items-center align-middle text-base-content">
               <span class="text-lg font-medium">{action}</span>
             </div>
           )}

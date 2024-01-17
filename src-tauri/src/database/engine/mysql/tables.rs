@@ -3,7 +3,7 @@ use futures::try_join;
 use mysql::Pool;
 use serde_json::{json, Value};
 
-use crate::database::connections::InitiatedConnection;
+use crate::database::types::connection::InitiatedConnection;
 
 use super::query::raw_query;
 
@@ -14,9 +14,9 @@ pub async fn get_table_structure(
 ) -> Result<Value> {
     let (columns, constraints, triggers, indices) = try_join!(
         get_columns(conn, pool, Some(&table)),
-        get_constraints(conn, pool, Some(&table)),
+        get_constraints(conn, pool, &table),
         get_triggers(conn, pool, Some(&table)),
-        get_indices(conn, pool, Some(&table)),
+        get_indices(conn, pool, &table),
     )?;
 
     let result = json!({
@@ -66,7 +66,7 @@ pub async fn get_columns(
 pub async fn get_constraints(
     conn: &InitiatedConnection,
     pool: &Pool,
-    table: Option<&str>,
+    table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let mut _conn = pool.get_conn()?;
@@ -76,10 +76,7 @@ pub async fn get_constraints(
                          INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
         schema
     );
-    let query = match table {
-        Some(table) => format!("{} AND TABLE_NAME = '{}'", query, table),
-        None => format!("{};", query),
-    };
+    let query = format!("{} AND TABLE_NAME = '{}'", query, table);
     Ok(raw_query(_conn, query)?)
 }
 
@@ -101,7 +98,7 @@ pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<V
 pub async fn get_indices(
     conn: &InitiatedConnection,
     pool: &Pool,
-    table: Option<&str>,
+    table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let mut _conn = pool.get_conn()?;
@@ -110,10 +107,7 @@ pub async fn get_indices(
                         information_schema.statistics WHERE non_unique = 1 AND table_schema = '{}'",
         schema
     );
-    let query = match table {
-        Some(table) => format!("{} and TABLE_NAME = '{}';", query, table),
-        None => format!("{};", query),
-    };
+    let query = format!("{} and TABLE_NAME = '{}';", query, table);
     Ok(raw_query(_conn, query)?)
 }
 

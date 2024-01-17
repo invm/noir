@@ -23,7 +23,8 @@
       },
       "dialog": {
         "all": false,
-        "save": true
+        "save": true,
+        "open": true
       },
       "clipboard": {
         "all": true

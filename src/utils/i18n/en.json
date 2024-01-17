@@ -15,7 +15,7 @@
         "password": "Password",
         "host": "Host",
         "socket": "Socket path",
-        "file": "Database file",
+        "path": "Database file",
         "db_name": "Default schema",
         "port": "Port"
       }

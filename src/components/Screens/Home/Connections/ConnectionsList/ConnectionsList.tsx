@@ -1,14 +1,15 @@
 import { invoke } from '@tauri-apps/api';
 import { createSignal, For } from 'solid-js';
-import { ConnectionConfig } from 'interfaces';
-import { ConnectionItem } from './ConnectionItem/ConnectionItem';
+import { ConnectionConfig, Mode } from 'interfaces';
+import { ColorCircle } from 'components/UI';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
 
 export const ConnectionsList = () => {
   const {
-    connections: { connections, refreshConnections },
+    messages: { notify },
+    connections: { connections, refreshConnections, addConnectionTab, fetchSchemaEntities, setLoading },
   } = useAppSelector();
   const [focusedConnection, setFocusedConnection] = createSignal<ConnectionConfig>();
 
@@ -20,23 +21,65 @@ export const ConnectionsList = () => {
   const modal_id = 'actions-menu';
   const { show } = useContextMenu({ id: menu_id, props: { id: '' } });
 
+  const onConnect = async (config: ConnectionConfig) => {
+    setLoading(true);
+    try {
+      await invoke('init_connection', { config });
+      const { triggers, columns, routines, tables, schemas, views } = await fetchSchemaEntities(
+        config.id,
+        config.dialect
+      );
+      await addConnectionTab({
+        id: config.id,
+        label: config.name,
+        selectedSchema: config.schema,
+        definition: { [config.schema]: { columns, routines, triggers, tables, views } },
+        schemas,
+        connection: config,
+      });
+    } catch (error) {
+      notify(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div class="h-full p-2 pt-5 bg-base-300">
       <h3 class="px-2 text-xl font-bold">{t('connections_list.title')}</h3>
       <div class="divider my-0"></div>
       <ul class="grid grid-cols-1 gap-1">
         <For each={connections}>
-          {(connection) => (
-            <>
-              <li
-                onContextMenu={(e) => {
-                  setFocusedConnection(connection);
-                  show(e);
-                }}>
-                <ConnectionItem {...{ connection }} />
-              </li>
-            </>
-          )}
+          {(connection) => {
+            const mode = connection.mode;
+            const creds = connection.credentials;
+            const connectionString =
+              mode === Mode.Host ? creds.host + ':' + creds.port : mode === Mode.File ? creds.path : creds.socket;
+
+            return (
+              <>
+                <li
+                  onContextMenu={(e) => {
+                    setFocusedConnection(connection);
+                    show(e);
+                  }}>
+                  <div
+                    onClick={() => onConnect(connection)}
+                    class="hover:bg-base-100 cursor-pointer rounded-md flex items-center justify-between px-2 py-1">
+                    <div>
+                      <div class="flex items-center">
+                        <div class="flex pr-3">
+                          <ColorCircle color={connection.color} />
+                        </div>
+                        <h5 class="text-md font-bold">{connection.name}</h5>
+                      </div>
+                      <p class="text-sm">{connectionString}</p>
+                    </div>
+                  </div>
+                </li>
+              </>
+            );
+          }}
         </For>
       </ul>
       <Menu id={menu_id} animation={animation.fade} theme={'dark'}>

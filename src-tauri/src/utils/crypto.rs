@@ -1,18 +1,17 @@
 use anyhow::Result;
 use md5::{Digest, Md5};
 use rand::{distributions::Alphanumeric, Rng};
-use simplecrypt::{decrypt, encrypt};
 use std::{fs, path::PathBuf};
 
 use super::fs::get_app_path;
 
-pub fn encrypt_data(data: &str, key: &str) -> Vec<u8> {
-    return encrypt(data.as_bytes(), key.as_bytes());
+pub fn encrypt_data(data: &str, _key: &str) -> Vec<u8> {
+    return data.as_bytes().to_vec();
 }
 
-pub fn decrypt_data(data: &Vec<u8>, key: &str) -> Result<Vec<u8>> {
-    let decrypted = decrypt(data, key.as_bytes())?;
-    Ok(decrypted)
+pub fn decrypt_data(data: &Vec<u8>, _key: &str) -> Result<String> {
+    let decrypted = data;
+    Ok(String::from_utf8_lossy(decrypted).to_string())
 }
 
 fn random_key_generator() -> String {
@@ -24,7 +23,7 @@ fn random_key_generator() -> String {
 }
 
 fn get_key_path() -> PathBuf {
-    PathBuf::from(format!("{}/.key", get_app_path().to_str().unwrap()))
+    PathBuf::from(format!("{}/._", get_app_path().to_str().unwrap()))
 }
 
 pub fn create_app_key() -> Result<()> {
@@ -64,7 +63,7 @@ mod test {
         let encrypted = encrypt_data(&data, &pass);
         assert_ne!(data, String::from_utf8_lossy(&encrypted));
         let decrypted = decrypt_data(&encrypted, &pass)?;
-        assert_eq!(data, String::from_utf8_lossy(&decrypted));
+        assert_eq!(data, decrypted);
         Ok(())
     }
 }

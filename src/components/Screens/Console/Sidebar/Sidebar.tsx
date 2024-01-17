@@ -114,7 +114,7 @@ export const Sidebar = () => {
 
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
-      <div class="pb-2 rounded-md flex justify-center items-center">
+      <div class="pb-2 rounded-md flex justify-between items-center">
         <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.select_schema')}>
           <select
             id="schema"
@@ -130,29 +130,31 @@ export const Sidebar = () => {
             </For>
           </select>
         </div>
-        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>
-          <button onClick={showProcessList} disabled={loading()} class="ml-2 btn btn-xs">
-            <Switch>
-              <Match when={loading()}>
-                <span class="loading text-primary loading-bars loading-xs"></span>
-              </Match>
-              <Match when={!loading()}>
-                <Terminal />
-              </Match>
-            </Switch>
-          </button>
-        </div>
-        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.refresh_schema')}>
-          <button onClick={refreshEntities} disabled={loading()} class="ml-2 btn btn-xs">
-            <Switch>
-              <Match when={loading()}>
-                <span class="loading text-primary loading-bars loading-xs"></span>
-              </Match>
-              <Match when={!loading()}>
-                <Refresh />
-              </Match>
-            </Switch>
-          </button>
+        <div class="flex">
+          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>
+            <button onClick={showProcessList} disabled={loading()} class="ml-2 btn btn-xs">
+              <Switch>
+                <Match when={loading()}>
+                  <span class="loading text-primary loading-bars loading-xs"></span>
+                </Match>
+                <Match when={!loading()}>
+                  <Terminal />
+                </Match>
+              </Switch>
+            </button>
+          </div>
+          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.refresh_schema')}>
+            <button onClick={refreshEntities} disabled={loading()} class="ml-2 btn btn-xs">
+              <Switch>
+                <Match when={loading()}>
+                  <span class="loading text-primary loading-bars loading-xs"></span>
+                </Match>
+                <Match when={!loading()}>
+                  <Refresh />
+                </Match>
+              </Switch>
+            </button>
+          </div>
         </div>
       </div>
       <div class="overflow-y-auto h-full pb-10 pr-2">

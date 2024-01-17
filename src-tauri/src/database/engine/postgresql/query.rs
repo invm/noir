@@ -2,11 +2,8 @@ use anyhow::Result;
 use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
 use serde_json::Value;
-use tracing::debug;
-
 use crate::{
-    database::connections::{ResultSet, TableMetadata},
-    utils::error::Error,
+    utils::error::Error, database::types::result::{ResultSet, TableMetadata},
 };
 
 use super::utils::row_to_object;
@@ -32,12 +29,10 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         rows.push(row_to_object(row)?);
     }
     let affected_rows = it.rows_affected().unwrap_or(0);
-    let warnings = 0;
-    let info = "";
     let set = ResultSet {
         affected_rows,
-        warnings,
-        info: info.to_string(),
+        warnings: 0,
+        info: "".to_string(),
         rows,
         table: TableMetadata {
             table: String::from(""),
@@ -52,7 +47,6 @@ pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
     let mut conn = pool.get().await?;
     let tx = conn.transaction().await?;
     for q in queries {
-        debug!(?q, "Executing query");
         let params: Vec<String> = vec![];
         match tx.execute_raw(q, &params).await {
             Ok(..) => {}

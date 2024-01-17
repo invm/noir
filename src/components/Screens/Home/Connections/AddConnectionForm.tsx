@@ -4,7 +4,7 @@ import { zodSchema } from 'solid-form-handler/zod';
 import { t } from 'i18next';
 import { createSignal, Match, onMount, Show, Switch } from 'solid-js';
 
-import { Alert, TextInput, Select, ColorCircle, FileInput } from 'components/UI';
+import { Alert, TextInput, Select, ColorCircle, Label } from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
@@ -18,6 +18,7 @@ import {
 import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
+import { open } from '@tauri-apps/api/dialog';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -50,7 +51,7 @@ export const ConnectionFormSchema = z.object({
     .max(MAX_LENGTH_STR, messages.length)
     .optional()
     .or(z.literal('')),
-  file: z
+  path: z
     .string()
     .min(MIN_LENGTH_STR, messages.length)
     .max(MAX_LENGTH_STR, messages.length)
@@ -70,7 +71,7 @@ export const ConnectionFormSchema = z.object({
 type ConnectionForm = z.infer<typeof ConnectionFormSchema>;
 
 export const formToConnectionStruct = (form: ConnectionForm) => {
-  const { name, color, dialect, mode, socket, file, ...credentials } = form;
+  const { name, color, dialect, mode, socket, path, ...credentials } = form;
 
   return {
     name,
@@ -81,7 +82,7 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
       ...credentials,
       port: String(credentials.port),
       ...(mode === Mode.Socket ? { socket } : {}),
-      ...(dialect === Dialect.Sqlite ? { file } : {}),
+      ...(dialect === Dialect.Sqlite ? { path } : {}),
     },
   };
 };
@@ -89,16 +90,16 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
 export * from './AddConnectionForm';
 
 const defaultValues = {
-  name: '',
+  name: 'bs',
   dialect: Dialect.Mysql,
   port: 3306,
   color: 'orange',
   mode: AvailableModes[Dialect.Mysql][0],
-  file: '',
+  path: '',
   host: 'localhost',
   user: 'root',
-  password: '',
-  db_name: '',
+  password: 'sd',
+  db_name: 'sd',
 };
 
 const AddConnectionForm = () => {
@@ -165,6 +166,9 @@ const AddConnectionForm = () => {
                 if (formData().mode === Mode.Socket) {
                   setFieldValue('socket', SocketPathDefaults[formData().dialect]);
                 }
+                if (formData().dialect === Dialect.Sqlite) {
+                  setFieldValue('mode', Mode.File);
+                }
               }}
             />
           </div>
@@ -187,7 +191,19 @@ const AddConnectionForm = () => {
           <div class="col-span-2">
             <Switch>
               <Match when={formData().dialect === Dialect.Sqlite}>
-                <FileInput label={t('add_connection_form.labels.file')} formHandler={formHandler} name="file" />
+                <div class="my-1 block">
+                  <Label for='path' value={t('add_connection_form.labels.path')} />
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-accent"
+                  onClick={async () => {
+                    const path = await open({ multiple: false, title: 'Select sqlite file' });
+                    if (!path) return;
+                    formHandler.setFieldValue('path', path);
+                  }}>
+                  <span class="p-2 border-end">{t('file_input.choose_file')}</span>
+                </button>
               </Match>
               <Match when={formData().dialect !== Dialect.Sqlite}>
                 <TextInput
@@ -302,6 +318,9 @@ const AddConnectionForm = () => {
               </div>
             </div>
           </div>
+        </Show>
+        <Show when={formData().dialect === Dialect.Sqlite}>
+          <span class="text-md font-bold text-accent h-[40px] py-2">{formData().path}</span>
         </Show>
         <div class="py-3 h-[50px]">
           <Show when={Object.keys(getFormErrors()).length}>

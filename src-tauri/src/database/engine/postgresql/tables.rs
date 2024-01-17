@@ -3,7 +3,7 @@ use deadpool_postgres::Pool;
 use futures::try_join;
 use serde_json::{json, Value};
 
-use crate::database::connections::InitiatedConnection;
+use crate::database::types::connection::InitiatedConnection;
 
 use super::query::raw_query;
 
@@ -14,9 +14,9 @@ pub async fn get_table_structure(
 ) -> Result<Value> {
     let (columns, constraints, triggers, indices) = try_join!(
         get_columns(conn, pool, Some(&table)),
-        get_constraints(conn, pool, Some(&table)),
+        get_constraints(conn, pool, &table),
         get_triggers(conn, pool, Some(&table)),
-        get_indices(conn, pool, Some(&table)),
+        get_indices(conn, pool, &table),
     )?;
 
     let result = json!({
@@ -69,7 +69,7 @@ pub async fn get_columns(
 pub async fn get_constraints(
     conn: &InitiatedConnection,
     pool: &Pool,
-    table: Option<&str>,
+    table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!(
@@ -81,10 +81,7 @@ pub async fn get_constraints(
         WHERE constraint_type = 'PRIMARY KEY' and c.table_schema = '{}'",
         schema
     );
-    let query = match table {
-        Some(table) => format!("{} AND c.table_name = '{}'", query, table),
-        None => format!("{};", query),
-    };
+    let query = format!("{} AND c.table_name = '{}'", query, table);
     Ok(raw_query(pool.clone(), &query).await?)
 }
 
@@ -108,7 +105,7 @@ pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<V
 pub async fn get_indices(
     conn: &InitiatedConnection,
     pool: &Pool,
-    table: Option<&str>,
+    table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!(
@@ -116,10 +113,7 @@ pub async fn get_indices(
                         pg_indexes WHERE schemaname = '{}'",
         schema
     );
-    let query = match table {
-        Some(table) => format!("{} and tablename = '{}';", query, table),
-        None => format!("{};", query),
-    };
+    let query = format!("{} and tablename = '{}';", query, table);
     Ok(raw_query(pool.clone(), &query).await?)
 }
 

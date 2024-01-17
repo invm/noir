@@ -5,17 +5,17 @@ use crate::utils::{
     fs::get_app_path,
 };
 use anyhow::Result;
-use rusqlite::{named_params, Connection as AppConnection};
+use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection, Error};
 use tracing::{error, info};
 use uuid::Uuid;
 
-use super::connections::{ConnectionConfig, Credentials, Dialect, Mode};
+use super::types::config::{ConnectionConfig, Credentials, Dialect, Mode};
 
 const CURRENT_DB_VERSION: u32 = 1;
 
 /// Initializes the database connection, creating the .sqlite file if needed, and upgrading the database
 /// if it's out of date.
-pub fn initialize_database() -> Result<AppConnection, rusqlite::Error> {
+pub fn initialize_database() -> Result<AppConnection, Error> {
     let db_path = get_db_path();
     let mut db = AppConnection::open(db_path)?;
 
@@ -32,7 +32,7 @@ pub fn initialize_database() -> Result<AppConnection, rusqlite::Error> {
 pub fn upgrade_database_if_needed(
     db: &mut AppConnection,
     existing_version: u32,
-) -> Result<(), rusqlite::Error> {
+) -> Result<(), Error> {
     if existing_version < CURRENT_DB_VERSION {
         db.pragma_update(None, "journal_mode", "WAL")?;
         let tx = db.transaction()?;
@@ -122,9 +122,10 @@ pub fn get_all_connections(db: &AppConnection) -> Result<Vec<ConnectionConfig>> 
     let mut statement = db.prepare("SELECT * FROM connections")?;
     let mut rows = statement.query([])?;
     let mut items = Vec::new();
+    let key = get_app_key()?;
     while let Some(row) = rows.next()? {
         let credentials = row.get("credentials")?;
-        let data = String::from_utf8(decrypt_data(&credentials, &get_app_key()?)?)?;
+        let data = decrypt_data(&credentials, &key)?;
         let credentials: Credentials = serde_json::from_str(&data)?;
         let dialect: Dialect = row.get("dialect")?;
         let mode: Mode = row.get("mode")?;

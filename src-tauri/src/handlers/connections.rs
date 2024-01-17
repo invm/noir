@@ -1,7 +1,8 @@
 use crate::{
     database::{
-        connections::{ConnectionConfig, Credentials, Dialect, Mode},
+        init_conn::init_conn,
         queries,
+        types::config::{ConnectionConfig, Credentials, Dialect, Mode},
     },
     state::ServiceAccess,
     utils::error::{CommandResult, Error},
@@ -20,6 +21,7 @@ pub fn add_connection(
 ) -> CommandResult<()> {
     info!(?name, ?dialect, ?mode, ?color, "add_connection");
     let conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    info!(?conn, "add_connection");
     app_handle
         .db(|db| queries::add_connection(db, &conn))
         .map_err(Error::from)
@@ -35,8 +37,8 @@ pub async fn test_connection(
     color: &str,
 ) -> CommandResult<()> {
     info!(?name, ?dialect, ?mode, ?color, "test_connection");
-    let mut conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
-    let conn = conn.init().await?;
+    let cfg = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    let conn = init_conn(cfg).await?;
     app_handle.connect(&conn.clone())?;
     let id = conn.config.id.clone().to_string();
     app_handle.disconnect(&id)?;
@@ -63,10 +65,10 @@ pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionCon
 #[command]
 pub async fn init_connection(
     mut app_handle: AppHandle,
-    mut config: ConnectionConfig,
+    config: ConnectionConfig,
 ) -> CommandResult<()> {
     info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
-    let conn = config.init().await?;
+    let conn = init_conn(config).await?;
     app_handle.connect(&conn)?;
     Ok(())
 }
@@ -90,4 +92,3 @@ pub async fn set_schema(
     app_handle.db(|db| queries::update_connection_schema(db, &conn_id, &schema))?;
     Ok(app_handle.update_connection(conn)?)
 }
-

@@ -17,11 +17,10 @@ path = "src/bin/main.rs"
 tauri-build = { version = "1.5.1", features = [] }
 
 [dependencies]
-tauri = { version = "1.5.4", features = [ "os-all", "updater", "process-relaunch", "clipboard-all", "dialog-save", "shell-open"] }
+tauri = { version = "1.5.4", features = [ "dialog-open", "os-all", "updater", "process-relaunch", "clipboard-all", "dialog-save", "shell-open"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
-rusqlite = { version = "0.29.0", features = ["bundled", "uuid"] }
-simplecrypt = "1.0.2"
+rusqlite = { version = "0.30.0", features = ["bundled", "uuid", "serde_json", "chrono"] }
 anyhow = "1.0.71"
 log = "0.4.19"
 env_logger = "0.10.0"
@@ -37,11 +36,12 @@ futures = "0.3.28"
 tokio = { version = "1.32.0", features = ["full"] }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
-sqlparser = "0.38.0"
+sqlparser = "0.41.0"
 md-5 = "0.10.6"
 chrono = "0.4.31"
 postgres = { version = "0.19.7", features = ["array-impls", "with-serde_json-1", "with-chrono-0_4"] }
 deadpool-postgres = "0.12.1"
+deadpool-sqlite = "0.7.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

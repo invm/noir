@@ -20,6 +20,14 @@ pub enum Error {
     MysqlUrlError(#[from] mysql::UrlError),
     #[error("Postgresql error: {0}")]
     Postgresql(#[from] postgres::error::Error),
+    #[error("Sqlite error: {0}")]
+    Sqlite(#[from] rusqlite::Error),
+    #[error("{0}")]
+    DeadpoolSqliteInteract(#[from] deadpool_sqlite::InteractError),
+    #[error("{0}")]
+    DeadpoolSqlitePool(#[from] deadpool_sqlite::PoolError),
+    #[error("Create pool error: {0}")]
+    DeadpoolSqliteCreatePool(#[from] deadpool_sqlite::CreatePoolError),
     #[error("{0}")]
     DeadpoolPostgresqlPoolError(#[from] deadpool_postgres::PoolError),
     #[error("Create pool error: {0}")]

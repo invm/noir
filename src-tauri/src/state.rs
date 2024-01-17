@@ -1,11 +1,11 @@
 use anyhow::Result;
-use rusqlite::Connection;
+use deadpool_sqlite::rusqlite::Connection;
 use std::collections::HashMap;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::{mpsc, Mutex};
 use tracing::error;
 
-use crate::{database::connections::InitiatedConnection, queues::query::QueryTask};
+use crate::{database::types::connection::InitiatedConnection, queues::query::QueryTask};
 
 pub struct AppState {
     pub db: std::sync::Mutex<Option<Connection>>,
@@ -102,4 +102,4 @@ impl ServiceAccess for AppHandle {
         }
         Ok(())
     }
-}
+} 

@@ -4,7 +4,7 @@ use mysql::{from_row, Pool, PooledConn, Row, TxOpts};
 use serde_json::Value;
 use tracing::info;
 
-use crate::database::connections::{ResultSet, TableMetadata};
+use crate::database::types::result::{ResultSet, TableMetadata};
 use crate::utils::error::Error;
 
 use super::utils::row_to_object;

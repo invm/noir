@@ -1,5 +1,7 @@
 import { Dialect, DialectType, Row, Table } from 'interfaces';
 
+export const log = (msg: string) => console.log(`[${new Date().toISOString()}] - ${msg}`);
+
 export const randomId = () => {
   const length = 36;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -28,9 +30,8 @@ export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   };
 };
 
-// TODO: handle all dialects
 export const columnsToTables = (allColumns: Row[], views: Row[], dialect: DialectType) => {
-  if (dialect === Dialect.Mysql || dialect === Dialect.Postgresql) {
+  if ([Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite].includes(dialect)) {
     const schema = allColumns.reduce((acc, col) => {
       const table_name = getAnyCase(col, 'table_name');
       const column_name = getAnyCase(col, 'column_name');

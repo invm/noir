@@ -30,6 +30,7 @@ pub async fn enqueue_query(
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
+    // ignore sqlparser when dialect is sqlite and statements contain pragma
     let statements: Result<Vec<String>, Error> = match Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
             .unwrap()
@@ -60,7 +61,7 @@ pub async fn enqueue_query(
                 if enqueued_ids.contains(&id) {
                     continue;
                 }
-                if auto_limit && !statement.to_lowercase().contains("limit") {
+                if auto_limit && !statement.to_lowercase().contains("limit") && statement.to_lowercase().contains("select") {
                     statement = format!("{} LIMIT 1000", statement);
                 }
                 let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx, table.clone());
