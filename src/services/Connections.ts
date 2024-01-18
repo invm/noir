@@ -211,6 +211,7 @@ export const ConnectionsService = () => {
   }, INTERVAL);
 
   const addConnectionTab = async (tab: ConnectionTab) => {
+    if (connectionStore.tabs.length === 10) return;
     if (connectionStore.tabs.find((t) => t.id === tab.id)) {
       setConnectionStore('idx', connectionStore.tabs.findIndex((t) => t.id === tab.id) + 1);
       return;
@@ -271,6 +272,7 @@ export const ConnectionsService = () => {
   };
 
   const addContentTab = (tab?: ContentTabType) => {
+    if (contentStore.tabs.length === 10) return;
     setContentStore(
       produce((s) => {
         s.tabs.push(tab ?? newContentTab('Query', ContentTab.Query));

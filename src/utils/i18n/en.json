@@ -65,6 +65,10 @@
         "csv": "Export to CSV",
         "json": "Export to JSON",
         "total_rows": "Total rows: "
+      },
+      "search": {
+        "placeholder": "Value to search for in {{table}}",
+        "clear": "Clear search"
       }
     },
     "sidebar": {

@@ -62,6 +62,7 @@ const getColumnDefs = (
 
       return {
         editable: !key && columns.length > 0,
+        singleClickEdit: true,
         // checkboxSelection: _i === 0,
         resizable: true,
         cellRenderer: (p: PopupCellRendererProps) => <PopupCellRenderer {...p} editable={editable} setCode={setCode} />,
@@ -284,13 +285,15 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           onPageSizeChange,
           onBtnExport,
           count: data()?.count ?? 0,
+          table: props.table ?? '',
+          columns: data()?.columns ?? [],
         }}
       />
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <Switch>
           <Match when={data()?.notReady}>
             <div class="flex items-center justify-center h-full">
-            <Keymaps />
+              <Keymaps />
             </div>
           </Match>
           <Match when={!data()?.notReady}>
@@ -303,6 +306,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
               rowData={data()?.rows}
               defaultColDef={defaultColDef}
               enableCellChangeFlash={true}
+              enableCellTextSelection={true}
               undoRedoCellEditing={true}
               suppressExcelExport={true}
               suppressCsvExport={false}

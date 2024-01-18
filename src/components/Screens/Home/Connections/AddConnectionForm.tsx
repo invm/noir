@@ -87,8 +87,6 @@ export const formToConnectionStruct = (form: ConnectionForm) => {
   };
 };
 
-export * from './AddConnectionForm';
-
 const defaultValues = {
   name: 'bs',
   dialect: Dialect.Mysql,
