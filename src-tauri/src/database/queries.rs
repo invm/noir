@@ -47,8 +47,9 @@ pub fn get_db_path() -> PathBuf {
     PathBuf::from(format!("{}/.app.db", app_path.to_str().unwrap()))
 }
 
-pub fn create_app_db(app_path: PathBuf) -> Result<()> {
-    info!("Creating app database at {}", app_path.to_str().unwrap());
+pub fn create_app_db() -> Result<()> {
+    let db_path = get_db_path();
+    info!("Creating app database at {}", db_path.to_str().unwrap());
     let db_path = get_db_path();
     let db = AppConnection::open(db_path)?;
 

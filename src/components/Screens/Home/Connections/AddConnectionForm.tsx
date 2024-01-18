@@ -18,7 +18,7 @@ import {
 import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
-import { open } from '@tauri-apps/api/dialog';
+import { open, save } from '@tauri-apps/api/dialog';
 
 const MIN_LENGTH_STR = 2;
 const MAX_LENGTH_STR = 255;
@@ -146,12 +146,12 @@ const AddConnectionForm = () => {
 
   return (
     <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-100">
-      <form class="flex max-w-lg flex-col gap-1" autocomplete="off" onSubmit={submit}>
+      <form class="flex w-[60%] flex-col gap-1" autocomplete="off" onSubmit={submit}>
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
-        <div class="grid grid-cols-6 gap-3">
-          <div class={formData().dialect === Dialect.Sqlite ? 'col-span-4' : 'col-span-2'}>
+        <div class="grid grid-cols-12 gap-3">
+          <div class="col-span-4">
             <Select
               id="dialect"
               name="dialect"
@@ -173,7 +173,7 @@ const AddConnectionForm = () => {
             />
           </div>
           <Show when={formData().dialect !== Dialect.Sqlite}>
-            <div class="col-span-2">
+            <div class="col-span-4">
               <Select
                 id="mode"
                 name="mode"
@@ -188,35 +188,50 @@ const AddConnectionForm = () => {
               />
             </div>
           </Show>
-          <div class="col-span-2">
-            <Switch>
-              <Match when={formData().dialect === Dialect.Sqlite}>
-                <div class="my-1 block">
-                  <Label for='path' value={t('add_connection_form.labels.path')} />
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-accent"
-                  onClick={async () => {
-                    const path = await open({ multiple: false, title: 'Select sqlite file' });
-                    if (!path) return;
-                    formHandler.setFieldValue('path', path);
-                  }}>
-                  <span class="p-2 border-end">{t('file_input.choose_file')}</span>
-                </button>
-              </Match>
-              <Match when={formData().dialect !== Dialect.Sqlite}>
-                <TextInput
-                  label={t('add_connection_form.labels.db_name')}
-                  min={1}
-                  max={255}
-                  name="db_name"
-                  id="db_name"
-                  formHandler={formHandler}
-                />
-              </Match>
-            </Switch>
-          </div>
+          <Show when={formData().dialect !== Dialect.Sqlite}>
+            <div class="col-span-4">
+              <TextInput
+                label={t('add_connection_form.labels.db_name')}
+                min={1}
+                max={255}
+                name="db_name"
+                id="db_name"
+                formHandler={formHandler}
+              />
+            </div>
+          </Show>
+          <Show when={formData().dialect === Dialect.Sqlite}>
+            <div class="col-span-4">
+              <div class="my-1 block">
+                <Label for="path" value={t('add_connection_form.labels.path')} />
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-block btn-accent text-xs"
+                onClick={async () => {
+                  const path = await open({ multiple: false, title: 'Select sqlite file' });
+                  if (!path) return;
+                  formHandler.setFieldValue('path', path);
+                }}>
+                <span class="p-2 border-end">{t('file_input.choose_file')}</span>
+              </button>
+            </div>
+            <div class="col-span-4">
+              <div class="my-1 block">
+                <Label for="path" value={t('add_connection_form.labels.new_path')} />
+              </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-block btn-secondary text-xs"
+                onClick={async () => {
+                  const path = await save({ title: 'Select database location' });
+                  if (!path) return;
+                  formHandler.setFieldValue('path', path + '.db');
+                }}>
+                <span class="p-2 border-end">{t('file_input.choose_file')}</span>
+              </button>
+            </div>
+          </Show>
         </div>
         <Show when={formData().dialect !== Dialect.Sqlite}>
           <div class="grid grid-cols-6 gap-3">

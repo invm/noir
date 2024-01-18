@@ -1,41 +1,21 @@
 use anyhow::Result;
+use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use md5::{Digest, Md5};
-use rand::{distributions::Alphanumeric, Rng};
-use std::{fs, path::PathBuf};
 
-use super::fs::get_app_path;
+use super::fs::read_key;
 
-pub fn encrypt_data(data: &str, _key: &str) -> Vec<u8> {
-    return data.as_bytes().to_vec();
+pub fn encrypt_data(data: &str, key: &MagicCrypt256) -> String {
+    return key.encrypt_str_to_base64(data);
 }
 
-pub fn decrypt_data(data: &Vec<u8>, _key: &str) -> Result<String> {
-    let decrypted = data;
-    Ok(String::from_utf8_lossy(decrypted).to_string())
+pub fn decrypt_data(data: &String, key: &MagicCrypt256) -> Result<String> {
+    Ok(key.decrypt_base64_to_string(&data)?)
 }
 
-fn random_key_generator() -> String {
-    rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(32)
-        .map(char::from)
-        .collect()
-}
-
-fn get_key_path() -> PathBuf {
-    PathBuf::from(format!("{}/._", get_app_path().to_str().unwrap()))
-}
-
-pub fn create_app_key() -> Result<()> {
-    let key_path = get_key_path();
-    Ok(fs::write(key_path, random_key_generator())?)
-}
-
-pub fn get_app_key() -> Result<String> {
-    let key_path = get_key_path();
-    let key = fs::read(key_path)?;
+pub fn get_app_key() -> Result<MagicCrypt256> {
+    let key = read_key()?;
     let key = String::from_utf8_lossy(&key).to_string();
-    Ok(key)
+    Ok(new_magic_crypt!(key, 256))
 }
 
 pub fn md5_hash(data: &str) -> String {
@@ -50,18 +30,14 @@ mod test {
     use anyhow::Result;
 
     use crate::utils::crypto::{decrypt_data, encrypt_data};
-
-    fn get_input() -> [std::string::String; 2] {
-        let data = String::from("{\"asd\":\"bs\",\"key\":\"val\",\"num\":4}");
-        let pass = "password".to_string();
-        return [data, pass];
-    }
+    use magic_crypt::new_magic_crypt;
 
     #[test]
     fn test_encrypt() -> Result<()> {
-        let [data, pass] = get_input();
+        let data = String::from("{\"asd\":\"bs\",\"key\":\"val\",\"num\":4}");
+        let pass = new_magic_crypt!("magickey", 256);
         let encrypted = encrypt_data(&data, &pass);
-        assert_ne!(data, String::from_utf8_lossy(&encrypted));
+        assert_ne!(data, encrypted);
         let decrypted = decrypt_data(&encrypted, &pass)?;
         assert_eq!(data, decrypted);
         Ok(())

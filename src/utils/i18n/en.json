@@ -16,6 +16,7 @@
         "host": "Host",
         "socket": "Socket path",
         "path": "Database file",
+        "new_path": "New database file",
         "db_name": "Default schema",
         "port": "Port"
       }
@@ -107,7 +108,8 @@
       "grid": "Grid"
     },
     "file_input": {
-      "choose_file": "Choose file"
+      "choose_file": "Choose file",
+      "new_file": "New file"
     },
     "table_structure_tab": {
       "columns": "Columns",

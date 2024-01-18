@@ -5,21 +5,16 @@ use tauri::{AppHandle, Manager, State};
 use tokio::sync::{mpsc, Mutex};
 use tracing::error;
 
-use crate::{
-    database::types::{config::ConnectionConfig, connection::InitiatedConnection},
-    queues::query::QueryTask,
-};
+use crate::{database::types::connection::InitiatedConnection, queues::query::QueryTask};
 
 pub struct AppState {
     pub db: std::sync::Mutex<Option<Connection>>,
     pub connections: std::sync::Mutex<HashMap<String, InitiatedConnection>>,
-    pub all_connections: std::sync::Mutex<Vec<ConnectionConfig>>,
 }
 
 pub struct AsyncState {
     pub tasks: Mutex<mpsc::Sender<QueryTask>>,
     pub connections: Mutex<HashMap<String, InitiatedConnection>>,
-    pub all_connections: std::sync::Mutex<Vec<ConnectionConfig>>,
 }
 
 pub trait ServiceAccess {
@@ -35,7 +30,6 @@ pub trait ServiceAccess {
     fn update_connection(&self, conn: InitiatedConnection) -> Result<()>;
     fn disconnect(&mut self, conn_id: &str) -> Result<()>;
     fn connect(&mut self, conn: &InitiatedConnection) -> Result<()>;
-    fn get_all_connections(&mut self) -> Result<Vec<ConnectionConfig>>;
 }
 
 impl ServiceAccess for AppHandle {
@@ -107,18 +101,5 @@ impl ServiceAccess for AppHandle {
             Err(e) => error!("Error: {}", e),
         }
         Ok(())
-    }
-
-    fn get_all_connections(&mut self) -> Result<Vec<ConnectionConfig>> {
-        let app_state: State<AppState> = self.state();
-        let mut binding = app_state.all_connections.lock();
-        let connection_guard = binding.as_mut();
-        match connection_guard {
-            Ok(connection_guard) => Ok(connection_guard.clone()),
-            Err(e) => {
-                error!("Error: {}", e);
-                Ok(vec![])
-            }
-        }
     }
 }

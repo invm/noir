@@ -3,7 +3,6 @@
 
 use chrono;
 use log::error;
-use noir::database::queries::get_all_connections;
 use state::AppState;
 use std::path::PathBuf;
 use std::{fs, panic};
@@ -44,12 +43,10 @@ fn main() {
         .manage(AsyncState {
             tasks: Mutex::new(async_proc_input_tx),
             connections: Default::default(),
-            all_connections: Default::default(),
         })
         .manage(AppState {
             db: Default::default(),
             connections: Default::default(),
-            all_connections: Default::default(),
         })
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -65,8 +62,6 @@ fn main() {
 
             let app_state: State<AppState> = handle.state();
             let db = initialize_database().expect("Database initialize should succeed");
-            let all_connections = get_all_connections(&db)?;
-            *app_state.all_connections.lock().unwrap() = all_connections;
             *app_state.db.lock().unwrap() = Some(db);
 
             tauri::async_runtime::spawn(async move {

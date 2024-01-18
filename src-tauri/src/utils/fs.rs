@@ -1,9 +1,31 @@
-use crate::database::types::result::ResultSet;
+use crate::database::{queries::get_db_path, types::result::ResultSet};
 use anyhow::Result;
+use fs::metadata;
 use serde_json::json;
 use std::{fs, path::PathBuf};
 use tauri::api::{dir::with_temp_dir, path::app_config_dir};
 use tracing::error;
+
+use rand::{distributions::Alphanumeric, Rng};
+
+fn get_key_path() -> PathBuf {
+    PathBuf::from(format!("{}/._", get_app_path().to_str().unwrap()))
+}
+
+pub fn read_key() -> Result<Vec<u8>> {
+    let key_path = get_key_path();
+    Ok(fs::read(key_path)?)
+}
+
+pub fn create_app_key() -> Result<()> {
+    let key_path = get_key_path();
+    let key: String = rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(32)
+        .map(char::from)
+        .collect();
+    Ok(fs::write(key_path, key)?)
+}
 
 pub fn get_tmp_dir() -> Result<String> {
     let mut temp_dir = PathBuf::from("");
@@ -25,11 +47,14 @@ pub fn get_app_path() -> PathBuf {
     path
 }
 
-pub fn check_if_app_dir_exists(app_path: &PathBuf) -> bool {
-    fs::metadata(app_path).is_ok()
+pub fn is_appdir_populated() -> bool {
+    let key_path = get_key_path();
+    let db_path = get_db_path();
+    metadata(key_path).is_ok() && metadata(db_path).is_ok()
 }
 
-pub fn create_app_dir(dir: &PathBuf) -> Result<()> {
+pub fn create_app_dir() -> Result<()> {
+    let dir = get_app_path();
     Ok(fs::create_dir_all(dir)?)
 }
 

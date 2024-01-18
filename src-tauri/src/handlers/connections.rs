@@ -55,9 +55,9 @@ pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()>
 }
 
 #[command]
-pub fn get_connections(mut app_handle: AppHandle) -> CommandResult<Vec<ConnectionConfig>> {
+pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionConfig>> {
     info!("get_connections");
-    Ok(app_handle.get_all_connections()?)
+    app_handle.db(queries::get_all_connections).map_err(Error::from)
 }
 
 #[command]

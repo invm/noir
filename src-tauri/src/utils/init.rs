@@ -1,18 +1,16 @@
 use anyhow::Result;
+use tracing::debug;
 
-use crate::database::queries::create_app_db;
+use crate::{database::queries::create_app_db, utils::fs::create_app_key};
 
-use super::{
-    crypto::create_app_key,
-    fs::{check_if_app_dir_exists, create_app_dir, get_app_path},
-};
+use super::fs::{create_app_dir, is_appdir_populated};
 
 pub fn init_app() -> Result<()> {
-    let app_path = get_app_path();
-    if !check_if_app_dir_exists(&app_path) {
-        create_app_dir(&app_path)?;
+    if !is_appdir_populated() {
+        debug!("appdir is not populated");
+        create_app_dir()?;
         create_app_key()?;
-        create_app_db(app_path)?;
+        create_app_db()?;
     }
     Ok(())
 }
