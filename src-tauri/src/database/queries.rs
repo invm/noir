@@ -1,76 +1,9 @@
-use std::path::PathBuf;
-
-use crate::utils::{
-    crypto::{decrypt_data, encrypt_data, get_app_key},
-    fs::get_app_path,
-};
+use crate::utils::crypto::{decrypt_data, encrypt_data, get_app_key};
 use anyhow::Result;
-use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection, Error};
-use tracing::{error, info};
+use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection};
 use uuid::Uuid;
 
 use crate::engine::types::config::{ConnectionConfig, Credentials, Dialect, Mode};
-
-const CURRENT_DB_VERSION: u32 = 1;
-
-/// Initializes the database connection, creating the .sqlite file if needed, and upgrading the database
-/// if it's out of date.
-pub fn initialize_database() -> Result<AppConnection, Error> {
-    let db_path = get_db_path();
-    let mut db = AppConnection::open(db_path)?;
-
-    let mut user_pragma = db.prepare("PRAGMA user_version")?;
-    let existing_user_version: u32 = user_pragma.query_row([], |row| row.get(0))?;
-    drop(user_pragma);
-
-    upgrade_database_if_needed(&mut db, existing_user_version)?;
-
-    Ok(db)
-}
-
-/// Upgrades the database to the current version.
-pub fn upgrade_database_if_needed(
-    db: &mut AppConnection,
-    existing_version: u32,
-) -> Result<(), Error> {
-    if existing_version < CURRENT_DB_VERSION {
-        db.pragma_update(None, "journal_mode", "WAL")?;
-        let tx = db.transaction()?;
-        tx.pragma_update(None, "user_version", CURRENT_DB_VERSION)?;
-        tx.commit()?;
-    }
-    Ok(())
-}
-
-pub fn get_db_path() -> PathBuf {
-    let app_path = get_app_path();
-    PathBuf::from(format!("{}/.app.db", app_path.to_str().unwrap()))
-}
-
-pub fn create_app_db() -> Result<()> {
-    let db_path = get_db_path();
-    info!("Creating app database at {}", db_path.to_str().unwrap());
-    let db_path = get_db_path();
-    let db = AppConnection::open(db_path)?;
-
-    db.execute(
-        "create table `connections` (
-          `id` TEXT not null,
-          `dialect` varchar(255) not null,
-          `mode` varchar(255) not null,
-          `credentials` varchar(255) not null,
-          `schema` varchar(255) not null,
-          `name` varchar(255) not null,
-          `color` varchar(255) not null
-        )",
-        [],
-    )?;
-    match db.close() {
-        Ok(_) => info!("Successfully created app database"),
-        Err(e) => error!("Failed to create app database: {:?}", e),
-    }
-    Ok(())
-}
 
 pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()> {
     let mut statement = db.prepare(

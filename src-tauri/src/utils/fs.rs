@@ -1,4 +1,4 @@
-use crate::{database::queries::get_db_path, engine::types::result::ResultSet};
+use crate::engine::types::result::ResultSet;
 use anyhow::Result;
 use fs::metadata;
 use serde_json::json;
@@ -7,6 +7,11 @@ use tauri::api::{dir::with_temp_dir, path::app_config_dir};
 use tracing::error;
 
 use rand::{distributions::Alphanumeric, Rng};
+
+pub fn get_db_path() -> PathBuf {
+    let app_path = get_app_path();
+    PathBuf::from(format!("{}/.app.db", app_path.to_str().unwrap()))
+}
 
 fn get_key_path() -> PathBuf {
     PathBuf::from(format!("{}/._", get_app_path().to_str().unwrap()))

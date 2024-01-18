@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use chrono;
-use log::error;
 use state::AppState;
+use tracing::error;
 use std::path::PathBuf;
 use std::{fs, panic};
 use tauri::{Manager, State};
@@ -12,7 +12,7 @@ use tokio::sync::Mutex;
 use tracing_subscriber;
 
 use noir::{
-    database::queries::initialize_database,
+    database::init::initialize_database,
     handlers::{connections, queries},
     queues::query::{async_process_model, rs2js},
     state::{self, AsyncState},
