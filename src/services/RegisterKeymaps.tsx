@@ -20,6 +20,21 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   const CmdOrCtrl = isMac ? 'Meta' : 'Control';
   setAppStore({ osType: props.osType });
 
+  if (isMac) {
+    for (let i = 1; i <= 9; i++) {
+      createShortcut(['Meta', String(i)], () => {
+        setContentIdx(i - 1);
+      });
+    }
+  } else {
+    for (let i = 1; i <= 9; i++) {
+      createShortcut(['Alt', String(i)], () => {
+        setContentIdx(i - 1);
+      });
+    }
+  }
+
+
   createShortcut(['F1'], () => {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
@@ -41,15 +56,10 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   });
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut([CmdOrCtrl, String(i)], () => {
-      setContentIdx(i - 1);
-    });
-  }
-
-  for (let i = 1; i <= 9; i++) {
-    createShortcut([CmdOrCtrl, 'Shift', String(i)], () => {
+    createShortcut(['Control', String(i)], () => {
       setConnectionIdx(i - 1);
     });
   }
+
   return props.children;
 };

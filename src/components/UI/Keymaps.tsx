@@ -3,8 +3,8 @@ import { For } from 'solid-js';
 const keymaps = [
   { action: 'Help', keys: ['F1'] },
   { action: 'Execute query', keys: ['Ctrl', 'E/Enter'] },
-  { action: 'Select tab', keys: ['Ctrl/Cmd', 'number'] },
-  { action: 'Select connection tab', keys: ['Ctrl/Cmd', 'Shift', 'number'] },
+  { action: 'Select tab', keys: ['Alt/Cmd', 'number'] },
+  { action: 'Select connection tab', keys: ['Ctrl/Cmd', 'number'] },
   { action: 'New tab', keys: ['Ctrl/Cmd', 'T'] },
   { action: 'Close current tab', keys: ['Ctrl/Cmd', 'W'] },
   { action: 'Focus on editor', keys: ['Ctrl', 'L'] },
