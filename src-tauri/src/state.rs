@@ -5,7 +5,7 @@ use tauri::{AppHandle, Manager, State};
 use tokio::sync::{mpsc, Mutex};
 use tracing::error;
 
-use crate::{database::types::connection::InitiatedConnection, queues::query::QueryTask};
+use crate::{engine::types::connection::InitiatedConnection, queues::query::QueryTask};
 
 pub struct AppState {
     pub db: std::sync::Mutex<Option<Connection>>,

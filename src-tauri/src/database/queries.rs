@@ -9,7 +9,7 @@ use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection, Error
 use tracing::{error, info};
 use uuid::Uuid;
 
-use super::types::config::{ConnectionConfig, Credentials, Dialect, Mode};
+use crate::engine::types::config::{ConnectionConfig, Credentials, Dialect, Mode};
 
 const CURRENT_DB_VERSION: u32 = 1;
 

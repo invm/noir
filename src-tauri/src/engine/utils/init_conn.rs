@@ -7,12 +7,7 @@ use deadpool_sqlite::Config as SqliteConfig;
 use mysql::{Opts, OptsBuilder, Pool as MysqlPool};
 use postgres::NoTls;
 
-use crate::utils::error::Error;
-
-use super::types::{
-    config::{ConnectionConfig, ConnectionOpts, ConnectionPool, Dialect, Mode},
-    connection::InitiatedConnection,
-};
+use crate::{utils::error::Error, engine::types::{config::{ConnectionConfig, Dialect, Mode, ConnectionPool, ConnectionOpts}, connection::InitiatedConnection}};
 
 pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Error> {
     match &cfg.dialect {

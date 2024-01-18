@@ -1,8 +1,8 @@
 use crate::{
-    database::{
-        init_conn::init_conn,
-        queries,
+    database::queries,
+    engine::{
         types::config::{ConnectionConfig, Credentials, Dialect, Mode},
+        utils::init_conn::init_conn,
     },
     state::ServiceAccess,
     utils::error::{CommandResult, Error},
@@ -57,7 +57,9 @@ pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()>
 #[command]
 pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionConfig>> {
     info!("get_connections");
-    app_handle.db(queries::get_all_connections).map_err(Error::from)
+    app_handle
+        .db(queries::get_all_connections)
+        .map_err(Error::from)
 }
 
 #[command]

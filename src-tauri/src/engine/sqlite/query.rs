@@ -3,7 +3,7 @@ use deadpool_sqlite::Pool;
 use serde_json::Value;
 
 use crate::{
-    database::types::result::{ResultSet, TableMetadata},
+    engine::types::result::{ResultSet, TableMetadata},
     utils::error::Error,
 };
 

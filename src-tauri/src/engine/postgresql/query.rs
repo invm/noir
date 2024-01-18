@@ -3,7 +3,7 @@ use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
 use serde_json::Value;
 use crate::{
-    utils::error::Error, database::types::result::{ResultSet, TableMetadata},
+    utils::error::Error, engine::types::result::{ResultSet, TableMetadata},
 };
 
 use super::utils::row_to_object;

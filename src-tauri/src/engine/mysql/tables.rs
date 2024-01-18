@@ -1,9 +1,9 @@
 use anyhow::Result;
-use deadpool_postgres::Pool;
 use futures::try_join;
+use mysql::Pool;
 use serde_json::{json, Value};
 
-use crate::database::types::connection::InitiatedConnection;
+use crate::engine::types::connection::InitiatedConnection;
 
 use super::query::raw_query;
 
@@ -36,26 +36,23 @@ pub async fn get_columns(
     table: Option<&str>,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
         TABLE_SCHEMA,
         TABLE_NAME,
         COLUMN_NAME, 
-        ORDINAL_POSITION, 
-        COLUMN_DEFAULT,
-        IS_NULLABLE,
+        COLUMN_TYPE, 
+        ORDINAL_POSITION,
         DATA_TYPE, 
-        CASE
-            WHEN character_maximum_length is not null  and udt_name != 'text'
-              THEN CONCAT(udt_name, concat('(', concat(character_maximum_length::varchar(255), ')')))
-            WHEN numeric_precision is not null
-                    THEN CONCAT(udt_name, concat('(', concat(numeric_precision::varchar(255),',',numeric_scale::varchar(255), ')')))
-            WHEN datetime_precision is not null AND udt_name != 'date' THEN
-              CONCAT(udt_name, concat('(', concat(datetime_precision::varchar(255), ')')))
-            ELSE udt_name
-        END as COLUMN_TYPE,
         CHARACTER_MAXIMUM_LENGTH,
-        CHARACTER_OCTET_LENGTH
+        IS_NULLABLE,
+        CHARACTER_OCTET_LENGTH,
+        CHARACTER_SET_NAME,
+        COLLATION_NAME,
+        COLUMN_COMMENT,
+        COLUMN_DEFAULT,
+        COLUMN_KEY
         FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{}'",
         schema
     );
@@ -63,7 +60,7 @@ pub async fn get_columns(
         Some(table) => format!("{} AND TABLE_NAME = '{}';", query, table),
         None => format!("{};", query),
     };
-    Ok(raw_query(pool.clone(), &query).await?)
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_constraints(
@@ -72,34 +69,30 @@ pub async fn get_constraints(
     table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
     let query = format!(
-    "SELECT c.column_name, c.table_name, tc.constraint_name, c.table_schema, c.ordinal_position
-        FROM information_schema.table_constraints tc 
-        JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) 
-        JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
-          AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
-        WHERE constraint_type = 'PRIMARY KEY' and c.table_schema = '{}'",
+        "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION,
+                         CONSTRAINT_NAME, REFERENCED_COLUMN_NAME, REFERENCED_TABLE_NAME FROM
+                         INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
         schema
     );
-    let query = format!("{} AND c.table_name = '{}'", query, table);
-    Ok(raw_query(pool.clone(), &query).await?)
+    let query = format!("{} AND TABLE_NAME = '{}'", query, table);
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
-    let schema = conn.get_schema();
-    let query = format!(
-        "SELECT routine_name, routine_definition
-        FROM information_schema.routines
-        WHERE routine_type = 'FUNCTION' AND routine_schema = '{}';",
-        schema
-    );
-    Ok(raw_query(pool.clone(), &query).await?)
+    let db = conn.config.credentials.get("db_name").unwrap().as_str();
+    let mut _conn = pool.get_conn()?;
+    let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db);
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let query = format!("SELECT routine_name, routine_definition FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
-    Ok(raw_query(pool.clone(), &query).await?)
+    let mut _conn = pool.get_conn()?;
+
+    let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_indices(
@@ -108,13 +101,14 @@ pub async fn get_indices(
     table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
     let query = format!(
-        "SELECT tablename, indexname, indexdef FROM
-                        pg_indexes WHERE schemaname = '{}'",
+        "SELECT TABLE_SCHEMA, TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM
+                        information_schema.statistics WHERE non_unique = 1 AND table_schema = '{}'",
         schema
     );
-    let query = format!("{} and tablename = '{}';", query, table);
-    Ok(raw_query(pool.clone(), &query).await?)
+    let query = format!("{} and TABLE_NAME = '{}';", query, table);
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_triggers(
@@ -122,6 +116,7 @@ pub async fn get_triggers(
     pool: &Pool,
     table: Option<&str>,
 ) -> Result<Vec<Value>> {
+    let mut _conn = pool.get_conn()?;
     let schema = conn.get_schema();
     let query = format!(
         "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
@@ -131,19 +126,24 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    Ok(raw_query(pool.clone(), &query).await?)
+    Ok(raw_query(_conn, query)?)
 }
 
 pub async fn get_schemas(pool: &Pool) -> Result<Vec<Value>> {
-    let query = "SELECT schema_name schema FROM information_schema.schemata;".to_string();
-    Ok(raw_query(pool.clone(), &query).await?)
+    let mut _conn = pool.get_conn()?;
+    let query = "select schema_name 'schema' from information_schema.schemata;".to_string();
+    let schemas = raw_query(_conn, query)?;
+    Ok(schemas)
 }
 
 pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
     let query = format!(
-        "SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_schema = '{}'",
+        "SELECT TABLE_SCHEMA, TABLE_NAME 
+            FROM information_schema.tables 
+            WHERE TABLE_TYPE LIKE 'VIEW' and table_schema = '{}';",
         schema
     );
-    Ok(raw_query(pool.clone(), &query).await?)
+    Ok(raw_query(_conn, query)?)
 }

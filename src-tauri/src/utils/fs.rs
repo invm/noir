@@ -1,4 +1,4 @@
-use crate::database::{queries::get_db_path, types::result::ResultSet};
+use crate::{database::queries::get_db_path, engine::types::result::ResultSet};
 use anyhow::Result;
 use fs::metadata;
 use serde_json::json;
