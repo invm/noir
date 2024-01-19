@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, Setter, Show } from 'solid-js';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
@@ -33,12 +33,14 @@ const getColumnDefs = ({
   setCode,
   editable,
   openDrawer,
+  setChanges,
 }: {
   setCode: (code: string) => void;
   openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
   columns: Row[];
   constraints: Row[];
   editable: boolean;
+  setChanges: Setter<Changes>;
 }): ColDef[] => {
   return columns.map((col, _i) => {
     const name = getAnyCase(col, 'column_name');
@@ -49,11 +51,12 @@ const getColumnDefs = ({
     const visible_type = getAnyCase(col, 'column_type');
 
     return {
+      editable: true,
       singleClickEdit: true,
       // checkboxSelection: _i === 0,
       resizable: true,
       cellRenderer: (p: PopupCellRendererProps) => (
-        <PopupCellRenderer {...p} {...{ editable, setCode, openDrawer, columns, constraints }} />
+        <PopupCellRenderer {...p} {...{ setChanges, editable, setCode, openDrawer, columns, constraints }} />
       ),
       filter: true,
       width: 300,
@@ -75,7 +78,7 @@ const getColumnDefs = ({
   });
 };
 
-type Changes = {
+export type Changes = {
   updates: {
     [rowIndex: string]: {
       updateKey: string;
@@ -152,6 +155,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           setCode,
           editable: !!props.editable,
           openDrawer,
+          setChanges,
         });
         if (result_set?.rows?.length) {
           return { rows: result_set.rows, columns, colDef, count: result_set.count };
@@ -251,7 +255,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const updateCol = constraints().find((c) => +getAnyCase(c, 'ordinal_position') === 1);
+      const updateCol = constraints().find((c) => getAnyCase(c, 'CONSTRAINT_NAME') === 'PRIMARY');
+      console.log(constraints());
       const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
       const change = e.column.getColId();
       setChanges((s) => ({

@@ -60,7 +60,7 @@
           "copy_cell": "Copy cell to clipboard as json",
           "edit_row": "Edit row",
           "edit_cell": "Edit cell",
-          "create_row": "Create row",
+          "add_row": "Add row",
           "delete_row": "Delete row"
         },
         "editing": "Editing {{table}}",

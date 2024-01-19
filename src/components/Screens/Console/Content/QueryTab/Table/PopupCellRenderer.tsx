@@ -1,10 +1,11 @@
 import { GridApi } from 'ag-grid-community';
 import { Row } from 'interfaces';
-import { createSignal, For } from 'solid-js';
+import { createSignal, For, Setter } from 'solid-js';
 import { tippy } from 'solid-tippy';
 import { parseObjRecursive } from 'utils/utils';
 import { writeText } from '@tauri-apps/api/clipboard';
 import { t } from 'utils/i18n';
+import { Changes } from '../Results';
 tippy;
 
 const rowsActions = [
@@ -13,8 +14,8 @@ const rowsActions = [
   { action: 'copy-cell', label: t('console.table.row_actions.copy_cell') },
   { action: 'edit-row', label: t('console.table.row_actions.edit_row') },
   { action: 'edit-cell', label: t('console.table.row_actions.edit_cell') },
-  // { action: 'create', label: '' },
-  // { action: 'delete', label: '' },
+  { action: 'add-row', label: t('console.table.row_actions.add_row') },
+  { action: 'delete-row', label: t('console.table.row_actions.delete_row') },
 ] as const;
 
 type RowAction = (typeof rowsActions)[number]['action'];
@@ -31,6 +32,7 @@ export type PopupCellRendererProps = {
   openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
   columns: Row[];
   constraints: Row[];
+  setChanges: Setter<Changes>;
 };
 
 const PopupCellRenderer = (props: PopupCellRendererProps) => {
@@ -68,14 +70,17 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
       await writeText(props.value);
     }
 
-    // if (option === 'create') {
-    //   props.api.applyTransaction({
-    //     add: [{}],
-    //   });
-    // }
-    // if (option === 'delete') {
-    //   props.api.applyTransaction({ remove: [props.data] });
-    // }
+    if (option === 'add-row') {
+      props.api.applyTransaction({
+        add: [{}],
+      });
+    }
+
+    if (option === 'delete-row') {
+      // console.log(props.node.id);
+      props.api.applyTransaction({ remove: [props.data] });
+      // props.setChanges('deletes', props.node.id);
+    }
 
     if (option === 'edit-cell') {
       props.api.startEditingCell({

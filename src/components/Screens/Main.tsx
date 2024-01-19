@@ -51,11 +51,17 @@ export const Main = () => {
                   tabindex={0}>
                   <span class="text-md font-bold">{tab.label}</span>
                 </button>
-                <Show when={connectionStore.idx === idx() + 1}>
-                  <button tabindex={0} onClick={() => handleCloseConnection(tab.id!)} class="ml-2">
-                    <CloseIcon />
-                  </button>
-                </Show>
+                <div class="w-8">
+                  <Show when={connectionStore.idx === idx() + 1}>
+                    <button
+                      class="btn btn-xs btn-ghost p-1"
+                      tabindex={0}
+                      onClick={() => handleCloseConnection(tab.id!)}
+                      class="ml-2">
+                      <CloseIcon />
+                    </button>
+                  </Show>
+                </div>
               </div>
             )}
           </For>

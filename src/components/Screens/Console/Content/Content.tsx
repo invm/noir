@@ -11,14 +11,13 @@ export const Content = () => {
     connections: { contentStore, setContentIdx, addContentTab, removeContentTab, getContent },
   } = useAppSelector();
 
+
   return (
     <div class="flex flex-col h-full">
       <div class="bg-base-300 tabs gap-1">
         <For each={contentStore.tabs}>
           {(_tab, idx) => (
-            <div
-              class="tab tab-md tab-lifted !pr-1 !pl-1"
-              classList={{ 'tab-active': contentStore.idx === idx() }}>
+            <div class="tab tab-md tab-lifted !pr-1 !pl-1" classList={{ 'tab-active': contentStore.idx === idx() }}>
               <button class="text-xs p-1 px-3" onClick={() => setContentIdx(idx())}>
                 {_tab.label}
               </button>

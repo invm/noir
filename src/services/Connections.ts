@@ -193,6 +193,7 @@ export const ConnectionsService = () => {
       if (tabs.length) {
         setConnectionStore(() => ({ ...conn_tabs, tabs }));
         const content = await getSavedData(CONTENT_KEY);
+        content.idx = 0;
         setContentStore(() => content as ContentStore);
       }
       updateStore();
