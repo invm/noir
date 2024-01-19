@@ -8,16 +8,15 @@ import { DataTab } from './DataTab/DataTab';
 
 export const Content = () => {
   const {
-    connections: { contentStore, setContentIdx, addContentTab, removeContentTab, getContent },
+    connections: { setContentIdx, getConnection, addContentTab, removeContentTab, getContent },
   } = useAppSelector();
-
 
   return (
     <div class="flex flex-col h-full">
       <div class="bg-base-300 tabs gap-1">
-        <For each={contentStore.tabs}>
+        <For each={getConnection().tabs}>
           {(_tab, idx) => (
-            <div class="tab tab-md tab-lifted !pr-1 !pl-1" classList={{ 'tab-active': contentStore.idx === idx() }}>
+            <div class="tab tab-md tab-lifted !pr-1 !pl-1" classList={{ 'tab-active': getConnection().idx === idx() }}>
               <button class="text-xs p-1 px-3" onClick={() => setContentIdx(idx())}>
                 {_tab.label}
               </button>
@@ -41,7 +40,7 @@ export const Content = () => {
             <QueryTab />
           </Match>
           <Match when={getContent().key === ContentTab.TableStructure}>
-            <TableStructureTab tabIdx={contentStore.idx} />
+            <TableStructureTab tabIdx={getConnection().idx} />
           </Match>
           <Match when={getContent().key === ContentTab.Data}>
             <DataTab />

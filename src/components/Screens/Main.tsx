@@ -12,7 +12,7 @@ import { ThemeSwitch } from 'components/UI/ThemeSwitch';
 export const Main = () => {
   const {
     app: { setComponent, component },
-    connections: { removeConnectionTab, connectionStore, setConnectionStore },
+    connections: { removeConnectionTab, store, setStore },
   } = useAppSelector();
 
   const handleCloseConnection = async (id: string) => {
@@ -27,37 +27,36 @@ export const Main = () => {
           <button
             onClick={() => {
               setComponent(0);
-              setConnectionStore('idx', 0);
+              setStore('idx', -1);
             }}
             class="tab tab-md"
             tabIndex={0}
-            classList={{ 'tab-active': connectionStore.idx === 0 }}>
+            classList={{ 'tab-active': store.idx === -1 }}>
             <span class="text-md font-bold">
               <HomeIcon />
             </span>
           </button>
-          <For each={connectionStore.tabs}>
+          <For each={store.tabs}>
             {(tab, idx) => (
               <div class="flex items-center">
                 <button
                   onClick={() => {
                     setComponent(0);
-                    setConnectionStore('idx', idx() + 1);
+                    setStore('idx', idx());
                   }}
                   class="tab tab-md pt-1"
                   classList={{
-                    'tab-active': connectionStore.idx === idx() + 1,
+                    'tab-active': store.idx === idx(),
                   }}
                   tabindex={0}>
                   <span class="text-md font-bold">{tab.label}</span>
                 </button>
                 <div class="w-8">
-                  <Show when={connectionStore.idx === idx() + 1}>
+                  <Show when={store.idx === idx()}>
                     <button
-                      class="btn btn-xs btn-ghost p-1"
+                      class="btn btn-xs btn-ghost p-1 ml-2"
                       tabindex={0}
-                      onClick={() => handleCloseConnection(tab.id!)}
-                      class="ml-2">
+                      onClick={() => handleCloseConnection(tab.id!)}>
                       <CloseIcon />
                     </button>
                   </Show>
@@ -82,10 +81,10 @@ export const Main = () => {
           </Match>
           <Match when={!component()}>
             <Switch>
-              <Match when={connectionStore.idx === 0}>
+              <Match when={store.idx === -1}>
                 <Home />
               </Match>
-              <Match when={connectionStore.idx !== 0}>
+              <Match when={store.idx >= 0}>
                 <Console />
               </Match>
             </Switch>

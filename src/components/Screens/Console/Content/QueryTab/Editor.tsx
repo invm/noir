@@ -61,7 +61,7 @@ const SQLDialects = {
 
 export const Editor = (props: { editorTheme: EditorTheme }) => {
   const {
-    connections: { connectionStore, updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
+    connections: { store, updateContentTab, getConnection, getContentData, getSchemaEntity },
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
@@ -70,16 +70,13 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
 
-  const updateCursor = debounce(() => {
-    updateContentTab('data', { query: code() });
+  const updateQuery = debounce(() => {
+    updateContentTab('data', { query: code(), cursor: editorView().state.selection.ranges[0].from });
   }, 300);
 
   const updateQueryText = (query: string) => {
     setCode(query);
-    if (focused()) {
-      updateContentTab('data', { cursor: editorView().state.selection.ranges[0].from });
-    }
-    updateCursor();
+    updateQuery();
   };
 
   const { ref, editorView, createExtension } = createCodeMirror({
@@ -116,13 +113,13 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     if (loading() || !code()) return;
     setLoading(true);
     const selectedText = getSelection();
-    const activeConnection = getConnection();
+    const conn = getConnection();
     try {
       const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
-        connId: activeConnection.id,
+        connId: conn.id,
         sql: selectedText || code(),
         autoLimit: autoLimit(),
-        tabIdx: contentStore.idx,
+        tabIdx: conn.idx,
       });
       updateContentTab('data', {
         query: code(),
@@ -146,7 +143,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     const data = getContentData('Query');
     setCode(data.query ?? '');
     setAutoLimit(data.auto_limit ?? true);
-  }, contentStore.idx);
+  }, getConnection().idx);
 
   createEffect(() => {
     const _schema = getSchemaEntity('tables').reduce(
@@ -157,7 +154,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
       {}
     );
     setSchema(_schema);
-  }, connectionStore.idx);
+  }, store.idx);
 
   createShortcut(['Control', 'k'], () => {
     if (focused() && vimModeOn()) {

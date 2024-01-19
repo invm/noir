@@ -19,7 +19,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   const [showModal, setShowModal] = createSignal(false);
 
   const {
-    connections: { insertColumnName, contentStore, addContentTab, getConnection, updateContentTab },
+    connections: { insertColumnName, addContentTab, getConnection, updateContentTab },
     backend: { selectAllFrom },
     messages: { notify },
   } = useAppSelector();
@@ -49,7 +49,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       const conn = getConnection();
       const data = { result_sets: [], table };
       addContentTab(newContentTab(table, 'Data', data));
-      const result_sets = await selectAllFrom(table, conn.id, contentStore.idx);
+      const result_sets = await selectAllFrom(table, conn.id, conn.idx);
       updateContentTab('data', {
         result_sets: result_sets.map((id) => ({ id })),
       });

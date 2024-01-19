@@ -38,6 +38,8 @@ export const ConnectionsList = () => {
         definition: { [config.schema]: { columns, routines, triggers, tables, views } },
         schemas,
         connection: config,
+        tabs: [],
+        idx: 0,
       });
     } catch (error) {
       notify(error);

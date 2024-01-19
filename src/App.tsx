@@ -19,7 +19,7 @@ import { t } from 'utils/i18n';
 
 function App() {
   const {
-    connections: { restoreConnectionStore, getConnection, updateResultSet, contentStore, loading, setLoading },
+    connections: { restoreConnectionStore, getConnection, updateResultSet, loading, setLoading },
     app: { restoreAppStore },
     backend: { getQueryMetadata },
     messages: { notify },
@@ -89,7 +89,7 @@ function App() {
 
   const compareAndAssign = async (event: QueryTaskResult) => {
     const { status, query_idx, tab_idx, conn_id } = event;
-    if (getConnection().id === conn_id && contentStore.idx === tab_idx) {
+    if (getConnection().id === conn_id && getConnection().idx === tab_idx) {
       if (status === 'Completed') {
         const md = await getQueryMetadata(event.path);
         const metadata = { ...md, path: event.path, status };

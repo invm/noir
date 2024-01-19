@@ -13,6 +13,7 @@ export const randomId = () => {
 };
 
 export const getAnyCase = (obj: Row, key: string) => {
+  if (typeof obj !== 'object') return '';
   return (obj[key] ? obj[key] : obj[key.toUpperCase()]) as string;
 };
 

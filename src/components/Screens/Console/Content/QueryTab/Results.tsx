@@ -7,7 +7,6 @@ import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
-import { ContentTabData } from 'services/Connections';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
@@ -34,6 +33,7 @@ const getColumnDefs = ({
   editable,
   openDrawer,
   setChanges,
+  row,
 }: {
   setCode: (code: string) => void;
   openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
@@ -41,14 +41,15 @@ const getColumnDefs = ({
   constraints: Row[];
   editable: boolean;
   setChanges: Setter<Changes>;
+  row: Row;
 }): ColDef[] => {
-  return columns.map((col, _i) => {
-    const name = getAnyCase(col, 'column_name');
+  return (columns.length ? columns : Object.keys(row)).map((col, _i) => {
+    const name = getAnyCase(col, 'column_name') || col;
     const key = constraints.find((c) => {
       const t = getAnyCase(c, 'column_name');
       return t === name;
     });
-    const visible_type = getAnyCase(col, 'column_type');
+    const visible_type = getAnyCase(col, 'column_type') || '';
 
     return {
       editable: true,
@@ -102,7 +103,7 @@ const defaultChanges: Changes = { updates: {}, deletes: {}, creates: {} };
 
 export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; editable?: boolean; table?: string }) => {
   const {
-    connections: { queryIdx, contentStore, getConnection, updateContentTab },
+    connections: { queryIdx, getConnection, updateContentTab, getContentData },
     backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
     messages: { notify },
   } = useAppSelector();
@@ -136,26 +137,21 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   };
 
   const [data] = createResource(
-    () =>
-      [
-        page(),
-        queryIdx(),
-        pageSize(),
-        (contentStore.tabs[contentStore.idx].data as ContentTabData['Query']).result_sets,
-      ] as const,
+    () => [page(), queryIdx(), pageSize(), getContentData('Query')?.result_sets] as const,
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
       try {
         // Reruns when either signal updates
         const result_set = result_sets[queryIdxVal];
         const columns = result_set?.columns ?? [];
         const constraints = result_set?.constraints ?? [];
-        const colDef = getColumnDefs({
+        let colDef = getColumnDefs({
           columns,
           constraints,
           setCode,
           editable: !!props.editable,
           openDrawer,
           setChanges,
+          row: result_set?.rows?.[0] ?? {},
         });
         if (result_set?.rows?.length) {
           return { rows: result_set.rows, columns, colDef, count: result_set.count };
@@ -164,6 +160,15 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
         }
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
+        colDef = getColumnDefs({
+          columns,
+          constraints,
+          setCode,
+          editable: !!props.editable,
+          openDrawer,
+          setChanges,
+          row: rows[0] ?? {},
+        });
         setConstraints(constraints);
         setTable(result_set.table ?? '');
         return {
@@ -186,7 +191,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     setConstraints([]);
     setChanges(defaultChanges);
     setTable('');
-  }, [queryIdx, contentStore.idx]);
+  }, [queryIdx, getConnection().idx]);
 
   const onNextPage = async () => {
     if (data()?.exhausted) return;
@@ -234,9 +239,9 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       });
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
-      const results_sets = await selectAllFrom(props.table!, conn.id, contentStore.idx);
+      const result_sets = await selectAllFrom(props.table!, conn.id, getConnection().idx);
       updateContentTab('data', {
-        result_sets: results_sets.map((id) => ({ id })),
+        result_sets: result_sets.map((id) => ({ id })),
       });
       setChanges(defaultChanges);
       notify(t('console.table.successfully_updated', { count: Object.keys(allChanges).length }), 'success');
@@ -255,8 +260,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const updateCol = constraints().find((c) => getAnyCase(c, 'CONSTRAINT_NAME') === 'PRIMARY');
-      console.log(constraints());
+      const updateCol = constraints().find((c) => getAnyCase(c, 'constraint_name') === 'PRIMARY');
       const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
       const change = e.column.getColId();
       setChanges((s) => ({

@@ -9,7 +9,6 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
       addContentTab,
       removeContentTab,
       setContentIdx,
-      contentStore,
       setNextContentIdx,
       setPrevContentIdx,
       setConnectionIdx,
@@ -42,7 +41,7 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   });
 
   createShortcut([cmdOrCtrl(), 'w'], () => {
-    removeContentTab(contentStore.idx);
+    removeContentTab();
   });
 
   createShortcut(['Control', 'Tab'], () => {
@@ -51,6 +50,10 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
 
   createShortcut(['Control', 'Shift', 'Tab'], () => {
     setPrevContentIdx();
+  });
+
+  createShortcut(['Control', '`'], () => {
+    setConnectionIdx(-1);
   });
 
   for (let i = 1; i <= 9; i++) {
