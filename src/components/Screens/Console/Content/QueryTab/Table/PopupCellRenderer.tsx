@@ -11,7 +11,8 @@ const rowsActions = [
   { action: 'view', label: t('console.table.row_actions.view') },
   { action: 'copy-row', label: t('console.table.row_actions.copy_row') },
   { action: 'copy-cell', label: t('console.table.row_actions.copy_cell') },
-  { action: 'edit', label: t('console.table.row_actions.edit_cell') },
+  { action: 'edit-row', label: t('console.table.row_actions.edit_row') },
+  { action: 'edit-cell', label: t('console.table.row_actions.edit_cell') },
   // { action: 'create', label: '' },
   // { action: 'delete', label: '' },
 ] as const;
@@ -27,6 +28,9 @@ export type PopupCellRendererProps = {
   value: string;
   column: { getColId: () => string };
   editable: boolean;
+  openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
+  columns: Row[];
+  constraints: Row[];
 };
 
 const PopupCellRenderer = (props: PopupCellRendererProps) => {
@@ -36,7 +40,7 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     <ul class="menu menu-xs rounded-box">
       <For
         each={rowsActions.filter((r) => {
-          if (r.action === 'edit') {
+          if (['edit-row', 'edit-cell'].includes(r.action)) {
             return props.editable;
           }
           return true;
@@ -73,11 +77,15 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     //   props.api.applyTransaction({ remove: [props.data] });
     // }
 
-    if (option === 'edit') {
+    if (option === 'edit-cell') {
       props.api.startEditingCell({
         rowIndex: props.rowIndex,
         colKey: props.column.getColId(),
       });
+    }
+
+    if (option === 'edit-row') {
+      props.openDrawer(props.data, props.columns, props.rowIndex, props.constraints);
     }
   };
 

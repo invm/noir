@@ -58,10 +58,12 @@
           "view": "View in JSON mode",
           "copy_row": "Copy row to clipboard as json",
           "copy_cell": "Copy cell to clipboard as json",
+          "edit_row": "Edit row",
           "edit_cell": "Edit cell",
           "create_row": "Create row",
           "delete_row": "Delete row"
         },
+        "editing": "Editing {{table}}",
         "successfully_updated": "Successfully updated {{count}} row/s",
         "csv": "Export to CSV",
         "json": "Export to JSON",

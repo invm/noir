@@ -74,7 +74,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "solid-contextmenu@0.0.2": "patches/solid-contextmenu@0.0.2.patch"
+      "solid-contextmenu@0.0.2": "patches/solid-contextmenu@0.0.2.patch",
+      "sql-bricks@3.0.1": "patches/sql-bricks@3.0.1.patch"
     }
   }
 }

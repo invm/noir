@@ -8,6 +8,9 @@ patchedDependencies:
   solid-contextmenu@0.0.2:
     hash: df2yvz34tducgiwp4thl3akrsu
     path: patches/solid-contextmenu@0.0.2.patch
+  sql-bricks@3.0.1:
+    hash: 56u4mdo3sos5jwscrtmdehi7ca
+    path: patches/sql-bricks@3.0.1.patch
 
 dependencies:
   '@codemirror/autocomplete':
@@ -111,7 +114,7 @@ dependencies:
     version: 1.6.5
   sql-bricks:
     specifier: ^3.0.1
-    version: 3.0.1
+    version: 3.0.1(patch_hash=56u4mdo3sos5jwscrtmdehi7ca)
   sql-formatter:
     specifier: ^12.2.3
     version: 12.2.3
@@ -4474,9 +4477,10 @@ packages:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
     dev: false
 
-  /sql-bricks@3.0.1:
+  /sql-bricks@3.0.1(patch_hash=56u4mdo3sos5jwscrtmdehi7ca):
     resolution: {integrity: sha512-ZkU/R+bwf7d9FxlwMJp/31P5bluVCjUuftutkqJjQKH1QMCE1iaEc0xeY0aVepc38fxC+ljUrqausGCzzcHzHQ==}
     dev: false
+    patched: true
 
   /sql-formatter@12.2.3:
     resolution: {integrity: sha512-sVRjEBTKJ5to2kfn11eDHcfVswz1//AL6HdGbPVN8ROWQ/XTv7E3z7rjgRxEimaBq5yDBE55JCljgcJ8a3+s7Q==}

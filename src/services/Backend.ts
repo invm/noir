@@ -12,11 +12,12 @@ export const BackendService = () => {
       params: { path, page, page_size },
     });
     const rows = JSON.parse('[' + res + ']') as unknown as Row[];
-    if (rows.length > 0 && rows.length < page_size) {
-      // pad the results with empty rows
-      const empty_rows = Array(page_size - rows.length).fill({});
-      rows.push(...empty_rows);
-    }
+    // left in case we want to pad the results with empty rows
+    // if (rows.length > 0 && rows.length < page_size) {
+    //   // pad the results with empty rows
+    //   const empty_rows = Array(page_size - rows.length).fill({});
+    //   rows.push(...empty_rows);
+    // }
     return rows;
   };
 
@@ -30,9 +31,7 @@ export const BackendService = () => {
       connId,
       table,
     });
-    const t = new RegExp(`\\"${table}\\"`, 'i');
-    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString().replace(t, table);
-    // remove escape characters
+    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString();
     const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
       connId,
       sql,

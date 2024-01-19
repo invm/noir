@@ -73,6 +73,8 @@ export const connectionColors = [
   'rose',
 ] as const;
 
+export const NumerticTypes = ['int', 'long', 'float', 'double', 'decimal', 'numeric', 'real', 'number', 'serial', 'short'] as const;
+
 export type ConnectionColor = (typeof connectionColors)[number];
 
 export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;

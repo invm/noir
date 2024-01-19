@@ -15,7 +15,7 @@ import { createShortcut } from '@solid-primitives/keyboard';
 import { search } from '@codemirror/search';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
-import { debounce, log } from 'utils/utils';
+import { debounce } from 'utils/utils';
 import { moveCompletionSelection } from '@codemirror/autocomplete';
 
 import { androidstudio } from '@uiw/codemirror-theme-androidstudio';
@@ -61,15 +61,7 @@ const SQLDialects = {
 
 export const Editor = (props: { editorTheme: EditorTheme }) => {
   const {
-    connections: {
-      refreshConnections,
-      connectionStore,
-      updateContentTab,
-      getConnection,
-      getContentData,
-      getSchemaEntity,
-      contentStore,
-    },
+    connections: { connectionStore, updateContentTab, getConnection, getContentData, getSchemaEntity, contentStore },
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
@@ -186,18 +178,14 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   createShortcut(['Control', 'l'], () => setFocused(true));
   createShortcut(['Control', 'Shift', 'F'], onFormat);
 
-  const dummyAction = async () => {
-    log('refreshing');
-    await refreshConnections();
-    log('refreshed');
-  };
+  // const dummyAction = async () => {};
 
   return (
     <div class="flex-1 flex flex-col h-full">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
-          <ActionRowButton dataTip={'Testing'} onClick={dummyAction} icon={<EditIcon />} />
           {/*
+          <ActionRowButton dataTip={'Testing'} onClick={dummyAction} icon={<EditIcon />} />
            */}
           <ActionRowButton dataTip={t('console.actions.format')} onClick={onFormat} icon={<EditIcon />} />
           <ActionRowButton

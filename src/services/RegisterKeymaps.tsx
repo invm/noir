@@ -14,10 +14,9 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
       setPrevContentIdx,
       setConnectionIdx,
     },
-    app: { setComponent, setAppStore },
+    app: { setComponent, setAppStore, cmdOrCtrl },
   } = useAppSelector();
   const isMac = props.osType === 'Darwin';
-  const CmdOrCtrl = isMac ? 'Meta' : 'Control';
   setAppStore({ osType: props.osType });
 
   if (isMac) {
@@ -34,16 +33,15 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
     }
   }
 
-
   createShortcut(['F1'], () => {
     setComponent((s) => (s === 1 ? 0 : 1));
   });
 
-  createShortcut([CmdOrCtrl, 't'], () => {
+  createShortcut([cmdOrCtrl(), 't'], () => {
     addContentTab();
   });
 
-  createShortcut([CmdOrCtrl, 'w'], () => {
+  createShortcut([cmdOrCtrl(), 'w'], () => {
     removeContentTab(contentStore.idx);
   });
 

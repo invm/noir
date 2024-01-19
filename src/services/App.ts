@@ -54,6 +54,10 @@ export const AppService = () => {
 
   const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
+  const cmdOrCtrl = (short = false) => {
+    if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
+    return short ? 'Ctrl' : 'Control';
+  };
 
   const toggleVimModeOn = () => {
     setAppStore('vimModeOn', !appStore.vimModeOn);
@@ -88,5 +92,6 @@ export const AppService = () => {
     setComponent,
     gridTheme,
     updateTheme,
+    cmdOrCtrl,
   };
 };
