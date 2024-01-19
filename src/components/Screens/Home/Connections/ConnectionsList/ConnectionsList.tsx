@@ -5,6 +5,7 @@ import { ColorCircle } from 'components/UI';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
+import { Refresh } from 'components/UI/Icons';
 
 export const ConnectionsList = () => {
   const {
@@ -17,6 +18,7 @@ export const ConnectionsList = () => {
     await invoke('delete_connection', { id });
     await refreshConnections();
   };
+
   const menu_id = 'connection-list';
   const modal_id = 'actions-menu';
   const { show } = useContextMenu({ id: menu_id, props: { id: '' } });
@@ -46,7 +48,16 @@ export const ConnectionsList = () => {
 
   return (
     <div class="h-full p-2 pt-5 bg-base-300">
-      <h3 class="px-2 text-xl font-bold">{t('connections_list.title')}</h3>
+      <div class="flex justify-between items-center">
+        <h3 class="px-2 text-xl font-bold">{t('connections_list.title')}</h3>
+        <div
+          class="tooltip tooltip-primary tooltip-bottom px-3"
+          data-tip={t('add_connection_form.refresh_connections')}>
+          <button onClick={refreshConnections} class="btn btn-sm btn-ghost">
+            <Refresh />
+          </button>
+        </div>
+      </div>
       <div class="divider my-0"></div>
       <ul class="grid grid-cols-1 gap-1">
         <For each={connections}>
