@@ -14,18 +14,18 @@ import Keymaps from 'components/UI/Keymaps';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
-import { update } from 'sql-bricks';
+import { deleteFrom, insert, update } from 'sql-bricks';
 import { editorThemes } from './Editor';
 import { EditorTheme } from 'services/App';
 import { tippy } from 'solid-tippy';
 import { t } from 'utils/i18n';
 import { Drawer } from './Table/Drawer';
-import { createStore } from 'solid-js/store';
+import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 tippy;
 
-const defaultChanges: Changes = { updates: {}, deletes: {}, creates: {} };
+const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
 
 export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; editable?: boolean; table?: string }) => {
   const {
@@ -35,6 +35,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   } = useAppSelector();
 
   const [drawerOpen, setDrawerOpen] = createStore({
+    mode: 'add' as 'add' | 'edit',
     open: false,
     data: {} as Row,
     columns: [] as Row[],
@@ -44,9 +45,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   });
   const [code, setCode] = createSignal('');
   const [page, setPage] = createSignal(0);
-  const [table, setTable] = createSignal('');
+  const [table, setTable] = createStore({
+    name: '',
+    foreign_keys: [] as Row[],
+    primary_key: [] as Row[],
+    columns: [] as Row[],
+  });
   const [changes, setChanges] = createStore<Changes>(defaultChanges);
-  const [primaryKey, setPrimaryKey] = createSignal<Row[]>([]);
 
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
@@ -59,6 +64,19 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
 
+  const openDrawerForm = ({ rowIndex, mode, data: row }: { data: Row; rowIndex?: number; mode: 'add' | 'edit' }) => {
+    if (!props.editable) return;
+    setDrawerOpen({
+      mode,
+      open: true,
+      data: row,
+      columns: table.columns,
+      foreign_keys: table.foreign_keys,
+      primary_key: table.primary_key,
+      rowIndex,
+    });
+  };
+
   const [data] = createResource(
     () => [page(), queryIdx(), pageSize(), getContentData('Query')?.result_sets] as const,
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
@@ -68,7 +86,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         const columns = result_set?.columns ?? [];
         const foreign_keys = result_set?.foreign_keys ?? [];
         const primary_key = result_set?.primary_key ?? [];
-        setPrimaryKey(result_set?.primary_key ?? []);
+        setTable({ name: result_set?.table ?? '', columns, foreign_keys, primary_key });
         let colDef = getColumnDefs({
           columns,
           foreign_keys,
@@ -78,6 +96,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           setDrawerOpen,
           setChanges,
           row: result_set?.rows?.[0] ?? {},
+          openDrawerForm,
         });
         if (result_set?.rows?.length) {
           return { rows: result_set.rows, columns, colDef, count: result_set.count };
@@ -86,7 +105,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
         }
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
-        setTable(result_set.table ?? '');
         colDef = getColumnDefs({
           columns,
           foreign_keys,
@@ -96,6 +114,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           setDrawerOpen,
           setChanges,
           row: rows[0] ?? {},
+          openDrawerForm,
         });
         return {
           columns,
@@ -114,8 +133,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   createEffect(() => {
     setPage(0);
-    setChanges(defaultChanges);
-    setTable('');
+    resetChanges();
+    resetTable();
   }, [queryIdx, getConnection().idx]);
 
   const onNextPage = async () => {
@@ -160,69 +179,104 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const applyChanges = async () => {
     try {
       const conn = getConnection();
-      const _table = table();
-      const queries = Object.keys(changes['updates'] ?? {}).map((rowIndex) => {
-        const row = changes['updates']?.[rowIndex];
-        return update(_table, { ...row.changes })
-          .where(row.updateConditions)
-          .toString();
-      });
+      const _table = table.name;
+      const queries = [];
+      if (Object.keys(changes['add']).length) {
+        const inserts = Object.keys(changes['add']).map((rowIndex) => {
+          const row = changes['add'];
+          return insert(_table).values(row[rowIndex].changes).toString();
+        });
+        queries.push(...inserts);
+      }
+      if (Object.keys(changes['update']).length) {
+        const updates = Object.keys(changes['update']).map((rowIndex) => {
+          const row = changes['update']?.[rowIndex];
+          return update(_table, { ...row.changes })
+            .where(row.condition)
+            .toString();
+        });
+        queries.push(...updates);
+      }
+      if (Object.keys(changes['delete']).length) {
+        const deletes = Object.keys(changes['delete']).map((rowIndex) => {
+          const row = changes['delete'];
+          return deleteFrom(_table).where(row[rowIndex].condition).toString();
+        });
+        queries.push(...deletes);
+      }
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
       const result_sets = await selectAllFrom(props.table!, conn.id, getConnection().idx);
       updateContentTab('data', {
         result_sets: result_sets.map((id) => ({ id })),
       });
-      setChanges(defaultChanges);
-      notify(t('console.table.successfully_updated', { count: Object.keys(changes).length }), 'success');
+      Object.keys(changes).forEach((key) => {
+        const count = Object.keys(changes[key as keyof typeof changes]).length;
+        if (count) notify(t(`console.table.successfull_${key}`, { count }), 'success');
+      }, 0);
+      resetChanges();
     } catch (error) {
       notify(error);
     }
   };
 
-  const resetChanges = async () => {
+  const resetChanges = () => {
+    setChanges(
+      produce((s) => {
+        s.update = {};
+        s.delete = {};
+        s.add = {};
+      })
+    );
+  };
+
+  const resetTable = () => {
+    setTable(
+      produce((t) => {
+        t.columns = [];
+        t.foreign_keys = [];
+        t.primary_key = [];
+        t.name = '';
+      })
+    );
+  };
+
+  const undoChanges = async () => {
     const undoSize = gridRef.api?.getCurrentUndoSize();
     for (let i = 0; i < undoSize!; i++) {
       gridRef.api?.undoCellEditing();
     }
-    setChanges(defaultChanges);
+    resetChanges();
   };
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const updateConditions = primaryKey().reduce((acc, c) => {
+      const condition = table.primary_key.reduce((acc, c) => {
         const col = getAnyCase(c, 'column_name');
-        return { ...acc, [col]: drawerOpen.data[col] };
+        return { ...acc, [col]: e.data[col] };
       }, {});
       const change = e.column.getColId();
-      setChanges((s) => ({
-        ...s,
-        updates: {
-          ...s.updates,
-          [e.rowIndex ?? '']: {
-            updateConditions,
-            changes: { ...s['updates'][e.rowIndex ?? '']?.changes, [change]: e.newValue },
-          },
-        },
-      }));
+      const idx = String(e.rowIndex);
+      setChanges('update', idx, {
+        condition,
+        changes: { [change]: e.newValue },
+      });
     }
   };
 
   const saveForm = async () => {
-    const updateConditions = primaryKey().reduce((acc, c) => {
+    if (!drawerOpen.data) return;
+    const condition = table.primary_key.reduce((acc, c) => {
       const col = getAnyCase(c, 'column_name');
       return { ...acc, [col]: drawerOpen.data[col] };
     }, {});
-    setChanges((c) => ({
-      ...c,
-      updates: {
-        ...c.updates,
-        [drawerOpen.rowIndex]: {
-          updateConditions,
-          changes: drawerOpen.data,
-        },
-      },
-    }));
+    if (drawerOpen.mode === 'add') {
+      const key = Object.values(condition).join('_');
+      setChanges('add', key, { changes: drawerOpen.data });
+    } else {
+      const idx = String(drawerOpen.rowIndex);
+      setChanges('update', idx, { condition, changes: drawerOpen.data });
+    }
     await applyChanges();
   };
 
@@ -242,9 +296,9 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         <Pagination
           {...{
             changesCount: Object.keys(changes).reduce((acc, key) => {
-              return acc + Object.keys(changes[key as 'updates']).length;
+              return acc + Object.keys(changes[key as keyof typeof changes]).length;
             }, 0),
-            resetChanges,
+            undoChanges,
             applyChanges,
             page,
             onNextPage,
@@ -254,6 +308,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             onPageSizeChange,
             onBtnExport,
             count: data()?.count ?? 0,
+            openDrawerForm,
           }}
         />
         <Search colDef={data()?.colDef ?? []} table={props.table ?? ''} columns={data()?.columns ?? []} />

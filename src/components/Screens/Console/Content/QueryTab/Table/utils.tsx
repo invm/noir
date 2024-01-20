@@ -1,27 +1,26 @@
 import PopupCellRenderer, { DrawerState, PopupCellRendererProps } from './PopupCellRenderer';
 import { getAnyCase } from 'utils/utils';
 import { Row } from 'interfaces';
-import { Setter, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { ColDef } from 'ag-grid-community';
 import { Key } from 'components/UI/Icons';
 import { t } from 'utils/i18n';
+import { SetStoreFunction } from 'solid-js/store';
 
 export type Changes = {
-  updates: {
+  update: {
     [rowIndex: string]: {
-      updateConditions: Row;
-      changes: {
-        [key: string]: string;
-      };
+      condition: Row;
+      changes: Row;
     };
   };
-  deletes: {
-    [deleteKey: string]: string;
-  };
-  creates: {
+  delete: {
     [rowIndex: string]: {
-      [key: string]: string;
+      condition: Row;
     };
+  };
+  add: {
+    [createKey: string]: Row;
   };
 };
 const headerComponent = (
@@ -56,6 +55,7 @@ export const getColumnDefs = ({
   setDrawerOpen,
   setChanges,
   row,
+  openDrawerForm,
 }: {
   setCode: (code: string) => void;
   setDrawerOpen: (s: DrawerState) => void;
@@ -63,13 +63,14 @@ export const getColumnDefs = ({
   foreign_keys: Row[];
   primary_key: Row[];
   editable: boolean;
-  setChanges: Setter<Changes>;
+  setChanges: SetStoreFunction<Changes>;
   row: Row;
+  openDrawerForm: (s: Pick<DrawerState, 'mode' | 'data' | 'rowIndex'>) => void;
 }): ColDef[] => {
   const cellRenderer = (p: PopupCellRendererProps) => (
     <PopupCellRenderer
       {...p}
-      {...{ setChanges, editable, setCode, setDrawerOpen, columns, foreign_keys, primary_key }}
+      {...{ setChanges, editable, setCode, setDrawerOpen, columns, foreign_keys, primary_key, openDrawerForm }}
     />
   );
 

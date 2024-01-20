@@ -1,15 +1,16 @@
 import { createShortcut } from '@solid-primitives/keyboard';
 import { Key } from 'components/UI/Icons';
-import { NumericTypes, Row } from 'interfaces';
+import { NumericTypes } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
 import { t } from 'utils/i18n';
 import { getAnyCase } from 'utils/utils';
+import { DrawerState } from './PopupCellRenderer';
 
 type DrawerProps = {
-  drawerOpen: { open: boolean; data: Row; columns: Row[]; foreign_keys: Row[], primary_key: Row[] };
-  setDrawerOpen: SetStoreFunction<{ open: boolean; data: Row; columns: Row[]; foreign_keys: Row[] }>;
+  drawerOpen: DrawerState;
+  setDrawerOpen: SetStoreFunction<DrawerState>;
   table: string;
   saveForm: () => void;
 };
@@ -40,16 +41,12 @@ export const Drawer = (props: DrawerProps) => {
           class="drawer-overlay !cursor-default"></label>
         <div class="bg-base-200  min-h-full w-3/12 overflow-auto h-full p-3">
           <div>
-            <span class="text-lg font-bold mb-4">{t('console.table.editing', { table: props.table })}</span>
-            <For each={Object.keys(props.drawerOpen.data)}>
-              {(field) => {
-                const col =
-                  props.drawerOpen.columns.find((c) => {
-                    const t = getAnyCase(c, 'column_name');
-                    if (t === field) {
-                      return true;
-                    }
-                  }) ?? {};
+            <span class="text-lg font-bold mb-4">
+              {t(`console.table.${props.drawerOpen.mode}`, { table: props.table })}
+            </span>
+            <For each={props.drawerOpen.columns}>
+              {(col) => {
+                const field = getAnyCase(col, 'column_name');
                 const visible_type = getAnyCase(col, 'column_type') || '';
                 const isEnum = visible_type.includes('enum');
                 const enumValues = isEnum
@@ -70,11 +67,11 @@ export const Drawer = (props: DrawerProps) => {
                   <div class="flex flex-col">
                     <div class="flex justify-between items-center mt-2 w-full">
                       <span class="text-sm font-semibold flex items-center">
-                      <Show when={pk || fk}>
-                        <span class="mr-1">
-                          <Key color={pk ? 'success' : 'warning'} />
-                        </span>
-                      </Show>
+                        <Show when={pk || fk}>
+                          <span class="mr-1">
+                            <Key color={pk ? 'success' : 'warning'} />
+                          </span>
+                        </Show>
                         {field}
                       </span>
                       <span class="text-sm font-light">{display_type}</span>
@@ -83,7 +80,7 @@ export const Drawer = (props: DrawerProps) => {
                       <Match when={isEnum}>
                         <select
                           // @ts-ignore
-                          value={props.drawerOpen.data[field]}>
+                          value={props.drawerOpen.data[field] ?? ''}>
                           <For each={enumValues}>
                             {(value) => {
                               return <option value={value}>{value}</option>;
@@ -95,26 +92,20 @@ export const Drawer = (props: DrawerProps) => {
                         <input
                           type="number"
                           // @ts-ignore
-                          value={props.drawerOpen.data[field]}
+                          value={props.drawerOpen.data[field] ?? 0}
                           class="input input-bordered border-base-content input-xs"
                           onChange={(e) => {
-                            props.setDrawerOpen({
-                              open: true,
-                              data: { ...props.drawerOpen.data, [field]: e.target.value },
-                            });
+                            props.setDrawerOpen('data', field, e.target.value);
                           }}
                         />
                       </Match>
                       <Match when={isTextArea}>
                         <textarea
                           // @ts-ignore
-                          value={props.drawerOpen.data[field]}
+                          value={props.drawerOpen.data[field] ?? ''}
                           class="input min-h-[100px] input-bordered border-base-content input-xs"
                           onChange={(e) => {
-                            props.setDrawerOpen({
-                              open: true,
-                              data: { ...props.drawerOpen.data, [field]: e.target.value },
-                            });
+                            props.setDrawerOpen('data', field, e.target.value);
                           }}
                         />
                       </Match>
@@ -122,13 +113,10 @@ export const Drawer = (props: DrawerProps) => {
                         <input
                           type="text"
                           // @ts-ignore
-                          value={props.drawerOpen.data[field]}
+                          value={props.drawerOpen.data[field] ?? ''}
                           class="input input-bordered border-base-content input-xs"
                           onChange={(e) => {
-                            props.setDrawerOpen({
-                              open: true,
-                              data: { ...props.drawerOpen.data, [field]: e.target.value },
-                            });
+                            props.setDrawerOpen('data', field, e.target.value);
                           }}
                         />
                       </Match>
@@ -139,9 +127,11 @@ export const Drawer = (props: DrawerProps) => {
             </For>
             <div class="pt-10"></div>
           </div>
-          <button onClick={props.saveForm} class="bottom-0 right-0 btn btn-primary btn-block btn-xs">
-            {t('console.actions.apply')} ({cmdOrCtrl(true)} + S)
-          </button>
+          <div class="pb-20">
+            <button onClick={props.saveForm} class="bottom-0 right-0 btn btn-primary btn-block btn-xs">
+              {t('console.actions.apply')} ({cmdOrCtrl(true)} + S)
+            </button>
+          </div>
         </div>
       </div>
     </div>

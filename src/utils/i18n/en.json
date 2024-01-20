@@ -65,8 +65,11 @@
         },
         "primary_key": "Primary key",
         "foreign_key": "Foreign key -> {{table}}.{{column}}",
-        "editing": "Editing {{table}}",
-        "successfully_updated": "Successfully updated {{count}} row/s",
+        "edit": "Editing {{table}}",
+        "add": "Adding to {{table}}",
+        "successfull_add": "Successfully added {{count}} row/s",
+        "successfull_delete": "Successfully deleted {{count}} row/s",
+        "successfull_update": "Successfully updated {{count}} row/s",
         "csv": "Export to CSV",
         "json": "Export to JSON",
         "total_rows": "Total rows: "

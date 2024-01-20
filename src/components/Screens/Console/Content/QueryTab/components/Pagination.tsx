@@ -17,7 +17,7 @@ type PaginationProps = {
   onNextPage: () => void;
   onBtnExport: (t: 'csv' | 'json') => void;
   applyChanges: () => void;
-  resetChanges: () => void;
+  undoChanges: () => void;
   count: number;
 };
 
@@ -83,7 +83,7 @@ export const Pagination = (props: PaginationProps) => {
         <div class="flex items-center">
           <Show when={props.changesCount > 0}>
             <div class="px-2 gap-4 flex">
-              <button class="btn btn-xs btn-outline" onClick={props.resetChanges}>
+              <button class="btn btn-xs btn-outline" onClick={props.undoChanges}>
                 {t('console.actions.reset')}
               </button>
               <button onClick={props.applyChanges} class="btn btn-xs btn-outline btn-error">

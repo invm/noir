@@ -1,11 +1,12 @@
 import { GridApi } from 'ag-grid-community';
 import { Row } from 'interfaces';
-import { createSignal, For, Setter } from 'solid-js';
+import { createSignal, For } from 'solid-js';
 import { tippy } from 'solid-tippy';
-import { parseObjRecursive } from 'utils/utils';
+import { getAnyCase, parseObjRecursive } from 'utils/utils';
 import { writeText } from '@tauri-apps/api/clipboard';
 import { t } from 'utils/i18n';
 import { Changes } from './utils';
+import { SetStoreFunction } from 'solid-js/store';
 tippy;
 
 const rowsActions = [
@@ -22,12 +23,13 @@ type RowAction = (typeof rowsActions)[number]['action'];
 
 export type DrawerState = {
   open: boolean;
+  mode: 'add' | 'edit';
   data: Row;
   columns: Row[];
-  foreign_keys: Row[],
-  primary_key: Row[],
-  rowIndex: number,
-}
+  foreign_keys: Row[];
+  primary_key: Row[];
+  rowIndex?: number;
+};
 
 export type PopupCellRendererProps = {
   setCode: (s: string) => void;
@@ -40,9 +42,10 @@ export type PopupCellRendererProps = {
   editable: boolean;
   setDrawerOpen: (s: DrawerState) => void;
   columns: Row[];
-  foreign_keys: Row[], 
-  primary_key: Row[],
-  setChanges: Setter<Changes>;
+  foreign_keys: Row[];
+  primary_key: Row[];
+  setChanges: SetStoreFunction<Changes>;
+  openDrawerForm: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
 };
 
 const PopupCellRenderer = (props: PopupCellRendererProps) => {
@@ -81,15 +84,19 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     }
 
     if (option === 'add-row') {
-      props.api.applyTransaction({
-        add: [{}],
+      props.openDrawerForm({
+        data: {},
+        mode: 'add',
       });
     }
 
     if (option === 'delete-row') {
-      // console.log(props.node.id);
-      props.api.applyTransaction({ remove: [props.data] });
-      // props.setChanges('deletes', props.node.id);
+      const condition = props.primary_key.reduce((acc, c) => {
+        const col = getAnyCase(c, 'column_name');
+        return { ...acc, [col]: props.data[col] };
+      }, {});
+      const key = Object.values(condition).join('_');
+      props.setChanges('delete', key, { condition });
     }
 
     if (option === 'edit-cell') {
@@ -100,13 +107,10 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     }
 
     if (option === 'edit-row') {
-      props.setDrawerOpen({
-        data: props.data, 
-        columns: props.columns,
-        open: true,
-        foreign_keys: props.foreign_keys,
-        primary_key: props.primary_key,
-        rowIndex: props.rowIndex
+      props.openDrawerForm({
+        data: props.data,
+        mode: 'edit',
+        rowIndex: props.rowIndex,
       });
     }
   };
