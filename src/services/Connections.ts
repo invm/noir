@@ -61,7 +61,8 @@ export const newContentTab = <T extends ContentComponentKeys>(label: string, key
           table: label,
           columns: [],
           indices: [],
-          constraints: [],
+          foreign_keys: [],
+          primary_key: [],
           triggers: [],
         },
         key,
@@ -83,7 +84,7 @@ export type TableStructureContentTabData = {
   [TableEntity.columns]: Row[];
   [TableEntity.indices]: Row[];
   [TableEntity.triggers]: Row[];
-  [TableEntity.constraints]: Row[];
+  [TableEntity.foreign_keys]: Row[];
 };
 
 export type DataContentTabData = {
@@ -93,7 +94,6 @@ export type DataContentTabData = {
 
 export type ContentTabType = {
   label: string;
-  error?: string;
 } & (
     | {
       key: typeof ContentTab.Query;
@@ -197,7 +197,7 @@ export const ConnectionsService = () => {
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (store.tabs.length === 10) return;
     if (store.tabs.find((t) => t.id === tab.id)) {
-      setStore('idx', store.tabs.findIndex((t) => t.id === tab.id) + 1);
+      setStore('idx', store.tabs.findIndex((t) => t.id === tab.id));
       return;
     }
     setStore(
@@ -228,7 +228,7 @@ export const ConnectionsService = () => {
   };
 
   const removeConnectionTab = async (id: string) => {
-    setStore('idx', 0);
+    setStore('idx', -1);
     setStore(
       'tabs',
       store.tabs.filter((t) => t.id !== id)
@@ -242,12 +242,12 @@ export const ConnectionsService = () => {
   };
 
   const getConnection = () => {
-    return store.tabs[store.idx];
+    return store.tabs?.[store.idx] ?? {};
   };
 
   const getContent = () => {
     const conn = getConnection();
-    return conn.tabs[conn.idx];
+    return conn.tabs?.[conn.idx] ?? {};
   };
 
   const getContentData = <T extends keyof ContentTabData>(_key: T) => {
@@ -338,7 +338,7 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const updateContentTab = <T extends keyof ContentTabType>(key: T, data: ContentTabType[T], idx?: number) => {
+  const updateContentTab = <T extends 'data'>(key: T, data: ContentTabType[T], idx?: number) => {
     const tab = getContent();
     if (!tab) return;
     const tabIdx = idx ?? getConnection().idx;
@@ -380,6 +380,7 @@ export const ConnectionsService = () => {
 
   const getSchemaEntity = <T extends keyof Schema>(entity: T): Schema[T] => {
     const schema = getConnection().selectedSchema;
+    if (!schema) return [];
     if (entity === 'tables') {
       return getConnection().definition[schema]?.['tables'] ?? [];
     }

@@ -1,6 +1,6 @@
 import { createShortcut } from '@solid-primitives/keyboard';
 import { Key } from 'components/UI/Icons';
-import { NumerticTypes, Row } from 'interfaces';
+import { NumericTypes, Row } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
@@ -8,8 +8,8 @@ import { t } from 'utils/i18n';
 import { getAnyCase } from 'utils/utils';
 
 type DrawerProps = {
-  drawerOpen: { open: boolean; data: Row; columns: Row[]; constraints: Row[] };
-  setDrawerOpen: SetStoreFunction<{ open: boolean; data: Row; columns: Row[]; constraints: Row[] }>;
+  drawerOpen: { open: boolean; data: Row; columns: Row[]; foreign_keys: Row[], primary_key: Row[] };
+  setDrawerOpen: SetStoreFunction<{ open: boolean; data: Row; columns: Row[]; foreign_keys: Row[] }>;
   table: string;
   saveForm: () => void;
 };
@@ -42,36 +42,40 @@ export const Drawer = (props: DrawerProps) => {
           <div>
             <span class="text-lg font-bold mb-4">{t('console.table.editing', { table: props.table })}</span>
             <For each={Object.keys(props.drawerOpen.data)}>
-              {(key) => {
+              {(field) => {
                 const col =
                   props.drawerOpen.columns.find((c) => {
                     const t = getAnyCase(c, 'column_name');
-                    if (t === key) {
+                    if (t === field) {
                       return true;
                     }
                   }) ?? {};
-                const type = getAnyCase(col, 'column_type');
-                const isEnum = type.includes('enum');
+                const visible_type = getAnyCase(col, 'column_type') || '';
+                const isEnum = visible_type.includes('enum');
                 const enumValues = isEnum
-                  ? type.replace('enum(', '').replace(')', '').replace(/'/g, '').split(',')
+                  ? visible_type.replace('enum(', '').replace(')', '').replace(/'/g, '').split(',')
                   : [];
-                const isKey = !!props.drawerOpen.constraints.find((c) => {
+                const fk = !!props.drawerOpen.foreign_keys.find((c) => {
                   const t = getAnyCase(c, 'column_name');
-                  return t === key;
+                  return t === field;
                 });
-                const isNumber = NumerticTypes.some((t) => type.includes(t));
-                const display_type = isEnum ? 'enum' : type;
-                const isTextArea = ['json', 'text'].includes(type);
+                const pk = !!props.drawerOpen.primary_key.find((c) => {
+                  const t = getAnyCase(c, 'column_name');
+                  return t === field;
+                });
+                const isNumber = NumericTypes.some((t) => visible_type.includes(t));
+                const display_type = isEnum ? 'enum' : visible_type;
+                const isTextArea = ['json', 'text'].includes(visible_type);
                 return (
                   <div class="flex flex-col">
                     <div class="flex justify-between items-center mt-2 w-full">
                       <span class="text-sm font-semibold flex items-center">
-                        <Show when={isKey}>
-                          <span class="mr-1">
-                            <Key />
-                          </span>
-                        </Show>
-                        {key}
+                      <Show when={pk || fk}>
+                        <span class="mr-1">
+                          <Key color={pk ? 'success' : 'warning'} />
+                        </span>
+                      </Show>
+                        {field}
                       </span>
                       <span class="text-sm font-light">{display_type}</span>
                     </div>
@@ -79,7 +83,7 @@ export const Drawer = (props: DrawerProps) => {
                       <Match when={isEnum}>
                         <select
                           // @ts-ignore
-                          value={props.drawerOpen.data[key]}>
+                          value={props.drawerOpen.data[field]}>
                           <For each={enumValues}>
                             {(value) => {
                               return <option value={value}>{value}</option>;
@@ -91,12 +95,12 @@ export const Drawer = (props: DrawerProps) => {
                         <input
                           type="number"
                           // @ts-ignore
-                          value={props.drawerOpen.data[key]}
+                          value={props.drawerOpen.data[field]}
                           class="input input-bordered border-base-content input-xs"
                           onChange={(e) => {
                             props.setDrawerOpen({
                               open: true,
-                              data: { ...props.drawerOpen.data, [key]: e.target.value },
+                              data: { ...props.drawerOpen.data, [field]: e.target.value },
                             });
                           }}
                         />
@@ -104,12 +108,12 @@ export const Drawer = (props: DrawerProps) => {
                       <Match when={isTextArea}>
                         <textarea
                           // @ts-ignore
-                          value={props.drawerOpen.data[key]}
+                          value={props.drawerOpen.data[field]}
                           class="input min-h-[100px] input-bordered border-base-content input-xs"
                           onChange={(e) => {
                             props.setDrawerOpen({
                               open: true,
-                              data: { ...props.drawerOpen.data, [key]: e.target.value },
+                              data: { ...props.drawerOpen.data, [field]: e.target.value },
                             });
                           }}
                         />
@@ -118,12 +122,12 @@ export const Drawer = (props: DrawerProps) => {
                         <input
                           type="text"
                           // @ts-ignore
-                          value={props.drawerOpen.data[key]}
+                          value={props.drawerOpen.data[field]}
                           class="input input-bordered border-base-content input-xs"
                           onChange={(e) => {
                             props.setDrawerOpen({
                               open: true,
-                              data: { ...props.drawerOpen.data, [key]: e.target.value },
+                              data: { ...props.drawerOpen.data, [field]: e.target.value },
                             });
                           }}
                         />

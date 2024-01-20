@@ -1,6 +1,11 @@
-export const Key = () => {
+export const Key = (props: {color: 'success' | 'warning'}) => {
+  const styles = {
+    success: 'w-3 h-3 text-success',
+    warning: 'w-3 h-3 text-warning',
+  };
+  const cls = styles[props.color];
   return (
-    <svg class="w-3 h-3 text-info" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <svg class={cls} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path
         stroke="currentColor"
         fill="currentColor"

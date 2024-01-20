@@ -93,7 +93,8 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         "warnings": result_set.warnings,
         "info": result_set.info,
         "table": result_set.table.table,
-        "constraints": result_set.table.constraints,
+        "foreign_keys": result_set.table.foreign_keys,
+        "primary_key": result_set.table.primary_key,
         "columns": result_set.table.columns,
     })
     .to_string();

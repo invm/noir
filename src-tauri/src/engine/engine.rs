@@ -31,11 +31,20 @@ pub async fn get_columns(conn: &InitiatedConnection, table: Option<&str>) -> Res
     }
 }
 
-pub async fn get_constraints(conn: &InitiatedConnection, table: &str) -> Result<Vec<Value>> {
+
+pub async fn get_primary_key(conn: &InitiatedConnection, table: &str) -> Result<Vec<Value>> {
     match &conn.pool {
-        Mysql(pool) => mysql::tables::get_constraints(conn, &pool, table).await,
-        Postgresql(pool) => postgresql::tables::get_constraints(conn, &pool, table).await,
-        Sqlite(pool) => sqlite::tables::get_constraints(&pool, table).await,
+        Mysql(pool) => mysql::tables::get_primary_key(conn, &pool, table).await,
+        Postgresql(pool) => postgresql::tables::get_primary_key(conn, &pool, table).await,
+        Sqlite(pool) => sqlite::tables::get_primary_key(&pool, table).await,
+    }
+}
+
+pub async fn get_foreign_keys(conn: &InitiatedConnection, table: &str) -> Result<Vec<Value>> {
+    match &conn.pool {
+        Mysql(pool) => mysql::tables::get_foreign_keys(conn, &pool, table).await,
+        Postgresql(pool) => postgresql::tables::get_foreign_keys(conn, &pool, table).await,
+        Sqlite(pool) => sqlite::tables::get_foreign_keys(&pool, table).await,
     }
 }
 

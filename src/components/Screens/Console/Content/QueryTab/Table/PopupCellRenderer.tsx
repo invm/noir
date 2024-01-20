@@ -5,7 +5,7 @@ import { tippy } from 'solid-tippy';
 import { parseObjRecursive } from 'utils/utils';
 import { writeText } from '@tauri-apps/api/clipboard';
 import { t } from 'utils/i18n';
-import { Changes } from '../Results';
+import { Changes } from './utils';
 tippy;
 
 const rowsActions = [
@@ -20,6 +20,15 @@ const rowsActions = [
 
 type RowAction = (typeof rowsActions)[number]['action'];
 
+export type DrawerState = {
+  open: boolean;
+  data: Row;
+  columns: Row[];
+  foreign_keys: Row[],
+  primary_key: Row[],
+  rowIndex: number,
+}
+
 export type PopupCellRendererProps = {
   setCode: (s: string) => void;
   api: GridApi;
@@ -29,9 +38,10 @@ export type PopupCellRendererProps = {
   value: string;
   column: { getColId: () => string };
   editable: boolean;
-  openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
+  setDrawerOpen: (s: DrawerState) => void;
   columns: Row[];
-  constraints: Row[];
+  foreign_keys: Row[], 
+  primary_key: Row[],
   setChanges: Setter<Changes>;
 };
 
@@ -90,7 +100,14 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     }
 
     if (option === 'edit-row') {
-      props.openDrawer(props.data, props.columns, props.rowIndex, props.constraints);
+      props.setDrawerOpen({
+        data: props.data, 
+        columns: props.columns,
+        open: true,
+        foreign_keys: props.foreign_keys,
+        primary_key: props.primary_key,
+        rowIndex: props.rowIndex
+      });
     }
   };
 

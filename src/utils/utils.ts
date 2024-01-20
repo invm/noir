@@ -14,7 +14,7 @@ export const randomId = () => {
 
 export const getAnyCase = (obj: Row, key: string) => {
   if (typeof obj !== 'object') return '';
-  return (obj[key] ? obj[key] : obj[key.toUpperCase()]) as string;
+  return (obj[key.toLowerCase()] ? obj[key.toLowerCase()] : obj[key.toUpperCase()]) as string;
 };
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {

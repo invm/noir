@@ -63,6 +63,8 @@
           "add_row": "Add row",
           "delete_row": "Delete row"
         },
+        "primary_key": "Primary key",
+        "foreign_key": "Foreign key -> {{table}}.{{column}}",
         "editing": "Editing {{table}}",
         "successfully_updated": "Successfully updated {{count}} row/s",
         "csv": "Export to CSV",
@@ -121,7 +123,7 @@
     "table_structure_tab": {
       "columns": "Columns",
       "indices": "Indices",
-      "constraints": "Constraints",
+      "foreign_keys": "Foreign keys",
       "triggers": "Triggers"
     },
     "update_toast": {

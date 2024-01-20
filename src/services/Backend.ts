@@ -27,11 +27,14 @@ export const BackendService = () => {
   };
 
   const selectAllFrom = async (table: string, connId: string, tabIdx: number) => {
-    const [pkey] = await invoke<RawQueryResult>('get_constraints', {
+    const pk = await invoke<RawQueryResult>('get_primary_key', {
       connId,
       table,
     });
-    const sql = select().from(table).orderBy(getAnyCase(pkey, 'column_name')).toString();
+    const sql = select()
+      .from(table)
+      .orderBy(...pk.map((c) => getAnyCase(c, 'column_name')))
+      .toString();
     const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
       connId,
       sql,

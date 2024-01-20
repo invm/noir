@@ -2,23 +2,26 @@ use anyhow::Result;
 use deadpool_sqlite::Pool;
 use futures::try_join;
 use serde_json::{json, Value};
+use tracing::info;
 
 use super::query::raw_query;
 
 pub async fn get_table_structure(pool: &Pool, table: String) -> Result<Value> {
-    let (columns, constraints, triggers, indices) = try_join!(
+    let (columns, foreign_keys, triggers, indices, pk) = try_join!(
         get_columns(pool, Some(&table)),
-        get_constraints(pool, &table),
+        get_foreign_keys(pool, &table),
         get_triggers(pool, Some(&table)),
         get_indices(pool, &table),
+        get_primary_key(pool, &table),
     )?;
 
     let result = json!({
         "table": table,
         "columns": columns,
-        "constraints": constraints,
+        "foreign_keys": foreign_keys,
         "indices": indices,
         "triggers": triggers,
+        "primary_key": pk,
     });
 
     Ok(result)
@@ -42,31 +45,55 @@ pub async fn get_columns(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>>
 
 async fn get_table_columns(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let query = format!("PRAGMA table_info('{}');", table);
-    let mut columns = raw_query(pool, &query).await?;
-    columns.iter_mut().for_each(|column| {
-        let column = column.as_object_mut().unwrap();
-        column.insert("table_name".to_string(), table.to_string().into());
-        column.insert("column_type".to_string(), column["type"].clone());
-        column.remove("type");
-        column.insert("column_name".to_string(), column["name"].clone());
-        column.remove("name");
+    let columns = raw_query(pool, &query).await?;
+    let mut res = vec![];
+    columns.iter().for_each(|column| {
+        let column = column.as_object().unwrap();
+        info!("column: {:?}", column);
+        res.push(json!({
+            "column_name": column["name"],
+            "column_type": column["type"],
+            "is_nullable": column["notnull"] == json!(0),
+            "column_default": column["dflt_value"],
+            "table_name": table.to_string(),
+            "primary_key": column["pk"],
+        }));
     });
-    Ok(columns)
+    Ok(res)
 }
 
-pub async fn get_constraints(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+pub async fn get_primary_key(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let columns = get_table_columns(pool, table).await?;
-    let pk = columns
+    let pks = columns
         .iter()
-        .filter(|c| c["pk"].as_bool().unwrap())
+        .filter(|c| c["primary_key"] == json!(1))
         .map(|c| c.clone())
         .collect::<Vec<_>>();
-    Ok(pk)
+    Ok(pks)
+}
+
+pub async fn get_foreign_keys(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+    let query = format!("PRAGMA foreign_key_list('{}');", table);
+    let fks = raw_query(pool, &query).await?;
+    let fks = fks
+        .iter()
+        .map(|fk| {
+            json!({
+                "constraint_name": fk["id"],
+                "constraint_type": "FOREIGN KEY",
+                "table_name": table,
+                "column_name": fk["from"],
+                "referenced_table_name": fk["table"],
+                "referenced_column_name": fk["to"],
+            })
+        })
+        .collect::<Vec<_>>();
+    Ok(fks)
 }
 
 pub async fn get_indices(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let query = "SELECT * FROM sqlite_master WHERE type = 'index'";
-    let query = format!("{} and tablename = '{}';", query, table);
+    let query = format!("{} and tbl_name = '{}';", query, table);
     Ok(raw_query(pool, &query).await?)
 }
 

@@ -54,7 +54,6 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@iarna/toml": "^2.2.5",
     "@tauri-apps/cli": "^1.4.0",
     "@types/node": "^20.3.2",
     "@typescript-eslint/eslint-plugin": "^6.7.5",

@@ -111,11 +111,6 @@ export const Search = (props: SearchProps) => {
       let query = sql.select().from(props.table);
       if (value) query = query.where(where);
       const conn = getConnection();
-      // TODO: add table to this call to retrieve columns and constraints
-      // const res = await invoke<ResultSet>('execute_query', {
-      //   connId: getConnection().id,
-      //   query,
-      // });
       const { result_sets: res } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
         connId: conn.id,
         sql: query.toString(),

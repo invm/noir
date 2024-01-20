@@ -73,7 +73,7 @@ export const connectionColors = [
   'rose',
 ] as const;
 
-export const NumerticTypes = ['int', 'long', 'float', 'double', 'decimal', 'numeric', 'real', 'number', 'serial', 'short'] as const;
+export const NumericTypes = ['int', 'long', 'float', 'double', 'decimal', 'numeric', 'real', 'number', 'serial', 'short'] as const;
 
 export type ConnectionColor = (typeof connectionColors)[number];
 
@@ -88,7 +88,8 @@ export type ResultSet = {
   warnings?: number;
   rows?: Row[];
   table?: string;
-  constraints?: Row[];
+  foreign_keys?: Row[];
+  primary_key?: Row[];
   columns?: Row[];
 } & (
     | {
@@ -141,7 +142,7 @@ export type RawQueryResult = Row[];
 export const TableEntity = {
   columns: 'columns',
   indices: 'indices',
-  constraints: 'constraints',
+  foreign_keys: 'foreign_keys',
   triggers: 'triggers',
 } as const;
 
@@ -150,7 +151,7 @@ export type TableStrucureEntityType = keyof typeof TableEntity;
 export const TableStrucureEntities = [
   TableEntity.columns,
   TableEntity.indices,
-  TableEntity.constraints,
+  TableEntity.foreign_keys,
   TableEntity.triggers,
 ] as const;
 

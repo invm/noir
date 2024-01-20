@@ -12,19 +12,21 @@ pub async fn get_table_structure(
     pool: &Pool,
     table: String,
 ) -> Result<Value> {
-    let (columns, constraints, triggers, indices) = try_join!(
+    let (columns, foreign_keys, triggers, indices, pk) = try_join!(
         get_columns(conn, pool, Some(&table)),
-        get_constraints(conn, pool, &table),
+        get_foreign_keys(conn, pool, &table),
         get_triggers(conn, pool, Some(&table)),
         get_indices(conn, pool, &table),
+        get_primary_key(conn, pool, &table),
     )?;
 
     let result = json!({
         "table": table,
         "columns": columns,
-        "constraints": constraints,
+        "foreign_keys": foreign_keys,
         "indices": indices,
         "triggers": triggers,
+        "primary_key": pk,
     });
 
     Ok(result)
@@ -38,12 +40,7 @@ pub async fn get_columns(
     let schema = conn.get_schema();
     let query = format!(
         "SELECT 
-        TABLE_SCHEMA,
-        TABLE_NAME,
         COLUMN_NAME, 
-        ORDINAL_POSITION, 
-        COLUMN_DEFAULT,
-        IS_NULLABLE,
         DATA_TYPE, 
         CASE
             WHEN character_maximum_length is not null  and udt_name != 'text'
@@ -54,19 +51,27 @@ pub async fn get_columns(
               CONCAT(udt_name, concat('(', concat(datetime_precision::varchar(255), ')')))
             ELSE udt_name
         END as COLUMN_TYPE,
+        IS_NULLABLE,
+        COLUMN_DEFAULT,
         CHARACTER_MAXIMUM_LENGTH,
-        CHARACTER_OCTET_LENGTH
+        CHARACTER_OCTET_LENGTH,
+        TABLE_SCHEMA,
+        ORDINAL_POSITION, 
+        TABLE_NAME
         FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{}'",
         schema
     );
     let query = match table {
-        Some(table) => format!("{} AND TABLE_NAME = '{}';", query, table),
-        None => format!("{};", query),
+        Some(table) => format!(
+            "{} AND TABLE_NAME = '{}' ORDER BY ORDINAL_POSITION;",
+            query, table
+        ),
+        None => format!("{} ORDER BY ORDINAL_POSITION;", query),
     };
     Ok(raw_query(pool.clone(), &query).await?)
 }
 
-pub async fn get_constraints(
+pub async fn get_primary_key(
     conn: &InitiatedConnection,
     pool: &Pool,
     table: &str,
@@ -82,6 +87,39 @@ pub async fn get_constraints(
         schema
     );
     let query = format!("{} AND c.table_name = '{}'", query, table);
+    Ok(raw_query(pool.clone(), &query).await?)
+}
+
+pub async fn get_foreign_keys(
+    conn: &InitiatedConnection,
+    pool: &Pool,
+    table: &str,
+) -> Result<Vec<Value>> {
+    let schema = conn.get_schema();
+    let query = format!(
+        "SELECT
+          tc.constraint_name,
+          ccu.table_name AS to_table,
+          kcu.column_name as from_column,
+          tc.table_name as from_table,
+          ccu.table_schema AS to_schema,
+          ccu.column_name AS to_column,
+          rc.update_rule as update_rule,
+          rc.delete_rule as delete_rule
+        FROM
+          information_schema.table_constraints tc
+          JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+          AND tc.table_schema = kcu.table_schema
+          JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = tc.constraint_name
+          AND ccu.table_schema = tc.table_schema
+          JOIN information_schema.referential_constraints rc on tc.constraint_name = rc.constraint_name
+          AND tc.table_schema = rc.constraint_schema
+        WHERE
+          tc.constraint_type = 'FOREIGN KEY'
+          AND tc.table_schema = '{}'",
+        schema
+    );
+    let query = format!("{} AND tc.table_name = '{}'", query, table);
     Ok(raw_query(pool.clone(), &query).await?)
 }
 
@@ -109,8 +147,7 @@ pub async fn get_indices(
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!(
-        "SELECT tablename, indexname, indexdef FROM
-                        pg_indexes WHERE schemaname = '{}'",
+        "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = '{}'",
         schema
     );
     let query = format!("{} and tablename = '{}';", query, table);
@@ -124,7 +161,9 @@ pub async fn get_triggers(
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!(
-        "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
+        "SELECT trigger_name, event_manipulation, action_timing,
+            event_object_table, action_statement, action_condition, created
+            FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
         schema
     );
     let query = match table {

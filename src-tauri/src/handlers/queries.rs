@@ -162,13 +162,23 @@ pub async fn get_columns(app_handle: AppHandle, conn_id: String) -> CommandResul
 }
 
 #[command]
-pub async fn get_constraints(
+pub async fn get_primary_key(
     app_handle: AppHandle,
     conn_id: String,
     table: String,
 ) -> CommandResult<Vec<Value>> {
     let connection = app_handle.acquire_connection(conn_id);
-    Ok(connection.get_constraints(&table).await?)
+    Ok(connection.get_primary_key(&table).await?)
+}
+
+#[command]
+pub async fn get_foreign_keys(
+    app_handle: AppHandle,
+    conn_id: String,
+    table: String,
+) -> CommandResult<Vec<Value>> {
+    let connection = app_handle.acquire_connection(conn_id);
+    Ok(connection.get_foreign_keys(&table).await?)
 }
 
 #[command]

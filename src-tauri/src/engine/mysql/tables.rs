@@ -12,19 +12,21 @@ pub async fn get_table_structure(
     pool: &Pool,
     table: String,
 ) -> Result<Value> {
-    let (columns, constraints, triggers, indices) = try_join!(
+    let (columns, foreign_keys, triggers, indices, pk) = try_join!(
         get_columns(conn, pool, Some(&table)),
-        get_constraints(conn, pool, &table),
+        get_foreign_keys(conn, pool, &table),
         get_triggers(conn, pool, Some(&table)),
         get_indices(conn, pool, &table),
+        get_primary_key(conn, pool, &table),
     )?;
 
     let result = json!({
         "table": table,
         "columns": columns,
-        "constraints": constraints,
+        "foreign_keys": foreign_keys,
         "indices": indices,
         "triggers": triggers,
+        "primary_key": pk,
     });
 
     Ok(result)
@@ -39,31 +41,34 @@ pub async fn get_columns(
     let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
-        TABLE_SCHEMA,
-        TABLE_NAME,
         COLUMN_NAME, 
         COLUMN_TYPE, 
-        ORDINAL_POSITION,
+        COLUMN_KEY,
         DATA_TYPE, 
-        CHARACTER_MAXIMUM_LENGTH,
         IS_NULLABLE,
+        COLUMN_DEFAULT,
+        CHARACTER_MAXIMUM_LENGTH,
+        ORDINAL_POSITION,
         CHARACTER_OCTET_LENGTH,
         CHARACTER_SET_NAME,
         COLLATION_NAME,
         COLUMN_COMMENT,
-        COLUMN_DEFAULT,
-        COLUMN_KEY
+        TABLE_SCHEMA,
+        TABLE_NAME
         FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{}'",
         schema
     );
     let query = match table {
-        Some(table) => format!("{} AND TABLE_NAME = '{}';", query, table),
-        None => format!("{};", query),
+        Some(table) => format!(
+            "{} AND TABLE_NAME = '{}' ORDER BY ORDINAL_POSITION;",
+            query, table
+        ),
+        None => format!("{} ORDER BY ORDINAL_POSITION;", query),
     };
     Ok(raw_query(_conn, query)?)
 }
 
-pub async fn get_constraints(
+pub async fn get_primary_key(
     conn: &InitiatedConnection,
     pool: &Pool,
     table: &str,
@@ -73,10 +78,30 @@ pub async fn get_constraints(
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION,
                          CONSTRAINT_NAME, REFERENCED_COLUMN_NAME, REFERENCED_TABLE_NAME FROM
-                         INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = '{}'",
+                         INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE CONSTRAINT_NAME = 'PRIMARY' AND TABLE_SCHEMA = '{}'",
         schema
     );
     let query = format!("{} AND TABLE_NAME = '{}'", query, table);
+    Ok(raw_query(_conn, query)?)
+}
+
+pub async fn get_foreign_keys(
+    conn: &InitiatedConnection,
+    pool: &Pool,
+    table: &str,
+) -> Result<Vec<Value>> {
+    let schema = conn.get_schema();
+    let mut _conn = pool.get_conn()?;
+    let query = format!(
+        "SELECT rc.constraint_name, kc.column_name, kc.referenced_table_name, kc.referenced_column_name,  rc.update_rule, rc.delete_rule
+            FROM information_schema.referential_constraints rc
+            JOIN information_schema.key_column_usage kc ON rc.constraint_schema = kc.table_schema
+                 AND rc.table_name = kc.table_name
+                 AND rc.constraint_name = kc.constraint_name
+            WHERE rc.constraint_schema = '{}'",
+        schema
+    );
+    let query = format!("{} AND rc.TABLE_NAME = '{}'", query, table);
     Ok(raw_query(_conn, query)?)
 }
 
@@ -103,8 +128,8 @@ pub async fn get_indices(
     let schema = conn.get_schema();
     let mut _conn = pool.get_conn()?;
     let query = format!(
-        "SELECT TABLE_SCHEMA, TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM
-                        information_schema.statistics WHERE non_unique = 1 AND table_schema = '{}'",
+        "SELECT INDEX_NAME, COLUMN_NAME, TABLE_SCHEMA, TABLE_NAME FROM
+                        information_schema.statistics WHERE table_schema = '{}'",
         schema
     );
     let query = format!("{} and TABLE_NAME = '{}';", query, table);
@@ -119,7 +144,8 @@ pub async fn get_triggers(
     let mut _conn = pool.get_conn()?;
     let schema = conn.get_schema();
     let query = format!(
-        "SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
+        "SELECT trigger_name, event_manipulation, action_timing, action_statement, created,
+            action_condition FROM INFORMATION_SCHEMA.TRIGGERS WHERE EVENT_OBJECT_SCHEMA = '{}'",
         schema
     );
     let query = match table {

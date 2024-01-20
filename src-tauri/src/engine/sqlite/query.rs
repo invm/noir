@@ -50,7 +50,8 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         rows,
         table: TableMetadata {
             table: String::from(""),
-            constraints: None,
+            foreign_keys: None,
+            primary_key: None,
             columns: None,
         },
     };

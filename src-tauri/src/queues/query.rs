@@ -98,11 +98,13 @@ pub async fn async_process_model(
         match task.conn.execute_query(&task.query).await {
             Ok(mut result_set) => {
                 if let Some(table) = task.table {
-                    let constraints = task.conn.get_constraints(&table).await?;
+                    let foreign_keys = task.conn.get_foreign_keys(&table).await?;
+                    let primary_key = task.conn.get_primary_key(&table).await?;
                     let columns = task.conn.get_columns(Some(&table)).await?;
                     result_set.table = TableMetadata {
                         table,
-                        constraints: Some(constraints),
+                        foreign_keys: Some(foreign_keys),
+                        primary_key: Some(primary_key),
                         columns: Some(columns),
                     }
                 }

@@ -71,10 +71,11 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   const [autoLimit, setAutoLimit] = createSignal(true);
 
   const updateQuery = debounce(() => {
-    updateContentTab('data', { query: code(), cursor: editorView().state.selection.ranges[0].from });
+    updateContentTab('data', { query: code(), cursor: editorView()?.state.selection.ranges[0].from ?? 0 });
   }, 300);
 
   const updateQueryText = (query: string) => {
+    if (code() === query) return;
     setCode(query);
     updateQuery();
   };
@@ -140,10 +141,11 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   };
 
   createEffect(() => {
+    if (!getConnection()) return;
     const data = getContentData('Query');
     setCode(data.query ?? '');
     setAutoLimit(data.auto_limit ?? true);
-  }, getConnection().idx);
+  }, getConnection());
 
   createEffect(() => {
     const _schema = getSchemaEntity('tables').reduce(

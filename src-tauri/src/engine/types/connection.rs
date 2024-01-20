@@ -36,8 +36,12 @@ impl InitiatedConnection {
         engine::get_columns(self, table).await
     }
 
-    pub async fn get_constraints(&self, table: &str) -> Result<Vec<Value>> {
-        engine::get_constraints(self, table).await
+    pub async fn get_foreign_keys(&self, table: &str) -> Result<Vec<Value>> {
+        engine::get_foreign_keys(self, table).await
+    }
+
+    pub async fn get_primary_key(&self, table: &str) -> Result<Vec<Value>> {
+        engine::get_primary_key(self, table).await
     }
 
     pub async fn get_functions(&self) -> Result<Vec<Value>> {

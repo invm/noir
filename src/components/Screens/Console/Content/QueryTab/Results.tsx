@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, Setter, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, Show } from 'solid-js';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
@@ -13,91 +13,17 @@ import { Loader } from 'components/UI';
 import Keymaps from 'components/UI/Keymaps';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
-import { Key } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
 import { update } from 'sql-bricks';
 import { editorThemes } from './Editor';
 import { EditorTheme } from 'services/App';
-import PopupCellRenderer, { PopupCellRendererProps } from './Table/PopupCellRenderer';
 import { tippy } from 'solid-tippy';
 import { t } from 'utils/i18n';
 import { Drawer } from './Table/Drawer';
 import { createStore } from 'solid-js/store';
 import { Search } from './components/Search';
+import { Changes, getColumnDefs } from './Table/utils';
 tippy;
-
-const getColumnDefs = ({
-  columns,
-  constraints,
-  setCode,
-  editable,
-  openDrawer,
-  setChanges,
-  row,
-}: {
-  setCode: (code: string) => void;
-  openDrawer: (row: Row, columns: Row[], rowIndex: number, constraints: Row[]) => void;
-  columns: Row[];
-  constraints: Row[];
-  editable: boolean;
-  setChanges: Setter<Changes>;
-  row: Row;
-}): ColDef[] => {
-  return (columns.length ? columns : Object.keys(row)).map((col, _i) => {
-    const name = getAnyCase(col, 'column_name') || col;
-    const key = constraints.find((c) => {
-      const t = getAnyCase(c, 'column_name');
-      return t === name;
-    });
-    const visible_type = getAnyCase(col, 'column_type') || '';
-
-    return {
-      editable: true,
-      singleClickEdit: true,
-      // checkboxSelection: _i === 0,
-      resizable: true,
-      cellRenderer: (p: PopupCellRendererProps) => (
-        <PopupCellRenderer {...p} {...{ setChanges, editable, setCode, openDrawer, columns, constraints }} />
-      ),
-      filter: true,
-      width: 300,
-      headerComponent: () => (
-        <div class="flex items-center justify-between w-full">
-          <div>
-            <span class="mr-2 text-sm">{name}</span>
-            <span class="text-xs text-base-content">{visible_type}</span>
-          </div>
-          <Show when={key}>
-            <Key />
-          </Show>
-        </div>
-      ),
-      sortable: true,
-      field: name,
-      headerName: name,
-    };
-  });
-};
-
-export type Changes = {
-  updates: {
-    [rowIndex: string]: {
-      updateKey: string;
-      updateVal: string;
-      changes: {
-        [key: string]: string;
-      };
-    };
-  };
-  deletes: {
-    [deleteKey: string]: string;
-  };
-  creates: {
-    [rowIndex: string]: {
-      [key: string]: string;
-    };
-  };
-};
 
 const defaultChanges: Changes = { updates: {}, deletes: {}, creates: {} };
 
@@ -112,14 +38,15 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     open: false,
     data: {} as Row,
     columns: [] as Row[],
-    constraints: [] as Row[],
+    foreign_keys: [] as Row[],
+    primary_key: [] as Row[],
     rowIndex: 0,
   });
   const [code, setCode] = createSignal('');
   const [page, setPage] = createSignal(0);
   const [table, setTable] = createSignal('');
-  const [changes, setChanges] = createSignal<Changes>(defaultChanges);
-  const [constraints, setConstraints] = createSignal<Row[]>([]);
+  const [changes, setChanges] = createStore<Changes>(defaultChanges);
+  const [primaryKey, setPrimaryKey] = createSignal<Row[]>([]);
 
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
@@ -132,10 +59,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
 
-  const openDrawer = (data: Row, columns: Row[], rowIndex: number, constraints: Row[]) => {
-    setDrawerOpen({ open: true, data, columns, rowIndex, constraints });
-  };
-
   const [data] = createResource(
     () => [page(), queryIdx(), pageSize(), getContentData('Query')?.result_sets] as const,
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
@@ -143,13 +66,16 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         // Reruns when either signal updates
         const result_set = result_sets[queryIdxVal];
         const columns = result_set?.columns ?? [];
-        const constraints = result_set?.constraints ?? [];
+        const foreign_keys = result_set?.foreign_keys ?? [];
+        const primary_key = result_set?.primary_key ?? [];
+        setPrimaryKey(result_set?.primary_key ?? []);
         let colDef = getColumnDefs({
           columns,
-          constraints,
+          foreign_keys,
+          primary_key,
           setCode,
           editable: !!props.editable,
-          openDrawer,
+          setDrawerOpen,
           setChanges,
           row: result_set?.rows?.[0] ?? {},
         });
@@ -160,17 +86,17 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
         }
         const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
+        setTable(result_set.table ?? '');
         colDef = getColumnDefs({
           columns,
-          constraints,
+          foreign_keys,
+          primary_key,
           setCode,
           editable: !!props.editable,
-          openDrawer,
+          setDrawerOpen,
           setChanges,
           row: rows[0] ?? {},
         });
-        setConstraints(constraints);
-        setTable(result_set.table ?? '');
         return {
           columns,
           rows,
@@ -188,7 +114,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   createEffect(() => {
     setPage(0);
-    setConstraints([]);
     setChanges(defaultChanges);
     setTable('');
   }, [queryIdx, getConnection().idx]);
@@ -210,6 +135,12 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const defaultColDef: ColDef = {
     minWidth: 30,
     suppressMovable: true,
+    editable: true,
+    sortable: true,
+    singleClickEdit: true,
+    resizable: true,
+    filter: true,
+    width: 300,
   };
 
   let gridRef: AgGridSolidRef;
@@ -227,14 +158,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   };
 
   const applyChanges = async () => {
-    const allChanges = changes();
     try {
       const conn = getConnection();
       const _table = table();
-      const queries = Object.keys(allChanges['updates'] ?? {}).map((rowIndex) => {
-        const row = allChanges['updates']?.[rowIndex];
+      const queries = Object.keys(changes['updates'] ?? {}).map((rowIndex) => {
+        const row = changes['updates']?.[rowIndex];
         return update(_table, { ...row.changes })
-          .where({ [row.updateKey]: row.updateVal })
+          .where(row.updateConditions)
           .toString();
       });
       await invoke('execute_tx', { queries, connId: conn.id });
@@ -244,7 +174,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         result_sets: result_sets.map((id) => ({ id })),
       });
       setChanges(defaultChanges);
-      notify(t('console.table.successfully_updated', { count: Object.keys(allChanges).length }), 'success');
+      notify(t('console.table.successfully_updated', { count: Object.keys(changes).length }), 'success');
     } catch (error) {
       notify(error);
     }
@@ -260,20 +190,18 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const updateCol = constraints().find((c) => getAnyCase(c, 'constraint_name') === 'PRIMARY');
-      const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(e.data)[0];
+      const updateConditions = primaryKey().reduce((acc, c) => {
+        const col = getAnyCase(c, 'column_name');
+        return { ...acc, [col]: drawerOpen.data[col] };
+      }, {});
       const change = e.column.getColId();
       setChanges((s) => ({
         ...s,
         updates: {
           ...s.updates,
           [e.rowIndex ?? '']: {
-            updateKey,
-            updateVal: e.data[updateKey],
-            changes: {
-              ...s['updates'][e.rowIndex ?? '']?.changes,
-              [change]: e.newValue,
-            },
+            updateConditions,
+            changes: { ...s['updates'][e.rowIndex ?? '']?.changes, [change]: e.newValue },
           },
         },
       }));
@@ -281,15 +209,16 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   };
 
   const saveForm = async () => {
-    const updateCol = constraints().find((c) => +getAnyCase(c, 'ordinal_position') === 1);
-    const updateKey = updateCol ? getAnyCase(updateCol, 'column_name') : Object.keys(drawerOpen.data)[0];
+    const updateConditions = primaryKey().reduce((acc, c) => {
+      const col = getAnyCase(c, 'column_name');
+      return { ...acc, [col]: drawerOpen.data[col] };
+    }, {});
     setChanges((c) => ({
       ...c,
       updates: {
         ...c.updates,
         [drawerOpen.rowIndex]: {
-          updateKey,
-          updateVal: drawerOpen.data[updateKey],
+          updateConditions,
           changes: drawerOpen.data,
         },
       },
@@ -312,8 +241,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       <div class="flex flex-col">
         <Pagination
           {...{
-            changesCount: Object.keys(changes()).reduce((acc, key) => {
-              return acc + Object.keys(changes()[key as 'updates']).length;
+            changesCount: Object.keys(changes).reduce((acc, key) => {
+              return acc + Object.keys(changes[key as 'updates']).length;
             }, 0),
             resetChanges,
             applyChanges,
