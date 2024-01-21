@@ -40,9 +40,6 @@ export type PopupCellRendererProps = {
   value: string;
   column: { getColId: () => string };
   editable: boolean;
-  setDrawerOpen: (s: DrawerState) => void;
-  columns: Row[];
-  foreign_keys: Row[];
   primary_key: Row[];
   setChanges: SetStoreFunction<Changes>;
   openDrawerForm: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;

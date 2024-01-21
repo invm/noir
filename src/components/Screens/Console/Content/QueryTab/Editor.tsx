@@ -1,5 +1,5 @@
 import { createCodeMirror, createEditorControlledValue, createEditorFocus } from 'solid-codemirror';
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, on } from 'solid-js';
 import { EditorView, drawSelection, highlightWhitespace, highlightActiveLine } from '@codemirror/view';
 import { MySQL, sql, SQLite, PostgreSQL } from '@codemirror/lang-sql';
 
@@ -65,6 +65,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
+  const idx = () => store.idx;
   const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
@@ -140,23 +141,22 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     navigator.clipboard.writeText(code());
   };
 
-  createEffect(() => {
-    if (!getConnection()) return;
-    const data = getContentData('Query');
-    setCode(data.query ?? '');
-    setAutoLimit(data.auto_limit ?? true);
-  }, getConnection());
-
-  createEffect(() => {
-    const _schema = getSchemaEntity('tables').reduce(
-      (acc, table) => ({
-        ...acc,
-        [table.name]: table.columns.map(({ name }) => name),
-      }),
-      {}
-    );
-    setSchema(_schema);
-  }, store.idx);
+  createEffect(
+    on(idx, () => {
+      if (idx() === -1) return;
+      const _schema = getSchemaEntity('tables').reduce(
+        (acc, table) => ({
+          ...acc,
+          [table.name]: table.columns.map(({ name }) => name),
+        }),
+        {}
+      );
+      setSchema(_schema);
+      const data = getContentData('Query');
+      setCode(data.query ?? '');
+      setAutoLimit(data.auto_limit ?? true);
+    })
+  );
 
   createShortcut(['Control', 'k'], () => {
     if (focused() && vimModeOn()) {

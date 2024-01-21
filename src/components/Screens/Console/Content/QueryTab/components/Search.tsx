@@ -90,7 +90,7 @@ export const Search = (props: SearchProps) => {
     if (props.colDef.length > 0 && !formData().column) {
       setFieldValue('column', props.colDef[0].headerName);
     }
-  }, [props.colDef]);
+  });
 
   const submit = async (event: Event) => {
     try {

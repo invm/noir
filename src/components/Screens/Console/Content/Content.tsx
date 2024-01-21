@@ -11,6 +11,8 @@ export const Content = () => {
     connections: { setContentIdx, getConnection, addContentTab, removeContentTab, getContent },
   } = useAppSelector();
 
+  const key = () => getContent().key;
+
   return (
     <div class="flex flex-col h-full">
       <div class="bg-base-300 tabs gap-1">
@@ -36,13 +38,13 @@ export const Content = () => {
       </div>
       <div class="h-full w-full">
         <Switch>
-          <Match when={getContent().key === ContentTab.Query}>
+          <Match when={key() === ContentTab.Query}>
             <QueryTab />
           </Match>
-          <Match when={getContent().key === ContentTab.TableStructure}>
+          <Match when={key() === ContentTab.TableStructure}>
             <TableStructureTab tabIdx={getConnection().idx} />
           </Match>
-          <Match when={getContent().key === ContentTab.Data}>
+          <Match when={key() === ContentTab.Data}>
             <DataTab />
           </Match>
         </Switch>

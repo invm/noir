@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
 import { search } from '@codemirror/search';
 import { basicSetup, EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
@@ -52,6 +52,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     columns: [] as Row[],
   });
   const [changes, setChanges] = createStore<Changes>(defaultChanges);
+  const idx = () => getConnection().idx;
 
   const { ref, editorView, createExtension } = createCodeMirror({
     onValueChange: setCode,
@@ -93,7 +94,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           primary_key,
           setCode,
           editable: !!props.editable,
-          setDrawerOpen,
           setChanges,
           row: result_set?.rows?.[0] ?? {},
           openDrawerForm,
@@ -111,7 +111,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           primary_key,
           setCode,
           editable: !!props.editable,
-          setDrawerOpen,
           setChanges,
           row: rows[0] ?? {},
           openDrawerForm,
@@ -131,11 +130,12 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     }
   );
 
-  createEffect(() => {
-    setPage(0);
-    resetChanges();
-    resetTable();
-  }, [queryIdx, getConnection().idx]);
+  createEffect(
+    on(idx, () => {
+      setPage(0);
+      resetChanges();
+    })
+  );
 
   const onNextPage = async () => {
     if (data()?.exhausted) return;
@@ -226,17 +226,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         s.update = {};
         s.delete = {};
         s.add = {};
-      })
-    );
-  };
-
-  const resetTable = () => {
-    setTable(
-      produce((t) => {
-        t.columns = [];
-        t.foreign_keys = [];
-        t.primary_key = [];
-        t.name = '';
       })
     );
   };

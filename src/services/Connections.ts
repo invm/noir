@@ -197,7 +197,10 @@ export const ConnectionsService = () => {
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (store.tabs.length === 10) return;
     if (store.tabs.find((t) => t.id === tab.id)) {
-      setStore('idx', store.tabs.findIndex((t) => t.id === tab.id));
+      setStore(
+        'idx',
+        store.tabs.findIndex((t) => t.id === tab.id)
+      );
       return;
     }
     setStore(

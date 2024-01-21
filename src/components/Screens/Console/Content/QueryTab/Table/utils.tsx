@@ -52,16 +52,14 @@ export const getColumnDefs = ({
   primary_key,
   setCode,
   editable,
-  setDrawerOpen,
   setChanges,
   row,
   openDrawerForm,
 }: {
-  setCode: (code: string) => void;
-  setDrawerOpen: (s: DrawerState) => void;
   columns: Row[];
   foreign_keys: Row[];
   primary_key: Row[];
+  setCode: (code: string) => void;
   editable: boolean;
   setChanges: SetStoreFunction<Changes>;
   row: Row;
@@ -70,7 +68,7 @@ export const getColumnDefs = ({
   const cellRenderer = (p: PopupCellRendererProps) => (
     <PopupCellRenderer
       {...p}
-      {...{ setChanges, editable, setCode, setDrawerOpen, columns, foreign_keys, primary_key, openDrawerForm }}
+      {...{ setChanges, editable, setCode, primary_key, openDrawerForm }}
     />
   );
 
