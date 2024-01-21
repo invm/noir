@@ -94,6 +94,7 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
       }, {});
       const key = Object.values(condition).join('_');
       props.setChanges('delete', key, { condition });
+      props.api.applyTransaction({ remove: [props.data] });
     }
 
     if (option === 'edit-cell') {

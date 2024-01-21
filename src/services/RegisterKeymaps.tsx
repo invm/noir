@@ -13,23 +13,14 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
       setPrevContentIdx,
       setConnectionIdx,
     },
-    app: { setComponent, setAppStore, cmdOrCtrl },
+    app: { setComponent, setAppStore, cmdOrCtrl, altOrMeta },
   } = useAppSelector();
-  const isMac = props.osType === 'Darwin';
   setAppStore({ osType: props.osType });
 
-  if (isMac) {
-    for (let i = 1; i <= 9; i++) {
-      createShortcut(['Meta', String(i)], () => {
-        setContentIdx(i - 1);
-      });
-    }
-  } else {
-    for (let i = 1; i <= 9; i++) {
-      createShortcut(['Alt', String(i)], () => {
-        setContentIdx(i - 1);
-      });
-    }
+  for (let i = 1; i <= 9; i++) {
+    createShortcut([altOrMeta(), String(i)], () => {
+      setContentIdx(i - 1);
+    });
   }
 
   createShortcut(['F1'], () => {

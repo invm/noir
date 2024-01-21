@@ -23,6 +23,7 @@ import { Drawer } from './Table/Drawer';
 import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
+import { createShortcut } from '@solid-primitives/keyboard';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -77,6 +78,10 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       rowIndex,
     });
   };
+
+  createShortcut(['Escape'], () => {
+    if (drawerOpen.open) setDrawerOpen({ open: false });
+  });
 
   const [data] = createResource(
     () => [page(), queryIdx(), pageSize(), getContentData('Query')?.result_sets] as const,
@@ -267,6 +272,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       setChanges('update', idx, { condition, changes: drawerOpen.data });
     }
     await applyChanges();
+    setDrawerOpen({ open: false, data: {} });
   };
 
   return (
@@ -297,7 +303,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             onPageSizeChange,
             onBtnExport,
             count: data()?.count ?? 0,
-            openDrawerForm,
+            openDrawerForm: props.editable ? openDrawerForm : undefined,
           }}
         />
         <Search colDef={data()?.colDef ?? []} table={props.table ?? ''} columns={data()?.columns ?? []} />

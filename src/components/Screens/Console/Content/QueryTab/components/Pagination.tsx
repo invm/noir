@@ -19,6 +19,7 @@ type PaginationProps = {
   applyChanges: () => void;
   undoChanges: () => void;
   count: number;
+  openDrawerForm?: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -27,12 +28,14 @@ export const Pagination = (props: PaginationProps) => {
   const {
     connections: { selectNextQuery, selectPrevQuery, queryIdx, getContentData },
     backend: { pageSize, setPageSize },
+    app: { altOrMeta },
   } = useAppSelector();
 
   createShortcut(['Control', 'Shift', 'N'], selectNextQuery);
   createShortcut(['Control', 'Shift', 'P'], selectPrevQuery);
   createShortcut(['Control', 'N'], props.onNextPage);
   createShortcut(['Control', 'P'], props.onPrevPage);
+  createShortcut([altOrMeta(), 'N'], () => props.openDrawerForm({ mode: 'add', data: {} }));
 
   const [resultSet, setResultSet] = createStore<ResultSet>({});
 
@@ -77,6 +80,11 @@ export const Pagination = (props: PaginationProps) => {
           <span class="text-sm text-base-content">
             {t('console.table.total_rows')} {props.count}
           </span>
+        </Show>
+        <Show when={props.openDrawerForm}>
+          <button class="btn btn-xs btn-ghost" onClick={() => props.openDrawerForm({ mode: 'add', data: {} })}>
+            {t('console.table.row_actions.add_row')}
+          </button>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>

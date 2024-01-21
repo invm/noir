@@ -66,10 +66,7 @@ export const getColumnDefs = ({
   openDrawerForm: (s: Pick<DrawerState, 'mode' | 'data' | 'rowIndex'>) => void;
 }): ColDef[] => {
   const cellRenderer = (p: PopupCellRendererProps) => (
-    <PopupCellRenderer
-      {...p}
-      {...{ setChanges, editable, setCode, primary_key, openDrawerForm }}
-    />
+    <PopupCellRenderer {...p} {...{ setChanges, editable, setCode, primary_key, openDrawerForm }} />
   );
 
   if (columns.length) {
