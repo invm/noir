@@ -14,6 +14,7 @@ Noir currently supports:
 
 - MySQL
 - Postgres
+- Sqlite
 
 ## Documentation
 
