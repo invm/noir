@@ -1,4 +1,4 @@
-export const Key = (props: {color: 'success' | 'warning'}) => {
+export const Key = (props: { color: 'success' | 'warning' }) => {
   const styles = {
     success: 'w-3 h-3 text-success',
     warning: 'w-3 h-3 text-warning',

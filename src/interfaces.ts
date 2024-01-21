@@ -91,6 +91,8 @@ export type ResultSet = {
   foreign_keys?: Row[];
   primary_key?: Row[];
   columns?: Row[];
+  start_time?: number;
+  end_time?: number;
 } & (
     | {
       path?: string;

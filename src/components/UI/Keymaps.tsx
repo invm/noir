@@ -1,6 +1,6 @@
 import { For } from 'solid-js';
 
-const keymaps = [
+const ALL_KEYMAPS = [
   { action: 'Help', keys: ['F1'] },
   { action: 'Execute query', keys: ['Ctrl', 'E/Enter'] },
   { action: 'Select tab', keys: ['Alt/Cmd', 'number'] },
@@ -9,11 +9,16 @@ const keymaps = [
   { action: 'Close current tab', keys: ['Ctrl/Cmd', 'W'] },
   { action: 'Focus on editor', keys: ['Ctrl', 'L'] },
   { action: 'Format query', keys: ['Ctrl', 'Shift', 'F'] },
+  { action: 'Trigger autocomplete in editor', keys: ['Ctrl', 'Space'] },
   { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'N/P'] },
   { action: 'Select next/previous page', keys: ['Ctrl', 'N/P'] },
+  { action: 'Add row', keys: ['Alt/Cmd', 'N'] },
 ];
 
-const Keymaps = () => {
+const LIMIT = 10;
+
+const Keymaps = (props: { short?: boolean }) => {
+  const keymaps = props.short ? ALL_KEYMAPS : ALL_KEYMAPS.slice(0, LIMIT);
   return (
     <div class="grid grid-cols-2">
       <div class="flex flex-col items-end pr-1">

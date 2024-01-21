@@ -7,7 +7,7 @@ import { ThemeCategory, THEMES } from 'services/App';
 const btnColors = {
   grid: 'btn-accent',
   ui: 'btn-primary',
-  editor: 'btn-secondary',
+  editor: 'btn-info',
 };
 
 export const ThemeSwitch = () => {

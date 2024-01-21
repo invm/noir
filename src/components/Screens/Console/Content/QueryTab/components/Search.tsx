@@ -2,13 +2,13 @@ import * as z from 'zod';
 import { useFormHandler } from 'solid-form-handler';
 import { zodSchema } from 'solid-form-handler/zod';
 import { useAppSelector } from 'services/Context';
-import { createEffect, createSignal, Match, Show, Switch } from 'solid-js';
+import { createSignal, Match, Show, Switch } from 'solid-js';
 import sql from 'sql-bricks';
 import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, Row } from 'interfaces';
-import { ColDef } from 'ag-grid-community';
 import { t } from 'utils/i18n';
 import { CloseIcon } from 'components/UI/Icons';
+import { getAnyCase } from 'utils/utils';
 
 export const SearchFormSchema = z.object({
   column: z.string().max(1024),
@@ -72,7 +72,6 @@ const COMPARISON_OPERATORS = {
 
 type SearchProps = {
   table: string;
-  colDef: ColDef[];
   columns: Row[];
 };
 
@@ -85,12 +84,6 @@ export const Search = (props: SearchProps) => {
   const [loading, setLoading] = createSignal(false);
   const formHandler = useFormHandler(zodSchema(SearchFormSchema));
   const { formData, setFieldValue } = formHandler;
-
-  createEffect(() => {
-    if (props.colDef.length > 0 && !formData().column) {
-      setFieldValue('column', props.colDef[0].headerName);
-    }
-  });
 
   const submit = async (event: Event) => {
     try {
@@ -134,15 +127,17 @@ export const Search = (props: SearchProps) => {
           <div class="col-span-3">
             <select
               onChange={(e) => setFieldValue('column', e.currentTarget.value)}
+              value={formData().column || getAnyCase(props.columns[0], 'column_name')}
               class="select select-bordered border-base-content select-sm w-full">
-              {props.colDef.map((c) => (
-                <option value={c.headerName}>{c.headerName}</option>
+              {props.columns.map((c) => (
+                <option value={getAnyCase(c, 'column_name')}>{getAnyCase(c, 'column_name')}</option>
               ))}
             </select>
           </div>
           <div class="col-span-1">
             <select
               onChange={(e) => setFieldValue('operator', e.currentTarget.value)}
+              value={formData().operator}
               class="select select-bordered border-base-content select-sm w-full">
               {Object.keys(COMPARISON_OPERATORS).map((o) => (
                 <option value={o}>{o}</option>

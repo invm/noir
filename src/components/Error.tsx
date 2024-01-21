@@ -11,7 +11,7 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
       <h2 class="text-xl font-bold text-error">{t('error.something_went_wrong')}</h2>
       <OpenIssue />
       <br />
-      <button class="btn btn-sm btn-secondary" onClick={async () => await ConnectionsService().clearStore()}>
+      <button class="btn btn-sm btn-accent" onClick={async () => await ConnectionsService().clearStore()}>
         {t('settings.clear_cache')}
       </button>
       <br />

@@ -1,10 +1,11 @@
+use crate::{
+    engine::types::result::{ResultSet, TableMetadata},
+    utils::error::Error,
+};
 use anyhow::Result;
 use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
 use serde_json::Value;
-use crate::{
-    utils::error::Error, engine::types::result::{ResultSet, TableMetadata},
-};
 
 use super::utils::row_to_object;
 
@@ -20,6 +21,10 @@ pub async fn raw_query(pool: Pool, query: &str) -> Result<Vec<Value>> {
 }
 
 pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
+    let start_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64;
     let conn = pool.get().await?;
     let params: Vec<String> = vec![];
     let it = conn.query_raw(query, &params).await?;
@@ -29,7 +34,13 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         rows.push(row_to_object(row)?);
     }
     let affected_rows = it.rows_affected().unwrap_or(0);
+    let end_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64;
     let set = ResultSet {
+        start_time,
+        end_time,
         affected_rows,
         warnings: 0,
         info: "".to_string(),

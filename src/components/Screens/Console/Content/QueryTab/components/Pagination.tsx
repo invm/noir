@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'components/UI/Icons';
 import { Alert } from 'components/UI';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
+import { DrawerState } from '../Table/PopupCellRenderer';
 
 type PaginationProps = {
   page: Accessor<number>;
@@ -20,6 +21,7 @@ type PaginationProps = {
   undoChanges: () => void;
   count: number;
   openDrawerForm?: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
+  executionTime?: number;
 };
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -35,7 +37,9 @@ export const Pagination = (props: PaginationProps) => {
   createShortcut(['Control', 'Shift', 'P'], selectPrevQuery);
   createShortcut(['Control', 'N'], props.onNextPage);
   createShortcut(['Control', 'P'], props.onPrevPage);
-  createShortcut([altOrMeta(), 'N'], () => props.openDrawerForm({ mode: 'add', data: {} }));
+  createShortcut([altOrMeta(), 'N'], () =>
+    props.openDrawerForm ? props.openDrawerForm({ mode: 'add', data: {} }) : null
+  );
 
   const [resultSet, setResultSet] = createStore<ResultSet>({});
 
@@ -82,9 +86,16 @@ export const Pagination = (props: PaginationProps) => {
           </span>
         </Show>
         <Show when={props.openDrawerForm}>
-          <button class="btn btn-xs btn-ghost" onClick={() => props.openDrawerForm({ mode: 'add', data: {} })}>
-            {t('console.table.row_actions.add_row')}
-          </button>
+          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={altOrMeta(true) + ' + N'}>
+            <button
+              class="btn btn-xs btn-ghost"
+              onClick={() => (props.openDrawerForm ? props.openDrawerForm({ mode: 'add', data: {} }) : null)}>
+              {t('console.table.row_actions.add_row')}
+            </button>
+          </div>
+        </Show>
+        <Show when={props.executionTime}>
+          <span class="text-xs">{t('console.table.ran', { duration: props.executionTime })} </span>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>

@@ -19,6 +19,10 @@ pub fn raw_query(mut conn: PooledConn, query: String) -> Result<Vec<Value>> {
 }
 
 pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
+    let start_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64;
     let mut conn = pool.get_conn()?;
     let mut results = conn.query_iter(query)?;
     while let Some(result_set) = results.iter() {
@@ -29,7 +33,13 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         for row in result_set {
             rows.push(row_to_object(from_row(row?)));
         }
+        let end_time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64;
         let set = ResultSet {
+            start_time,
+            end_time,
             affected_rows,
             warnings,
             info: info.to_string(),
@@ -45,6 +55,8 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     }
 
     return Ok(ResultSet {
+        start_time: 0,
+        end_time: 0,
         affected_rows: 0,
         warnings: 0,
         info: "".to_string(),

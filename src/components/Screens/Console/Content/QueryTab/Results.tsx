@@ -92,6 +92,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         const columns = result_set?.columns ?? [];
         const foreign_keys = result_set?.foreign_keys ?? [];
         const primary_key = result_set?.primary_key ?? [];
+        const start_time = result_set?.start_time ?? 0;
+        const end_time = result_set?.end_time ?? 0;
         setTable({ name: result_set?.table ?? '', columns, foreign_keys, primary_key });
         let colDef = getColumnDefs({
           columns,
@@ -104,7 +106,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           openDrawerForm,
         });
         if (result_set?.rows?.length) {
-          return { rows: result_set.rows, columns, colDef, count: result_set.count };
+          return { rows: result_set.rows, columns, colDef, count: result_set.count, start_time, end_time };
         }
         if (!result_set || result_set?.status !== 'Completed') {
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
@@ -127,6 +129,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           count: result_set.count,
           exhausted: rows.length < pageSizeVal,
           path: result_set.path,
+          start_time,
+          end_time,
         };
       } catch (error) {
         notify(error);
@@ -304,13 +308,14 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             onBtnExport,
             count: data()?.count ?? 0,
             openDrawerForm: props.editable ? openDrawerForm : undefined,
+            executionTime: (data()?.end_time ?? 0) - (data()?.start_time ?? 0),
           }}
         />
-        <Search colDef={data()?.colDef ?? []} table={props.table ?? ''} columns={data()?.columns ?? []} />
+        <Search table={table.name} columns={table.columns} />
       </div>
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <AgGridSolid
-          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps /> : <NoResults error={data()?.error} />)}
+          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps short /> : <NoResults error={data()?.error} />)}
           loadingOverlayComponent={Loader}
           ref={gridRef!}
           columnDefs={data()?.colDef}

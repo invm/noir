@@ -136,7 +136,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           show(e);
         }}>
         <div class="flex items-center">
-          <span onClick={() => setOpen(!open())} class="collapse">
+          <span class="collapse">
             <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
               <SwapChevronRight />
               <SwapChevronDown />

@@ -1,6 +1,6 @@
 import { Alerts } from 'components/UI';
 import { invoke } from '@tauri-apps/api';
-import { CloseIcon, Cog, HomeIcon } from 'components/UI/Icons';
+import { CloseIcon, Cog, HomeIcon, QuestionMark } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
@@ -67,6 +67,11 @@ export const Main = () => {
         </div>
         <div class="flex items-center py-2">
           <ThemeSwitch />
+          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.read_docs')}>
+            <a href="https://noir.github.io" target="_blank" class="btn btn-square btn-ghost btn-sm">
+              <QuestionMark />
+            </a>
+          </div>
           <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
             <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
               <Cog />

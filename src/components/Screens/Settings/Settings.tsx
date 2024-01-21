@@ -33,7 +33,7 @@ export const Settings = () => {
         </div>
         <span class="text-sm text-gray-500 dark:text-gray-400">Version: {version}</span>
         <div class="flex gap-4 py-4">
-          <button class="btn btn-xs btn-secondary" onClick={async () => await clearStore()}>
+          <button class="btn btn-xs btn-accent" onClick={async () => await clearStore()}>
             {t('settings.clear_cache')}
           </button>
         </div>

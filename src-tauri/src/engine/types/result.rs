@@ -11,6 +11,8 @@ pub struct TableMetadata {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ResultSet {
+    pub start_time: u64,
+    pub end_time: u64,
     pub affected_rows: u64,
     pub warnings: u16,
     pub info: String,

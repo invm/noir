@@ -88,6 +88,8 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         rows += &(row.to_string() + "\n");
     });
     let metadata = json!({
+        "start_time": result_set.start_time,
+        "end_time": result_set.end_time,
         "count": result_set.rows.len(),
         "affected_rows": result_set.affected_rows,
         "warnings": result_set.warnings,

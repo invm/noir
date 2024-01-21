@@ -28,6 +28,10 @@ pub async fn raw_query(pool: &Pool, query: &str) -> Result<Vec<Value>> {
 }
 
 pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
+    let start_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64;
     let conn = pool.get().await.unwrap();
     let query = query.to_string();
     let rows = conn
@@ -43,7 +47,13 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         })
         .await;
     let rows = rows.map_err(|e| anyhow!(e.to_string()))?;
+    let end_time = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u64;
     let set = ResultSet {
+        start_time,
+        end_time,
         affected_rows: 0,
         warnings: 0,
         info: "".to_string(),

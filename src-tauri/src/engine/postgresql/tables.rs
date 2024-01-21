@@ -99,11 +99,9 @@ pub async fn get_foreign_keys(
     let query = format!(
         "SELECT
           tc.constraint_name,
-          ccu.table_name AS to_table,
-          kcu.column_name as from_column,
-          tc.table_name as from_table,
-          ccu.table_schema AS to_schema,
-          ccu.column_name AS to_column,
+          kcu.column_name as column_name,
+          ccu.table_name AS referenced_table_name,
+          ccu.column_name AS referenced_column_name,
           rc.update_rule as update_rule,
           rc.delete_rule as delete_rule
         FROM

@@ -1,12 +1,11 @@
 export const QuestionMark = () => {
   return (
     <svg
-      class="w-6 h-6 text-secondary"
+      class="w-5 h-5 text-primary"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
-      viewBox="0 0 20 20"
-    >
+      viewBox="0 0 20 20">
       <path
         stroke="currentColor"
         stroke-linecap="round"

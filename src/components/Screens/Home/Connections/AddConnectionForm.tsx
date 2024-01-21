@@ -205,7 +205,7 @@ const AddConnectionForm = () => {
               </div>
               <button
                 type="button"
-                class="btn btn-sm btn-block btn-accent text-xs"
+                class="btn btn-sm btn-block btn-primary text-xs"
                 onClick={async () => {
                   const path = await open({ multiple: false, title: 'Select sqlite file' });
                   if (!path) return;
@@ -220,7 +220,7 @@ const AddConnectionForm = () => {
               </div>
               <button
                 type="button"
-                class="btn btn-sm btn-block btn-secondary text-xs"
+                class="btn btn-sm btn-block btn-accent text-xs"
                 onClick={async () => {
                   const path = await save({ title: 'Select database location' });
                   if (!path) return;
@@ -349,7 +349,7 @@ const AddConnectionForm = () => {
         <div class="py-4 flex items-center justify-end">
           <div class="gap-4 flex">
             <button
-              class="btn btn-secondary btn-sm"
+              class="btn btn-accent btn-sm"
               onClick={testConnection}
               disabled={!!Object.keys(getFormErrors()).length || testing()}>
               <Show when={testing()}>
@@ -359,8 +359,7 @@ const AddConnectionForm = () => {
             </button>
             <button
               disabled={!!Object.keys(getFormErrors()).length || loading()}
-              class="btn
-            btn-primary btn-sm"
+              class="btn btn-primary btn-sm"
               type="submit">
               <Show when={loading()}>
                 <span class="loading loading-spinner"></span>

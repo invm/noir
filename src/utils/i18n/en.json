@@ -63,6 +63,7 @@
           "add_row": "Add row",
           "delete_row": "Delete row"
         },
+        "ran": "Ran in {{duration}} ms",
         "primary_key": "Primary key",
         "foreign_key": "Foreign key -> {{table}}.{{column}}",
         "edit": "Editing {{table}}",
@@ -106,6 +107,7 @@
       "process_list": "Process list"
     },
     "settings": {
+      "read_docs": "Read docs",
       "settings": "Settings",
       "clear_cache": "Clear app cache",
       "shortcuts": "Shortcuts"
@@ -135,7 +137,7 @@
       "release_notes": "Release notes",
       "close": "Close"
     },
-    "error":{
+    "error": {
       "something_went_wrong": "Something went wrong",
       "stack": "Stack",
       "relaunch_app": "Relaunch app"

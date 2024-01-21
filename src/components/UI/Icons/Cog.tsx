@@ -1,7 +1,7 @@
 export const Cog = () => {
   return (
     <svg
-      class="w-6 h-6 text-secondary"
+      class="w-5 h-5 text-primary"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor"
