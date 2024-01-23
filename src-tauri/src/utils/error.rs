@@ -29,6 +29,8 @@ pub enum Error {
     #[error("Create pool error: {0}")]
     DeadpoolSqliteCreatePool(#[from] deadpool_sqlite::CreatePoolError),
     #[error("{0}")]
+    OpenSSLError(#[from] openssl::error::ErrorStack),
+    #[error("{0}")]
     DeadpoolPostgresqlPoolError(#[from] deadpool_postgres::PoolError),
     #[error("Create pool error: {0}")]
     DeadpoolPostgresqlCreatePoolError(#[from] deadpool_postgres::CreatePoolError),
