@@ -97,7 +97,7 @@ impl ConnectionConfig {
     pub fn new(
         dialect: Dialect,
         mode: Mode,
-        mut credentials: HashMap<String, String>,
+        mut credentials: Credentials,
         name: &str,
         color: &str,
     ) -> Result<Self> {

@@ -36,7 +36,7 @@ export const AvailableModes = {
 
 export const connectionModes = [Mode.Host, Mode.Socket, Mode.File] as const;
 
-export type Credentials = Record<string, string>;
+export type Credentials = Record<string, string | number>;
 
 export type ConnectionConfig = {
   id: string;
@@ -49,31 +49,42 @@ export type ConnectionConfig = {
 };
 
 export const connectionColors = [
-  'slate',
-  'gray',
-  'zinc',
-  'neutral',
-  'stone',
-  'red',
-  'orange',
   'amber',
-  'yellow',
-  'lime',
-  'green',
-  'emerald',
-  'teal',
-  'cyan',
-  'sky',
   'blue',
-  'indigo',
-  'violet',
-  'purple',
+  'cyan',
+  'emerald',
   'fuchsia',
+  'gray',
+  'green',
+  'indigo',
+  'lime',
+  'neutral',
+  'orange',
   'pink',
+  'purple',
+  'red',
   'rose',
+  'sky',
+  'slate',
+  'stone',
+  'teal',
+  'violet',
+  'yellow',
+  'zinc',
 ] as const;
 
-export const NumericTypes = ['int', 'long', 'float', 'double', 'decimal', 'numeric', 'real', 'number', 'serial', 'short'] as const;
+export const NumericTypes = [
+  'int',
+  'long',
+  'float',
+  'double',
+  'decimal',
+  'numeric',
+  'real',
+  'number',
+  'serial',
+  'short',
+] as const;
 
 export type ConnectionColor = (typeof connectionColors)[number];
 

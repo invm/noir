@@ -2,9 +2,9 @@ import { ConnectionColor } from '../../interfaces';
 
 export const ColorCircle = (props: { color: ConnectionColor }) => {
   return (
-    <div class="flex h-[26px]">
+    <div class="flex h-[20px]">
       <span
-        class={`min-w-[22px] w-[22px] min-h-[22px] h-[22px] rounded-full border-2 bg-${props.color}-500`}
+        class={`min-w-[20px] w-[20px] min-h-[20px] h-[20px] rounded-full border-2 bg-${props.color}-500`}
       ></span>
     </div>
   );

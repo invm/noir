@@ -1,40 +1,26 @@
-import { FieldProps, Field } from 'solid-form-handler';
-import { Component, JSX, Show, splitProps } from 'solid-js';
-import { Label } from '.';
+import { Component, JSX, Show } from 'solid-js';
 
-export type TextInputProps = JSX.InputHTMLAttributes<HTMLInputElement> &
-  FieldProps & { label?: string };
-
-export const TextInput: Component<TextInputProps> = (props) => {
-  const [local, rest] = splitProps(props, [
-    'classList',
-    'label',
-    'formHandler',
-  ]);
-
-  return (
-    <Field
-      {...props}
-      mode="input"
-      render={(field) => (
-        <div classList={local.classList}>
-          <Show when={local.label}>
-            <div class="my-1 block">
-              <Label for={field.props.id ?? ''} value={local.label} />
-            </div>
-          </Show>
-          <input type={props.type ?? 'text'} class="app-input"
-            {...rest}
-            {...field.props}
-            autocapitalize="off"
-            classList={{
-              'is-invalid': field.helpers.error,
-              'form-control': true,
-            }}
-          />
-        </div>
-      )}
-    />
-  );
+export type TextInputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+  errors?: string[] | null;
 };
 
+export const TextInput: Component<TextInputProps> = (props) => {
+  return (
+    <div class="flex flex-col w-full">
+      <Show when={props.label}>
+        <label for={props.name} class="my-1 block text-sm font-medium">
+          {props.label}
+        </label>
+      </Show>
+      <input
+        type={props.type ?? 'text'}
+        classList={{ 'border-red-400': !!props.errors }}
+        class="input input-bordered input-sm w-full"
+        autocorrect="off"
+        autocapitalize="off"
+        {...props}
+      />
+    </div>
+  );
+};

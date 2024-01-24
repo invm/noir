@@ -4,6 +4,7 @@ declare module 'solid-js' {
   namespace JSX {
     interface Directives {
       tippy: TippyOptions;
+      form: true;
     }
   }
 }

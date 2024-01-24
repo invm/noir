@@ -1,6 +1,4 @@
 import * as z from 'zod';
-import { useFormHandler } from 'solid-form-handler';
-import { zodSchema } from 'solid-form-handler/zod';
 import { useAppSelector } from 'services/Context';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import sql from 'sql-bricks';
@@ -9,12 +7,17 @@ import { QueryTaskEnqueueResult, Row } from 'interfaces';
 import { t } from 'utils/i18n';
 import { CloseIcon } from 'components/UI/Icons';
 import { getAnyCase } from 'utils/utils';
+import { createForm } from '@felte/solid';
+import { Select, TextInput } from 'components/UI';
+import { validator } from '@felte/validator-zod';
 
-export const SearchFormSchema = z.object({
+export const schema = z.object({
   column: z.string().max(1024),
   operator: z.string().min(1).max(1024).default('='),
   value: z.string().max(2048),
 });
+
+type Form = z.infer<typeof schema>;
 
 const wrapper = (operator: (c: string, v: string) => sql.WhereBinary | sql.WhereExpression) => (c: string, v: string) =>
   operator(c, v);
@@ -82,23 +85,16 @@ export const Search = (props: SearchProps) => {
   } = useAppSelector();
 
   const [loading, setLoading] = createSignal(false);
-  const formHandler = useFormHandler(zodSchema(SearchFormSchema));
-  const { formData, setFieldValue } = formHandler;
+  // const [defaultValues, setDefaultValues] = createSignal<Form>({
+  //   column: '',
+  //   operator: '=',
+  //   value: '',
+  // });
 
-  const submit = async (event: Event) => {
-    try {
-      event.preventDefault();
-      await formHandler.validateForm();
-    } catch (e) {
-      // @ts-ignore
-      for (const { path, message } of e.validationResult) {
-        if (path !== '__ROOT__') notify(path + ' ' + message);
-      }
-      return;
-    }
+  const onSubmit = async (values: Form) => {
     try {
       setLoading(true);
-      const { column, operator, value } = formData();
+      const { column, operator, value } = values;
       const op = COMPARISON_OPERATORS[operator as keyof typeof COMPARISON_OPERATORS].operator;
       const where = op(column, value);
       let query = sql.select().from(props.table);
@@ -120,37 +116,27 @@ export const Search = (props: SearchProps) => {
     }
   };
 
+  const { form, setData, data } = createForm<Form>({
+    onSubmit,
+    // initialValues: defaultValues(),
+    extend: validator({ schema }),
+  });
+
   return (
     <Show when={props.table}>
-      <form autocomplete="off" onSubmit={submit}>
+      <form use:form autocomplete="off">
         <div class="w-full pb-2 bg-base-100 px-2 py-1 grid grid-cols-12 gap-2">
           <div class="col-span-3">
-            <select
-              onChange={(e) => setFieldValue('column', e.currentTarget.value)}
-              value={formData().column || getAnyCase(props.columns[0], 'column_name')}
-              class="select select-bordered border-base-content select-sm w-full">
-              {props.columns.map((c) => (
-                <option value={getAnyCase(c, 'column_name')}>{getAnyCase(c, 'column_name')}</option>
-              ))}
-            </select>
+            <Select suppressTitlecase name="column" options={props.columns.map((c) => getAnyCase(c, 'column_name'))} />
           </div>
           <div class="col-span-1">
-            <select
-              onChange={(e) => setFieldValue('operator', e.currentTarget.value)}
-              value={formData().operator}
-              class="select select-bordered border-base-content select-sm w-full">
-              {Object.keys(COMPARISON_OPERATORS).map((o) => (
-                <option value={o}>{o}</option>
-              ))}
-            </select>
+            <Select name="operator" options={Object.keys(COMPARISON_OPERATORS)} />
           </div>
           <div class="col-span-8 flex items-center justify-between gap-3">
-            <input
-              type="text"
-              value={formData().value}
-              onChange={(e) => setFieldValue('value', e.currentTarget.value)}
-              class="input input-bordered input-sm border-base-content w-full"
+            <TextInput
+              name="value"
               placeholder={t('console.search.placeholder', { table: props.table })}
+              class="input input-bordered input-sm border-base-content w-full"
             />
             <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.search.clear')}>
               <Switch>
@@ -159,9 +145,9 @@ export const Search = (props: SearchProps) => {
                 </Match>
                 <Match when={!loading()}>
                   <button
-                    onClick={(e) => {
-                      setFieldValue('value', '');
-                      submit(e);
+                    onClick={() => {
+                      setData('value', '');
+                      onSubmit(data());
                     }}
                     class="btn btn-sm btn-ghost"
                     type="button">
