@@ -3,7 +3,7 @@ import { validator } from '@felte/validator-zod';
 import { t } from 'i18next';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import { createForm } from '@felte/solid';
-import { TextInput, ColorCircle, Select, Alert } from 'components/UI';
+import { TextInput, ColorCircle, Select, Alert, FilePicker } from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
@@ -14,6 +14,8 @@ import {
   dialects,
   DialectType,
   connectionModes,
+  sslModes,
+  SslMode,
 } from 'interfaces';
 import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
@@ -54,18 +56,21 @@ const schema = z.object({
   mode: z.enum(connectionModes),
   credentials: CredentialsSchema,
   color: z.enum(connectionColors),
+  ssl_mode: z.enum(sslModes).optional(),
+  ca_cert: zstr.optional(),
+  client_cert: zstr.optional(),
+  client_key: zstr.optional(),
 });
 
 type Form = z.infer<typeof schema>;
 type Credentials = z.infer<typeof CredentialsSchema>;
 type HostCredentials = Extract<Credentials, { host: string }>;
-type FileCredentials = Extract<Credentials, { path: string }>;
 
 const defaultValues = {
   name: '',
-  dialect: Dialect.Postgresql,
+  dialect: Dialect.Sqlite,
   color: connectionColors[0],
-  mode: AvailableModes[Dialect.Postgresql][0],
+  mode: AvailableModes[Dialect.Sqlite][0],
   credentials: {
     port: 5432,
     path: '',
@@ -74,6 +79,10 @@ const defaultValues = {
     password: '',
     db_name: '',
   },
+  ssl_mode: SslMode.prefer,
+  ca_cert: '',
+  client_cert: '',
+  client_key: '',
 };
 
 const AddConnectionForm = () => {
@@ -113,7 +122,7 @@ const AddConnectionForm = () => {
     }
   };
 
-  const { form, setData, errors, data, isValid, isSubmitting, isDirty, reset } = createForm<Form>({
+  const { form, setData, setFields, errors, data, isValid, isSubmitting, isDirty, reset } = createForm<Form>({
     onSubmit,
     initialValues: defaultValues,
     extend: validator({ schema }),
@@ -126,7 +135,11 @@ const AddConnectionForm = () => {
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
         <div class="grid grid-cols-12 gap-3">
-          <div class="col-span-6">
+          <div
+            classList={{
+              'col-span-6': data('dialect') !== Dialect.Sqlite,
+              'col-span-12': data('dialect') === Dialect.Sqlite,
+            }}>
             <Select
               name="dialect"
               label={t('add_connection_form.labels.dialect')}
@@ -145,7 +158,7 @@ const AddConnectionForm = () => {
               }}
             />
           </div>
-          <Show when={data().dialect !== Dialect.Sqlite}>
+          <Show when={data('dialect') !== Dialect.Sqlite}>
             <div class="col-span-6">
               <Select
                 name="mode"
@@ -163,39 +176,25 @@ const AddConnectionForm = () => {
             </div>
           </Show>
           <Show when={data().dialect === Dialect.Sqlite}>
-            <div class="col-span-3">
+            <div class="col-span-12">
               <div class="my-1 block">
                 <label for="credentials.path" class="text-sm font-medium">
                   {t('add_connection_form.labels.path')}
                 </label>
               </div>
-              <button
-                type="button"
-                class="btn btn-sm btn-block btn-primary text-xs p-0"
-                onClick={async () => {
-                  const path = (await open({ multiple: false, title: 'Select sqlite file' })) as string;
-                  if (!path) return;
-                  setData('credentials.path', path);
-                }}>
-                <span class="p-0 border-end">{t('file_input.choose_file')}</span>
-              </button>
-            </div>
-            <div class="col-span-3">
-              <div class="my-1 block">
-                <label for="credentials.path" class="text-sm font-medium">
-                  {t('add_connection_form.labels.new_path')}
-                </label>
-              </div>
-              <button
-                type="button"
-                class="btn btn-sm btn-block btn-accent text-xs p-0"
-                onClick={async () => {
+              <FilePicker
+                name="credentials.path"
+                onCreate={async () => {
                   const path = await save({ title: 'Select database location' });
                   if (!path) return;
-                  setData('credentials.path', path + '.db');
-                }}>
-                <span class="p-0 border-end">{t('file_input.choose_file')}</span>
-              </button>
+                  setFields('credentials.path', path + '.db');
+                }}
+                onChange={async () => {
+                  const path = (await open({ multiple: false, title: 'Select sqlite file' })) as string;
+                  if (!path) return;
+                  setFields('credentials.path', path);
+                }}
+              />
             </div>
           </Show>
         </div>
@@ -274,11 +273,6 @@ const AddConnectionForm = () => {
               </div>
             </div>
           </div>
-        </Show>
-        <Show when={data().dialect === Dialect.Sqlite}>
-          <span class="text-md font-bold text-accent h-[40px] py-2">
-            {(data().credentials as FileCredentials).path}
-          </span>
         </Show>
         <div class="py-3 min-h-[80px]">
           <Show when={error()}>

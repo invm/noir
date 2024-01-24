@@ -17,7 +17,6 @@
         "host": "Host",
         "socket": "Socket path",
         "path": "DB file",
-        "new_path": "New DB file",
         "db_name": "Default schema",
         "port": "Port"
       }

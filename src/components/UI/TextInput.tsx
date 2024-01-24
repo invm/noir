@@ -16,7 +16,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
       <input
         type={props.type ?? 'text'}
         classList={{ 'border-red-400': !!props.errors }}
-        class="input input-bordered input-sm w-full"
+        class="input input-bordered border-base-content input-sm w-full"
         autocorrect="off"
         autocapitalize="off"
         {...props}
