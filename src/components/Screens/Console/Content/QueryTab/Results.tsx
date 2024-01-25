@@ -33,6 +33,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     connections: { queryIdx, getConnection, updateContentTab, getContentData },
     backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
     messages: { notify },
+    app: { cmdOrCtrl },
   } = useAppSelector();
 
   const [drawerOpen, setDrawerOpen] = createStore({
@@ -187,7 +188,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const applyChanges = async () => {
     try {
-      const conn = getConnection();
       const _table = table.name;
       const queries = [];
       if (Object.keys(changes['add']).length) {
@@ -213,6 +213,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         });
         queries.push(...deletes);
       }
+      if (queries.length === 0) return;
+      const conn = getConnection();
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
       const result_sets = await selectAllFrom(props.table!, conn.id, getConnection().idx);
@@ -278,6 +280,15 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     await applyChanges();
     setDrawerOpen({ open: false, data: {} });
   };
+
+  createShortcut([cmdOrCtrl(), 's'], () => {
+    if (!props.editable) return;
+    if (drawerOpen.open) {
+      saveForm();
+    } else {
+      applyChanges();
+    }
+  });
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
