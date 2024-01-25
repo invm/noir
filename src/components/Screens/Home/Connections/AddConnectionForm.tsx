@@ -16,6 +16,7 @@ import {
   connectionModes,
   sslModes,
   SslMode,
+  ModeType,
 } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
@@ -38,9 +39,9 @@ const CredentialsSchema = z.union([
     db_name: zstr,
     port: z.union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)]).optional(),
     ssl_mode: z.enum(sslModes).optional(),
-    ca_cert: zstr.optional(),
-    client_cert: zstr.optional(),
-    client_key: zstr.optional(),
+    ca_cert: zstr.optional().or(z.literal('')),
+    client_cert: zstr.optional().or(z.literal('')),
+    client_key: zstr.optional().or(z.literal('')),
   }),
   z.object({
     socket: zstr,
@@ -66,7 +67,7 @@ type Credentials = z.infer<typeof CredentialsSchema>;
 type HostCredentials = Extract<Credentials, { host: string }>;
 
 const defaultValues = {
-  name: 'sasdad',
+  name: '',
   dialect: Dialect.Postgresql,
   color: connectionColors[0],
   mode: AvailableModes[Dialect.Postgresql][0],
@@ -74,13 +75,13 @@ const defaultValues = {
     port: 5432,
     path: '',
     host: 'localhost',
-    user: 'postgres',
-    password: 'example',
-    db_name: 'dvdrental',
-    ssl_mode: SslMode.require,
-    ca_cert: '/Users/michaelionov/p/noir/dev/certs/ca.pem',
-    client_cert: '/Users/michaelionov/p/noir/dev/certs/client.pem',
-    client_key: '/Users/michaelionov/p/noir/dev/certs/client.key',
+    user: '',
+    password: '',
+    db_name: '',
+    ssl_mode: SslMode.prefer,
+    ca_cert: '',
+    client_cert: '',
+    client_key: '',
   },
 };
 
@@ -91,6 +92,7 @@ const AddConnectionForm = () => {
   } = useAppSelector();
   const [testing, setTesting] = createSignal(false);
   const [error, setError] = createSignal('');
+  const [showCerts, setShowCerts] = createSignal(false);
 
   const testConnection = async () => {
     try {
@@ -99,7 +101,6 @@ const AddConnectionForm = () => {
       if ((d.credentials as HostCredentials).port) {
         (d.credentials as HostCredentials).port = String((d.credentials as HostCredentials).port);
       }
-      console.log({ d });
       await invoke('test_connection', d);
       notify(t('add_connection_form.success', { name: d.name }), 'success');
       setError('');
@@ -122,14 +123,14 @@ const AddConnectionForm = () => {
     }
   };
 
-  const { form, setData, setFields, errors, data, isValid, isSubmitting, isDirty, reset } = createForm<Form>({
+  const { form, setFields, errors, data, isValid, isSubmitting, isDirty, reset } = createForm<Form>({
     onSubmit,
     initialValues: defaultValues,
     extend: validator({ schema }),
   });
 
   return (
-    <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-100">
+    <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-200">
       <form use:form class="flex lg:w-[80%] xl:w-[60%] flex-col gap-1" autocomplete="off">
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
@@ -145,15 +146,17 @@ const AddConnectionForm = () => {
               label={t('add_connection_form.labels.dialect')}
               options={dialects.map(String)}
               onChange={(e) => {
+                const dialect = e.target.value as DialectType;
+                setFields('dialect', dialect);
                 if (data('mode') === Mode.Socket) {
-                  setData('credentials.socket', SocketPathDefaults[data('dialect')]);
+                  setFields('credentials.socket', SocketPathDefaults[data('dialect')]);
                 }
-                if (e.target.value === Dialect.Sqlite) {
-                  setData('mode', Mode.File);
+                if (dialect === Dialect.Sqlite) {
+                  setFields('mode', Mode.File);
                 } else {
-                  setData('credentials.host', 'localhost');
-                  setData('credentials.port', PORTS_MAP[data('dialect')] || 3306);
-                  setData('mode', AvailableModes[e.target.value as DialectType][0]);
+                  setFields('credentials.host', 'localhost');
+                  setFields('credentials.port', PORTS_MAP[dialect] || 3306);
+                  setFields('mode', AvailableModes[e.target.value as DialectType][0]);
                 }
               }}
             />
@@ -165,11 +168,13 @@ const AddConnectionForm = () => {
                 label={t('add_connection_form.labels.mode')}
                 options={AvailableModes[data('dialect')].map(String) ?? []}
                 onChange={(e) => {
+                  setFields('mode', e.target.value as ModeType);
                   if (e.target.value === Mode.Socket) {
-                    setData('credentials.socket', SocketPathDefaults[data('dialect')]);
+                    setFields('credentials.socket', SocketPathDefaults[data('dialect')]);
                   } else if (e.target.value === Mode.Host) {
-                    setData('credentials.host', 'localhost');
-                    setData('credentials.port', PORTS_MAP[data('dialect')] || 3306);
+                    setFields('credentials.host', 'localhost');
+                    setFields('credentials.port', PORTS_MAP[data('dialect')] || 3306);
+                    setFields('credentials.ssl_mode', SslMode.prefer);
                   }
                 }}
               />
@@ -219,7 +224,11 @@ const AddConnectionForm = () => {
                   />
                 </div>
                 <div class="col-span-3">
-                  <Select label={t('add_connection_form.labels.host')} name="credentials.ssl_mode" options={sslModes.map(String)} />
+                  <Select
+                    label={t('add_connection_form.labels.ssl_mode')}
+                    name="credentials.ssl_mode"
+                    options={sslModes.map(String)}
+                  />
                 </div>
               </Match>
               <Match when={data('mode') === Mode.Socket}>
@@ -256,7 +265,23 @@ const AddConnectionForm = () => {
                 />
               </div>
             </Show>
-            <Show when={data('mode') === Mode.Host}>
+            <Show when={data('mode') === Mode.Host && data('credentials.ssl_mode') !== SslMode.disable}>
+              <div class="col-span-12">
+                <div class="form-control max-w-[140px]">
+                  <label class="cursor-pointer label">
+                    <input
+                      name="show_certs"
+                      type="checkbox"
+                      checked={showCerts()}
+                      class="checkbox checkbox-sm"
+                      onChange={(e) => setShowCerts(e.target.checked)}
+                    />
+                    <Label for="show_certs" label={t('add_connection_form.labels.show_ssl_certs')} />
+                  </label>
+                </div>
+              </div>
+            </Show>
+            <Show when={data('mode') === Mode.Host && data('credentials.ssl_mode') !== SslMode.disable && showCerts()}>
               <div class="col-span-12">
                 <div class="block">
                   <Label label={t('add_connection_form.labels.ca_cert')} for="credentials.ca_cert" />

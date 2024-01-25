@@ -68,32 +68,56 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                 _ => Some(SslMode::Disable),
             };
             let rt = Some(deadpool_postgres::Runtime::Tokio1);
+            let ca_cert = cfg
+                .credentials
+                .get("ca_cert")
+                .cloned()
+                .unwrap_or("".to_string());
+            let client_cert = cfg
+                .credentials
+                .get("client_cert")
+                .cloned()
+                .unwrap_or("".to_string());
+            let client_key = cfg
+                .credentials
+                .get("client_key")
+                .cloned()
+                .unwrap_or("".to_string());
+
+            if (!client_cert.is_empty() && client_key.is_empty())
+                || (client_cert.is_empty() && !client_key.is_empty())
+            {
+                return Err(
+                    anyhow::anyhow!("client_cert and client_key must be set together").into(),
+                );
+            }
+
             let pool = match config.ssl_mode {
                 Some(mode) => match mode {
                     SslMode::Prefer | SslMode::Require => {
-                        let mut builder = SslConnector::builder(SslMethod::tls_client())?;
-                        if cfg.credentials.get("ca_cert").is_some() {
-                            // ssl verify mode peer
+                        if !ca_cert.is_empty() && !client_cert.is_empty() && !client_key.is_empty()
+                        {
+                            let mut builder = SslConnector::builder(SslMethod::tls_client())?;
+                            builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
+                            builder.set_ca_file(ca_cert)?;
+                            builder.set_certificate_chain_file(client_cert)?;
+                            builder.set_private_key_file(client_key, SslFiletype::PEM)?;
+                            let connector = MakeTlsConnector::new(builder.build());
+                            Some(config.create_pool(rt, connector)?)
+                        } else if !ca_cert.is_empty() {
+                            let mut builder = SslConnector::builder(SslMethod::tls_client())?;
                             builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
                             builder.set_ca_file(cfg.credentials.get("ca_cert").unwrap())?;
+                            let connector = MakeTlsConnector::new(builder.build());
+                            Some(config.create_pool(rt, connector)?)
+                        } else {
+                            let mut builder = SslConnector::builder(SslMethod::tls())?;
+                            builder.set_verify(SslVerifyMode::NONE); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
+                            let connector = MakeTlsConnector::new(builder.build());
+                            Some(config.create_pool(rt, connector)?)
                         }
-                        if cfg.credentials.get("client_cert").is_some() {
-                            builder.set_certificate_chain_file(
-                                cfg.credentials.get("client_cert").unwrap(),
-                            )?;
-                        }
-                        if cfg.credentials.get("client_key").is_some() {
-                            builder.set_private_key_file(
-                                cfg.credentials.get("client_key").unwrap(),
-                                SslFiletype::PEM,
-                            )?;
-                        }
-                        let connector = MakeTlsConnector::new(builder.build());
-                        Some(config.create_pool(rt, connector)?)
                     }
-                    SslMode::Disable => {
-                        Some(config.create_pool(rt, NoTls)?)
-                    }
+                    SslMode::Disable => Some(config.create_pool(rt, NoTls)?),
                     _ => None,
                 },
                 None => None,

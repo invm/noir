@@ -20,9 +20,10 @@
         "db_name": "Default schema",
         "port": "Port",
         "ssl_mode": "SSL Mode",
-        "ca_cert": "CA Certificate (optional)",
-        "client_cert": "Client Certificate (optional)",
-        "client_key": "Client Key (optional)"
+        "ca_cert": "CA certificate (optional)",
+        "client_cert": "Client certificate (optional)",
+        "client_key": "Client key (optional)",
+        "show_ssl_certs": "Add certificates"
       },
       "select_file": "Select file"
     },

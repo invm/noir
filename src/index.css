@@ -73,10 +73,6 @@ input[type="number"] {
   background: #555;
 }
 
-.background-gradient {
-  @apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-black via-slate-900 to-black;
-}
-
 .cm-editor {
   height: 100%;
 }
