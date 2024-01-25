@@ -18,8 +18,13 @@
         "socket": "Socket path",
         "path": "DB file",
         "db_name": "Default schema",
-        "port": "Port"
-      }
+        "port": "Port",
+        "ssl_mode": "SSL Mode",
+        "ca_cert": "CA Certificate (optional)",
+        "client_cert": "Client Certificate (optional)",
+        "client_key": "Client Key (optional)"
+      },
+      "select_file": "Select file"
     },
     "connections_list": {
       "title": "Connections",

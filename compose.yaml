@@ -1,24 +1,24 @@
 volumes:
-  mysql:
+  # mysql:
   psql:
 
 services:
-  mysql:
-    image: mysql:8.0.29-debian
-    container_name: mysql
-    command: >
-      --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: world # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
-    ports:
-      - 3306:3306
-    volumes:
-      - mysql:/var/lib/mysql
-      - ./dev/mysql/mysql.conf:/etc/mysql/conf.d/mysql.conf
-      # extract in dev/mysql folder before mounting
-      - ./dev/mysql/world.sql:/docker-entrypoint-initdb.d/world.sql:ro
+  # mysql:
+  #   image: mysql:8.0.29-debian
+  #   container_name: mysql
+  #   command: >
+  #     --default-authentication-plugin=mysql_native_password
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: example
+  #     MYSQL_DATABASE: world # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
+  #   ports:
+  #     - 3306:3306
+  #   volumes:
+  #     - mysql:/var/lib/mysql
+  #     - ./dev/mysql/mysql.conf:/etc/mysql/conf.d/mysql.conf
+  #     # extract in dev/mysql folder before mounting
+  #     - ./dev/mysql/world.sql:/docker-entrypoint-initdb.d/world.sql:ro
   psql:
     image: postgres:16-bookworm
     container_name: psql

@@ -67,7 +67,7 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                 "require" => Some(SslMode::Require),
                 _ => Some(SslMode::Disable),
             };
-
+            let rt = Some(deadpool_postgres::Runtime::Tokio1);
             let pool = match config.ssl_mode {
                 Some(mode) => match mode {
                     SslMode::Prefer | SslMode::Require => {
@@ -89,13 +89,10 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                             )?;
                         }
                         let connector = MakeTlsConnector::new(builder.build());
-                        Some(
-                            config
-                                .create_pool(Some(deadpool_postgres::Runtime::Tokio1), connector)?,
-                        )
+                        Some(config.create_pool(rt, connector)?)
                     }
                     SslMode::Disable => {
-                        Some(config.create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)?)
+                        Some(config.create_pool(rt, NoTls)?)
                     }
                     _ => None,
                 },

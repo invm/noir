@@ -1,5 +1,6 @@
 import { For } from 'solid-js';
 
+// TODO: use t instead
 const ALL_KEYMAPS = [
   { action: 'Help', keys: ['F1'] },
   { action: 'Execute query', keys: ['Ctrl', 'E/Enter'] },

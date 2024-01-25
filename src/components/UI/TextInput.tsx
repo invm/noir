@@ -1,4 +1,5 @@
 import { Component, JSX, Show } from 'solid-js';
+import { Label } from './Label';
 
 export type TextInputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -9,9 +10,7 @@ export const TextInput: Component<TextInputProps> = (props) => {
   return (
     <div class="flex flex-col w-full">
       <Show when={props.label}>
-        <label for={props.name} class="my-1 block text-sm font-medium">
-          {props.label}
-        </label>
+        <Label label={props.label} for={props.name} />
       </Show>
       <input
         type={props.type ?? 'text'}

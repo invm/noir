@@ -3,7 +3,7 @@ import { validator } from '@felte/validator-zod';
 import { t } from 'i18next';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import { createForm } from '@felte/solid';
-import { TextInput, ColorCircle, Select, Alert, FilePicker } from 'components/UI';
+import { TextInput, ColorCircle, Select, Alert, FilePicker, Label } from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
@@ -17,7 +17,6 @@ import {
   sslModes,
   SslMode,
 } from 'interfaces';
-import { titleCase } from 'utils/formatters';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
 import { open, save } from '@tauri-apps/api/dialog';
@@ -38,6 +37,10 @@ const CredentialsSchema = z.union([
     password: zstr,
     db_name: zstr,
     port: z.union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)]).optional(),
+    ssl_mode: z.enum(sslModes).optional(),
+    ca_cert: zstr.optional(),
+    client_cert: zstr.optional(),
+    client_key: zstr.optional(),
   }),
   z.object({
     socket: zstr,
@@ -56,10 +59,6 @@ const schema = z.object({
   mode: z.enum(connectionModes),
   credentials: CredentialsSchema,
   color: z.enum(connectionColors),
-  ssl_mode: z.enum(sslModes).optional(),
-  ca_cert: zstr.optional(),
-  client_cert: zstr.optional(),
-  client_key: zstr.optional(),
 });
 
 type Form = z.infer<typeof schema>;
@@ -67,22 +66,22 @@ type Credentials = z.infer<typeof CredentialsSchema>;
 type HostCredentials = Extract<Credentials, { host: string }>;
 
 const defaultValues = {
-  name: '',
-  dialect: Dialect.Sqlite,
+  name: 'sasdad',
+  dialect: Dialect.Postgresql,
   color: connectionColors[0],
-  mode: AvailableModes[Dialect.Sqlite][0],
+  mode: AvailableModes[Dialect.Postgresql][0],
   credentials: {
     port: 5432,
     path: '',
     host: 'localhost',
-    user: 'root',
-    password: '',
-    db_name: '',
+    user: 'postgres',
+    password: 'example',
+    db_name: 'dvdrental',
+    ssl_mode: SslMode.require,
+    ca_cert: '/Users/michaelionov/p/noir/dev/certs/ca.pem',
+    client_cert: '/Users/michaelionov/p/noir/dev/certs/client.pem',
+    client_key: '/Users/michaelionov/p/noir/dev/certs/client.key',
   },
-  ssl_mode: SslMode.prefer,
-  ca_cert: '',
-  client_cert: '',
-  client_key: '',
 };
 
 const AddConnectionForm = () => {
@@ -100,8 +99,9 @@ const AddConnectionForm = () => {
       if ((d.credentials as HostCredentials).port) {
         (d.credentials as HostCredentials).port = String((d.credentials as HostCredentials).port);
       }
+      console.log({ d });
       await invoke('test_connection', d);
-      notify(t('add_connection_form.success', { name: form.name }), 'success');
+      notify(t('add_connection_form.success', { name: d.name }), 'success');
       setError('');
     } catch (error) {
       setError(String(error));
@@ -130,11 +130,11 @@ const AddConnectionForm = () => {
 
   return (
     <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-100">
-      <form use:form class="flex w-[60%] flex-col gap-1" autocomplete="off">
+      <form use:form class="flex lg:w-[80%] xl:w-[60%] flex-col gap-1" autocomplete="off">
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
-        <div class="grid grid-cols-12 gap-3">
+        <div class="grid grid-cols-12 gap-2">
           <div
             classList={{
               'col-span-6': data('dialect') !== Dialect.Sqlite,
@@ -145,7 +145,7 @@ const AddConnectionForm = () => {
               label={t('add_connection_form.labels.dialect')}
               options={dialects.map(String)}
               onChange={(e) => {
-                if (data().mode === Mode.Socket) {
+                if (data('mode') === Mode.Socket) {
                   setData('credentials.socket', SocketPathDefaults[data('dialect')]);
                 }
                 if (e.target.value === Dialect.Sqlite) {
@@ -166,21 +166,19 @@ const AddConnectionForm = () => {
                 options={AvailableModes[data('dialect')].map(String) ?? []}
                 onChange={(e) => {
                   if (e.target.value === Mode.Socket) {
-                    setData('credentials.socket', SocketPathDefaults[data().dialect]);
+                    setData('credentials.socket', SocketPathDefaults[data('dialect')]);
                   } else if (e.target.value === Mode.Host) {
                     setData('credentials.host', 'localhost');
-                    setData('credentials.port', PORTS_MAP[data()?.dialect] || 3306);
+                    setData('credentials.port', PORTS_MAP[data('dialect')] || 3306);
                   }
                 }}
               />
             </div>
           </Show>
-          <Show when={data().dialect === Dialect.Sqlite}>
+          <Show when={data('dialect') === Dialect.Sqlite}>
             <div class="col-span-12">
-              <div class="my-1 block">
-                <label for="credentials.path" class="text-sm font-medium">
-                  {t('add_connection_form.labels.path')}
-                </label>
+              <div class="block">
+                <Label label={t('add_connection_form.labels.path')} for="credentials.path" />
               </div>
               <FilePicker
                 name="credentials.path"
@@ -200,19 +198,17 @@ const AddConnectionForm = () => {
               />
             </div>
           </Show>
-        </div>
-        <Show when={data().dialect !== Dialect.Sqlite}>
-          <div class="grid grid-cols-6 gap-3">
+          <Show when={data('dialect') !== Dialect.Sqlite}>
             <Switch>
-              <Match when={data().mode === Mode.Host}>
-                <div class="col-span-4">
+              <Match when={data('mode') === Mode.Host}>
+                <div class="col-span-6">
                   <TextInput
                     label={t('add_connection_form.labels.host')}
                     errors={errors('credentials.host')}
                     name="credentials.host"
                   />
                 </div>
-                <div class="col-span-2">
+                <div class="col-span-3">
                   <TextInput
                     label={t('add_connection_form.labels.port')}
                     errors={errors('credentials.port')}
@@ -222,9 +218,12 @@ const AddConnectionForm = () => {
                     max={65335}
                   />
                 </div>
+                <div class="col-span-3">
+                  <Select label={t('add_connection_form.labels.host')} name="credentials.ssl_mode" options={sslModes.map(String)} />
+                </div>
               </Match>
-              <Match when={data().mode === Mode.Socket}>
-                <div class="col-span-6">
+              <Match when={data('mode') === Mode.Socket}>
+                <div class="col-span-12">
                   <TextInput
                     label={t('add_connection_form.labels.socket')}
                     errors={errors('credentials.socket')}
@@ -233,50 +232,104 @@ const AddConnectionForm = () => {
                 </div>
               </Match>
             </Switch>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <TextInput
-              label={t('add_connection_form.labels.user')}
-              errors={errors('credentials.user')}
-              name="credentials.user"
-            />
-            <TextInput
-              label={t('add_connection_form.labels.password')}
-              errors={errors('credentials.password')}
-              name="credentials.password"
-              type="password"
-            />
-            <Show when={data().dialect !== Dialect.Sqlite}>
+            <div class="col-span-4">
               <TextInput
-                label={t('add_connection_form.labels.db_name')}
-                errors={errors('credentials.db_name')}
-                name="credentials.db_name"
+                label={t('add_connection_form.labels.user')}
+                errors={errors('credentials.user')}
+                name="credentials.user"
               />
+            </div>
+            <div class="col-span-4">
+              <TextInput
+                label={t('add_connection_form.labels.password')}
+                errors={errors('credentials.password')}
+                name="credentials.password"
+                type="password"
+              />
+            </div>
+            <Show when={data('dialect') !== Dialect.Sqlite}>
+              <div class="col-span-4">
+                <TextInput
+                  label={t('add_connection_form.labels.db_name')}
+                  errors={errors('credentials.db_name')}
+                  name="credentials.db_name"
+                />
+              </div>
             </Show>
-          </div>
-          <div class="grid grid-cols-5 gap-3">
-            <div class="col-span-3">
+            <Show when={data('mode') === Mode.Host}>
+              <div class="col-span-12">
+                <div class="block">
+                  <Label label={t('add_connection_form.labels.ca_cert')} for="credentials.ca_cert" />
+                </div>
+                <FilePicker
+                  name="credentials.ca_cert"
+                  onClear={() => {
+                    setFields('credentials.ca_cert', '');
+                  }}
+                  onChange={async () => {
+                    const path = (await open({
+                      multiple: false,
+                      title: t('add_connection_form.select_file'),
+                    })) as string;
+                    if (!path) return;
+                    setFields('credentials.ca_cert', path);
+                  }}
+                />
+              </div>
+              <div class="col-span-12">
+                <div class="block">
+                  <Label label={t('add_connection_form.labels.client_cert')} for="credentials.client_cert" />
+                </div>
+                <FilePicker
+                  name="credentials.client_cert"
+                  onClear={() => {
+                    setFields('credentials.client_cert', '');
+                  }}
+                  onChange={async () => {
+                    const path = (await open({
+                      multiple: false,
+                      title: t('add_connection_form.select_file'),
+                    })) as string;
+                    if (!path) return;
+                    setFields('credentials.client_cert', path);
+                  }}
+                />
+              </div>
+              <div class="col-span-12">
+                <div class="block">
+                  <Label label={t('add_connection_form.labels.client_key')} for="credentials.client_key" />
+                </div>
+                <FilePicker
+                  name="credentials.client_key"
+                  onClear={() => {
+                    setFields('credentials.client_key', '');
+                  }}
+                  onChange={async () => {
+                    const path = (await open({
+                      multiple: false,
+                      title: t('add_connection_form.select_file'),
+                    })) as string;
+                    if (!path) return;
+                    setFields('credentials.client_key', path);
+                  }}
+                />
+              </div>
+            </Show>
+            <div class="col-span-8">
               <TextInput label={t('add_connection_form.labels.name')} errors={errors('name')} name="name" />
             </div>
-            <div class="col-span-2">
-              <div class="w-full">
-                <div class="my-1 block flex justify-between">
-                  <label for="color" class="text-sm font-medium">
-                    {t('add_connection_form.labels.color')}
-                  </label>
-                  <ColorCircle color={data().color} />
-                </div>
-                <div class="flex items-end gap-3">
-                  <select id="color" name="color" class="select select-bordered border-base-content select-sm w-full">
-                    {connectionColors.map((color) => (
-                      <option value={color}>{titleCase(color)}</option>
-                    ))}
-                  </select>
-                </div>
+            <div class="col-span-4">
+              <div class="flex items-end">
+                <Select
+                  name="color"
+                  label={t('add_connection_form.labels.color')}
+                  options={connectionColors.map(String)}
+                />
+                <ColorCircle color={data('color')} />
               </div>
             </div>
-          </div>
-        </Show>
+          </Show>
+        </div>
         <div class="py-3 min-h-[80px]">
           <Show when={error()}>
             <Alert color="error">

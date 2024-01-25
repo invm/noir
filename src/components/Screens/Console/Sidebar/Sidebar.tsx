@@ -8,6 +8,7 @@ import { invoke } from '@tauri-apps/api';
 import { ResultSet } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { getAnyCase } from 'utils/utils';
+import { Select } from 'components/UI';
 
 export const Sidebar = () => {
   const {
@@ -116,19 +117,12 @@ export const Sidebar = () => {
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md flex justify-between items-center">
         <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.select_schema')}>
-          <select
-            id="schema"
+          <Select
+            name="mode"
             value={getConnection().selectedSchema}
             onChange={(e) => selectSchema(e.currentTarget.value)}
-            class="select select-accent select-bordered select-xs w-full">
-            <For each={getConnection().schemas}>
-              {(db) => (
-                <option class="py-1" value={db}>
-                  {db}
-                </option>
-              )}
-            </For>
-          </select>
+            options={getConnection().schemas ?? []}
+          />
         </div>
         <div class="flex">
           <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>

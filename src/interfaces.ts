@@ -38,19 +38,11 @@ export const SslMode = {
   disable: 'disable',
   prefer: 'prefer',
   require: 'require',
-  'verify-ca': 'verify-ca',
-  'verify-full': 'verify-full',
 } as const;
 
 export const connectionModes = [Mode.Host, Mode.Socket, Mode.File] as const;
 
-export const sslModes = [
-  SslMode.disable,
-  SslMode.prefer,
-  SslMode.require,
-  SslMode['verify-ca'],
-  SslMode['verify-full'],
-] as const;
+export const sslModes = [SslMode.disable, SslMode.prefer, SslMode.require] as const;
 
 export type Credentials = Record<string, string | number>;
 

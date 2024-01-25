@@ -10,7 +10,7 @@ export type SelectProps = JSX.InputHTMLAttributes<HTMLSelectElement> & {
 
 export const Select: Component<SelectProps> = (props) => {
   return (
-    <div class="flex flex-col justify-between h-full">
+    <div class="flex flex-1 flex-col justify-between h-full">
       <Show when={props.label}>
         <label for={props.name} class="block text-sm font-medium">
           {props.label}
