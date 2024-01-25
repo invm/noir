@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 dev/psql/dvdrental.tar
-dev/psql/certs/
+dev/certs/
 dev/sqlite/chinook.db
 dev/mysql/world.sql
-dev/mysql/certs/
