@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 
 use deadpool_postgres::{
-    Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, RecyclingMethod,
+    Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, RecyclingMethod, SslMode,
 };
 use deadpool_sqlite::Config as SqliteConfig;
 use mysql::{Opts, OptsBuilder, Pool as MysqlPool};
+use openssl::ssl::{SslConnector, SslFiletype, SslMethod, SslVerifyMode};
 use postgres::NoTls;
+use postgres_openssl::MakeTlsConnector;
 
 use crate::{
     engine::types::{
@@ -59,21 +61,58 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             config.manager = Some(PsqlManagerConfig {
                 recycling_method: RecyclingMethod::Fast,
             });
-            match config.create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls) {
-                // in case of sockets, the url should be percent-encoded
-                Ok(pool) => {
-                    let _cfg = config.clone();
-                    match pool.get().await {
-                        Ok(_) => Ok(InitiatedConnection {
-                            config: cfg.clone(),
-                            pool: ConnectionPool::Postgresql(pool),
-                            opts: ConnectionOpts::Postgresql(_cfg),
-                            schema: "public".to_string(),
-                        }),
-                        Err(e) => Err(Error::DeadpoolPostgresqlPoolError(e)),
+            let ssl_mode = cfg.credentials.get("ssl_mode").unwrap();
+            config.ssl_mode = match ssl_mode.as_str() {
+                "prefer" => Some(SslMode::Prefer),
+                "require" => Some(SslMode::Require),
+                _ => Some(SslMode::Disable),
+            };
+
+            let pool = match config.ssl_mode {
+                Some(mode) => match mode {
+                    SslMode::Prefer | SslMode::Require => {
+                        let mut builder = SslConnector::builder(SslMethod::tls_client())?;
+                        if cfg.credentials.get("ca_cert").is_some() {
+                            // ssl verify mode peer
+                            builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
+                            builder.set_ca_file(cfg.credentials.get("ca_cert").unwrap())?;
+                        }
+                        if cfg.credentials.get("client_cert").is_some() {
+                            builder.set_certificate_chain_file(
+                                cfg.credentials.get("client_cert").unwrap(),
+                            )?;
+                        }
+                        if cfg.credentials.get("client_key").is_some() {
+                            builder.set_private_key_file(
+                                cfg.credentials.get("client_key").unwrap(),
+                                SslFiletype::PEM,
+                            )?;
+                        }
+                        let connector = MakeTlsConnector::new(builder.build());
+                        Some(
+                            config
+                                .create_pool(Some(deadpool_postgres::Runtime::Tokio1), connector)?,
+                        )
                     }
+                    SslMode::Disable => {
+                        Some(config.create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls)?)
+                    }
+                    _ => None,
+                },
+                None => None,
+            };
+
+            match pool {
+                Some(pool) => {
+                    let _cfg = config.clone();
+                    Ok(InitiatedConnection {
+                        config: cfg.clone(),
+                        pool: ConnectionPool::Postgresql(pool),
+                        opts: ConnectionOpts::Postgresql(_cfg),
+                        schema: "public".to_string(),
+                    })
                 }
-                Err(e) => Err(Error::DeadpoolPostgresqlCreatePoolError(e)),
+                None => Err(anyhow::anyhow!("Cannot create pool").into()),
             }
         }
         Dialect::Sqlite => {

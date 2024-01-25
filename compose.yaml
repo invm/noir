@@ -25,9 +25,9 @@ services:
     command: >
       -c log_statement=all 
       -c ssl=on 
-      -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem 
-      -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
-      -c ssl_ca_file=/etc/ssl/certs/ce275665.0
+      -c ssl_cert_file=/etc/ssl/psql/certs/server.pem
+      -c ssl_key_file=/etc/ssl/psql/certs/server.key
+      -c ssl_ca_file=/etc/ssl/psql/certs/ca.pem
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
@@ -35,8 +35,10 @@ services:
     volumes:
       - psql:/var/lib/postgresql/data
       - ./dev/psql/postgres.conf:/etc/postgresql/postgresql.conf
+      - ./dev/psql/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
       # extract in dev/psql folder before mounting
       - ./dev/psql/dvdrental.tar:/tmp/dvdrental.tar
       - ./dev/psql/init.sh:/docker-entrypoint-initdb.d/init.sh 
+      - ./dev/psql/certs:/etc/ssl/psql/certs
     ports:
       - 5432:5432

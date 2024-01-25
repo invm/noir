@@ -184,6 +184,9 @@ const AddConnectionForm = () => {
               </div>
               <FilePicker
                 name="credentials.path"
+                onClear={() => {
+                  setFields('credentials.path', '');
+                }}
                 onCreate={async () => {
                   const path = await save({ title: 'Select database location' });
                   if (!path) return;
