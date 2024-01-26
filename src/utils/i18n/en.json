@@ -23,7 +23,9 @@
         "ca_cert": "CA certificate (optional)",
         "client_cert": "Client certificate (optional)",
         "client_key": "Client key (optional)",
-        "show_ssl_certs": "Add certificates"
+        "show_ssl_certs": "Add certificates",
+        "client_p12": "P12 file (optional)",
+        "client_p12_pass": "P12 password (optional)"
       },
       "select_file": "Select file"
     },

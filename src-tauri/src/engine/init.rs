@@ -4,7 +4,7 @@ use deadpool_postgres::{
     Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, RecyclingMethod, SslMode,
 };
 use deadpool_sqlite::Config as SqliteConfig;
-use mysql::{Opts, OptsBuilder, Pool as MysqlPool};
+use mysql::{ClientIdentity, Opts, OptsBuilder, Pool as MysqlPool, SslOpts};
 use openssl::ssl::{SslConnector, SslFiletype, SslMethod, SslVerifyMode};
 use postgres::NoTls;
 use postgres_openssl::MakeTlsConnector;
@@ -23,11 +23,54 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             if cfg.mode == Mode::File {
                 return Err(anyhow::anyhow!("File mode is not supported for Mysql").into());
             }
-            let builder = OptsBuilder::new();
-            let builder = builder
-                .from_hash_map(&cfg.credentials)?
-                .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
-                .prefer_socket(cfg.mode == Mode::Socket);
+            let mut credentials = cfg.credentials.clone();
+            let ssl_keys = vec!["ssl_mode", "ca_cert", "client_p12", "client_p12_pass"];
+            let mut ssl_cfg = credentials.clone();
+            ssl_cfg.retain(|k, _| ssl_keys.contains(&k.as_str()));
+            for key in ssl_keys {
+                credentials.remove(key);
+            }
+            let ssl_mode = ssl_cfg.get("ssl_mode").cloned().unwrap_or("".to_string());
+            let ca_cert = ssl_cfg.get("ca_cert").cloned().unwrap_or("".to_string());
+            let client_p12 = ssl_cfg.get("client_p12").cloned().unwrap_or("".to_string());
+            let client_p12_pass = ssl_cfg
+                .get("client_p12_pass")
+                .cloned()
+                .unwrap_or("".to_string());
+
+            let builder = match ssl_mode.as_str() {
+                "prefer" | "require" => {
+                    let mut ssl_opts = if !client_p12.is_empty() && !client_p12_pass.is_empty() {
+                        let identity = ClientIdentity::new(PathBuf::from(&client_p12))
+                            .with_password(client_p12_pass);
+                        let sslopts = SslOpts::default().with_client_identity(Some(identity));
+                        sslopts
+                    } else if !client_p12.is_empty() {
+                        // TODO: this does not work without a password
+                        // https://github.com/blackbeam/rust-mysql-simple/issues/369
+                        let identity = ClientIdentity::new(PathBuf::from(&client_p12));
+                        let sslopts = SslOpts::default().with_client_identity(Some(identity));
+                        sslopts
+                    } else {
+                        SslOpts::default()
+                    };
+                    if !ca_cert.is_empty() {
+                        ssl_opts = ssl_opts.with_root_cert_path(Some(PathBuf::from(&ca_cert)));
+                    }
+                    ssl_opts = ssl_opts.with_danger_accept_invalid_certs(true);
+
+                    OptsBuilder::new()
+                        .from_hash_map(&credentials)?
+                        .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
+                        .prefer_socket(cfg.mode == Mode::Socket)
+                        .ssl_opts(ssl_opts)
+                }
+                _ => OptsBuilder::new()
+                    .from_hash_map(&credentials)?
+                    .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
+                    .prefer_socket(cfg.mode == Mode::Socket),
+            };
+
             let opts = Opts::from(builder);
             let cloned = opts.clone();
             match MysqlPool::new(opts.clone()) {

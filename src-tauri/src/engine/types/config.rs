@@ -127,11 +127,11 @@ impl ConnectionConfig {
                     "tcp_connect_timeout_ms",
                     "stmt_cache_size",
                     "secure_auth",
-                    // TODO: check not official config keys, might be needed to remove before creating the config
-                    "ssl_mode", // disable, prefer, require, if with ca_cert ssl verify mode is peer
+                    // later before connecting those keys are omitted and everything else is passed to cfg builder
+                    "ssl_mode",
                     "ca_cert",
-                    "client_cert",
-                    "client_key",
+                    "client_p12",
+                    "client_p12_pass",
                 ];
                 let _ = credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 let schema = credentials

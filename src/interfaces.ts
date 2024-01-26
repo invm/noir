@@ -12,7 +12,7 @@ export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.Sqlite]: 0,
 } as const;
 
-export const dialects = [Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite] as const;
+export const dialects = [Dialect.Postgresql, Dialect.Mysql, Dialect.Sqlite] as const;
 
 export const Mode = {
   Host: 'Host',

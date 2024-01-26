@@ -42,6 +42,8 @@ const CredentialsSchema = z.union([
     ca_cert: zstr.optional().or(z.literal('')),
     client_cert: zstr.optional().or(z.literal('')),
     client_key: zstr.optional().or(z.literal('')),
+    client_p12: zstr.optional().or(z.literal('')),
+    client_p12_pass: zstr.optional().or(z.literal('')),
   }),
   z.object({
     socket: zstr,
@@ -82,6 +84,8 @@ const defaultValues = {
     ca_cert: '',
     client_cert: '',
     client_key: '',
+    client_p12: '',
+    client_p12_pass: '',
   },
 };
 
@@ -128,6 +132,7 @@ const AddConnectionForm = () => {
     initialValues: defaultValues,
     extend: validator({ schema }),
   });
+  form; // ts-server - stfu
 
   return (
     <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-200">
@@ -301,44 +306,77 @@ const AddConnectionForm = () => {
                   }}
                 />
               </div>
-              <div class="col-span-12">
-                <div class="block">
-                  <Label label={t('add_connection_form.labels.client_cert')} for="credentials.client_cert" />
+              <Show when={data('dialect') === Dialect.Postgresql}>
+                <div class="col-span-12">
+                  <div class="block">
+                    <Label label={t('add_connection_form.labels.client_cert')} for="credentials.client_cert" />
+                  </div>
+                  <FilePicker
+                    name="credentials.client_cert"
+                    onClear={() => {
+                      setFields('credentials.client_cert', '');
+                    }}
+                    onChange={async () => {
+                      const path = (await open({
+                        multiple: false,
+                        title: t('add_connection_form.select_file'),
+                      })) as string;
+                      if (!path) return;
+                      setFields('credentials.client_cert', path);
+                    }}
+                  />
                 </div>
-                <FilePicker
-                  name="credentials.client_cert"
-                  onClear={() => {
-                    setFields('credentials.client_cert', '');
-                  }}
-                  onChange={async () => {
-                    const path = (await open({
-                      multiple: false,
-                      title: t('add_connection_form.select_file'),
-                    })) as string;
-                    if (!path) return;
-                    setFields('credentials.client_cert', path);
-                  }}
-                />
-              </div>
-              <div class="col-span-12">
-                <div class="block">
-                  <Label label={t('add_connection_form.labels.client_key')} for="credentials.client_key" />
+              </Show>
+              <Show when={data('dialect') === Dialect.Postgresql}>
+                <div class="col-span-12">
+                  <div class="block">
+                    <Label label={t('add_connection_form.labels.client_key')} for="credentials.client_key" />
+                  </div>
+                  <FilePicker
+                    name="credentials.client_key"
+                    onClear={() => {
+                      setFields('credentials.client_key', '');
+                    }}
+                    onChange={async () => {
+                      const path = (await open({
+                        multiple: false,
+                        title: t('add_connection_form.select_file'),
+                      })) as string;
+                      if (!path) return;
+                      setFields('credentials.client_key', path);
+                    }}
+                  />
                 </div>
-                <FilePicker
-                  name="credentials.client_key"
-                  onClear={() => {
-                    setFields('credentials.client_key', '');
-                  }}
-                  onChange={async () => {
-                    const path = (await open({
-                      multiple: false,
-                      title: t('add_connection_form.select_file'),
-                    })) as string;
-                    if (!path) return;
-                    setFields('credentials.client_key', path);
-                  }}
-                />
-              </div>
+              </Show>
+              <Show when={data('dialect') === Dialect.Mysql}>
+                <div class="col-span-12">
+                  <div class="block">
+                    <Label label={t('add_connection_form.labels.client_p12')} for="credentials.client_cert" />
+                  </div>
+                  <FilePicker
+                    name="credentials.client_p12"
+                    onClear={() => {
+                      setFields('credentials.client_p12', '');
+                    }}
+                    onChange={async () => {
+                      const path = (await open({
+                        multiple: false,
+                        title: t('add_connection_form.select_file'),
+                      })) as string;
+                      if (!path) return;
+                      setFields('credentials.client_p12', path);
+                    }}
+                  />
+                </div>
+              </Show>
+              <Show when={data('dialect') === Dialect.Mysql}>
+                <div class="col-span-12">
+                  <TextInput
+                    label={t('add_connection_form.labels.client_p12_pass')}
+                    name="credentials.client_p12_pass"
+                  />
+                </div>
+              </Show>
             </Show>
             <div class="col-span-8">
               <TextInput label={t('add_connection_form.labels.name')} errors={errors('name')} name="name" />
