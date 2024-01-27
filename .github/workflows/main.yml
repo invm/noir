@@ -46,9 +46,10 @@ jobs:
 
       - name: Set up Homebrew and install openssl
         if: matrix.build == 'macos'
-        id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
-        run: brew install openssl@3
+
+      - run: brew install openssl@3
+        if: matrix.build == 'macos'
 
       - name: Set up Homebrew and install openssl
         if: matrix.build == 'windows'
@@ -60,6 +61,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
+
       - run: pnpm install --frozen-lockfile
 
       - name: Install rust
