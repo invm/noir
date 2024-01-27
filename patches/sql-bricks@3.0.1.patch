@@ -1,0 +1,38 @@
+diff --git a/sql-bricks.js b/sql-bricks.js
+index e32853a2434778d66ab84d53d28a7b6cfebbbd47..5179f5ed66f38f5ac96b30fde3d692c21f8ea44c 100644
+--- a/sql-bricks.js
++++ b/sql-bricks.js
+@@ -1057,32 +1057,10 @@
+     if (expr instanceof sql)
+       return expr.toString(opts);
+ as
+-    if (unquoted_regex.test(expr))
+-      return quoteColOrTbl(expr);
+-    else
+-      return expr;
++    return expr;
+   }
+   sql._handleColumn = handleColumn;
+ 
+-  function quoteColOrTbl(expr) {
+-    var prefix = '';
+-    var dot_ix = expr.lastIndexOf('.');
+-    if (dot_ix > -1) {
+-      prefix = expr.slice(0, dot_ix);
+-      expr = expr.slice(dot_ix + 1);
+-    }
+-
+-    var suffix = '';
+-    var space_ix = expr.indexOf(' ');
+-    if (space_ix > -1) {
+-      suffix = expr.slice(space_ix);
+-      expr = expr.slice(0, space_ix);
+-    }
+-
+-    return (prefix ? autoQuote(prefix) + '.' : '') + autoQuote(expr) + suffix;
+-  }
+-  sql._quoteColOrTbl = quoteColOrTbl;
+-
+   // auto-quote tbl & col names if they have caps or are reserved words
+   sql._autoQuoteChar = '"';
+   
