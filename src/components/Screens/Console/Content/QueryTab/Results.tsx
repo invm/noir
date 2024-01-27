@@ -23,7 +23,7 @@ import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
-import Keymaps from 'components/Screens/Settings/Keymaps/Keymaps';
+import Keymaps from 'components/Screens/Settings/Keymaps';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -164,7 +164,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   let gridRef: AgGridSolidRef;
 
   const onBtnExport = async (t: 'csv' | 'json') => {
-    if (!data().path) return;
+    if (!data()?.path) return;
     const filename = props.table + '_' + new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;

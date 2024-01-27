@@ -1,4 +1,4 @@
-import { For, Show } from 'solid-js';
+import { For, JSX, Show } from 'solid-js';
 import { t } from 'utils/i18n';
 
 // this is not done with i18n because this is copied to the docs site as is
@@ -58,11 +58,11 @@ const ALL_KEYMAPS = [
 
 const CATEGORY_LIMIT = 3;
 
-const Keymaps = (props: { short?: boolean; suffix?: boolean }) => {
+const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
   const keymaps = props.short ? ALL_KEYMAPS.slice(0, CATEGORY_LIMIT) : ALL_KEYMAPS;
   return (
     <div class="flex items-center flex-col">
-      <Show when={!props.seeAllButton && !props.short}>
+      <Show when={!props.suffix && !props.short}>
         <h2 class="text-2xl font-bold mt-4 text-primary pb-5">{t('keymaps.title')}</h2>
         <span class="max-w-lg font-medium text-center pb-5">{t('keymaps.description')}</span>
       </Show>
@@ -70,7 +70,7 @@ const Keymaps = (props: { short?: boolean; suffix?: boolean }) => {
         {({ category, keys, description }) => (
           <div class="flex items-center flex-col">
             <div class="flex flex-col items-center">
-              <h3 class="text-lg font-bold text-accent">{category}</h3>
+              <h3 class="text-lg font-bold text-primary">{category}</h3>
               <Show when={description}>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{description}</span>
               </Show>

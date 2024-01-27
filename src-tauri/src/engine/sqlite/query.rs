@@ -36,17 +36,26 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let query = query.to_string();
     let rows = conn
         .interact(move |conn| {
-            let mut stmt = conn.prepare(&query).unwrap();
-            let mut result: Vec<Value> = Vec::new();
-            let columns_count = stmt.column_count();
-            let mut rows = stmt.query([]).unwrap();
-            while let Some(row) = rows.next().unwrap() {
-                result.push(row_to_object(row, columns_count));
+            let stmt = conn.prepare(&query);
+            match stmt {
+                Ok(mut stmt) => {
+                    let mut result: Vec<Value> = Vec::new();
+                    let columns_count = stmt.column_count();
+                    match stmt.query([]) {
+                        Ok(mut rows) => {
+                            while let Some(row) = rows.next().unwrap() {
+                                result.push(row_to_object(row, columns_count));
+                            }
+                            Ok(result)
+                        }
+                        Err(e) => Err(e),
+                    }
+                }
+                Err(e) => Err(e),
             }
-            result
         })
         .await;
-    let rows = rows.map_err(|e| anyhow!(e.to_string()))?;
+    let rows = rows.unwrap()?;
     let end_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()

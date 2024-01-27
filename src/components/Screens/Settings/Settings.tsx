@@ -2,7 +2,7 @@ import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
 import { version } from '../../../../package.json';
-import Keymaps from './Keymaps/Keymaps';
+import Keymaps from './Keymaps';
 import { OpenIssue } from './OpenIssue';
 
 export const Settings = () => {

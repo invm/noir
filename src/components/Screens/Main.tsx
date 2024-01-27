@@ -8,7 +8,7 @@ import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
-import Keymaps from './Settings/Keymaps/Keymaps';
+import Keymaps from './Settings/Keymaps';
 
 export const Main = () => {
   const {
@@ -27,13 +27,13 @@ export const Main = () => {
   return (
     <div class="w-full h-full flex flex-col">
       <div class="px-2 bg-base-300 rounded-none gap-2 flex justify-between items-center">
-        <div class="tabs tabs-boxed gap-2">
+        <div class="tabs tabs-md tabs-boxed gap-2 flex">
           <button
             onClick={() => {
               setComponent('home');
               setStore('idx', 0);
             }}
-            class="tab tab-md"
+            class="tab"
             tabIndex={0}
             classList={{ 'tab-active': component() === 'home' }}>
             <span class="text-md font-bold">
@@ -48,7 +48,7 @@ export const Main = () => {
                     setComponent('console');
                     setStore('idx', idx());
                   }}
-                  class="tab tab-md pt-1"
+                  class="tab pt-1"
                   classList={{
                     'tab-active': component() === 'console' && store.idx === idx(),
                   }}

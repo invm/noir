@@ -15,10 +15,10 @@ export const Content = () => {
 
   return (
     <div class="flex flex-col h-full">
-      <div class="bg-base-300 tabs gap-1">
+      <div role="tablist" class="bg-base-300 tabs tabs-md tabs-lifted gap-1 flex">
         <For each={getConnection().tabs}>
           {(_tab, idx) => (
-            <div class="tab tab-md tab-lifted !pr-1 !pl-1" classList={{ 'tab-active': getConnection().idx === idx() }}>
+            <a role="tab" class="max-w-fit tab !pr-1 !pl-1" classList={{ 'tab-active': getConnection().idx === idx() }}>
               <button class="text-xs p-1 px-3" onClick={() => setContentIdx(idx())}>
                 {_tab.label}
               </button>
@@ -27,10 +27,10 @@ export const Content = () => {
                   <CloseIcon />
                 </button>
               </Show>
-            </div>
+            </a>
           )}
         </For>
-        <div class="tab tab-sm tab-lifted tab-active">
+        <div class="tab tab-active max-w-fit">
           <button onClick={() => addContentTab()}>
             <AddIcon />
           </button>
