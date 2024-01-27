@@ -10,13 +10,13 @@ import { SetStoreFunction } from 'solid-js/store';
 tippy;
 
 const rowsActions = [
-  { action: 'view', label: t('console.table.row_actions.view') },
-  { action: 'copy-row', label: t('console.table.row_actions.copy_row') },
-  { action: 'copy-cell', label: t('console.table.row_actions.copy_cell') },
-  { action: 'edit-row', label: t('console.table.row_actions.edit_row') },
-  { action: 'edit-cell', label: t('console.table.row_actions.edit_cell') },
-  { action: 'add-row', label: t('console.table.row_actions.add_row') },
-  { action: 'delete-row', label: t('console.table.row_actions.delete_row') },
+  { action: 'view', editable: false, label: t('console.table.row_actions.view') },
+  { action: 'copy-row', editable: false, label: t('console.table.row_actions.copy_row') },
+  { action: 'copy-cell', editable: false, label: t('console.table.row_actions.copy_cell') },
+  { action: 'edit-row', editable: true, label: t('console.table.row_actions.edit_row') },
+  { action: 'edit-cell', editable: true, label: t('console.table.row_actions.edit_cell') },
+  { action: 'add-row', editable: true, label: t('console.table.row_actions.add_row') },
+  { action: 'delete-row', editable: true, label: t('console.table.row_actions.delete_row') },
 ] as const;
 
 type RowAction = (typeof rowsActions)[number]['action'];
@@ -52,10 +52,7 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
     <ul class="menu menu-xs rounded-box">
       <For
         each={rowsActions.filter((r) => {
-          if (['edit-row', 'edit-cell'].includes(r.action)) {
-            return props.editable;
-          }
-          return true;
+          return !r.editable || r.editable === props.editable;
         })}>
         {({ action, label }) => (
           <li>

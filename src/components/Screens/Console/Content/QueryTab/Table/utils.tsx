@@ -84,6 +84,7 @@ export const getColumnDefs = ({
 
       return {
         cellRenderer,
+        editable,
         headerComponent: () =>
           headerComponent(field, {
             visible_type,
@@ -97,6 +98,7 @@ export const getColumnDefs = ({
   }
   return Object.keys(row).map((field, _i) => {
     return {
+      editable,
       cellRenderer,
       headerComponent: () => headerComponent(field, {}),
       field,
