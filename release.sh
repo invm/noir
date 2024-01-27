@@ -8,7 +8,8 @@ if [ "$valid" ]; then
 	pnpm release --release-as "$type"
 	cd src-tauri || exit
 	cargo bump "$type"
-	git commit --amend
+	git add .
+	git commit --amend --no-edit
 else
 	echo "Invalid bump type"
 	exit 1
