@@ -77,7 +77,7 @@ Run `pnpm install`
 
 Start the project with `pnpm dev`
 
-Build for your os and arch with `pnpm build`
+Build for your os and arch with `pnpm tauri build`
 
 ## Usage
 
