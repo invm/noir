@@ -38,28 +38,23 @@ jobs:
         with:
           node-version: latest
 
+      - name: Install dependencies (ubuntu only)
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          sudo apt update
+          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
+      - run: pnpm install --frozen-lockfile
 
       - name: Install rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: ${{ matrix.target }}
-          
-      - name: Install dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          sudo apt update
-          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
-      - name: Install app dependencies from lockfile and build web
-        run: pnpm i
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
