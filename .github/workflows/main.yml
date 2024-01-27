@@ -47,7 +47,7 @@ jobs:
       - name: LS
         run: |
           ls -la
-          ls -la patchs
+          ls -la patches
           tree
         
       - name: Install pnpm
