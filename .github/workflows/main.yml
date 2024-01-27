@@ -11,14 +11,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - build: linux
-          #   os: ubuntu-20.04
-          #   arch: x86_64
-          #   target: x86_64-unknown-linux-gnu
-          # - build: macos
-          #   os: macos-latest
-          #   arch: x86_64
-          #   target: x86_64-apple-darwin
+          - build: linux
+            os: ubuntu-20.04
+            arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - build: macos
+            os: macos-latest
+            arch: x86_64
+            target: x86_64-apple-darwin
           - build: macos
             os: macos-latest
             arch: aarch64
