@@ -50,8 +50,9 @@ jobs:
 
       - if: matrix.build == 'macos'
         run: |
-          brew install openssl@3 (macos only)
+          brew install openssl@3
           export OPENSSL_LIB_DIR=$(which openssl)
+          export OPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include
 
       - name: Set up openssl (windows only)
         if: matrix.build == 'windows'
