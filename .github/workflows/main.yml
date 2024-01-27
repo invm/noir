@@ -45,7 +45,10 @@ jobs:
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
 
       - name: LS
-        run: ls -la
+        run: |
+          ls -la
+          ls -la patchs
+          tree
         
       - name: Install pnpm
         uses: pnpm/action-setup@v2
