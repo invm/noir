@@ -46,6 +46,8 @@ magic-crypt = "3.1.13"
 rusqlite_migration = { version= "1.1.0", features = ["from-directory"] }
 include_dir = "0.7.3"
 lazy_static = "1.4.0"
+postgres-openssl = "0.5.0"
+openssl = "0.10.63"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

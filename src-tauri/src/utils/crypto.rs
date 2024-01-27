@@ -8,7 +8,7 @@ pub fn encrypt_data(data: &str, key: &MagicCrypt256) -> String {
     return key.encrypt_str_to_base64(data);
 }
 
-pub fn decrypt_data(data: &String, key: &MagicCrypt256) -> Result<String> {
+pub fn decrypt_data(data: &str, key: &MagicCrypt256) -> Result<String> {
     Ok(key.decrypt_base64_to_string(&data)?)
 }
 

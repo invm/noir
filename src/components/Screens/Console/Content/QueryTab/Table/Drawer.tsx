@@ -1,4 +1,3 @@
-import { createShortcut } from '@solid-primitives/keyboard';
 import { Key } from 'components/UI/Icons';
 import { NumericTypes } from 'interfaces';
 import { useAppSelector } from 'services/Context';
@@ -19,12 +18,6 @@ export const Drawer = (props: DrawerProps) => {
   const {
     app: { cmdOrCtrl },
   } = useAppSelector();
-
-  createShortcut([cmdOrCtrl(), 's'], () => {
-    if (props.drawerOpen.open) {
-      props.saveForm();
-    }
-  });
 
   return (
     <div class="drawer drawer-end z-10">

@@ -1,8 +1,8 @@
 use crate::{
     database::queries,
     engine::{
+        init::init_conn,
         types::config::{ConnectionConfig, Credentials, Dialect, Mode},
-        utils::init_conn::init_conn,
     },
     state::ServiceAccess,
     utils::error::{CommandResult, Error},

@@ -58,7 +58,7 @@ pub fn get_all_connections(db: &AppConnection) -> Result<Vec<ConnectionConfig>> 
     let mut items = Vec::new();
     let key = get_app_key()?;
     while let Some(row) = rows.next()? {
-        let credentials = row.get("credentials")?;
+        let credentials: String = row.get("credentials")?;
         let data = decrypt_data(&credentials, &key)?;
         let credentials: Credentials = serde_json::from_str(&data)?;
         let dialect: Dialect = row.get("dialect")?;

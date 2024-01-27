@@ -10,7 +10,6 @@ import { Row } from 'interfaces';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
-import Keymaps from 'components/UI/Keymaps';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
@@ -24,6 +23,7 @@ import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
+import Keymaps from 'components/Screens/Settings/Keymaps/Keymaps';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -33,6 +33,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     connections: { queryIdx, getConnection, updateContentTab, getContentData },
     backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
     messages: { notify },
+    app: { cmdOrCtrl },
   } = useAppSelector();
 
   const [drawerOpen, setDrawerOpen] = createStore({
@@ -160,20 +161,10 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     setPage(0);
   };
 
-  const defaultColDef: ColDef = {
-    minWidth: 30,
-    suppressMovable: true,
-    editable: true,
-    sortable: true,
-    singleClickEdit: true,
-    resizable: true,
-    filter: true,
-    width: 300,
-  };
-
   let gridRef: AgGridSolidRef;
 
   const onBtnExport = async (t: 'csv' | 'json') => {
+    if (!data().path) return;
     const filename = props.table + '_' + new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;
@@ -187,7 +178,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const applyChanges = async () => {
     try {
-      const conn = getConnection();
       const _table = table.name;
       const queries = [];
       if (Object.keys(changes['add']).length) {
@@ -213,6 +203,8 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         });
         queries.push(...deletes);
       }
+      if (queries.length === 0) return;
+      const conn = getConnection();
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
       const result_sets = await selectAllFrom(props.table!, conn.id, getConnection().idx);
@@ -277,6 +269,26 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     }
     await applyChanges();
     setDrawerOpen({ open: false, data: {} });
+  };
+
+  createShortcut([cmdOrCtrl(), 's'], () => {
+    if (!props.editable) return;
+    if (drawerOpen.open) {
+      saveForm();
+    } else {
+      applyChanges();
+    }
+  });
+
+  const defaultColDef: ColDef = {
+    minWidth: 30,
+    suppressMovable: true,
+    editable: true,
+    sortable: true,
+    singleClickEdit: true,
+    resizable: true,
+    filter: true,
+    width: 300,
   };
 
   return (

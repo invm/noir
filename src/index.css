@@ -73,22 +73,6 @@ input[type="number"] {
   background: #555;
 }
 
-.app-input {
-  @apply block w-full p-2 border border-gray-300 rounded-lg bg-base-100 sm:text-sm focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 py-1.5 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base h-[32px];
-}
-
-.app-checkbox {
-  @apply w-4 h-4 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:border-gray-600;
-}
-
-.app-select {
-  @apply border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500 text-base sm:text-sm py-0.5 h-[32px];
-}
-
-.background-gradient {
-  @apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-black via-slate-900 to-black;
-}
-
 .cm-editor {
   height: 100%;
 }

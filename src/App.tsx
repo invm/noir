@@ -19,8 +19,8 @@ import { t } from 'utils/i18n';
 
 function App() {
   const {
-    connections: { restoreConnectionStore, getConnection, updateResultSet, loading, setLoading },
-    app: { restoreAppStore },
+    connections: { store, restoreConnectionStore, getConnection, updateResultSet, loading, setLoading },
+    app: { restoreAppStore, setComponent },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
@@ -113,6 +113,9 @@ function App() {
     document.documentElement.dataset.theme = theme;
     await restoreAppStore();
     await restoreConnectionStore();
+    if (store.tabs.length === 0) {
+      setComponent('home');
+    }
     setLoading(false);
   });
 

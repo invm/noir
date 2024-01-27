@@ -118,7 +118,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           onClick={({ props }) => {
             listData(props.table);
           }}>
-          {t('sidebar.show_data')}
+          {t('sidebar.view_data')}
         </Item>
         <Item
           onClick={() => {

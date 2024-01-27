@@ -97,7 +97,7 @@ impl ConnectionConfig {
     pub fn new(
         dialect: Dialect,
         mode: Mode,
-        mut credentials: HashMap<String, String>,
+        mut credentials: Credentials,
         name: &str,
         color: &str,
     ) -> Result<Self> {
@@ -109,7 +109,7 @@ impl ConnectionConfig {
         }
         match dialect {
             Dialect::Mysql => {
-                let available_keys = vec![
+                let allowed_keys = vec![
                     "pool_min",
                     "pool_max",
                     "user",
@@ -127,8 +127,13 @@ impl ConnectionConfig {
                     "tcp_connect_timeout_ms",
                     "stmt_cache_size",
                     "secure_auth",
+                    // later before connecting those keys are omitted and everything else is passed to cfg builder
+                    "ssl_mode",
+                    "ca_cert",
+                    "client_p12",
+                    "client_p12_pass",
                 ];
-                let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                let _ = credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 let schema = credentials
                     .get("db_name")
                     .cloned()
@@ -144,7 +149,7 @@ impl ConnectionConfig {
                 })
             }
             Dialect::Postgresql => {
-                let available_keys = vec![
+                let allowed_keys = vec![
                     "user",
                     "password",
                     "db_name",
@@ -158,8 +163,12 @@ impl ConnectionConfig {
                     "keepalives_idle",
                     "target_session_attrs",
                     "transaction_read_write",
+                    "ssl_mode", // disable, prefer, require, if with ca_cert ssl verify mode is peer
+                    "ca_cert",
+                    "client_cert",
+                    "client_key",
                 ];
-                let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                let _ = credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 Ok(ConnectionConfig {
                     id: Uuid::new_v4(),
                     dialect,

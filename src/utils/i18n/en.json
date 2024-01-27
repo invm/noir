@@ -16,11 +16,18 @@
         "password": "Password",
         "host": "Host",
         "socket": "Socket path",
-        "path": "Database file",
-        "new_path": "New database file",
+        "path": "DB file",
         "db_name": "Default schema",
-        "port": "Port"
-      }
+        "port": "Port",
+        "ssl_mode": "SSL Mode",
+        "ca_cert": "CA certificate (optional)",
+        "client_cert": "Client certificate (optional)",
+        "client_key": "Client key (optional)",
+        "show_ssl_certs": "Add certificates",
+        "client_p12": "P12 file (optional)",
+        "client_p12_pass": "P12 password (optional)"
+      },
+      "select_file": "Select file"
     },
     "connections_list": {
       "title": "Connections",
@@ -82,7 +89,7 @@
     },
     "sidebar": {
       "show_table_structure": "Show table structure",
-      "show_data": "Show data",
+      "view_data": "View data",
       "truncate_table": "Truncate table",
       "confirm_truncate": "Are you sure you want to truncate table {{table}}?",
       "yes": "Yes",
@@ -141,6 +148,11 @@
       "something_went_wrong": "Something went wrong",
       "stack": "Stack",
       "relaunch_app": "Relaunch app"
+    },
+    "keymaps":{
+      "title": "Available keyboard shortcuts",
+      "see_all": "See all shortcuts",
+      "description": "Some keyboard shortcuts are only available in certain modes or when some elements are visible on screen, like the editor or the results table."
     }
   }
 }

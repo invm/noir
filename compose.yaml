@@ -1,31 +1,45 @@
 volumes:
-  # mysql:
+  mysql:
   psql:
 
 services:
-  # mysql:
-  #   image: mysql:8.0.33
-  #   container_name: mysql
-  #   command: --default-authentication-plugin=mysql_native_password
-  #   restart: always
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: example
-  #     MYSQL_DATABASE: world_x # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
-  #   ports:
-  #     - 3306:3306
-  #   volumes:
-  #     - mysql:/var/lib/mysql
-  #     - ./dev/:/docker-entrypoint-initdb.d
+  mysql:
+    image: mysql:8.0.29-debian
+    container_name: mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: world # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./dev/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      # extract in dev/mysql folder before mounting
+      - ./dev/mysql/world.sql:/docker-entrypoint-initdb.d/world.sql:ro
+      - ./dev/certs:/etc/ssl/mysql/certs
   psql:
-    image: postgres:15
+    image: postgres:16-bookworm
     container_name: psql
-    command: ["postgres", "-c", "log_statement=all"]
+    command: >
+      -c log_statement=all 
+      -c ssl=on 
+      -c ssl_cert_file=/etc/ssl/psql/certs/server.pem
+      -c ssl_key_file=/etc/ssl/psql/certs/server.key
+      -c ssl_ca_file=/etc/ssl/psql/certs/ca.pem
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
       POSTGRES_DB: dvdrental # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
     volumes:
       - psql:/var/lib/postgresql/data
-      # - ./db.tar:/tmp/db.tar # pg_restore -U postgres -d dvdrental -1 /tmp/db.tar
+      - ./dev/psql/postgres.conf:/etc/postgresql/postgresql.conf
+      # - ./dev/psql/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      # extract in dev/psql folder before mounting
+      - ./dev/psql/dvdrental.tar:/tmp/dvdrental.tar
+      - ./dev/psql/init.sh:/docker-entrypoint-initdb.d/init.sh 
+      - ./dev/certs:/etc/ssl/psql/certs
     ports:
       - 5432:5432

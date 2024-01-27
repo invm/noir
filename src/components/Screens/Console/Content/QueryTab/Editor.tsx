@@ -143,7 +143,6 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
 
   createEffect(
     on(idx, () => {
-      if (idx() === -1) return;
       const _schema = getSchemaEntity('tables').reduce(
         (acc, table) => ({
           ...acc,
