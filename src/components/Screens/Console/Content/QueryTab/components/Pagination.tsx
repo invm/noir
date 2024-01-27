@@ -37,6 +37,8 @@ export const Pagination = (props: PaginationProps) => {
   createShortcut(['Control', 'Shift', 'P'], selectPrevQuery);
   createShortcut(['Control', 'N'], props.onNextPage);
   createShortcut(['Control', 'P'], props.onPrevPage);
+  createShortcut(['Control', 'Shift', 'J'], () => props.onBtnExport('json'));
+  createShortcut(['Control', 'Shift', 'C'], () => props.onBtnExport('csv'));
   createShortcut([altOrMeta(), 'N'], () =>
     props.openDrawerForm ? props.openDrawerForm({ mode: 'add', data: {} }) : null
   );

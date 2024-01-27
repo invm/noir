@@ -10,7 +10,6 @@ import { Row } from 'interfaces';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/UI';
-import Keymaps from 'components/UI/Keymaps';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
@@ -24,6 +23,7 @@ import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
+import Keymaps from 'components/Screens/Settings/Keymaps/Keymaps';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -161,20 +161,10 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     setPage(0);
   };
 
-  const defaultColDef: ColDef = {
-    minWidth: 30,
-    suppressMovable: true,
-    editable: true,
-    sortable: true,
-    singleClickEdit: true,
-    resizable: true,
-    filter: true,
-    width: 300,
-  };
-
   let gridRef: AgGridSolidRef;
 
   const onBtnExport = async (t: 'csv' | 'json') => {
+    if (!data().path) return;
     const filename = props.table + '_' + new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;
@@ -289,6 +279,17 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       applyChanges();
     }
   });
+
+  const defaultColDef: ColDef = {
+    minWidth: 30,
+    suppressMovable: true,
+    editable: true,
+    sortable: true,
+    singleClickEdit: true,
+    resizable: true,
+    filter: true,
+    width: 300,
+  };
 
   return (
     <div class="flex flex-col h-full overflow-hidden">

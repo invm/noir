@@ -24,7 +24,7 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   }
 
   createShortcut(['F1'], () => {
-    setComponent((s) => (s === 1 ? 0 : 1));
+    setComponent((s) => (s === 'keymaps' ? 'console' : 'keymaps'));
   });
 
   createShortcut([cmdOrCtrl(), 't'], () => {
@@ -44,11 +44,12 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   });
 
   createShortcut(['Control', '`'], () => {
-    setConnectionIdx(-1);
+    setComponent('home');
   });
 
   for (let i = 1; i <= 9; i++) {
     createShortcut(['Control', String(i)], () => {
+      setComponent('console');
       setConnectionIdx(i - 1);
     });
   }

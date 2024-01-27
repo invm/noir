@@ -37,6 +37,8 @@ const getSavedData = async (key: string) => {
   }
 };
 
+type Screen = 'console' | 'settings' | 'keymaps' | 'home';
+
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     vimModeOn: false,
@@ -45,7 +47,7 @@ export const AppService = () => {
     osType: 'Linux',
   });
 
-  const [component, setComponent] = createSignal(0);
+  const [component, setComponent] = createSignal<Screen>('console');
 
   const updateStore = debounce(async () => {
     await store.set(APP_KEY, JSON.stringify(appStore));

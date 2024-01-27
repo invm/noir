@@ -8,6 +8,7 @@ import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
 import { ThemeSwitch } from 'components/UI/ThemeSwitch';
+import Keymaps from './Settings/Keymaps/Keymaps';
 
 export const Main = () => {
   const {
@@ -18,6 +19,9 @@ export const Main = () => {
   const handleCloseConnection = async (id: string) => {
     await invoke<string>('disconnect', { id });
     await removeConnectionTab(id);
+    if (store.tabs.length === 0) {
+      setComponent('home');
+    }
   };
 
   return (
@@ -26,12 +30,12 @@ export const Main = () => {
         <div class="tabs tabs-boxed gap-2">
           <button
             onClick={() => {
-              setComponent(0);
-              setStore('idx', -1);
+              setComponent('home');
+              setStore('idx', 0);
             }}
             class="tab tab-md"
             tabIndex={0}
-            classList={{ 'tab-active': store.idx === -1 }}>
+            classList={{ 'tab-active': component() === 'home' }}>
             <span class="text-md font-bold">
               <HomeIcon />
             </span>
@@ -41,12 +45,12 @@ export const Main = () => {
               <div class="flex items-center">
                 <button
                   onClick={() => {
-                    setComponent(0);
+                    setComponent('console');
                     setStore('idx', idx());
                   }}
                   class="tab tab-md pt-1"
                   classList={{
-                    'tab-active': store.idx === idx(),
+                    'tab-active': component() === 'console' && store.idx === idx(),
                   }}
                   tabindex={0}>
                   <span class="text-md font-bold">{tab.label}</span>
@@ -73,7 +77,9 @@ export const Main = () => {
             </a>
           </div>
           <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
-            <button class="btn btn-square btn-ghost btn-sm" onClick={() => setComponent((s) => (s === 1 ? 0 : 1))}>
+            <button
+              class="btn btn-square btn-ghost btn-sm"
+              onClick={() => setComponent((s) => (s === 'console' ? 'settings' : 'console'))}>
               <Cog />
             </button>
           </div>
@@ -81,18 +87,19 @@ export const Main = () => {
       </div>
       <div class="flex-1 overflow-hidden flex">
         <Switch>
-          <Match when={component() === 1}>
+          <Match when={component() === 'settings'}>
             <Settings />
           </Match>
-          <Match when={!component()}>
-            <Switch>
-              <Match when={store.idx === -1}>
-                <Home />
-              </Match>
-              <Match when={store.idx >= 0}>
-                <Console />
-              </Match>
-            </Switch>
+          <Match when={component() === 'keymaps'}>
+            <div class="w-full bg-base-200 py-10 overflow-y-auto">
+              <Keymaps />
+            </div>
+          </Match>
+          <Match when={component() === 'home'}>
+            <Home />
+          </Match>
+          <Match when={component() === 'console'}>
+            <Console />
           </Match>
         </Switch>
       </div>

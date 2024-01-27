@@ -13,7 +13,6 @@ import {
 import { Store } from 'tauri-plugin-store-api';
 import { columnsToTables, debounce } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
-import { MessageService } from './Messages';
 import { createSignal } from 'solid-js';
 
 const cache = new Store('.connections.dat');
@@ -154,7 +153,7 @@ export const ConnectionsService = () => {
   const [loading, setLoading] = createSignal(true);
   const [store, setStore] = createStore<ConnectionStore>({
     tabs: [],
-    idx: -1,
+    idx: 0,
   });
 
   const [connections, setConnections] = createStore<ConnectionConfig[]>([]);
@@ -174,7 +173,6 @@ export const ConnectionsService = () => {
             return Promise.resolve([...res, conn]);
           } catch (e) {
             conn_tabs.idx = 0;
-            MessageService().notify(e);
             return Promise.resolve(res);
           }
         },
@@ -231,7 +229,7 @@ export const ConnectionsService = () => {
   };
 
   const removeConnectionTab = async (id: string) => {
-    setStore('idx', -1);
+    setStore('idx', 0);
     setStore(
       'tabs',
       store.tabs.filter((t) => t.id !== id)
@@ -283,14 +281,14 @@ export const ConnectionsService = () => {
   };
 
   const setConnectionIdx = (i: number) => {
-    if (i <= store.tabs.length - 1) {
+    if (i < store.tabs.length) {
       setStore('idx', i);
     }
   };
 
   const setContentIdx = (i: number) => {
     const conn = getConnection();
-    if (i <= conn.tabs.length) {
+    if (i < conn.tabs.length) {
       setStore(
         produce((s) => {
           s.tabs[s.idx].idx = i;
