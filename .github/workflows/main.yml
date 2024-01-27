@@ -19,7 +19,7 @@ jobs:
             os: macos-latest
             arch: x86_64
             target: x86_64-apple-darwin
-          - buid: macos
+          - build: macos
             os: macos-latest
             arch: aarch64
             target: aarch64-apple-darwin
@@ -69,6 +69,11 @@ jobs:
         with:
           toolchain: stable
           target: ${{ matrix.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
