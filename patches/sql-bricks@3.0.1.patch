@@ -5,7 +5,7 @@ index e32853a2434778d66ab84d53d28a7b6cfebbbd47..5179f5ed66f38f5ac96b30fde3d692c2
 @@ -1057,32 +1057,10 @@
      if (expr instanceof sql)
        return expr.toString(opts);
- as
+ 
 -    if (unquoted_regex.test(expr))
 -      return quoteColOrTbl(expr);
 -    else
