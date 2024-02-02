@@ -18,18 +18,20 @@ export const QueryTab = () => {
   });
 
   const {
-    app: { gridTheme, appStore },
+    app: { gridTheme, editorTheme },
   } = useAppSelector();
 
   return (
     <div class="flex flex-col h-full">
       <div id="query" class="flex flex-col">
-        <Show when={appStore.editorTheme} keyed>
-          {(_) => <Editor editorTheme={appStore.editorTheme} />}
+        <Show when={editorTheme()} keyed>
+          {(_) => <Editor editorTheme={editorTheme()} />}
         </Show>
       </div>
       <div id="results">
-        <Results editable={false} gridTheme={gridTheme()} editorTheme={appStore.editorTheme} />
+        <Show when={editorTheme()} keyed>
+          {(_) => <Results editable={false} gridTheme={gridTheme()} editorTheme={editorTheme()} />}
+        </Show>
       </div>
     </div>
   );

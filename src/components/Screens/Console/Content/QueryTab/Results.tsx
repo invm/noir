@@ -60,12 +60,16 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     onValueChange: setCode,
   });
   createEditorControlledValue(editorView, code);
-  createExtension(() => search());
+  createExtension(search);
+  createExtension(editorThemes[props.editorTheme]);
   createExtension(basicSetup);
   createExtension(json);
-  createExtension(editorThemes[props.editorTheme]);
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
+
+  createEffect(() => {
+    console.log(props.editorTheme);
+  });
 
   const openDrawerForm = ({ rowIndex, mode, data: row }: { data: Row; rowIndex?: number; mode: 'add' | 'edit' }) => {
     if (!props.editable) return;

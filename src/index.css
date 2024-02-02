@@ -133,7 +133,7 @@ dialog {
 
 /* ag-grid */
 div[class*='ag-theme'] {
-    --ag-grid-size: 5px;
-    --ag-list-item-height: 20px;
+    --ag-grid-size: 4px;
+    --ag-list-item-height: 16px;
     --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
 }

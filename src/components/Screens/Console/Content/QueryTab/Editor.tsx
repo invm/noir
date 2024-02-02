@@ -65,7 +65,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
   } = useAppSelector();
-  const idx = () => store.idx;
+  const idx = () => store.tabs[store.idx].idx;
   const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
