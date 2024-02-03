@@ -68,6 +68,7 @@ pub async fn init_connection(
     config: ConnectionConfig,
 ) -> CommandResult<()> {
     info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
+    app_handle.db(|db| queries::get_connection(db, &config.id.to_string()))?;
     let conn = init_conn(config).await?;
     app_handle.connect(&conn)?;
     Ok(())
