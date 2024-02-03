@@ -3,12 +3,12 @@
 
 use chrono;
 use state::AppState;
-use tracing::error;
 use std::path::PathBuf;
 use std::{fs, panic};
 use tauri::{Manager, State};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
+use tracing::error;
 use tracing_subscriber;
 
 use noir::{
@@ -32,8 +32,8 @@ fn main() {
         error!("Panicked: {:?}", info);
         let path = get_app_path();
         let ts = chrono::offset::Utc::now();
-        let dest = format!("{}/error.log", path.to_str().unwrap());
-        fs::write(&PathBuf::from(dest), format!("{} - {:?}", ts, info)).unwrap();
+        let dest = format!("{}/error.log", path.to_str().expect("Failed to get path"));
+        fs::write(&PathBuf::from(dest), format!("{} - {:?}", ts, info)).expect("Failed to write error log");
     }));
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
@@ -54,7 +54,7 @@ fn main() {
             println!("{}, {argv:?}, {cwd}", app.package_info().name);
 
             app.emit_all("single-instance", Payload { args: argv, cwd })
-                .unwrap();
+                .expect("failed to emit");
         }))
         .setup(|app| {
             init::init_app()?;
@@ -62,7 +62,7 @@ fn main() {
 
             let app_state: State<AppState> = handle.state();
             let db = initialize_database().expect("Database initialize should succeed");
-            *app_state.db.lock().unwrap() = Some(db);
+            *app_state.db.lock().expect("Failed to lock db") = Some(db);
 
             tauri::async_runtime::spawn(async move {
                 async_process_model(async_proc_input_rx, async_proc_output_tx).await

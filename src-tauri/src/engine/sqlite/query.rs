@@ -10,15 +10,15 @@ use crate::{
 use super::utils::row_to_object;
 
 pub async fn raw_query(pool: &Pool, query: &str) -> Result<Vec<Value>> {
-    let conn = pool.get().await.unwrap();
+    let conn = pool.get().await.expect("Failed to get connection");
     let query = query.to_string();
     let mut result: Vec<Value> = Vec::new();
     let rows = conn
         .interact(move |conn| {
-            let mut stmt = conn.prepare(&query).unwrap();
+            let mut stmt = conn.prepare(&query).expect("Failed to prepare statement");
             let columns_count = stmt.column_count();
-            let mut rows = stmt.query([]).unwrap();
-            while let Some(row) = rows.next().unwrap() {
+            let mut rows = stmt.query([]).expect("Failed to execute query");
+            while let Some(row) = rows.next().expect("Failed to get row") {
                 result.push(row_to_object(row, columns_count));
             }
             result
@@ -30,9 +30,9 @@ pub async fn raw_query(pool: &Pool, query: &str) -> Result<Vec<Value>> {
 pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let start_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards")
         .as_millis() as u64;
-    let conn = pool.get().await.unwrap();
+    let conn = pool.get().await.expect("Failed to get connection");
     let query = query.to_string();
     let rows = conn
         .interact(move |conn| {
@@ -43,7 +43,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
                     let columns_count = stmt.column_count();
                     match stmt.query([]) {
                         Ok(mut rows) => {
-                            while let Some(row) = rows.next().unwrap() {
+                            while let Some(row) = rows.next().expect("Failed to get row") {
                                 result.push(row_to_object(row, columns_count));
                             }
                             Ok(result)
@@ -55,10 +55,10 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
             }
         })
         .await;
-    let rows = rows.unwrap()?;
+    let rows = rows.expect("Failed to execute query")?;
     let end_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards")
         .as_millis() as u64;
     let set = ResultSet {
         start_time,
@@ -78,7 +78,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
 }
 
 pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
-    let conn = pool.get().await.unwrap();
+    let conn = pool.get().await.expect("Failed to get connection");
     let queries = queries
         .iter()
         .map(|q| q.to_string())
@@ -87,7 +87,8 @@ pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
         let tx = conn.transaction()?;
 
         for query in queries {
-            tx.execute(&query, []).unwrap();
+            tx.execute(&query, [])
+                .expect("Failed to execute query in transaction");
         }
 
         Ok(tx.commit()?)

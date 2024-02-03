@@ -10,7 +10,7 @@ static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/database/migr
 // Define migrations. These are applied atomically.
 lazy_static! {
     static ref MIGRATIONS: Migrations<'static> =
-        Migrations::from_directory(&MIGRATIONS_DIR).unwrap();
+        Migrations::from_directory(&MIGRATIONS_DIR).expect("Failed to load migrations");
 }
 
 /// Initializes the database connection, creating the .sqlite file if needed, and upgrading the database

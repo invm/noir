@@ -106,7 +106,7 @@ pub async fn get_foreign_keys(
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
-    let db = conn.config.credentials.get("db_name").unwrap().as_str();
+    let db = conn.config.credentials.get("db_name").expect("Failed to get db_name from credentials").as_str();
     let mut _conn = pool.get_conn()?;
     let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db);
     Ok(raw_query(_conn, query)?)

@@ -168,5 +168,5 @@ pub async fn rs2js<R: tauri::Runtime>(result: QueryTaskResult, manager: &impl Ma
     info!(?result, "rs2js");
     manager
         .emit_all(Events::QueryFinished.as_str(), result)
-        .unwrap();
+        .expect("Failed to emit query_finished event");
 }

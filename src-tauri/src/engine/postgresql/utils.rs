@@ -97,7 +97,7 @@ impl FromSql<'_> for GenericEnum {
         _: &Type,
         raw: &[u8],
     ) -> Result<GenericEnum, Box<dyn std::error::Error + Sync + Send>> {
-        let result = std::str::from_utf8(raw).unwrap();
+        let result = std::str::from_utf8(raw).expect("Failed to convert to utf8 string");
         let val = GenericEnum(result.to_owned());
         Ok(val)
     }

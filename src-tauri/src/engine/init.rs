@@ -104,11 +104,14 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             config.manager = Some(PsqlManagerConfig {
                 recycling_method: RecyclingMethod::Fast,
             });
-            let ssl_mode = cfg.credentials.get("ssl_mode").unwrap();
-            config.ssl_mode = match ssl_mode.as_str() {
-                "prefer" => Some(SslMode::Prefer),
-                "require" => Some(SslMode::Require),
-                _ => Some(SslMode::Disable),
+            let ssl_mode = cfg.credentials.get("ssl_mode");
+            config.ssl_mode = match ssl_mode {
+                Some(val) => match val.as_str() {
+                    "prefer" => Some(SslMode::Prefer),
+                    "require" => Some(SslMode::Require),
+                    _ => Some(SslMode::Disable),
+                },
+                None => Some(SslMode::Disable),
             };
             let rt = Some(deadpool_postgres::Runtime::Tokio1);
             let ca_cert = cfg
@@ -150,7 +153,7 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                         } else if !ca_cert.is_empty() {
                             let mut builder = SslConnector::builder(SslMethod::tls_client())?;
                             builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
-                            builder.set_ca_file(cfg.credentials.get("ca_cert").unwrap())?;
+                            builder.set_ca_file(cfg.credentials.get("ca_cert").expect("Should have a ca cert"))?;
                             let connector = MakeTlsConnector::new(builder.build());
                             Some(config.create_pool(rt, connector)?)
                         } else {

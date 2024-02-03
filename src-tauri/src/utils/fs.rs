@@ -10,11 +10,11 @@ use rand::{distributions::Alphanumeric, Rng};
 
 pub fn get_db_path() -> PathBuf {
     let app_path = get_app_path();
-    PathBuf::from(format!("{}/.app.db", app_path.to_str().unwrap()))
+    PathBuf::from(format!("{}/.app.db", app_path.to_str().expect("Failed to get app path")))
 }
 
 fn get_key_path() -> PathBuf {
-    PathBuf::from(format!("{}/._", get_app_path().to_str().unwrap()))
+    PathBuf::from(format!("{}/._", get_app_path().to_str().expect("Failed to get app path")))
 }
 
 pub fn read_key() -> Result<Vec<u8>> {
@@ -47,8 +47,8 @@ pub fn get_tmp_dir() -> Result<String> {
 
 pub fn get_app_path() -> PathBuf {
     let config = tauri::Config::default();
-    let config_dir = app_config_dir(&config).unwrap();
-    let path = PathBuf::from(config_dir.to_str().unwrap().to_string() + "noir");
+    let config_dir = app_config_dir(&config).expect("Failed to get app config dir");
+    let path = PathBuf::from(config_dir.to_str().expect("Failed to get dir").to_string() + "noir");
     path
 }
 
@@ -118,7 +118,7 @@ pub fn copy_file(src: &str, dest: &str) -> Result<()> {
 
 pub fn remove_dir(file_path: &str) -> Result<()> {
     let file_path = PathBuf::from(file_path);
-    let dir = file_path.parent().unwrap();
+    let dir = file_path.parent().expect("Failed to get parent dir");
     let res = fs::remove_dir_all(dir);
     if let Err(res) = res {
         error!("Error: {:?}", res);

@@ -7,9 +7,9 @@ fn convert_value(value: &mysql::Value) -> serde_json::Value {
         Value::Int(v) => serde_json::Value::Number((*v).into()),
         Value::UInt(v) => serde_json::Value::Number((*v).into()),
         Value::Float(v) => serde_json::Value::Number(
-            serde_json::Number::from_f64(<f32 as std::convert::Into<f64>>::into(*v)).unwrap(),
+            serde_json::Number::from_f64(<f32 as std::convert::Into<f64>>::into(*v)).expect("Failed to convert f32 to f64"),
         ),
-        Value::Double(v) => serde_json::Value::Number(serde_json::Number::from_f64(*v).unwrap()),
+        Value::Double(v) => serde_json::Value::Number(serde_json::Number::from_f64(*v).expect("Failed to convert f64")),
         Value::Date(y, m, d, ..) => serde_json::Value::String(format!("{}-{}-{}", y, m, d)),
         Value::Time(neg, _d, h, m, s, z) => serde_json::Value::String(format!(
             "{}{}:{}:{}{}",

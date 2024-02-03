@@ -33,7 +33,7 @@ pub async fn enqueue_query(
     // ignore sqlparser when dialect is sqlite and statements contain pragma
     let statements: Result<Vec<String>, Error> = match Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
-            .unwrap()
+            .expect("Failed to get dialect")
             .as_ref(),
         sql,
     ) {
@@ -228,7 +228,7 @@ pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> 
     let content: Vec<Value> = serde_json::from_str(&format!("[{}]", content))?;
     let keys = content[0]
         .as_object()
-        .unwrap()
+        .expect("Failed to get object")
         .keys()
         .map(|k| k.to_string())
         .collect::<Vec<String>>();
@@ -238,7 +238,7 @@ pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> 
         .iter()
         .map(|row| {
             keys.iter()
-                .map(|k| row.get(k).unwrap().to_string())
+                .map(|k| row.get(k).expect(&format!("Failed to get key {} from {}", k, row)).to_string())
                 .collect::<Vec<String>>()
                 .join(",")
         })

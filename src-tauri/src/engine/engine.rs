@@ -31,7 +31,6 @@ pub async fn get_columns(conn: &InitiatedConnection, table: Option<&str>) -> Res
     }
 }
 
-
 pub async fn get_primary_key(conn: &InitiatedConnection, table: &str) -> Result<Vec<Value>> {
     match &conn.pool {
         Mysql(pool) => mysql::tables::get_primary_key(conn, &pool, table).await,
@@ -77,7 +76,7 @@ pub async fn get_schemas(conn: &InitiatedConnection) -> Result<Vec<Value>> {
         Mysql(pool) => mysql::tables::get_schemas(&pool).await,
         Postgresql(pool) => postgresql::tables::get_schemas(&pool).await,
         Sqlite(_pool) => Ok(vec![json!({
-        "schema": conn.config.credentials.get("path").unwrap().clone(),
+        "schema": conn.config.credentials.get("path").expect("Failed to get path from credentials").clone(),
         })]),
     }
 }

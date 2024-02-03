@@ -23,7 +23,7 @@ pub async fn raw_query(pool: Pool, query: &str) -> Result<Vec<Value>> {
 pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let start_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards")
         .as_millis() as u64;
     let conn = pool.get().await?;
     let params: Vec<String> = vec![];
@@ -36,7 +36,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let affected_rows = it.rows_affected().unwrap_or(0);
     let end_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards")
         .as_millis() as u64;
     let set = ResultSet {
         start_time,

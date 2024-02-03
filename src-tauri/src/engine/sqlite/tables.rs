@@ -36,7 +36,7 @@ pub async fn get_columns(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>>
     };
     let tables = raw_query(pool, &query).await?;
     for table in tables {
-        let table = table["tbl_name"].as_str().unwrap();
+        let table = table["tbl_name"].as_str().expect("Failed to get table name");
         let mut table_columns = get_table_columns(pool, table).await?;
         columns.append(&mut table_columns);
     }
@@ -48,7 +48,7 @@ async fn get_table_columns(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let columns = raw_query(pool, &query).await?;
     let mut res = vec![];
     columns.iter().for_each(|column| {
-        let column = column.as_object().unwrap();
+        let column = column.as_object().expect("Failed to get column info");
         info!("column: {:?}", column);
         res.push(json!({
             "column_name": column["name"],

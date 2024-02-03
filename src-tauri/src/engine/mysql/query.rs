@@ -21,7 +21,7 @@ pub fn raw_query(mut conn: PooledConn, query: String) -> Result<Vec<Value>> {
 pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     let start_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
+        .expect("Time went backwards")
         .as_millis() as u64;
     let mut conn = pool.get_conn()?;
     let mut results = conn.query_iter(query)?;
@@ -35,7 +35,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         }
         let end_time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
+            .expect("Time went backwards")
             .as_millis() as u64;
         let set = ResultSet {
             start_time,
@@ -78,14 +78,14 @@ pub fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
             for q in queries {
                 let success = tx.query_iter(q);
                 if success.is_err() {
-                    error = Some(success.err().unwrap());
+                    error = Some(success.err().expect("Failed to get error"));
                     break;
                 }
             }
             if error.is_some() {
                 info!("Rolling back transaction {:?}", error);
                 tx.rollback()?;
-                return Err(error.unwrap());
+                return Err(error.expect("Failed to get error"));
             }
             info!("Committing transaction");
             tx.commit()?;
