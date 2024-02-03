@@ -39,7 +39,9 @@ impl ServiceAccess for AppHandle {
     {
         let app_state: State<AppState> = self.state();
         let db_connection_guard = app_state.db.lock().expect("Failed to lock db");
-        let db = db_connection_guard.as_ref().expect("Connection not initialized");
+        let db = db_connection_guard
+            .as_ref()
+            .expect("Connection not initialized");
 
         operation(db)
     }
@@ -50,7 +52,9 @@ impl ServiceAccess for AppHandle {
     {
         let app_state: State<AppState> = self.state();
         let mut db_connection_guard = app_state.db.lock().expect("Failed to lock db");
-        let db = db_connection_guard.as_mut().expect("Connection not initialized");
+        let db = db_connection_guard
+            .as_mut()
+            .expect("Connection not initialized");
 
         operation(db)
     }
@@ -59,9 +63,12 @@ impl ServiceAccess for AppHandle {
         let app_state: State<AppState> = self.state();
         let binding = app_state.connections.lock();
         let connection_guard = binding.as_ref();
-        let connection = connection_guard.expect("Failed to get db binding").get(&conn_id).expect("Failed to get connection");
+        let connection = connection_guard
+            .expect("Failed to get db binding")
+            .get(&conn_id)
+            .expect("Failed to get connection");
 
-        return connection.clone();
+        connection.clone()
     }
 
     fn connect(&mut self, conn: &InitiatedConnection) -> Result<()> {

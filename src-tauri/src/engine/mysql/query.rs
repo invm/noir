@@ -25,7 +25,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         .as_millis() as u64;
     let mut conn = pool.get_conn()?;
     let mut results = conn.query_iter(query)?;
-    while let Some(result_set) = results.iter() {
+    if let Some(result_set) = results.iter() {
         let affected_rows = result_set.affected_rows();
         let warnings = result_set.warnings();
         let info = &result_set.info_str().to_string();
@@ -54,7 +54,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         return Ok(set);
     }
 
-    return Ok(ResultSet {
+    Ok(ResultSet {
         start_time: 0,
         end_time: 0,
         affected_rows: 0,
@@ -67,7 +67,7 @@ pub fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
             primary_key: None,
             columns: None,
         },
-    });
+    })
 }
 
 pub fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
@@ -78,7 +78,7 @@ pub fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
             for q in queries {
                 let success = tx.query_iter(q);
                 if success.is_err() {
-                    error = Some(success.err().expect("Failed to get error"));
+                    error = Some(success.expect_err("Failed to get error"));
                     break;
                 }
             }

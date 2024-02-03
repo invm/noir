@@ -21,17 +21,15 @@ impl Events {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum QueryTaskStatus {
+    #[default]
     Progress,
     Completed,
     Error,
 }
 
-impl Default for QueryTaskStatus {
-    fn default() -> Self {
-        QueryTaskStatus::Progress
-    }
-}
+
 
 #[derive(Debug, Clone)]
 pub struct QueryTask {

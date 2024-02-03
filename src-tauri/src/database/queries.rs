@@ -105,7 +105,7 @@ pub fn get_connection(db: &AppConnection, id: &str) -> Result<ConnectionConfig> 
             schema,
         });
     }
-    if items.len() == 0 {
+    if items.is_empty() {
         return Err(anyhow::anyhow!("Connection not found"));
     }
 

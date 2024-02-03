@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use chrono;
+
 use state::AppState;
 use std::path::PathBuf;
 use std::{fs, panic};
@@ -9,7 +9,7 @@ use tauri::{Manager, State};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex;
 use tracing::error;
-use tracing_subscriber;
+
 
 use noir::{
     database::init::initialize_database,
@@ -33,7 +33,7 @@ fn main() {
         let path = get_app_path();
         let ts = chrono::offset::Utc::now();
         let dest = format!("{}/error.log", path.to_str().expect("Failed to get path"));
-        fs::write(&PathBuf::from(dest), format!("{} - {:?}", ts, info)).expect("Failed to write error log");
+        fs::write(PathBuf::from(dest), format!("{} - {:?}", ts, info)).expect("Failed to write error log");
     }));
 
     let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);

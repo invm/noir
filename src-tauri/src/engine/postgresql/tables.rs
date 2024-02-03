@@ -68,7 +68,7 @@ pub async fn get_columns(
         ),
         None => format!("{} ORDER BY ORDINAL_POSITION;", query),
     };
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_primary_key(
@@ -87,7 +87,7 @@ pub async fn get_primary_key(
         schema
     );
     let query = format!("{} AND c.table_name = '{}'", query, table);
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_foreign_keys(
@@ -118,7 +118,7 @@ pub async fn get_foreign_keys(
         schema
     );
     let query = format!("{} AND tc.table_name = '{}'", query, table);
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
@@ -129,13 +129,13 @@ pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Ve
         WHERE routine_type = 'FUNCTION' AND routine_schema = '{}';",
         schema
     );
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
     let query = format!("SELECT routine_name, routine_definition FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_indices(
@@ -149,7 +149,7 @@ pub async fn get_indices(
         schema
     );
     let query = format!("{} and tablename = '{}';", query, table);
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_triggers(
@@ -168,12 +168,12 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_schemas(pool: &Pool) -> Result<Vec<Value>> {
     let query = "SELECT schema_name schema FROM information_schema.schemata;".to_string();
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }
 
 pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
@@ -182,5 +182,5 @@ pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Va
         "SELECT table_name FROM INFORMATION_SCHEMA.views WHERE table_schema = '{}'",
         schema
     );
-    Ok(raw_query(pool.clone(), &query).await?)
+    raw_query(pool.clone(), &query).await
 }

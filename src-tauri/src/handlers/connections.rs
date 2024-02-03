@@ -77,7 +77,7 @@ pub async fn init_connection(
 #[command]
 pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()> {
     info!(?id, "disconnect");
-    app_handle.disconnect(&id)?;
+    app_handle.disconnect(id)?;
     Ok(())
 }
 

@@ -18,7 +18,7 @@ pub fn row_to_object(row: Row) -> Result<Value> {
 fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
     let f64_to_json_number = |raw_val: f64| -> Result<Value> {
         let temp =
-            serde_json::Number::from_f64(raw_val.into()).ok_or(anyhow!("invalid json-float"))?;
+            serde_json::Number::from_f64(raw_val).ok_or(anyhow!("invalid json-float"))?;
         Ok(Value::Number(temp))
     };
     Ok(match *column.type_() {
@@ -52,10 +52,8 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
             get_basic(row, column, column_i, |a: String| Ok(Value::String(a)))?
         }
         Type::JSON | Type::JSONB => get_basic(row, column, column_i, |a: Value| Ok(a))?,
-        Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| {
-            Ok(f64_to_json_number(a.into())?)
-        })?,
-        Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?,
+        Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| f64_to_json_number(a.into()))?,
+        Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| f64_to_json_number(a))?,
         // these types require a custom StringCollector struct as an intermediary (see struct at bottom)
 
         // array types
@@ -73,12 +71,10 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
             get_array(row, column, column_i, |a: String| Ok(Value::String(a)))?
         }
         Type::JSON_ARRAY | Type::JSONB_ARRAY => get_array(row, column, column_i, |a: Value| Ok(a))?,
-        Type::FLOAT4_ARRAY => get_array(row, column, column_i, |a: f32| {
-            Ok(f64_to_json_number(a.into())?)
-        })?,
-        Type::FLOAT8_ARRAY => {
-            get_array(row, column, column_i, |a: f64| Ok(f64_to_json_number(a)?))?
+        Type::FLOAT4_ARRAY => {
+            get_array(row, column, column_i, |a: f32| f64_to_json_number(a.into()))?
         }
+        Type::FLOAT8_ARRAY => get_array(row, column, column_i, |a: f64| f64_to_json_number(a))?,
 
         _ => {
             let val: Option<GenericEnum> = row.get(1);

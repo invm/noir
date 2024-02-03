@@ -10,11 +10,17 @@ use rand::{distributions::Alphanumeric, Rng};
 
 pub fn get_db_path() -> PathBuf {
     let app_path = get_app_path();
-    PathBuf::from(format!("{}/.app.db", app_path.to_str().expect("Failed to get app path")))
+    PathBuf::from(format!(
+        "{}/.app.db",
+        app_path.to_str().expect("Failed to get app path")
+    ))
 }
 
 fn get_key_path() -> PathBuf {
-    PathBuf::from(format!("{}/._", get_app_path().to_str().expect("Failed to get app path")))
+    PathBuf::from(format!(
+        "{}/._",
+        get_app_path().to_str().expect("Failed to get app path")
+    ))
 }
 
 pub fn read_key() -> Result<Vec<u8>> {
@@ -36,7 +42,6 @@ pub fn get_tmp_dir() -> Result<String> {
     let mut temp_dir = PathBuf::from("");
     with_temp_dir(|dir| {
         temp_dir = PathBuf::from(dir.path());
-        return ();
     })?;
     let res = fs::create_dir(temp_dir.clone());
     if let Err(res) = res {
@@ -71,11 +76,11 @@ pub fn paginate_file(path: &str, page: usize, limit: usize) -> Result<Vec<String
         .take(limit)
         .map(|s| s.to_string())
         .collect();
-    return Ok(lines);
+    Ok(lines)
 }
 
 pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
-    let res = fs::write(&path, content);
+    let res = fs::write(path, content);
     if let Err(res) = res {
         error!("Error: {:?}", res);
     }

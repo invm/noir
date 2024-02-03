@@ -20,7 +20,7 @@ pub enum ConnectionPool {
 pub enum ConnectionOpts {
     Mysql(Opts),
     MariaDB(Opts),
-    Postgresql(PsqlConfig),
+    Postgresql(Box<PsqlConfig>),
     Sqlite(SqliteConfig),
 }
 
@@ -138,7 +138,7 @@ impl ConnectionConfig {
                     "client_p12",
                     "client_p12_pass",
                 ];
-                let _ = credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
+                credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 let schema = credentials
                     .get("db_name")
                     .cloned()
@@ -173,7 +173,7 @@ impl ConnectionConfig {
                     "client_cert",
                     "client_key",
                 ];
-                let _ = credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
+                credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 Ok(ConnectionConfig {
                     id: Uuid::new_v4(),
                     dialect,
@@ -185,8 +185,8 @@ impl ConnectionConfig {
                 })
             }
             Dialect::Sqlite => {
-                let available_keys = vec!["path"];
-                let _ = credentials.retain(|k, _| available_keys.contains(&k.as_str()));
+                let available_keys = ["path"];
+                credentials.retain(|k, _| available_keys.contains(&k.as_str()));
                 let schema = credentials.get("path").cloned().unwrap_or("".to_string());
                 Ok(ConnectionConfig {
                     id: Uuid::new_v4(),

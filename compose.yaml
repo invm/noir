@@ -31,7 +31,7 @@ services:
       -c ssl_key_file=/etc/ssl/psql/certs/server.key
       -c ssl_ca_file=/etc/ssl/psql/certs/ca.pem
     environment:
-      # POSTGRES_USER: postgres
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: dvdrental # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
     volumes:
@@ -54,7 +54,7 @@ services:
       MYSQL_DATABASE: nation # https://www.mariadbtutorial.com/getting-started/mariadb-sample-database/
     volumes:
       - maria:/var/lib/mysql
-      - ./dev/maria/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - ./dev/mariadb/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
       # extract in dev/maria folder before mounting
       - ./dev/mariadb/nation.sql:/docker-entrypoint-initdb.d/nation.sql:ro
       - ./dev/certs:/etc/ssl/mysql/certs

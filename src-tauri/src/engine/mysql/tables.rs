@@ -65,7 +65,7 @@ pub async fn get_columns(
         ),
         None => format!("{} ORDER BY ORDINAL_POSITION;", query),
     };
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_primary_key(
@@ -82,7 +82,7 @@ pub async fn get_primary_key(
         schema
     );
     let query = format!("{} AND TABLE_NAME = '{}'", query, table);
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_foreign_keys(
@@ -102,14 +102,19 @@ pub async fn get_foreign_keys(
         schema
     );
     let query = format!("{} AND rc.TABLE_NAME = '{}'", query, table);
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
-    let db = conn.config.credentials.get("db_name").expect("Failed to get db_name from credentials").as_str();
+    let db = conn
+        .config
+        .credentials
+        .get("db_name")
+        .expect("Failed to get db_name from credentials")
+        .as_str();
     let mut _conn = pool.get_conn()?;
     let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db);
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
@@ -117,7 +122,7 @@ pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<V
     let mut _conn = pool.get_conn()?;
 
     let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_indices(
@@ -133,7 +138,7 @@ pub async fn get_indices(
         schema
     );
     let query = format!("{} and TABLE_NAME = '{}';", query, table);
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_triggers(
@@ -152,7 +157,7 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }
 
 pub async fn get_schemas(pool: &Pool) -> Result<Vec<Value>> {
@@ -171,5 +176,5 @@ pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Va
             WHERE TABLE_TYPE LIKE 'VIEW' and table_schema = '{}';",
         schema
     );
-    Ok(raw_query(_conn, query)?)
+    raw_query(_conn, query)
 }

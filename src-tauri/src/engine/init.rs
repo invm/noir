@@ -43,12 +43,12 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                     let mut ssl_opts = if !client_p12.is_empty() && !client_p12_pass.is_empty() {
                         let identity = ClientIdentity::new(PathBuf::from(&client_p12))
                             .with_password(client_p12_pass);
-                        let sslopts = SslOpts::default().with_client_identity(Some(identity));
-                        sslopts
+                        
+                        SslOpts::default().with_client_identity(Some(identity))
                     } else if !client_p12.is_empty() {
                         let identity = ClientIdentity::new(PathBuf::from(&client_p12));
-                        let sslopts = SslOpts::default().with_client_identity(Some(identity));
-                        sslopts
+                        
+                        SslOpts::default().with_client_identity(Some(identity))
                     } else {
                         SslOpts::default()
                     };
@@ -181,7 +181,7 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                     Ok(InitiatedConnection {
                         config: cfg.clone(),
                         pool: ConnectionPool::Postgresql(pool),
-                        opts: ConnectionOpts::Postgresql(_cfg),
+                        opts: ConnectionOpts::Postgresql(Box::new(_cfg)),
                         schema: "public".to_string(),
                     })
                 }

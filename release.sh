@@ -8,6 +8,7 @@ if [ "$valid" ]; then
 	pnpm release --release-as "$type"
 	cd src-tauri || exit
 	cargo bump "$type"
+	cargo check
 	git add .
 	git commit --amend --no-edit
 else

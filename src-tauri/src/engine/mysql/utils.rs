@@ -31,5 +31,5 @@ pub fn row_to_object(row: Row) -> serde_json::Value {
         object[column.name_str().as_ref()] = value;
     }
 
-    return object;
+    object
 }

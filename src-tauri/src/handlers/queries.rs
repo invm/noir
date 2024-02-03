@@ -47,7 +47,7 @@ pub async fn enqueue_query(
                 .map(|s| {
                     let id = conn.config.id.to_string() + &tab_idx.to_string() + &s;
                     let hash = md5_hash(&id);
-                    return (s, hash);
+                    (s, hash)
                 })
                 .collect();
             if statements.is_empty() {
@@ -127,7 +127,7 @@ pub async fn get_query_metadata(_app_handle: AppHandle, path: String) -> Command
     let data = read_to_string(path + ".metadata");
     match data {
         Ok(data) => Ok(Value::from(data)),
-        Err(..) => Err(Error::from(Error::QueryExpired)),
+        Err(..) => Err(Error::QueryExpired),
     }
 }
 
@@ -140,7 +140,7 @@ pub async fn query_results(
     let data = paginate_file(&params.path, params.page, params.page_size);
     match data {
         Ok(data) => Ok(Value::from(data)),
-        Err(..) => Err(Error::from(Error::QueryExpired)),
+        Err(..) => Err(Error::QueryExpired),
     }
 }
 
@@ -238,7 +238,7 @@ pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> 
         .iter()
         .map(|row| {
             keys.iter()
-                .map(|k| row.get(k).expect(&format!("Failed to get key {} from {}", k, row)).to_string())
+                .map(|k| row.get(k).unwrap_or_else(|| panic!("Failed to get key {} from {}", k, row)).to_string())
                 .collect::<Vec<String>>()
                 .join(",")
         })

@@ -36,7 +36,9 @@ pub async fn get_columns(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>>
     };
     let tables = raw_query(pool, &query).await?;
     for table in tables {
-        let table = table["tbl_name"].as_str().expect("Failed to get table name");
+        let table = table["tbl_name"]
+            .as_str()
+            .expect("Failed to get table name");
         let mut table_columns = get_table_columns(pool, table).await?;
         columns.append(&mut table_columns);
     }
@@ -66,8 +68,7 @@ pub async fn get_primary_key(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let columns = get_table_columns(pool, table).await?;
     let pks = columns
         .iter()
-        .filter(|c| c["primary_key"] == json!(1))
-        .map(|c| c.clone())
+        .filter(|c| c["primary_key"] == json!(1)).cloned()
         .collect::<Vec<_>>();
     Ok(pks)
 }
@@ -94,19 +95,19 @@ pub async fn get_foreign_keys(pool: &Pool, table: &str) -> Result<Vec<Value>> {
 pub async fn get_indices(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let query = "SELECT * FROM sqlite_master WHERE type = 'index'";
     let query = format!("{} and tbl_name = '{}';", query, table);
-    Ok(raw_query(pool, &query).await?)
+    raw_query(pool, &query).await
 }
 
 pub async fn get_triggers(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>> {
-    let query = format!("SELECT * FROM sqlite_master WHERE type='trigger'");
+    let query = "SELECT * FROM sqlite_master WHERE type='trigger'";
     let query = match table {
         Some(table) => format!("{} AND tbl_name = '{}';", query, table),
         None => format!("{};", query),
     };
-    Ok(raw_query(pool, &query).await?)
+    raw_query(pool, &query).await
 }
 
 pub async fn get_views(pool: &Pool) -> Result<Vec<Value>> {
-    let query = format!("SELECT * FROM sqlite_master WHERE type='view'");
-    Ok(raw_query(pool, &query).await?)
+    let query = "SELECT * FROM sqlite_master WHERE type='view'";
+    raw_query(pool, query).await
 }
