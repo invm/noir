@@ -4,7 +4,7 @@ use deadpool_postgres::{
     Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, RecyclingMethod, SslMode,
 };
 use deadpool_sqlite::Config as SqliteConfig;
-use mysql::{ClientIdentity, Opts, OptsBuilder, Pool as MysqlPool, SslOpts};
+use mysql::{prelude::Queryable, ClientIdentity, Opts, OptsBuilder, Pool as MysqlPool, SslOpts};
 use openssl::ssl::{SslConnector, SslFiletype, SslMethod, SslVerifyMode};
 use postgres::NoTls;
 use postgres_openssl::MakeTlsConnector;
@@ -19,7 +19,7 @@ use crate::{
 
 pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Error> {
     match &cfg.dialect {
-        Dialect::Mysql => {
+        Dialect::Mysql | Dialect::MariaDB => {
             if cfg.mode == Mode::File {
                 return Err(anyhow::anyhow!("File mode is not supported for Mysql").into());
             }
@@ -46,8 +46,6 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                         let sslopts = SslOpts::default().with_client_identity(Some(identity));
                         sslopts
                     } else if !client_p12.is_empty() {
-                        // TODO: this does not work without a password
-                        // https://github.com/blackbeam/rust-mysql-simple/issues/369
                         let identity = ClientIdentity::new(PathBuf::from(&client_p12));
                         let sslopts = SslOpts::default().with_client_identity(Some(identity));
                         sslopts
@@ -76,6 +74,8 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             match MysqlPool::new(opts.clone()) {
                 Ok(pool) => {
                     let schema = cloned.get_db_name().unwrap_or("");
+                    let mut conn = pool.get_conn()?;
+                    conn.query_drop("SELECT 1")?;
                     Ok(InitiatedConnection {
                         config: cfg.clone(),
                         pool: ConnectionPool::Mysql(pool),
@@ -153,7 +153,11 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                         } else if !ca_cert.is_empty() {
                             let mut builder = SslConnector::builder(SslMethod::tls_client())?;
                             builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
-                            builder.set_ca_file(cfg.credentials.get("ca_cert").expect("Should have a ca cert"))?;
+                            builder.set_ca_file(
+                                cfg.credentials
+                                    .get("ca_cert")
+                                    .expect("Should have a ca cert"),
+                            )?;
                             let connector = MakeTlsConnector::new(builder.build());
                             Some(config.create_pool(rt, connector)?)
                         } else {
@@ -172,6 +176,8 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             match pool {
                 Some(pool) => {
                     let _cfg = config.clone();
+                    let conn = pool.get().await?;
+                    conn.execute("SELECT 1", &[]).await?;
                     Ok(InitiatedConnection {
                         config: cfg.clone(),
                         pool: ConnectionPool::Postgresql(pool),
@@ -194,12 +200,16 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
             let config = SqliteConfig::new(PathBuf::from(path.clone()));
             match config.create_pool(deadpool_sqlite::Runtime::Tokio1) {
                 Ok(pool) => match pool.get().await {
-                    Ok(_) => Ok(InitiatedConnection {
-                        config: cfg.clone(),
-                        pool: ConnectionPool::Sqlite(pool),
-                        opts: ConnectionOpts::Sqlite(config),
-                        schema: path.to_string(),
-                    }),
+                    Ok(_) => {
+                        let conn = pool.get().await?;
+                        let _ = conn.interact(|c| c.execute("SELECT 1", [])).await?;
+                        Ok(InitiatedConnection {
+                            config: cfg.clone(),
+                            pool: ConnectionPool::Sqlite(pool),
+                            opts: ConnectionOpts::Sqlite(config),
+                            schema: path.to_string(),
+                        })
+                    }
                     Err(e) => Err(Error::DeadpoolSqlitePool(e)),
                 },
                 Err(e) => Err(Error::DeadpoolSqliteCreatePool(e)),

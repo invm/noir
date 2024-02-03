@@ -1,6 +1,7 @@
 volumes:
   mysql:
   psql:
+  maria:
 
 services:
   mysql:
@@ -10,7 +11,7 @@ services:
       --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: world # https://dev.mysql.com/doc/world-x-setup/en/world-x-setup-installation.html
     ports:
       - 3306:3306
@@ -30,8 +31,8 @@ services:
       -c ssl_key_file=/etc/ssl/psql/certs/server.key
       -c ssl_ca_file=/etc/ssl/psql/certs/ca.pem
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
+      # POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: dvdrental # https://www.postgresqltutorial.com/postgresql-getting-started/postgresql-sample-database/
     volumes:
       - psql:/var/lib/postgresql/data
@@ -43,3 +44,19 @@ services:
       - ./dev/certs:/etc/ssl/psql/certs
     ports:
       - 5432:5432
+
+  maria:
+    image: mariadb:11.2.2-jammy
+    container_name: maria
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: nation # https://www.mariadbtutorial.com/getting-started/mariadb-sample-database/
+    volumes:
+      - maria:/var/lib/mysql
+      - ./dev/maria/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      # extract in dev/maria folder before mounting
+      - ./dev/mariadb/nation.sql:/docker-entrypoint-initdb.d/nation.sql:ro
+      - ./dev/certs:/etc/ssl/mysql/certs
+    ports:
+      - 3307:3306

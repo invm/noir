@@ -1,5 +1,6 @@
 export const Dialect = {
   Mysql: 'Mysql',
+  MariaDB: 'MariaDB',
   Postgresql: 'Postgresql',
   Sqlite: 'Sqlite',
 } as const;
@@ -8,11 +9,12 @@ export type DialectType = keyof typeof Dialect;
 
 export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.Mysql]: 3306,
+  [Dialect.MariaDB]: 3306,
   [Dialect.Postgresql]: 5432,
   [Dialect.Sqlite]: 0,
 } as const;
 
-export const dialects = [Dialect.Postgresql, Dialect.Mysql, Dialect.Sqlite] as const;
+export const dialects = [Dialect.Postgresql, Dialect.Mysql, Dialect.MariaDB, Dialect.Sqlite] as const;
 
 export const Mode = {
   Host: 'Host',
@@ -23,12 +25,14 @@ export const Mode = {
 export type ModeType = keyof typeof Mode;
 
 export const SocketPathDefaults = {
+  [Dialect.MariaDB]: '/var/run/mysqld/mysqld.sock',
   [Dialect.Mysql]: '/var/run/mysqld/mysqld.sock',
   [Dialect.Postgresql]: '/var/run/postgresql/.s.PGSQL.5432',
   [Dialect.Sqlite]: '',
 } as const;
 
 export const AvailableModes = {
+  [Dialect.MariaDB]: [Mode.Host, Mode.Socket],
   [Dialect.Mysql]: [Mode.Host, Mode.Socket],
   [Dialect.Postgresql]: [Mode.Host, Mode.Socket],
   [Dialect.Sqlite]: [Mode.File],

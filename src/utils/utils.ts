@@ -32,7 +32,7 @@ export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
 };
 
 export const columnsToTables = (allColumns: Row[], views: Row[], dialect: DialectType) => {
-  if ([Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite].includes(dialect)) {
+  if ([Dialect.MariaDB, Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite].includes(dialect)) {
     const schema = allColumns.reduce((acc, col) => {
       const table_name = getAnyCase(col, 'table_name');
       const column_name = getAnyCase(col, 'column_name');

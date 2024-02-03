@@ -12,3 +12,5 @@ mysql:
 psql:
 	@docker-compose exec -it psql bash
 
+maria:
+	@docker-compose exec -it maria bash

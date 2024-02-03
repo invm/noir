@@ -1,6 +1,6 @@
 import * as z from 'zod';
 import { useAppSelector } from 'services/Context';
-import { createSignal, Match, Show, Switch } from 'solid-js';
+import { createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import sql from 'sql-bricks';
 import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, Row } from 'interfaces';
@@ -13,7 +13,7 @@ import { validator } from '@felte/validator-zod';
 
 export const schema = z.object({
   column: z.string().max(1024),
-  operator: z.string().min(1).max(1024).default('='),
+  operator: z.string().min(1).max(10).default('='),
   value: z.string().max(2048),
 });
 
@@ -85,13 +85,14 @@ export const Search = (props: SearchProps) => {
   } = useAppSelector();
 
   const [loading, setLoading] = createSignal(false);
-  // const [defaultValues, setDefaultValues] = createSignal<Form>({
-  //   column: '',
-  //   operator: '=',
-  //   value: '',
-  // });
+  const [cols, setCols] = createSignal<Row[]>([]);
+
+  createEffect(() => {
+    if (JSON.stringify(props.columns) !== JSON.stringify(cols())) setCols(props.columns);
+  });
 
   const onSubmit = async (values: Form) => {
+    console.log('onSubmit: ', values);
     try {
       setLoading(true);
       const { column, operator, value } = values;
@@ -107,7 +108,7 @@ export const Search = (props: SearchProps) => {
         tabIdx: conn.idx,
         table: props.table,
       });
-      const result_sets = res.map((id) => ({ id, columns: props.columns }));
+      const result_sets = res.map((id) => ({ id, columns: props.columns, table: props.table }));
       updateContentTab('data', { result_sets });
     } catch (error) {
       notify(error);
@@ -116,18 +117,18 @@ export const Search = (props: SearchProps) => {
     }
   };
 
-  const { form, setData, data } = createForm<Form>({
+  const { form, data, reset, setFields } = createForm<Form>({
     onSubmit,
-    // initialValues: defaultValues(),
     extend: validator({ schema }),
   });
+  form;
 
   return (
     <Show when={props.table}>
       <form use:form autocomplete="off">
         <div class="w-full pb-2 bg-base-100 px-2 py-1 grid grid-cols-12 gap-2">
           <div class="col-span-3">
-            <Select suppressTitlecase name="column" options={props.columns.map((c) => getAnyCase(c, 'column_name'))} />
+            <Select suppressTitlecase name="column" options={cols().map((c) => getAnyCase(c, 'column_name'))} />
           </div>
           <div class="col-span-1">
             <Select name="operator" options={Object.keys(COMPARISON_OPERATORS)} />
@@ -146,7 +147,8 @@ export const Search = (props: SearchProps) => {
                 <Match when={!loading()}>
                   <button
                     onClick={() => {
-                      setData('value', '');
+                      reset();
+                      setFields('column', getAnyCase(cols()[0], 'column_name'));
                       onSubmit(data());
                     }}
                     class="btn btn-sm btn-ghost"

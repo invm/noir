@@ -24,6 +24,7 @@ import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
 import Keymaps from 'components/Screens/Settings/Keymaps';
+import { DrawerState } from './Table/PopupCellRenderer';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -36,7 +37,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     app: { cmdOrCtrl },
   } = useAppSelector();
 
-  const [drawerOpen, setDrawerOpen] = createStore({
+  const [drawerOpen, setDrawerOpen] = createStore<DrawerState>({
     mode: 'add' as 'add' | 'edit',
     open: false,
     data: {} as Row,
@@ -44,6 +45,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     foreign_keys: [] as Row[],
     primary_key: [] as Row[],
     rowIndex: 0,
+    originalData: {} as Row,
   });
   const [code, setCode] = createSignal('');
   const [page, setPage] = createSignal(0);
@@ -67,10 +69,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
 
-  createEffect(() => {
-    console.log(props.editorTheme);
-  });
-
   const openDrawerForm = ({ rowIndex, mode, data: row }: { data: Row; rowIndex?: number; mode: 'add' | 'edit' }) => {
     if (!props.editable) return;
     setDrawerOpen({
@@ -81,6 +79,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       foreign_keys: table.foreign_keys,
       primary_key: table.primary_key,
       rowIndex,
+      originalData: { ...row }, // specifically to remove the reference
     });
   };
 
@@ -245,7 +244,10 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const condition = table.primary_key.reduce((acc, c) => {
+      const columns = (table.primary_key.length ? table.primary_key : table.columns).filter(
+        (c) => c.column_name !== e.column.getColId()
+      );
+      const condition = columns.reduce((acc, c) => {
         const col = getAnyCase(c, 'column_name');
         return { ...acc, [col]: e.data[col] };
       }, {});
@@ -260,7 +262,11 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const saveForm = async () => {
     if (!drawerOpen.data) return;
-    const condition = table.primary_key.reduce((acc, c) => {
+    const changed = Object.keys(drawerOpen.data).filter((key) => drawerOpen.data[key] !== drawerOpen.originalData[key]);
+    const columns = (table.primary_key.length ? table.primary_key : table.columns).filter(
+      (c) => !changed.includes(getAnyCase(c, 'column_name'))
+    );
+    const condition = columns.reduce((acc, c) => {
       const col = getAnyCase(c, 'column_name');
       return { ...acc, [col]: drawerOpen.data[col] };
     }, {});

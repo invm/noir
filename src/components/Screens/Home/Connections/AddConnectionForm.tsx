@@ -59,7 +59,7 @@ const CredentialsSchema = z.union([
 const schema = z.object({
   name: zstr,
   dialect: z.enum(dialects),
-  mode: z.enum(connectionModes),
+  mode: z.enum(connectionModes).default(connectionModes[0]),
   credentials: CredentialsSchema,
   color: z.enum(connectionColors),
 });
@@ -89,6 +89,16 @@ const defaultValues = {
   },
 };
 
+const normalize = (values: Form) => {
+  if (values.mode === Mode.Host) {
+    (values.credentials as HostCredentials).port = String((values.credentials as HostCredentials).port);
+  }
+  if (!values.mode && values.dialect === Dialect.Sqlite) {
+    values.mode = Mode.File;
+  }
+  return values;
+};
+
 const AddConnectionForm = () => {
   const {
     connections: { addConnection },
@@ -101,12 +111,9 @@ const AddConnectionForm = () => {
   const testConnection = async () => {
     try {
       setTesting(true);
-      const d = data();
-      if ((d.credentials as HostCredentials).port) {
-        (d.credentials as HostCredentials).port = String((d.credentials as HostCredentials).port);
-      }
-      await invoke('test_connection', d);
-      notify(t('add_connection_form.success', { name: d.name }), 'success');
+      const values = data();
+      await invoke('test_connection', normalize(values));
+      notify(t('add_connection_form.success', { name: values.name }), 'success');
       setError('');
     } catch (error) {
       setError(String(error));
@@ -117,10 +124,7 @@ const AddConnectionForm = () => {
 
   const onSubmit = async (values: Form) => {
     try {
-      if ((values.credentials as HostCredentials).port) {
-        (values.credentials as HostCredentials).port = String((values.credentials as HostCredentials).port);
-      }
-      await addConnection(values);
+      await addConnection(normalize(values));
       reset();
     } catch (error) {
       setError(String(error));
@@ -348,7 +352,7 @@ const AddConnectionForm = () => {
                   />
                 </div>
               </Show>
-              <Show when={data('dialect') === Dialect.Mysql}>
+              <Show when={data('dialect') === Dialect.Mysql || data('dialect') === Dialect.MariaDB}>
                 <div class="col-span-12">
                   <div class="block">
                     <Label label={t('add_connection_form.labels.client_p12')} for="credentials.client_cert" />
@@ -378,20 +382,20 @@ const AddConnectionForm = () => {
                 </div>
               </Show>
             </Show>
-            <div class="col-span-8">
-              <TextInput label={t('add_connection_form.labels.name')} errors={errors('name')} name="name" />
-            </div>
-            <div class="col-span-4">
-              <div class="flex items-end">
-                <Select
-                  name="color"
-                  label={t('add_connection_form.labels.color')}
-                  options={connectionColors.map(String)}
-                />
-                <ColorCircle color={data('color')} />
-              </div>
-            </div>
           </Show>
+          <div class="col-span-8">
+            <TextInput label={t('add_connection_form.labels.name')} errors={errors('name')} name="name" />
+          </div>
+          <div class="col-span-4">
+            <div class="flex items-end">
+              <Select
+                name="color"
+                label={t('add_connection_form.labels.color')}
+                options={connectionColors.map(String)}
+              />
+              <ColorCircle color={data('color')} />
+            </div>
+          </div>
         </div>
         <div class="py-3 min-h-[80px]">
           <Show when={error()}>

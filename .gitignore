@@ -27,3 +27,4 @@ dev/psql/dvdrental.tar
 dev/certs/
 dev/sqlite/chinook.db
 dev/mysql/world.sql
+dev/mariadb/nation.sql

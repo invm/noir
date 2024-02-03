@@ -27,10 +27,14 @@ export const BackendService = () => {
   };
 
   const selectAllFrom = async (table: string, connId: string, tabIdx: number) => {
-    const pk = await invoke<RawQueryResult>('get_primary_key', {
+    let pk = await invoke<RawQueryResult>('get_primary_key', {
       connId,
       table,
     });
+    if (!pk.length) {
+      const columns = await invoke<RawQueryResult>('get_columns', { connId, table });
+      pk = [columns[0]];
+    }
     const sql = select()
       .from(table)
       .orderBy(...pk.map((c) => getAnyCase(c, 'column_name')))

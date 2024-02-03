@@ -16,7 +16,7 @@ export const Settings = () => {
       <div class="flex flex-col items-center pb-4">
         <div>
           <span class="text-md font-semibold text-primary">
-            🕵️ Noir - keyboard driven database management client for Postgresql and MySQL
+            🕵️ Noir - keyboard driven database management client for Postgresql, MySQL, MariaDB and SQLite.
           </span>
         </div>
         <OpenIssue />

@@ -29,6 +29,7 @@ export type DrawerState = {
   foreign_keys: Row[];
   primary_key: Row[];
   rowIndex?: number;
+  originalData: Row;
 };
 
 export type PopupCellRendererProps = {

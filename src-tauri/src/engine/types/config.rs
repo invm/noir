@@ -13,11 +13,13 @@ pub enum ConnectionPool {
     Mysql(MysqlPool),
     Postgresql(PostgresqlPool),
     Sqlite(SqlitePool),
+    MariaDB(MysqlPool),
 }
 
 #[derive(Debug, Clone)]
 pub enum ConnectionOpts {
     Mysql(Opts),
+    MariaDB(Opts),
     Postgresql(PsqlConfig),
     Sqlite(SqliteConfig),
 }
@@ -25,6 +27,7 @@ pub enum ConnectionOpts {
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum Dialect {
     Mysql,
+    MariaDB,
     Postgresql,
     Sqlite,
 }
@@ -33,6 +36,7 @@ impl fmt::Display for Dialect {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Dialect::Mysql => write!(f, "Mysql"),
+            Dialect::MariaDB => write!(f, "MariaDB"),
             Dialect::Postgresql => write!(f, "Postgresql"),
             Dialect::Sqlite => write!(f, "Sqlite"),
         }
@@ -44,6 +48,7 @@ impl FromSql for Dialect {
         let s: String = String::column_result(value)?;
         match s.as_str() {
             "Mysql" => Ok(Dialect::Mysql),
+            "MariaDB" => Ok(Dialect::MariaDB),
             "Postgresql" => Ok(Dialect::Postgresql),
             "Sqlite" => Ok(Dialect::Sqlite),
             _ => Err(types::FromSqlError::InvalidType),
@@ -108,7 +113,7 @@ impl ConnectionConfig {
             return Err(anyhow::anyhow!("Color cannot be empty"));
         }
         match dialect {
-            Dialect::Mysql => {
+            Dialect::Mysql | Dialect::MariaDB => {
                 let allowed_keys = vec![
                     "pool_min",
                     "pool_max",

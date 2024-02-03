@@ -1,7 +1,7 @@
 import { createCodeMirror, createEditorControlledValue, createEditorFocus } from 'solid-codemirror';
 import { createEffect, createSignal, on } from 'solid-js';
 import { EditorView, drawSelection, highlightWhitespace, highlightActiveLine } from '@codemirror/view';
-import { MySQL, sql, SQLite, PostgreSQL } from '@codemirror/lang-sql';
+import { MySQL, sql, SQLite, PostgreSQL, MariaSQL } from '@codemirror/lang-sql';
 
 import { vim } from '@replit/codemirror-vim';
 import { format } from 'sql-formatter';
@@ -55,6 +55,7 @@ export const editorThemes = {
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
+  [Dialect.MariaDB]: MariaSQL,
   [Dialect.Postgresql]: PostgreSQL,
   [Dialect.Sqlite]: SQLite,
 };
