@@ -13,7 +13,7 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
       setPrevContentIdx,
       setConnectionIdx,
     },
-    app: { setComponent, setAppStore, cmdOrCtrl, altOrMeta },
+    app: { setScreen, toggleScreen, setAppStore, cmdOrCtrl, altOrMeta },
   } = useAppSelector();
   setAppStore({ osType: props.osType });
 
@@ -24,7 +24,7 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   }
 
   createShortcut(['F1'], () => {
-    setComponent((s) => (s === 'keymaps' ? 'console' : 'keymaps'));
+    toggleScreen('keymaps');
   });
 
   createShortcut([cmdOrCtrl(), 't'], () => {
@@ -44,12 +44,12 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
   });
 
   createShortcut(['Control', '`'], () => {
-    setComponent('home');
+    setScreen('home');
   });
 
   for (let i = 1; i <= 9; i++) {
     createShortcut(['Control', String(i)], () => {
-      setComponent('console');
+      setScreen('console');
       setConnectionIdx(i - 1);
     });
   }

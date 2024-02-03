@@ -8,7 +8,7 @@ import { OpenIssue } from './OpenIssue';
 export const Settings = () => {
   const {
     connections: { clearStore },
-    app: { setComponent },
+    app: { setScreen },
   } = useAppSelector();
 
   return (
@@ -24,7 +24,7 @@ export const Settings = () => {
         <Keymaps
           short
           suffix={
-            <button onClick={() => setComponent('keymaps')} class="btn btn-sm btn-primary w-md mt-2">
+            <button onClick={() => setScreen('keymaps')} class="btn btn-sm btn-primary w-md mt-2">
               {t('keymaps.see_all')}
             </button>
           }

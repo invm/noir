@@ -12,7 +12,7 @@ import Keymaps from './Settings/Keymaps';
 
 export const Main = () => {
   const {
-    app: { setComponent, component },
+    app: { screen, setScreen, toggleScreen },
     connections: { removeConnectionTab, store, setStore },
   } = useAppSelector();
 
@@ -20,7 +20,7 @@ export const Main = () => {
     await invoke<string>('disconnect', { id });
     await removeConnectionTab(id);
     if (store.tabs.length === 0) {
-      setComponent('home');
+      setScreen('home');
     }
   };
 
@@ -30,12 +30,12 @@ export const Main = () => {
         <div class="tabs tabs-md tabs-boxed gap-2 flex">
           <button
             onClick={() => {
-              setComponent('home');
+              setScreen('home');
               setStore('idx', 0);
             }}
             class="tab"
             tabIndex={0}
-            classList={{ 'tab-active': component() === 'home' }}>
+            classList={{ 'tab-active': screen() === 'home' }}>
             <span class="text-md font-bold">
               <HomeIcon />
             </span>
@@ -45,12 +45,12 @@ export const Main = () => {
               <div class="flex items-center">
                 <button
                   onClick={() => {
-                    setComponent('console');
+                    setScreen('console');
                     setStore('idx', idx());
                   }}
                   class="tab pt-1"
                   classList={{
-                    'tab-active': component() === 'console' && store.idx === idx(),
+                    'tab-active': screen() === 'console' && store.idx === idx(),
                   }}
                   tabindex={0}>
                   <span class="text-md font-bold">{tab.label}</span>
@@ -72,14 +72,12 @@ export const Main = () => {
         <div class="flex items-center py-2">
           <ThemeSwitch />
           <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.read_docs')}>
-            <a href="https://noir.github.io" target="_blank" class="btn btn-square btn-ghost btn-sm">
+            <a href="https://noirdb.dev" target="_blank" class="btn btn-square btn-ghost btn-sm">
               <QuestionMark />
             </a>
           </div>
           <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
-            <button
-              class="btn btn-square btn-ghost btn-sm"
-              onClick={() => setComponent((s) => (s === 'console' ? 'settings' : 'console'))}>
+            <button class="btn btn-square btn-ghost btn-sm" onClick={() => toggleScreen('settings')}>
               <Cog />
             </button>
           </div>
@@ -87,18 +85,18 @@ export const Main = () => {
       </div>
       <div class="flex-1 overflow-hidden flex">
         <Switch>
-          <Match when={component() === 'settings'}>
+          <Match when={screen() === 'settings'}>
             <Settings />
           </Match>
-          <Match when={component() === 'keymaps'}>
+          <Match when={screen() === 'keymaps'}>
             <div class="w-full bg-base-200 py-10 overflow-y-auto">
               <Keymaps />
             </div>
           </Match>
-          <Match when={component() === 'home'}>
+          <Match when={screen() === 'home'}>
             <Home />
           </Match>
-          <Match when={component() === 'console'}>
+          <Match when={screen() === 'console'}>
             <Console />
           </Match>
         </Switch>

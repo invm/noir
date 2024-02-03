@@ -12,7 +12,6 @@ import { onMount, Switch, Match, createSignal, Show } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
-import { isDev } from 'solid-js/web';
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
 import { relaunch } from '@tauri-apps/api/process';
 import { t } from 'utils/i18n';
@@ -20,7 +19,7 @@ import { t } from 'utils/i18n';
 function App() {
   const {
     connections: { store, restoreConnectionStore, getConnection, updateResultSet, loading, setLoading },
-    app: { restoreAppStore, setComponent },
+    app: { restoreAppStore, setScreen, appStore },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
@@ -53,10 +52,6 @@ function App() {
     }
   };
 
-  onMount(async () => {
-    await checkForUpdates();
-  });
-
   const disableMenu = () => {
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
@@ -73,7 +68,7 @@ function App() {
     );
   };
 
-  if (!isDev) {
+  if (!appStore.enableDevTools) {
     disableMenu();
   }
 
@@ -102,21 +97,20 @@ function App() {
   };
 
   onMount(async () => {
-    await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
-      console.log(event);
-      await compareAndAssign(event.payload);
-    });
-  });
-
-  onMount(async () => {
     const theme = localStorage.getItem('theme') || 'dark';
     document.documentElement.dataset.theme = theme;
     await restoreAppStore();
     await restoreConnectionStore();
     if (store.tabs.length === 0) {
-      setComponent('home');
+      setScreen('home');
     }
     setLoading(false);
+
+    await checkForUpdates();
+    await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
+      console.log(event);
+      await compareAndAssign(event.payload);
+    });
   });
 
   return (

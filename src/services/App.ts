@@ -24,6 +24,7 @@ type AppStore = {
   gridTheme: string;
   editorTheme: EditorTheme;
   osType: OsType;
+  enableDevTools: boolean;
 };
 
 const getSavedData = async (key: string) => {
@@ -45,9 +46,11 @@ export const AppService = () => {
     gridTheme: 'alpine-dark',
     editorTheme: 'Dracula',
     osType: 'Linux',
+    enableDevTools: true,
   });
 
-  const [component, setComponent] = createSignal<Screen>('console');
+  const [screen, setScreen] = createSignal<Screen>('console');
+  const [lastScreen, setLastScreen] = createSignal<Screen>('console');
 
   const updateStore = debounce(async () => {
     await store.set(APP_KEY, JSON.stringify(appStore));
@@ -57,6 +60,17 @@ export const AppService = () => {
   const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
   const editorTheme = () => appStore.editorTheme;
+
+  const toggleScreen = (s: Screen) => {
+    if (screen() === s) {
+      const last = lastScreen();
+      setLastScreen(screen());
+      setScreen(last);
+      return;
+    }
+    setLastScreen(screen());
+    setScreen(s);
+  };
 
   const altOrMeta = (short = false) => {
     if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
@@ -96,8 +110,9 @@ export const AppService = () => {
     vimModeOn,
     toggleVimModeOn,
     restoreAppStore,
-    component,
-    setComponent,
+    screen,
+    setScreen,
+    toggleScreen,
     gridTheme,
     editorTheme,
     updateTheme,

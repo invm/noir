@@ -10,7 +10,7 @@ import { Refresh } from 'components/UI/Icons';
 export const ConnectionsList = () => {
   const {
     messages: { notify },
-    app: { setComponent },
+    app: { setScreen },
     connections: { connections, refreshConnections, addConnectionTab, fetchSchemaEntities, setLoading },
   } = useAppSelector();
   const [focusedConnection, setFocusedConnection] = createSignal<ConnectionConfig>();
@@ -42,7 +42,7 @@ export const ConnectionsList = () => {
         tabs: [],
         idx: 0,
       });
-      setComponent('console');
+      setScreen('console');
     } catch (error) {
       notify(error);
     } finally {
