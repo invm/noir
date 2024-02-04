@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/invm/noir/compare/v0.2.0...v0.3.0) (2024-02-04)
+
+
+### Features
+
+* add support for mariadb ([5772b5b](https://github.com/invm/noir/commit/5772b5b77b84582469306dd8a25fde4ef75e343f))
+
+
+### Bug Fixes
+
+* missing rerenders when props change ([44ae89c](https://github.com/invm/noir/commit/44ae89ce86a05f234a2265b8895ec28ee2746aa4))
+* screens toggle does not toggle back ([500a10e](https://github.com/invm/noir/commit/500a10e17bc2c7cbb40e64aa8f0638aba7ef7d80))
+
 ## 0.2.0 (2024-01-27)
 
 
