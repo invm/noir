@@ -15,6 +15,7 @@ import { Events, QueryTaskResult } from 'interfaces';
 import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
 import { relaunch } from '@tauri-apps/api/process';
 import { t } from 'utils/i18n';
+import { isDev } from 'solid-js/web';
 
 function App() {
   const {
@@ -68,7 +69,7 @@ function App() {
     );
   };
 
-  if (!appStore.enableDevTools) {
+  if (!appStore.enableDevTools && !isDev) {
     disableMenu();
   }
 

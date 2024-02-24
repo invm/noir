@@ -108,7 +108,7 @@ See [LICENSE](LICENSE.md) for more information.
 
 ## Authors
 
-* **Michael Ionov** - [Michael Ionov](https://github.com/invm/)
+* [Michael Ionov](https://github.com/invm/)
 
 
 This readme was made with [Readme generator](https://readme.shaankhan.dev/)
