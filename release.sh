@@ -1,4 +1,5 @@
 #!/bin/bash
+# requires cargo-bump and pnpm
 
 type=$1
 # valivate type is major|minor|patch or matches \d\.\d\.\d
