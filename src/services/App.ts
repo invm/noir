@@ -46,7 +46,7 @@ export const AppService = () => {
     gridTheme: 'alpine-dark',
     editorTheme: 'Dracula',
     osType: 'Linux',
-    enableDevTools: true,
+    enableDevTools: false,
   });
 
   const [screen, setScreen] = createSignal<Screen>('console');
