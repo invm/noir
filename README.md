@@ -47,8 +47,9 @@ Unleash efficiency, tailor UI themes, and explore complex data effortlessly. Ele
 
 ### Supported databases
 
+- Postgresql
 - MySQL
-- Postgres
+- MariaDB
 - SQLite
 
 ## Built With
