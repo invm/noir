@@ -16,18 +16,18 @@ jobs:
             os: ubuntu-20.04
             arch: x86_64
             target: x86_64-unknown-linux-gnu
-          # - build: macos
-          #   os: macos-latest
-          #   arch: x86_64
-          #   target: x86_64-apple-darwin
-          # - build: macos
-          #   os: macos-latest
-          #   arch: aarch64
-          #   target: aarch64-apple-darwin
-          # - build: windows
-          #   os: windows-latest
-          #   arch: x86_64
-          #   target: x86_64-pc-windows-msvc
+          - build: macos
+            os: macos-latest
+            arch: x86_64
+            target: x86_64-apple-darwin
+          - build: macos
+            os: macos-latest
+            arch: aarch64
+            target: aarch64-apple-darwin
+          - build: windows
+            os: windows-latest
+            arch: x86_64
+            target: x86_64-pc-windows-msvc
 
     runs-on: ${{ matrix.os }}
     steps:
