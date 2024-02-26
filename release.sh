@@ -6,10 +6,11 @@ type=$1
 valid=$(echo "$type" | grep -E "major|minor|patch|^[0-9]+\.[0-9]+\.[0-9]+$")
 if [ "$valid" ]; then
 	echo "Bumping $type version"
-	pnpm release --release-as "$type"
 	cd src-tauri || exit
 	cargo bump "$type"
 	cargo check
+	cd .. || exit
+	pnpm release --release-as "$type"
 	git add .
 	git commit --amend --no-edit
 else
