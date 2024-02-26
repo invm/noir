@@ -10,9 +10,9 @@ if [ "$valid" ]; then
 	cargo bump "$type"
 	cargo check
 	cd .. || exit
-	pnpm release --release-as "$type"
 	git add .
-	git commit --amend --no-edit
+	git commit -m "chore: bump rust version to $type"
+	pnpm release --release-as "$type"
 else
 	echo "Invalid bump type"
 	exit 1
