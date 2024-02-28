@@ -14,7 +14,7 @@ import { createShortcut } from '@solid-primitives/keyboard';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
-import { moveCompletionSelection } from '@codemirror/autocomplete';
+import { moveCompletionSelection, autocompletion } from '@codemirror/autocomplete';
 
 import { EditorTheme } from 'services/App';
 import { editorThemes } from './components/EditorThemes';
@@ -58,6 +58,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   createExtension(lineWrapping);
   createExtension(editorThemes[props.editorTheme]);
   createExtension(basicSetup);
+  createExtension(autocompletion);
   createExtension(() => (vimModeOn() ? vim() : []));
   createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));
   const { setFocused, focused } = createEditorFocus(editorView);
