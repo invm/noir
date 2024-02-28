@@ -1,4 +1,4 @@
-import { editorThemes } from 'components/Screens/Console/Content/QueryTab/Editor';
+import { editorThemes } from 'components/Screens/Console/Content/QueryTab/components/EditorThemes';
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';

@@ -50,7 +50,7 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
   const [visible, setVisible] = createSignal(false);
 
   const dropDownContent = (
-    <ul class="menu menu-xs rounded-box">
+    <ul class="menu menu-xs rounded-box p-0">
       <For
         each={rowsActions.filter((r) => {
           return !r.editable || r.editable === props.editable;

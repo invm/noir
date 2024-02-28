@@ -1,6 +1,6 @@
 import { createCodeMirror, createEditorControlledValue, createEditorFocus } from 'solid-codemirror';
 import { createEffect, createSignal, on } from 'solid-js';
-import { EditorView, drawSelection, highlightWhitespace, highlightActiveLine } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { MySQL, sql, SQLite, PostgreSQL, MariaSQL } from '@codemirror/lang-sql';
 
 import { vim } from '@replit/codemirror-vim';
@@ -10,48 +10,15 @@ import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
 import { Dialect, QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
-import { basicSetup } from 'codemirror';
 import { createShortcut } from '@solid-primitives/keyboard';
-import { search } from '@codemirror/search';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
 import { moveCompletionSelection } from '@codemirror/autocomplete';
 
-import { androidstudio } from '@uiw/codemirror-theme-androidstudio';
-import { andromeda } from '@uiw/codemirror-theme-andromeda';
-import { atomone } from '@uiw/codemirror-theme-atomone';
-import { copilot } from '@uiw/codemirror-theme-copilot';
-import { dracula } from '@uiw/codemirror-theme-dracula';
-import { githubDark, githubLight } from '@uiw/codemirror-theme-github';
-import { gruvboxDark, gruvboxLight } from '@uiw/codemirror-theme-gruvbox-dark';
-import { materialDark, materialLight, material } from '@uiw/codemirror-theme-material';
-import { nord } from '@uiw/codemirror-theme-nord';
-import { tokyoNight } from '@uiw/codemirror-theme-tokyo-night';
-import { tokyoNightDay } from '@uiw/codemirror-theme-tokyo-night-day';
-import { tokyoNightStorm } from '@uiw/codemirror-theme-tokyo-night-storm';
-import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { EditorTheme } from 'services/App';
-
-export const editorThemes = {
-  'Android Studio': androidstudio,
-  Dracula: dracula,
-  'Github Dark': githubDark,
-  'Github Light': githubLight,
-  'Gruvbox Dark': gruvboxDark,
-  'Gruvbox Light': gruvboxLight,
-  'Material Dark': materialDark,
-  'Material Light': materialLight,
-  'Tokyo Night Day': tokyoNightDay,
-  'Tokyo Night Storm': tokyoNightStorm,
-  'Tokyo Night': tokyoNight,
-  'VS Code': vscodeDark,
-  Andromeda: andromeda,
-  Atomone: atomone,
-  Copilot: copilot,
-  Material: material,
-  Nord: nord,
-};
+import { editorThemes } from './components/EditorThemes';
+import { basicSetup } from './components/EditorExtensions';
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
@@ -89,11 +56,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   createEditorControlledValue(editorView, code);
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
-  createExtension(drawSelection);
-  createExtension(highlightWhitespace);
-  createExtension(highlightActiveLine);
   createExtension(editorThemes[props.editorTheme]);
-  createExtension(search);
   createExtension(basicSetup);
   createExtension(() => (vimModeOn() ? vim() : []));
   createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));

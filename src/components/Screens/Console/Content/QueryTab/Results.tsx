@@ -1,6 +1,5 @@
 import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
-import { search } from '@codemirror/search';
-import { basicSetup, EditorView } from 'codemirror';
+import { EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
 import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
 import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
@@ -14,7 +13,6 @@ import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
 import { deleteFrom, insert, update } from 'sql-bricks';
-import { editorThemes } from './Editor';
 import { EditorTheme } from 'services/App';
 import { tippy } from 'solid-tippy';
 import { t } from 'utils/i18n';
@@ -25,6 +23,8 @@ import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
 import Keymaps from 'components/Screens/Settings/Keymaps';
 import { DrawerState } from './Table/PopupCellRenderer';
+import { editorThemes } from './components/EditorThemes';
+import { basicSetup } from './components/EditorExtensions';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
@@ -62,7 +62,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
     onValueChange: setCode,
   });
   createEditorControlledValue(editorView, code);
-  createExtension(search);
   createExtension(editorThemes[props.editorTheme]);
   createExtension(basicSetup);
   createExtension(json);
@@ -138,7 +137,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         };
       } catch (error) {
         notify(error);
-        return { rows: [], columns: [], exhausted: true, error };
+        return { rows: [], columns: [], colDef: [], exhausted: true, error };
       }
     }
   );

@@ -116,14 +116,12 @@ export const Sidebar = () => {
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md flex justify-between items-center">
-        <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.select_schema')}>
-          <Select
-            name="mode"
-            value={getConnection().selectedSchema}
-            onChange={(e) => selectSchema(e.currentTarget.value)}
-            options={getConnection().schemas ?? []}
-          />
-        </div>
+        <Select
+          name="mode"
+          value={getConnection().selectedSchema}
+          onChange={(e) => selectSchema(e.currentTarget.value)}
+          options={getConnection().schemas ?? []}
+        />
         <div class="flex">
           <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>
             <button onClick={showProcessList} disabled={loading()} class="ml-2 btn btn-xs">
