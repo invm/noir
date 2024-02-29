@@ -225,7 +225,7 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.triggers')}</div>
           <For each={getSchemaEntity('triggers')}>
             {(trigger) => (
-              <div class="px-2 w-fit truncate w-full hover:bg-base-100">
+              <div class="px-2 truncate w-full hover:bg-base-100">
                 <div
                   onContextMenu={(e) => {
                     hideAll();

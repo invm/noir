@@ -9,7 +9,7 @@
     Unleash the Power of Seamless Database Management – Navigate, Query, and Optimize, All at Your Fingertips
     <br/>
     <br/>
-    <a href="https://invm.github.io/noir-docs/"><strong>Explore the docs »</strong></a>
+    <a href="https://noirdb.dev/"><strong>Explore the docs »</strong></a>
     <br/>
     <br/>
     <a href="https://github.com/invm/noir/issues">Report Bug</a>
@@ -84,7 +84,7 @@ Build for your os and arch with `pnpm tauri build`
 
 Query, inspect, and export results all with your keyboard.
 
-Noir is a database management client and you can do everything you would expect with it, full docs are available [here](https://invm.github.io/noir-docs/).
+Noir is a database management client and you can do everything you would expect with it, full docs are available [here](https://noirdb.dev/).
 
 ## Contributing
 

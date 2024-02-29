@@ -135,7 +135,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           hideAll();
           show(e);
         }}>
-        <div class="flex items-center">
+        <div class="pt-1 flex items-center">
           <span class="collapse">
             <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
               <SwapChevronRight />
@@ -155,7 +155,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       </div>
 
       <div
-        class="pl-4 pt-1"
+        class="pl-4"
         classList={{
           'mb-2': open(),
           'border-b-[1px]': open(),
