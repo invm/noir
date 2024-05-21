@@ -109,7 +109,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           openDrawerForm,
         });
         if (result_set?.rows?.length) {
-          return { rows: result_set.rows, columns, colDef, count: result_set.count, start_time, end_time };
+          return { rows: result_set.rows, columns, colDef, count: result_set.count, start_time, end_time, info: result_set.info };
         }
         if (!result_set || result_set?.status !== 'Completed') {
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
@@ -134,6 +134,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           path: result_set.path,
           start_time,
           end_time,
+          info: result_set.info
         };
       } catch (error) {
         notify(error);
@@ -167,7 +168,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onBtnExport = async (t: 'csv' | 'json') => {
     if (!data()?.path) return;
-    const filename = props.table + '_' + new Date().toISOString() + '.' + t;
+    const filename = (props.table ?? '') + new Date().toISOString() + '.' + t;
     const filePath = (await save({ defaultPath: filename })) ?? '';
     const dataPath = data()?.path;
     if (!filePath || !dataPath) return;
@@ -328,6 +329,7 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             onPageSizeChange,
             onBtnExport,
             count: data()?.count ?? 0,
+            info: data()?.info ?? '',
             openDrawerForm: props.editable ? openDrawerForm : undefined,
             executionTime: (data()?.end_time ?? 0) - (data()?.start_time ?? 0),
           }}

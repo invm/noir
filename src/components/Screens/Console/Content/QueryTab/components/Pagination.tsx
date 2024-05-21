@@ -20,6 +20,7 @@ type PaginationProps = {
   applyChanges: () => void;
   undoChanges: () => void;
   count: number;
+  info: string;
   openDrawerForm?: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
   executionTime?: number;
 };
@@ -97,7 +98,7 @@ export const Pagination = (props: PaginationProps) => {
           </div>
         </Show>
         <Show when={props.executionTime}>
-          <span class="text-xs">{t('console.table.ran', { duration: props.executionTime })} </span>
+          <span class="text-xs font-medium">{t('console.table.ran', { duration: props.executionTime })} | {props.info}</span>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed' && !resultSet.info}>

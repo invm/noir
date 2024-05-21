@@ -92,7 +92,6 @@ export const Search = (props: SearchProps) => {
   });
 
   const onSubmit = async (values: Form) => {
-    console.log('onSubmit: ', values);
     try {
       setLoading(true);
       const { column, operator, value } = values;

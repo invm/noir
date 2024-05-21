@@ -51,7 +51,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
@@ -78,7 +78,7 @@ input[type="number"] {
 }
 
 .cm-button {
-  @apply !rounded-full !text-xs !text-info ;
+  @apply !rounded-full !text-xs !text-info;
 }
 
 *:focus {
@@ -108,10 +108,12 @@ dialog {
   cursor: col-resize;
 }
 
-#results {
-  -webkit-user-select: auto; /* Safari */
-  -ms-user-select: auto; /* IE 10 and IE 11 */
-  user-select: auto;
+::-moz-selection { /* Code for Firefox */
+  @apply bg-primary text-primary-content;
+}
+
+::selection {
+  @apply bg-primary text-primary-content;
 }
 
 .solid-contextmenu__item__content {
@@ -130,10 +132,9 @@ dialog {
   @apply z-50;
 }
 
-
 /* ag-grid */
 div[class*='ag-theme'] {
-    --ag-grid-size: 4px;
-    --ag-list-item-height: 16px;
-    --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
+  --ag-grid-size: 4px;
+  --ag-list-item-height: 16px;
+  --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
 }

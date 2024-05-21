@@ -119,6 +119,7 @@ export const Sidebar = () => {
         <Select
           name="mode"
           value={getConnection().selectedSchema}
+          suppressTitlecase 
           onChange={(e) => selectSchema(e.currentTarget.value)}
           options={getConnection().schemas ?? []}
         />
@@ -186,7 +187,7 @@ export const Sidebar = () => {
           <div class="text-xs font-bold py-1">{t('sidebar.routines')}</div>
           <For each={getSchemaEntity('routines')}>
             {(routine) => (
-              <div class="px-2 w-fit truncate w-full hover:bg-base-100">
+              <div class="px-2 truncate w-full hover:bg-base-100">
                 <div
                   onContextMenu={(e) => {
                     hideAll();

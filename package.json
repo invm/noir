@@ -5,10 +5,12 @@
   "description": "",
   "scripts": {
     "start": "vite",
-    "dev": "vite",
+    "dev": "tauri dev",
     "build": "vite build",
     "serve": "vite preview",
     "tauri": "tauri",
+    "update-deps": "pnpm up -Li",
+    "clean": "rm -rf node_modules src-tauri/target dist",
     "release": "standard-version"
   },
   "license": "MIT",

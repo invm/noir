@@ -106,6 +106,7 @@ export type Row = Record<string, JSONValue>;
 
 export type ResultSet = {
   id?: string;
+  info?: string;
   count?: number;
   affected_rows?: number;
   warnings?: number;
