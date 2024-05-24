@@ -1,7 +1,4 @@
-use crate::{
-    engine::types::result::{ResultSet, TableMetadata},
-    utils::error::Error,
-};
+use crate::engine::types::result::{ResultSet, TableMetadata};
 use anyhow::Result;
 use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
@@ -42,8 +39,6 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         start_time,
         end_time,
         affected_rows,
-        warnings: 0,
-        info: "".to_string(),
         rows,
         table: TableMetadata {
             table: String::from(""),
@@ -55,7 +50,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
     Ok(set)
 }
 
-pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
+pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<()> {
     let mut conn = pool.get().await?;
     let tx = conn.transaction().await?;
     for q in queries {
@@ -64,7 +59,7 @@ pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
             Ok(..) => {}
             Err(e) => {
                 tx.rollback().await?;
-                return Err(Error::TxError(e.to_string()));
+                return Err(anyhow::anyhow!("Error executing query: {:?}", e));
             }
         }
     }

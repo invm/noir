@@ -13,11 +13,7 @@ pub enum Error {
     #[error("Queue send error: {0}")]
     Send(#[from] tokio::sync::mpsc::error::SendError<QueryTask>),
     #[error("{0}")]
-    Mysql(#[from] mysql::Error),
-    #[error("Mysql error: {0}")]
-    MysqlError(#[from] mysql::MySqlError),
-    #[error("Mysql url error: {0}")]
-    MysqlUrlError(#[from] mysql::UrlError),
+    Sqlx(#[from] sqlx::error::Error),
     #[error("Postgresql error: {0}")]
     Postgresql(#[from] postgres::error::Error),
     #[error("Sqlite error: {0}")]

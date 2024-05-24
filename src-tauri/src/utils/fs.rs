@@ -97,8 +97,6 @@ pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
         "end_time": result_set.end_time,
         "count": result_set.rows.len(),
         "affected_rows": result_set.affected_rows,
-        "warnings": result_set.warnings,
-        "info": result_set.info,
         "table": result_set.table.table,
         "foreign_keys": result_set.table.foreign_keys,
         "primary_key": result_set.table.primary_key,

@@ -14,7 +14,12 @@ export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.Sqlite]: 0,
 } as const;
 
-export const dialects = [Dialect.Postgresql, Dialect.Mysql, Dialect.MariaDB, Dialect.Sqlite] as const;
+export const dialects = [
+  Dialect.Postgresql,
+  Dialect.Mysql,
+  Dialect.MariaDB,
+  Dialect.Sqlite,
+] as const;
 
 export const Mode = {
   Host: 'Host',
@@ -46,7 +51,11 @@ export const SslMode = {
 
 export const connectionModes = [Mode.Host, Mode.Socket, Mode.File] as const;
 
-export const sslModes = [SslMode.disable, SslMode.prefer, SslMode.require] as const;
+export const sslModes = [
+  SslMode.disable,
+  SslMode.prefer,
+  SslMode.require,
+] as const;
 
 export type Credentials = Record<string, string | number>;
 
@@ -100,16 +109,19 @@ export const NumericTypes = [
 
 export type ConnectionColor = (typeof connectionColors)[number];
 
-export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>;
 
 export type Row = Record<string, JSONValue>;
 
 export type ResultSet = {
   id?: string;
-  info?: string;
   count?: number;
   affected_rows?: number;
-  warnings?: number;
   rows?: Row[];
   table?: string;
   foreign_keys?: Row[];
@@ -118,16 +130,15 @@ export type ResultSet = {
   start_time?: number;
   end_time?: number;
 } & (
-    | {
+  | {
       path?: string;
       status?: (typeof QueryTaskStatus)['Completed'];
-      info?: string;
     }
-    | {
+  | {
       status?: (typeof QueryTaskStatus)['Error'];
       error?: string;
     }
-  );
+);
 
 const QueryTaskStatus = {
   Progress: 'Progress',
@@ -153,15 +164,15 @@ export type QueryTaskResult = {
   query_idx: number;
   count: number;
 } & (
-    | {
+  | {
       status: 'Error';
       error: string;
     }
-    | {
+  | {
       status: 'Completed';
       path: string;
     }
-  );
+);
 
 export type RawQueryResult = Row[];
 

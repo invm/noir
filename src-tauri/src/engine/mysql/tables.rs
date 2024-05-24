@@ -1,15 +1,15 @@
 use anyhow::Result;
 use futures::try_join;
-use mysql::Pool;
 use serde_json::{json, Value};
+use sqlx::MySqlPool;
 
 use crate::engine::types::connection::InitiatedConnection;
 
-use super::query::raw_query;
+use super::sql_to_json::row_to_json;
 
 pub async fn get_table_structure(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: String,
 ) -> Result<Value> {
     let (columns, foreign_keys, triggers, indices, pk) = try_join!(
@@ -34,11 +34,10 @@ pub async fn get_table_structure(
 
 pub async fn get_columns(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: Option<&str>,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT 
         COLUMN_NAME, 
@@ -65,16 +64,15 @@ pub async fn get_columns(
         ),
         None => format!("{} ORDER BY ORDINAL_POSITION;", query),
     };
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
 pub async fn get_primary_key(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION,
                          CONSTRAINT_NAME, REFERENCED_COLUMN_NAME, REFERENCED_TABLE_NAME FROM
@@ -82,16 +80,15 @@ pub async fn get_primary_key(
         schema
     );
     let query = format!("{} AND TABLE_NAME = '{}'", query, table);
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
 pub async fn get_foreign_keys(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT rc.constraint_name, kc.column_name, kc.referenced_table_name, kc.referenced_column_name,  rc.update_rule, rc.delete_rule
             FROM information_schema.referential_constraints rc
@@ -102,51 +99,46 @@ pub async fn get_foreign_keys(
         schema
     );
     let query = format!("{} AND rc.TABLE_NAME = '{}'", query, table);
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
-pub async fn get_functions(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
+pub async fn get_functions(conn: &InitiatedConnection, pool: &MySqlPool) -> Result<Vec<Value>> {
     let db = conn
         .config
         .credentials
         .get("db_name")
         .expect("Failed to get db_name from credentials")
         .as_str();
-    let mut _conn = pool.get_conn()?;
     let query = format!("SHOW FUNCTION STATUS WHERE DB = '{}';", db);
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
-pub async fn get_procedures(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
+pub async fn get_procedures(conn: &InitiatedConnection, pool: &MySqlPool) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
-
     let query = format!("SELECT * FROM information_schema.routines WHERE routine_type = 'PROCEDURE' AND routine_schema = '{}';", schema);
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
 pub async fn get_indices(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: &str,
 ) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT INDEX_NAME, COLUMN_NAME, TABLE_SCHEMA, TABLE_NAME FROM
                         information_schema.statistics WHERE table_schema = '{}'",
         schema
     );
     let query = format!("{} and TABLE_NAME = '{}';", query, table);
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
 pub async fn get_triggers(
     conn: &InitiatedConnection,
-    pool: &Pool,
+    pool: &MySqlPool,
     table: Option<&str>,
 ) -> Result<Vec<Value>> {
-    let mut _conn = pool.get_conn()?;
     let schema = conn.get_schema();
     let query = format!(
         "SELECT trigger_name, event_manipulation, action_timing, action_statement, created,
@@ -157,24 +149,21 @@ pub async fn get_triggers(
         Some(table) => format!("{} AND EVENT_OBJECT_TABLE = '{}';", query, table),
         None => format!("{};", query),
     };
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
-pub async fn get_schemas(pool: &Pool) -> Result<Vec<Value>> {
-    let mut _conn = pool.get_conn()?;
+pub async fn get_schemas(pool: &sqlx::mysql::MySqlPool) -> Result<Vec<Value>> {
     let query = "select schema_name 'schema' from information_schema.schemata;".to_string();
-    let schemas = raw_query(_conn, query)?;
-    Ok(schemas)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }
 
-pub async fn get_views(conn: &InitiatedConnection, pool: &Pool) -> Result<Vec<Value>> {
+pub async fn get_views(conn: &InitiatedConnection, pool: &MySqlPool) -> Result<Vec<Value>> {
     let schema = conn.get_schema();
-    let mut _conn = pool.get_conn()?;
     let query = format!(
         "SELECT TABLE_SCHEMA, TABLE_NAME 
             FROM information_schema.tables 
             WHERE TABLE_TYPE LIKE 'VIEW' and table_schema = '{}';",
         schema
     );
-    raw_query(_conn, query)
+    Ok(sqlx::query(&query).map(row_to_json).fetch_all(pool).await?)
 }

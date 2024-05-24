@@ -3,7 +3,14 @@ import { validator } from '@felte/validator-zod';
 import { t } from 'i18next';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import { createForm } from '@felte/solid';
-import { TextInput, ColorCircle, Select, Alert, FilePicker, Label } from 'components/UI';
+import {
+  TextInput,
+  ColorCircle,
+  Select,
+  Alert,
+  FilePicker,
+  Label,
+} from 'components/UI';
 import {
   PORTS_MAP,
   Dialect,
@@ -29,7 +36,10 @@ const MIN_PORT = 1;
 
 const messages = { length: t('add_connection_form.length_validation') };
 
-const zstr = z.string().min(MIN_LENGTH_STR, messages.length).max(MAX_LENGTH_STR, messages.length);
+const zstr = z
+  .string()
+  .min(MIN_LENGTH_STR, messages.length)
+  .max(MAX_LENGTH_STR, messages.length);
 
 const CredentialsSchema = z.union([
   z.object({
@@ -37,13 +47,13 @@ const CredentialsSchema = z.union([
     user: zstr,
     password: zstr,
     db_name: zstr,
-    port: z.union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)]).optional(),
+    port: z
+      .union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)])
+      .optional(),
     ssl_mode: z.enum(sslModes).optional(),
     ca_cert: zstr.optional().or(z.literal('')),
     client_cert: zstr.optional().or(z.literal('')),
     client_key: zstr.optional().or(z.literal('')),
-    client_p12: zstr.optional().or(z.literal('')),
-    client_p12_pass: zstr.optional().or(z.literal('')),
   }),
   z.object({
     socket: zstr,
@@ -84,14 +94,14 @@ const defaultValues = {
     ca_cert: '',
     client_cert: '',
     client_key: '',
-    client_p12: '',
-    client_p12_pass: '',
   },
 };
 
 const normalize = (values: Form) => {
   if (values.mode === Mode.Host) {
-    (values.credentials as HostCredentials).port = String((values.credentials as HostCredentials).port);
+    (values.credentials as HostCredentials).port = String(
+      (values.credentials as HostCredentials).port
+    );
   }
   if (!values.mode && values.dialect === Dialect.Sqlite) {
     values.mode = Mode.File;
@@ -113,7 +123,10 @@ const AddConnectionForm = () => {
       setTesting(true);
       const values = data();
       await invoke('test_connection', normalize(values));
-      notify(t('add_connection_form.success', { name: values.name }), 'success');
+      notify(
+        t('add_connection_form.success', { name: values.name }),
+        'success'
+      );
       setError('');
     } catch (error) {
       setError(String(error));
@@ -131,7 +144,16 @@ const AddConnectionForm = () => {
     }
   };
 
-  const { form, setFields, errors, data, isValid, isSubmitting, isDirty, reset } = createForm<Form>({
+  const {
+    form,
+    setFields,
+    errors,
+    data,
+    isValid,
+    isSubmitting,
+    isDirty,
+    reset,
+  } = createForm<Form>({
     onSubmit,
     initialValues: defaultValues,
     extend: validator({ schema }),
@@ -140,7 +162,11 @@ const AddConnectionForm = () => {
 
   return (
     <div class="p-3 w-full flex justify-center items-around pt-20 rounded-tl-lg bg-base-200">
-      <form use:form class="flex lg:w-[80%] xl:w-[60%] flex-col gap-1" autocomplete="off">
+      <form
+        use:form
+        class="flex lg:w-[80%] xl:w-[60%] flex-col gap-1"
+        autocomplete="off"
+      >
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
         </div>
@@ -149,7 +175,8 @@ const AddConnectionForm = () => {
             classList={{
               'col-span-6': data('dialect') !== Dialect.Sqlite,
               'col-span-12': data('dialect') === Dialect.Sqlite,
-            }}>
+            }}
+          >
             <Select
               name="dialect"
               label={t('add_connection_form.labels.dialect')}
@@ -158,14 +185,20 @@ const AddConnectionForm = () => {
                 const dialect = e.target.value as DialectType;
                 setFields('dialect', dialect);
                 if (data('mode') === Mode.Socket) {
-                  setFields('credentials.socket', SocketPathDefaults[data('dialect')]);
+                  setFields(
+                    'credentials.socket',
+                    SocketPathDefaults[data('dialect')]
+                  );
                 }
                 if (dialect === Dialect.Sqlite) {
                   setFields('mode', Mode.File);
                 } else {
                   setFields('credentials.host', 'localhost');
                   setFields('credentials.port', PORTS_MAP[dialect] || 3306);
-                  setFields('mode', AvailableModes[e.target.value as DialectType][0]);
+                  setFields(
+                    'mode',
+                    AvailableModes[e.target.value as DialectType][0]
+                  );
                 }
               }}
             />
@@ -179,10 +212,16 @@ const AddConnectionForm = () => {
                 onChange={(e) => {
                   setFields('mode', e.target.value as ModeType);
                   if (e.target.value === Mode.Socket) {
-                    setFields('credentials.socket', SocketPathDefaults[data('dialect')]);
+                    setFields(
+                      'credentials.socket',
+                      SocketPathDefaults[data('dialect')]
+                    );
                   } else if (e.target.value === Mode.Host) {
                     setFields('credentials.host', 'localhost');
-                    setFields('credentials.port', PORTS_MAP[data('dialect')] || 3306);
+                    setFields(
+                      'credentials.port',
+                      PORTS_MAP[data('dialect')] || 3306
+                    );
                     setFields('credentials.ssl_mode', SslMode.prefer);
                   }
                 }}
@@ -192,7 +231,10 @@ const AddConnectionForm = () => {
           <Show when={data('dialect') === Dialect.Sqlite}>
             <div class="col-span-12">
               <div class="block">
-                <Label label={t('add_connection_form.labels.path')} for="credentials.path" />
+                <Label
+                  label={t('add_connection_form.labels.path')}
+                  for="credentials.path"
+                />
               </div>
               <FilePicker
                 name="credentials.path"
@@ -200,12 +242,17 @@ const AddConnectionForm = () => {
                   setFields('credentials.path', '');
                 }}
                 onCreate={async () => {
-                  const path = await save({ title: 'Select database location' });
+                  const path = await save({
+                    title: 'Select database location',
+                  });
                   if (!path) return;
                   setFields('credentials.path', path + '.db');
                 }}
                 onChange={async () => {
-                  const path = (await open({ multiple: false, title: 'Select sqlite file' })) as string;
+                  const path = (await open({
+                    multiple: false,
+                    title: 'Select sqlite file',
+                  })) as string;
                   if (!path) return;
                   setFields('credentials.path', path);
                 }}
@@ -274,7 +321,12 @@ const AddConnectionForm = () => {
                 />
               </div>
             </Show>
-            <Show when={data('mode') === Mode.Host && data('credentials.ssl_mode') !== SslMode.disable}>
+            <Show
+              when={
+                data('mode') === Mode.Host &&
+                data('credentials.ssl_mode') !== SslMode.disable
+              }
+            >
               <div class="col-span-12">
                 <div class="form-control max-w-[140px]">
                   <label class="cursor-pointer label">
@@ -285,15 +337,27 @@ const AddConnectionForm = () => {
                       class="checkbox checkbox-sm"
                       onChange={(e) => setShowCerts(e.target.checked)}
                     />
-                    <Label for="show_certs" label={t('add_connection_form.labels.show_ssl_certs')} />
+                    <Label
+                      for="show_certs"
+                      label={t('add_connection_form.labels.show_ssl_certs')}
+                    />
                   </label>
                 </div>
               </div>
             </Show>
-            <Show when={data('mode') === Mode.Host && data('credentials.ssl_mode') !== SslMode.disable && showCerts()}>
+            <Show
+              when={
+                data('mode') === Mode.Host &&
+                data('credentials.ssl_mode') !== SslMode.disable &&
+                showCerts()
+              }
+            >
               <div class="col-span-12">
                 <div class="block">
-                  <Label label={t('add_connection_form.labels.ca_cert')} for="credentials.ca_cert" />
+                  <Label
+                    label={t('add_connection_form.labels.ca_cert')}
+                    for="credentials.ca_cert"
+                  />
                 </div>
                 <FilePicker
                   name="credentials.ca_cert"
@@ -310,10 +374,13 @@ const AddConnectionForm = () => {
                   }}
                 />
               </div>
-              <Show when={data('dialect') === Dialect.Postgresql}>
+              <Show when={data('dialect') !== Dialect.Sqlite}>
                 <div class="col-span-12">
                   <div class="block">
-                    <Label label={t('add_connection_form.labels.client_cert')} for="credentials.client_cert" />
+                    <Label
+                      label={t('add_connection_form.labels.client_cert')}
+                      for="credentials.client_cert"
+                    />
                   </div>
                   <FilePicker
                     name="credentials.client_cert"
@@ -331,10 +398,13 @@ const AddConnectionForm = () => {
                   />
                 </div>
               </Show>
-              <Show when={data('dialect') === Dialect.Postgresql}>
+              <Show when={data('dialect') !== Dialect.Sqlite}>
                 <div class="col-span-12">
                   <div class="block">
-                    <Label label={t('add_connection_form.labels.client_key')} for="credentials.client_key" />
+                    <Label
+                      label={t('add_connection_form.labels.client_key')}
+                      for="credentials.client_key"
+                    />
                   </div>
                   <FilePicker
                     name="credentials.client_key"
@@ -352,39 +422,14 @@ const AddConnectionForm = () => {
                   />
                 </div>
               </Show>
-              <Show when={data('dialect') === Dialect.Mysql || data('dialect') === Dialect.MariaDB}>
-                <div class="col-span-12">
-                  <div class="block">
-                    <Label label={t('add_connection_form.labels.client_p12')} for="credentials.client_cert" />
-                  </div>
-                  <FilePicker
-                    name="credentials.client_p12"
-                    onClear={() => {
-                      setFields('credentials.client_p12', '');
-                    }}
-                    onChange={async () => {
-                      const path = (await open({
-                        multiple: false,
-                        title: t('add_connection_form.select_file'),
-                      })) as string;
-                      if (!path) return;
-                      setFields('credentials.client_p12', path);
-                    }}
-                  />
-                </div>
-              </Show>
-              <Show when={data('dialect') === Dialect.Mysql}>
-                <div class="col-span-12">
-                  <TextInput
-                    label={t('add_connection_form.labels.client_p12_pass')}
-                    name="credentials.client_p12_pass"
-                  />
-                </div>
-              </Show>
             </Show>
           </Show>
           <div class="col-span-8">
-            <TextInput label={t('add_connection_form.labels.name')} errors={errors('name')} name="name" />
+            <TextInput
+              label={t('add_connection_form.labels.name')}
+              errors={errors('name')}
+              name="name"
+            />
           </div>
           <div class="col-span-4">
             <div class="flex items-end">
@@ -410,13 +455,18 @@ const AddConnectionForm = () => {
               class="btn btn-accent btn-sm"
               type="button"
               onClick={testConnection}
-              disabled={!isValid() || testing() || !isDirty()}>
+              disabled={!isValid() || testing() || !isDirty()}
+            >
               <Show when={testing()}>
                 <span class="loading loading-spinner"></span>
               </Show>
               {t('add_connection_form.test')}
             </button>
-            <button disabled={isSubmitting() || !isValid() || !isDirty()} class="btn btn-primary btn-sm" type="submit">
+            <button
+              disabled={isSubmitting() || !isValid() || !isDirty()}
+              class="btn btn-primary btn-sm"
+              type="submit"
+            >
               <Show when={isSubmitting()}>
                 <span class="loading loading-spinner"></span>
               </Show>

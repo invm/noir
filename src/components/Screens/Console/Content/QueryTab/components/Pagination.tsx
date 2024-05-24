@@ -20,7 +20,6 @@ type PaginationProps = {
   applyChanges: () => void;
   undoChanges: () => void;
   count: number;
-  info: string;
   openDrawerForm?: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
   executionTime?: number;
 };
@@ -41,7 +40,9 @@ export const Pagination = (props: PaginationProps) => {
   createShortcut(['Control', 'Shift', 'J'], () => props.onBtnExport('json'));
   createShortcut(['Control', 'Shift', 'C'], () => props.onBtnExport('csv'));
   createShortcut([altOrMeta(), 'N'], () =>
-    props.openDrawerForm ? props.openDrawerForm({ mode: 'add', data: {} }) : null
+    props.openDrawerForm
+      ? props.openDrawerForm({ mode: 'add', data: {} })
+      : null
   );
 
   const [resultSet, setResultSet] = createStore<ResultSet>({});
@@ -58,7 +59,8 @@ export const Pagination = (props: PaginationProps) => {
           <div class="join">
             <div
               class="join-item tooltip tooltip-primary tooltip-right"
-              data-tip={t('console.actions.previous_result_set')}>
+              data-tip={t('console.actions.previous_result_set')}
+            >
               <button class="join-item btn btn-sm" onClick={selectPrevQuery}>
                 <ChevronLeft />
               </button>
@@ -70,55 +72,89 @@ export const Pagination = (props: PaginationProps) => {
             </button>
             <div
               class="join-item tooltip tooltip-primary tooltip-right"
-              data-tip={t('console.actions.next_result_set')}>
+              data-tip={t('console.actions.next_result_set')}
+            >
               <button class="join-item btn btn-sm" onClick={selectNextQuery}>
                 <ChevronRight />
               </button>
             </div>
           </div>
           <div class="flex-1">
-            <Show when={resultSet?.status === 'Completed' && resultSet.info}>
-              <Alert color="info">{resultSet?.status === 'Completed' && resultSet?.info}</Alert>
+            <Show
+              when={
+                resultSet?.status === 'Completed' && resultSet.affected_rows
+              }
+            >
+              <Alert color="info">
+                {resultSet?.status === 'Completed' &&
+                  resultSet?.affected_rows +
+                    ' ' +
+                    t('console.table.affected_rows')}
+              </Alert>
             </Show>
           </div>
         </Show>
 
         <Show when={props.count > 0}>
-          <span class="text-sm text-base-content">
+          <span class="text-xs text-base-content">
             {t('console.table.total_rows')} {props.count}
           </span>
         </Show>
         <Show when={props.openDrawerForm}>
-          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={altOrMeta(true) + ' + N'}>
+          <div
+            class="tooltip tooltip-primary tooltip-bottom px-3"
+            data-tip={altOrMeta(true) + ' + N'}
+          >
             <button
               class="btn btn-xs btn-ghost"
-              onClick={() => (props.openDrawerForm ? props.openDrawerForm({ mode: 'add', data: {} }) : null)}>
+              onClick={() =>
+                props.openDrawerForm
+                  ? props.openDrawerForm({ mode: 'add', data: {} })
+                  : null
+              }
+            >
               {t('console.table.row_actions.add_row')}
             </button>
           </div>
         </Show>
         <Show when={props.executionTime}>
-          <span class="text-xs font-medium">{t('console.table.ran', { duration: props.executionTime })} | {props.info}</span>
+          <span class="text-xs font-medium">
+            {t('console.table.ran', { duration: props.executionTime })}
+          </span>
         </Show>
       </div>
-      <Show when={resultSet.status === 'Completed' && !resultSet.info}>
+      <Show when={resultSet.status === 'Completed'}>
         <div class="flex items-center">
           <Show when={props.changesCount > 0}>
             <div class="px-2 gap-4 flex">
-              <button class="btn btn-xs btn-outline" onClick={props.undoChanges}>
+              <button
+                class="btn btn-xs btn-outline"
+                onClick={props.undoChanges}
+              >
                 {t('console.actions.reset')}
               </button>
-              <button onClick={props.applyChanges} class="btn btn-xs btn-outline btn-error">
+              <button
+                onClick={props.applyChanges}
+                class="btn btn-xs btn-outline btn-error"
+              >
                 {t('console.actions.apply')} {props.changesCount}{' '}
-                {t(`console.actions.${props.changesCount > 1 ? 'changes' : 'change'}`)}
+                {t(
+                  `console.actions.${props.changesCount > 1 ? 'changes' : 'change'}`
+                )}
               </button>
             </div>
           </Show>
           <Show when={props.hasResults}>
-            <button class="btn btn-ghost btn-xs" onClick={(_) => props.onBtnExport('csv')}>
+            <button
+              class="btn btn-ghost btn-xs"
+              onClick={(_) => props.onBtnExport('csv')}
+            >
               {t('console.table.csv')}
             </button>
-            <button class="btn btn-ghost btn-xs" onClick={(_) => props.onBtnExport('json')}>
+            <button
+              class="btn btn-ghost btn-xs"
+              onClick={(_) => props.onBtnExport('json')}
+            >
               {t('console.table.json')}
             </button>
           </Show>
@@ -129,17 +165,30 @@ export const Pagination = (props: PaginationProps) => {
                 setPageSize(+e.currentTarget.value);
                 props.onPageSizeChange();
               }}
-              class="select select-accent select-bordered select-xs w-full">
-              <For each={PAGE_SIZE_OPTIONS}>{(n) => <option value={n}>{n}</option>}</For>
+              class="select select-accent select-bordered select-xs w-full"
+            >
+              <For each={PAGE_SIZE_OPTIONS}>
+                {(n) => <option value={n}>{n}</option>}
+              </For>
             </select>
           </div>
           <div class="join">
-            <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.previous_page')}>
-              <button class="join-item btn btn-xs" disabled={props.loading || !props.page()} onClick={props.onPrevPage}>
+            <div
+              class="tooltip tooltip-primary tooltip-left"
+              data-tip={t('console.actions.previous_page')}
+            >
+              <button
+                class="join-item btn btn-xs"
+                disabled={props.loading || !props.page()}
+                onClick={props.onPrevPage}
+              >
                 <ChevronLeft />
               </button>
             </div>
-            <button disabled class="join-item btn btn-xs btn-disabled !text-base-content w-[50px]">
+            <button
+              disabled
+              class="join-item btn btn-xs btn-disabled !text-base-content w-[50px]"
+            >
               <Switch>
                 <Match when={props.loading}>
                   <span class="loading text-primary loading-bars loading-xs"></span>
@@ -150,11 +199,19 @@ export const Pagination = (props: PaginationProps) => {
               </Switch>
             </button>
 
-            <div class="tooltip tooltip-primary tooltip-left" data-tip={t('console.actions.next_page')}>
+            <div
+              class="tooltip tooltip-primary tooltip-left"
+              data-tip={t('console.actions.next_page')}
+            >
               <button
                 class="join-item btn btn-xs"
-                disabled={props.loading || props.page() * pageSize() + pageSize() >= (resultSet?.count ?? 0)}
-                onClick={props.onNextPage}>
+                disabled={
+                  props.loading ||
+                  props.page() * pageSize() + pageSize() >=
+                    (resultSet?.count ?? 0)
+                }
+                onClick={props.onNextPage}
+              >
                 <ChevronRight />
               </button>
             </div>

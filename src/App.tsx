@@ -19,7 +19,14 @@ import { isDev } from 'solid-js/web';
 
 function App() {
   const {
-    connections: { store, restoreConnectionStore, getConnection, updateResultSet, loading, setLoading },
+    connections: {
+      store,
+      restoreConnectionStore,
+      getConnection,
+      updateResultSet,
+      loading,
+      setLoading,
+    },
     app: { restoreAppStore, setScreen, appStore },
     backend: { getQueryMetadata },
     messages: { notify },
@@ -27,7 +34,11 @@ function App() {
 
   const [updating, setUpdating] = createSignal(false);
   const [shouldUpdate, setShouldUpdate] = createSignal(false);
-  const [updateManifest, setUpdateManifest] = createSignal({ version: '', date: '', body: '' });
+  const [updateManifest, setUpdateManifest] = createSignal({
+    version: '',
+    date: '',
+    body: '',
+  });
 
   const checkForUpdates = async () => {
     const { shouldUpdate, manifest } = await checkUpdate().catch((e) => {
@@ -36,7 +47,11 @@ function App() {
     });
     if (shouldUpdate) {
       setShouldUpdate(true);
-      setUpdateManifest(() => ({ version: manifest!.version, date: manifest!.date, body: manifest!.body }));
+      setUpdateManifest(() => ({
+        version: manifest!.version,
+        date: manifest!.date,
+        body: manifest!.body,
+      }));
     }
   };
 
@@ -74,7 +89,11 @@ function App() {
   }
 
   addEventListener('unhandledrejection', (e) => {
-    console.log({ message: 'Unhandled rejection', info: (e.reason?.message || e.reason || e).toString() });
+    console.error(e);
+    console.log({
+      message: 'Unhandled rejection',
+      info: (e.reason?.message || e.reason || e).toString(),
+    });
     notify(e.reason?.message || e, 'error');
   });
 
@@ -107,11 +126,11 @@ function App() {
     }
     setLoading(false);
 
-    await checkForUpdates();
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
       console.log(event);
       await compareAndAssign(event.payload);
     });
+    await checkForUpdates();
   });
 
   return (
@@ -138,7 +157,8 @@ function App() {
                   class="ml-auto fill-current text-gray-700 w-6 h-6 cursor-pointer"
                   onClick={() => {
                     setShouldUpdate(false);
-                  }}>
+                  }}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                     <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z" />
                   </svg>
@@ -149,7 +169,11 @@ function App() {
               <div>{updateManifest().body}</div>
               <hr class="py-2" />
               <div class="ml-auto">
-                <button disabled={updating()} onClick={handleUpdate} class="btn btn-primary btn-sm">
+                <button
+                  disabled={updating()}
+                  onClick={handleUpdate}
+                  class="btn btn-primary btn-sm"
+                >
                   {t('update_toast.download')}
                 </button>
               </div>

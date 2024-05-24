@@ -1,17 +1,20 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration};
 
 use deadpool_postgres::{
     Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, RecyclingMethod, SslMode,
 };
 use deadpool_sqlite::Config as SqliteConfig;
-use mysql::{prelude::Queryable, ClientIdentity, Opts, OptsBuilder, Pool as MysqlPool, SslOpts};
 use openssl::ssl::{SslConnector, SslFiletype, SslMethod, SslVerifyMode};
 use postgres::NoTls;
 use postgres_openssl::MakeTlsConnector;
+use sqlx::{
+    mysql::{MySqlConnectOptions, MySqlPoolOptions, MySqlSslMode},
+    Executor,
+};
 
 use crate::{
     engine::types::{
-        config::{ConnectionConfig, ConnectionOpts, ConnectionPool, Dialect, Mode},
+        config::{ConnectionConfig, ConnectionPool, Dialect, Mode},
         connection::InitiatedConnection,
     },
     utils::error::Error,
@@ -24,67 +27,71 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                 return Err(anyhow::anyhow!("File mode is not supported for Mysql").into());
             }
             let mut credentials = cfg.credentials.clone();
-            let ssl_keys = vec!["ssl_mode", "ca_cert", "client_p12", "client_p12_pass"];
+            let ssl_keys = vec!["ssl_mode", "ca_cert", "client_key", "client_cert"];
             let mut ssl_cfg = credentials.clone();
             ssl_cfg.retain(|k, _| ssl_keys.contains(&k.as_str()));
             for key in ssl_keys {
                 credentials.remove(key);
             }
-            let ssl_mode = ssl_cfg.get("ssl_mode").cloned().unwrap_or("".to_string());
             let ca_cert = ssl_cfg.get("ca_cert").cloned().unwrap_or("".to_string());
-            let client_p12 = ssl_cfg.get("client_p12").cloned().unwrap_or("".to_string());
-            let client_p12_pass = ssl_cfg
-                .get("client_p12_pass")
+            let client_cert = cfg
+                .credentials
+                .get("client_cert")
                 .cloned()
                 .unwrap_or("".to_string());
-
-            let builder = match ssl_mode.as_str() {
-                "prefer" | "require" => {
-                    let mut ssl_opts = if !client_p12.is_empty() && !client_p12_pass.is_empty() {
-                        let identity = ClientIdentity::new(PathBuf::from(&client_p12))
-                            .with_password(client_p12_pass);
-                        
-                        SslOpts::default().with_client_identity(Some(identity))
-                    } else if !client_p12.is_empty() {
-                        let identity = ClientIdentity::new(PathBuf::from(&client_p12));
-                        
-                        SslOpts::default().with_client_identity(Some(identity))
-                    } else {
-                        SslOpts::default()
-                    };
-                    if !ca_cert.is_empty() {
-                        ssl_opts = ssl_opts.with_root_cert_path(Some(PathBuf::from(&ca_cert)));
-                    }
-                    ssl_opts = ssl_opts.with_danger_accept_invalid_certs(true);
-
-                    OptsBuilder::new()
-                        .from_hash_map(&credentials)?
-                        .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
-                        .prefer_socket(cfg.mode == Mode::Socket)
-                        .ssl_opts(ssl_opts)
-                }
-                _ => OptsBuilder::new()
-                    .from_hash_map(&credentials)?
-                    .tcp_connect_timeout(Some(std::time::Duration::from_secs(15)))
-                    .prefer_socket(cfg.mode == Mode::Socket),
-            };
-
-            let opts = Opts::from(builder);
-            let cloned = opts.clone();
-            match MysqlPool::new(opts.clone()) {
-                Ok(pool) => {
-                    let schema = cloned.get_db_name().unwrap_or("");
-                    let mut conn = pool.get_conn()?;
-                    conn.query_drop("SELECT 1")?;
-                    Ok(InitiatedConnection {
-                        config: cfg.clone(),
-                        pool: ConnectionPool::Mysql(pool),
-                        opts: ConnectionOpts::Mysql(opts),
-                        schema: schema.to_string(),
-                    })
-                }
-                Err(e) => Err(Error::Mysql(e)),
+            let client_key = cfg
+                .credentials
+                .get("client_key")
+                .cloned()
+                .unwrap_or("".to_string());
+            if (!client_cert.is_empty() && client_key.is_empty())
+                || (client_cert.is_empty() && !client_key.is_empty())
+            {
+                return Err(
+                    anyhow::anyhow!("client_cert and client_key must be set together").into(),
+                );
             }
+            let port = credentials
+                .get("port")
+                .cloned()
+                .map(|p| p.parse::<u16>().expect("Port should be a valid number"))
+                .unwrap_or(3306);
+            let mut options = MySqlConnectOptions::new()
+                .host(credentials.get("host").unwrap_or(&"".to_string()))
+                .username(credentials.get("user").unwrap_or(&"".to_string()))
+                .password(credentials.get("password").unwrap_or(&"".to_string()))
+                .database(credentials.get("db_name").unwrap_or(&"".to_string()))
+                .port(port);
+            let ssl_mode = cfg.credentials.get("ssl_mode");
+            if let Some(ssl_mode) = ssl_mode {
+                options = match ssl_mode.as_str() {
+                    "prefer" => options.ssl_mode(MySqlSslMode::Preferred),
+                    "require" => options.ssl_mode(MySqlSslMode::Required),
+                    _ => options.ssl_mode(MySqlSslMode::Disabled),
+                };
+            }
+            if !ca_cert.is_empty() {
+                options = options.ssl_ca(ca_cert);
+            }
+            if !client_cert.is_empty() {
+                options = options.ssl_client_cert(client_cert);
+                options = options.ssl_client_cert(client_key);
+            }
+            let schema = options.get_database().unwrap_or("").to_string();
+            let pool_opts = MySqlPoolOptions::new()
+                .max_connections(10)
+                .idle_timeout(Duration::from_secs(30 * 60))
+                .max_lifetime(Duration::from_secs(60 * 60))
+                .acquire_timeout(Duration::from_secs(10));
+            let pool = pool_opts.connect_with(options).await?;
+            if pool.execute("SELECT 1").await.is_err() {
+                return Err(Error::from(anyhow::anyhow!("Could not connect")));
+            }
+            Ok(InitiatedConnection {
+                config: cfg.clone(),
+                pool: ConnectionPool::Mysql(pool),
+                schema,
+            })
         }
         Dialect::Postgresql => {
             if cfg.mode == Mode::File {
@@ -181,7 +188,6 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                     Ok(InitiatedConnection {
                         config: cfg.clone(),
                         pool: ConnectionPool::Postgresql(pool),
-                        opts: ConnectionOpts::Postgresql(Box::new(_cfg)),
                         schema: "public".to_string(),
                     })
                 }
@@ -206,7 +212,6 @@ pub async fn init_conn(cfg: ConnectionConfig) -> Result<InitiatedConnection, Err
                         Ok(InitiatedConnection {
                             config: cfg.clone(),
                             pool: ConnectionPool::Sqlite(pool),
-                            opts: ConnectionOpts::Sqlite(config),
                             schema: path.to_string(),
                         })
                     }

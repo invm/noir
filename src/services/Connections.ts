@@ -39,7 +39,11 @@ export type ContentTabData = {
   [ContentTab.Data]: DataContentTabData;
 };
 
-export const newContentTab = <T extends ContentComponentKeys>(label: string, key: T, data?: ContentTabData[T]) => {
+export const newContentTab = <T extends ContentComponentKeys>(
+  label: string,
+  key: T,
+  data?: ContentTabData[T]
+) => {
   switch (key) {
     case ContentTab.Query:
       return {
@@ -94,19 +98,19 @@ export type DataContentTabData = {
 export type ContentTabType = {
   label: string;
 } & (
-    | {
+  | {
       key: typeof ContentTab.Query;
       data: Partial<QueryContentTabData>;
     }
-    | {
+  | {
       key: typeof ContentTab.TableStructure;
       data: Partial<TableStructureContentTabData>;
     }
-    | {
+  | {
       key: typeof ContentTab.Data;
       data: Partial<DataContentTabData>;
     }
-  );
+);
 
 type Schema = {
   columns: Row[];
@@ -261,7 +265,10 @@ export const ConnectionsService = () => {
     if (conn.tabs.length === 10) return;
     setStore(
       produce((s) => {
-        s.tabs[s.idx].tabs = [...s.tabs[s.idx].tabs, tab ?? newContentTab('Query', ContentTab.Query)];
+        s.tabs[s.idx].tabs = [
+          ...s.tabs[s.idx].tabs,
+          tab ?? newContentTab('Query', ContentTab.Query),
+        ];
         s.tabs[s.idx].idx = s.tabs[s.idx].tabs.length - 1;
       })
     );
@@ -310,12 +317,18 @@ export const ConnectionsService = () => {
     setStore(
       produce((s) => {
         const idx = s.tabs[s.idx].idx;
-        s.tabs[s.idx].idx = (idx - 1 >= 0 ? idx - 1 : s.tabs[s.idx].tabs.length - 1) % s.tabs[s.idx].tabs.length;
+        s.tabs[s.idx].idx =
+          (idx - 1 >= 0 ? idx - 1 : s.tabs[s.idx].tabs.length - 1) %
+          s.tabs[s.idx].tabs.length;
       })
     );
   };
 
-  const updateConnectionTab = <T extends keyof ConnectionTab>(key: T, data: ConnectionTab[T], idx?: number) => {
+  const updateConnectionTab = <T extends keyof ConnectionTab>(
+    key: T,
+    data: ConnectionTab[T],
+    idx?: number
+  ) => {
     const tab = getConnection();
     if (!tab) return;
     setStore('tabs', idx ?? store.idx, key, data);
@@ -339,7 +352,11 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const updateContentTab = <T extends 'data'>(key: T, data: ContentTabType[T], idx?: number) => {
+  const updateContentTab = <T extends 'data'>(
+    key: T,
+    data: ContentTabType[T],
+    idx?: number
+  ) => {
     const tab = getContent();
     if (!tab) return;
     const tabIdx = idx ?? getConnection().idx;
@@ -354,18 +371,27 @@ export const ConnectionsService = () => {
   const insertColumnName = (column: string) => {
     const { query, cursor } = getContentData('Query');
     if (query) {
-      const _query = query.slice(0, cursor) + column + ', ' + query.slice(cursor);
+      const _query =
+        query.slice(0, cursor) + column + ', ' + query.slice(cursor);
       setStore(
         produce((s) => {
           const tabIdx = s.tabs[s.idx].idx;
           const data = s.tabs[s.idx].tabs[tabIdx]['data'];
-          s.tabs[s.idx].tabs[tabIdx]['data'] = { ...data, query: _query, cursor: cursor + column.length + 2 }; // 2 for ', '
+          s.tabs[s.idx].tabs[tabIdx]['data'] = {
+            ...data,
+            query: _query,
+            cursor: cursor + column.length + 2,
+          }; // 2 for ', '
         })
       );
     }
   };
 
-  const updateResultSet = (tabIdx: number, query_idx: number, data: Partial<ResultSet>) => {
+  const updateResultSet = (
+    tabIdx: number,
+    query_idx: number,
+    data: Partial<ResultSet>
+  ) => {
     setStore(
       produce((s) => {
         const curr = s.tabs[s.idx].tabs[tabIdx]['data'];
@@ -390,7 +416,9 @@ export const ConnectionsService = () => {
 
   const selectPrevQuery = () => {
     if (getContentData('Query').result_sets.length) {
-      setQueryIdx((s) => (s - 1 >= 0 ? s - 1 : getContentData('Query').result_sets.length - 1));
+      setQueryIdx((s) =>
+        s - 1 >= 0 ? s - 1 : getContentData('Query').result_sets.length - 1
+      );
     }
   };
 
@@ -400,6 +428,7 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
+    console.log('403');
     const [_schemas, columns, routines, triggers, _views] = await Promise.all([
       invoke<RawQueryResult>('get_schemas', { connId }),
       invoke<RawQueryResult>('get_columns', { connId }),
@@ -407,6 +436,7 @@ export const ConnectionsService = () => {
       invoke<RawQueryResult>('get_triggers', { connId }),
       invoke<RawQueryResult>('get_views', { connId }),
     ]);
+    console.log('411');
 
     const { views, tables } = columnsToTables(columns, _views, dialect) ?? [];
     const schemas = _schemas.map((d) => String(d['schema']));

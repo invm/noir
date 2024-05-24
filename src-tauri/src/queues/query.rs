@@ -1,3 +1,4 @@
+use crate::database::QueryType;
 use crate::engine::types::connection::InitiatedConnection;
 use crate::engine::types::result::TableMetadata;
 use crate::utils::fs::write_query;
@@ -20,8 +21,7 @@ impl Events {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub enum QueryTaskStatus {
     #[default]
     Progress,
@@ -29,13 +29,12 @@ pub enum QueryTaskStatus {
     Error,
 }
 
-
-
 #[derive(Debug, Clone)]
 pub struct QueryTask {
     pub conn: InitiatedConnection,
     pub query: String,
     pub id: String,
+    pub query_type: QueryType,
     pub status: QueryTaskStatus,
     pub tab_idx: usize,
     pub query_idx: usize,
@@ -46,6 +45,7 @@ impl QueryTask {
     pub fn new(
         conn: InitiatedConnection,
         query: String,
+        query_type: QueryType,
         query_id: String,
         tab_idx: usize,
         query_idx: usize,
@@ -54,6 +54,7 @@ impl QueryTask {
         QueryTask {
             conn,
             id: query_id,
+            query_type,
             tab_idx,
             query_idx,
             query: query.to_string(),
@@ -79,7 +80,6 @@ pub struct QueryTaskResult {
     pub id: String,
     pub path: Option<String>,
     pub error: Option<String>,
-    pub info: Option<String>,
     pub count: Option<usize>,
     pub tab_idx: usize,
     pub query_idx: usize,
@@ -93,7 +93,7 @@ pub async fn async_process_model(
         let task = input;
         // so what happened is that this ran too fast and the UI didn't have time to update, a single millisecond is enough
         tokio::time::sleep(tokio::time::Duration::from_nanos(1)).await;
-        match task.conn.execute_query(&task.query).await {
+        match task.conn.execute_query(&task.query, task.query_type).await {
             Ok(mut result_set) => {
                 if let Some(table) = task.table {
                     let foreign_keys = task.conn.get_foreign_keys(&table).await?;
@@ -119,7 +119,6 @@ pub async fn async_process_model(
                                 tab_idx: task.tab_idx,
                                 path: Some(path),
                                 error: None,
-                                info: Some(result_set.info),
                             })
                             .await?
                     }
@@ -135,7 +134,6 @@ pub async fn async_process_model(
                                 tab_idx: task.tab_idx,
                                 path: None,
                                 error: Some(e.to_string()),
-                                info: None,
                             })
                             .await?
                     }
@@ -153,7 +151,6 @@ pub async fn async_process_model(
                         tab_idx: task.tab_idx,
                         path: None,
                         error: Some(e.to_string()),
-                        info: None,
                     })
                     .await?;
             }

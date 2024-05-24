@@ -23,9 +23,7 @@
         "ca_cert": "CA certificate (optional)",
         "client_cert": "Client certificate (optional)",
         "client_key": "Client key (optional)",
-        "show_ssl_certs": "Add certificates",
-        "client_p12": "P12 file (optional)",
-        "client_p12_pass": "P12 password (optional)"
+        "show_ssl_certs": "Add certificates"
       },
       "select_file": "Select file"
     },
@@ -70,6 +68,7 @@
           "add_row": "Add row",
           "delete_row": "Delete row"
         },
+        "affected_rows": "affected rows",
         "ran": "Ran in {{duration}} ms",
         "primary_key": "Primary key",
         "foreign_key": "Foreign key -> {{table}}.{{column}}",

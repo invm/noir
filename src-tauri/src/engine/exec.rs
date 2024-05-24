@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde_json::{json, Value};
 
-use crate::utils::error::Error;
+use crate::database::QueryType;
 
 use super::types::result::ResultSet;
 use super::types::{config::ConnectionPool::*, connection::InitiatedConnection};
@@ -89,17 +89,17 @@ pub async fn get_views(conn: &InitiatedConnection) -> Result<Vec<Value>> {
     }
 }
 
-pub async fn execute_query(conn: &InitiatedConnection, q: &str) -> Result<ResultSet> {
+pub async fn execute_query(conn: &InitiatedConnection, q: &str, t: QueryType) -> Result<ResultSet> {
     match &conn.pool {
-        Mysql(pool) | MariaDB(pool) => mysql::query::execute_query(pool, q),
+        Mysql(pool) | MariaDB(pool) => mysql::query::execute_query(pool, q, t).await,
         Postgresql(pool) => postgresql::query::execute_query(pool, q).await,
         Sqlite(pool) => sqlite::query::execute_query(pool, q).await,
     }
 }
 
-pub async fn execute_tx(conn: &InitiatedConnection, queries: Vec<&str>) -> Result<(), Error> {
+pub async fn execute_tx(conn: &InitiatedConnection, queries: Vec<&str>) -> Result<()> {
     match &conn.pool {
-        Mysql(pool) | MariaDB(pool) => mysql::query::execute_tx(pool, queries),
+        Mysql(pool) | MariaDB(pool) => mysql::query::execute_tx(pool, queries).await,
         Postgresql(pool) => postgresql::query::execute_tx(pool, queries).await,
         Sqlite(pool) => sqlite::query::execute_tx(pool, queries).await,
     }

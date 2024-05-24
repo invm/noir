@@ -21,7 +21,6 @@ pub fn add_connection(
 ) -> CommandResult<()> {
     info!(?name, ?dialect, ?mode, ?color, "add_connection");
     let conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
-    info!(?conn, "add_connection");
     app_handle
         .db(|db| queries::add_connection(db, &conn))
         .map_err(Error::from)

@@ -2,10 +2,7 @@ use anyhow::{anyhow, Result};
 use deadpool_sqlite::Pool;
 use serde_json::Value;
 
-use crate::{
-    engine::types::result::{ResultSet, TableMetadata},
-    utils::error::Error,
-};
+use crate::engine::types::result::{ResultSet, TableMetadata};
 
 use super::utils::row_to_object;
 
@@ -64,20 +61,13 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         start_time,
         end_time,
         affected_rows: 0,
-        warnings: 0,
-        info: "".to_string(),
         rows,
-        table: TableMetadata {
-            table: String::from(""),
-            foreign_keys: None,
-            primary_key: None,
-            columns: None,
-        },
+        table: TableMetadata::default(),
     };
     Ok(set)
 }
 
-pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<(), Error> {
+pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<()> {
     let conn = pool.get().await.expect("Failed to get connection");
     let queries = queries
         .iter()

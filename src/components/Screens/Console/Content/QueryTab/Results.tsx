@@ -1,7 +1,10 @@
 import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
 import { EditorView } from 'codemirror';
 import { json } from '@codemirror/lang-json';
-import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
+import {
+  createCodeMirror,
+  createEditorControlledValue,
+} from 'solid-codemirror';
 import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useAppSelector } from 'services/Context';
@@ -29,10 +32,21 @@ tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
 
-export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; editable?: boolean; table?: string }) => {
+export const Results = (props: {
+  editorTheme: EditorTheme;
+  gridTheme: string;
+  editable?: boolean;
+  table?: string;
+}) => {
   const {
     connections: { queryIdx, getConnection, updateContentTab, getContentData },
-    backend: { getQueryResults, pageSize, downloadCsv, downloadJSON, selectAllFrom },
+    backend: {
+      getQueryResults,
+      pageSize,
+      downloadCsv,
+      downloadJSON,
+      selectAllFrom,
+    },
     messages: { notify },
     app: { cmdOrCtrl },
   } = useAppSelector();
@@ -68,7 +82,15 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   const lineWrapping = EditorView.lineWrapping;
   createExtension(lineWrapping);
 
-  const openDrawerForm = ({ rowIndex, mode, data: row }: { data: Row; rowIndex?: number; mode: 'add' | 'edit' }) => {
+  const openDrawerForm = ({
+    rowIndex,
+    mode,
+    data: row,
+  }: {
+    data: Row;
+    rowIndex?: number;
+    mode: 'add' | 'edit';
+  }) => {
     if (!props.editable) return;
     setDrawerOpen({
       mode,
@@ -87,7 +109,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
   });
 
   const [data] = createResource(
-    () => [page(), queryIdx(), pageSize(), getContentData('Query')?.result_sets] as const,
+    () =>
+      [
+        page(),
+        queryIdx(),
+        pageSize(),
+        getContentData('Query')?.result_sets,
+      ] as const,
     async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
       try {
         // Reruns when either signal updates
@@ -97,7 +125,12 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         const primary_key = result_set?.primary_key ?? [];
         const start_time = result_set?.start_time ?? 0;
         const end_time = result_set?.end_time ?? 0;
-        setTable({ name: result_set?.table ?? '', columns, foreign_keys, primary_key });
+        setTable({
+          name: result_set?.table ?? '',
+          columns,
+          foreign_keys,
+          primary_key,
+        });
         let colDef = getColumnDefs({
           columns,
           foreign_keys,
@@ -109,12 +142,23 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           openDrawerForm,
         });
         if (result_set?.rows?.length) {
-          return { rows: result_set.rows, columns, colDef, count: result_set.count, start_time, end_time, info: result_set.info };
+          return {
+            rows: result_set.rows,
+            columns,
+            colDef,
+            count: result_set.count,
+            start_time,
+            end_time,
+          };
         }
         if (!result_set || result_set?.status !== 'Completed') {
           return { rows: [], columns, colDef, exhausted: true, notReady: true };
         }
-        const rows = await getQueryResults(result_set.path!, pageVal, pageSizeVal);
+        const rows = await getQueryResults(
+          result_set.path!,
+          pageVal,
+          pageSizeVal
+        );
         colDef = getColumnDefs({
           columns,
           foreign_keys,
@@ -134,7 +178,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
           path: result_set.path,
           start_time,
           end_time,
-          info: result_set.info
         };
       } catch (error) {
         notify(error);
@@ -210,13 +253,18 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       const conn = getConnection();
       await invoke('execute_tx', { queries, connId: conn.id });
       await invoke('invalidate_query', { path: data()?.path });
-      const result_sets = await selectAllFrom(props.table!, conn.id, getConnection().idx);
+      const result_sets = await selectAllFrom(
+        props.table!,
+        conn.id,
+        getConnection().idx
+      );
       updateContentTab('data', {
         result_sets: result_sets.map((id) => ({ id })),
       });
       Object.keys(changes).forEach((key) => {
         const count = Object.keys(changes[key as keyof typeof changes]).length;
-        if (count) notify(t(`console.table.successfull_${key}`, { count }), 'success');
+        if (count)
+          notify(t(`console.table.successfull_${key}`, { count }), 'success');
       }, 0);
       resetChanges();
     } catch (error) {
@@ -244,9 +292,9 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const onCellEditingStopped = (e: CellEditingStoppedEvent) => {
     if (e.valueChanged) {
-      const columns = (table.primary_key.length ? table.primary_key : table.columns).filter(
-        (c) => c.column_name !== e.column.getColId()
-      );
+      const columns = (
+        table.primary_key.length ? table.primary_key : table.columns
+      ).filter((c) => c.column_name !== e.column.getColId());
       const condition = columns.reduce((acc, c) => {
         const col = getAnyCase(c, 'column_name');
         return { ...acc, [col]: e.data[col] };
@@ -262,10 +310,12 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
 
   const saveForm = async () => {
     if (!drawerOpen.data) return;
-    const changed = Object.keys(drawerOpen.data).filter((key) => drawerOpen.data[key] !== drawerOpen.originalData[key]);
-    const columns = (table.primary_key.length ? table.primary_key : table.columns).filter(
-      (c) => !changed.includes(getAnyCase(c, 'column_name'))
+    const changed = Object.keys(drawerOpen.data).filter(
+      (key) => drawerOpen.data[key] !== drawerOpen.originalData[key]
     );
+    const columns = (
+      table.primary_key.length ? table.primary_key : table.columns
+    ).filter((c) => !changed.includes(getAnyCase(c, 'column_name')));
     const condition = columns.reduce((acc, c) => {
       const col = getAnyCase(c, 'column_name');
       return { ...acc, [col]: drawerOpen.data[col] };
@@ -317,7 +367,9 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
         <Pagination
           {...{
             changesCount: Object.keys(changes).reduce((acc, key) => {
-              return acc + Object.keys(changes[key as keyof typeof changes]).length;
+              return (
+                acc + Object.keys(changes[key as keyof typeof changes]).length
+              );
             }, 0),
             undoChanges,
             applyChanges,
@@ -329,7 +381,6 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
             onPageSizeChange,
             onBtnExport,
             count: data()?.count ?? 0,
-            info: data()?.info ?? '',
             openDrawerForm: props.editable ? openDrawerForm : undefined,
             executionTime: (data()?.end_time ?? 0) - (data()?.start_time ?? 0),
           }}
@@ -338,7 +389,13 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       </div>
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <AgGridSolid
-          noRowsOverlayComponent={() => (data()?.notReady ? <Keymaps short /> : <NoResults error={data()?.error} />)}
+          noRowsOverlayComponent={() =>
+            data()?.notReady ? (
+              <Keymaps short />
+            ) : (
+              <NoResults error={data()?.error} />
+            )
+          }
           loadingOverlayComponent={Loader}
           ref={gridRef!}
           columnDefs={data()?.colDef}
@@ -355,7 +412,14 @@ export const Results = (props: { editorTheme: EditorTheme; gridTheme: string; ed
       </div>
       <Show when={props.editable}>
         <div class="absolute right-0 top-0">
-          <Drawer {...{ drawerOpen, setDrawerOpen, table: props.table ?? '', saveForm }} />
+          <Drawer
+            {...{
+              drawerOpen,
+              setDrawerOpen,
+              table: props.table ?? '',
+              saveForm,
+            }}
+          />
         </div>
       </Show>
     </div>

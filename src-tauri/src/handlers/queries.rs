@@ -1,6 +1,7 @@
 use std::{fs::read_to_string, path::PathBuf};
 
 use crate::{
+    database::QueryType,
     queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
     state::{AsyncState, ServiceAccess},
     utils::{
@@ -13,10 +14,20 @@ use crate::{
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlparser::{dialect::dialect_from_str, parser::Parser};
+use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
 use tauri::{command, AppHandle, State};
 use tracing::info;
+
+fn get_query_type(s: Statement) -> QueryType {
+    match s {
+        Statement::Query(_) => QueryType::Select,
+        //Statement::Insert { .. } => QueryType::Insert,
+        //Statement::Update { .. } => QueryType::Update,
+        //Statement::Delete { .. } => QueryType::Delete,
+        _ => QueryType::Other,
+    }
+}
 
 #[command]
 pub async fn enqueue_query(
@@ -31,54 +42,45 @@ pub async fn enqueue_query(
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
     // ignore sqlparser when dialect is sqlite and statements contain pragma
-    let statements: Result<Vec<String>, Error> = match Parser::parse_sql(
+    let statements = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
             .expect("Failed to get dialect")
             .as_ref(),
         sql,
-    ) {
-        Ok(statements) => Ok(statements.into_iter().map(|s| s.to_string()).collect()),
-        Err(e) => Err(Error::from(e)),
-    };
-    match statements {
-        Ok(statements) => {
-            let statements: Vec<(String, String)> = statements
-                .into_iter()
-                .map(|s| {
-                    let id = conn.config.id.to_string() + &tab_idx.to_string() + &s;
-                    let hash = md5_hash(&id);
-                    (s, hash)
-                })
-                .collect();
-            if statements.is_empty() {
-                return Err(Error::from(anyhow!("No statements found")));
-            }
-            let async_proc_input_tx = async_state.tasks.lock().await;
-            let enqueued_ids: Vec<String> = vec![];
-            for (idx, stmt) in statements.iter().enumerate() {
-                let (mut statement, id) = stmt.clone();
-                info!("Got statement {:?}", statement);
-                if enqueued_ids.contains(&id) {
-                    continue;
-                }
-                if auto_limit && !statement.to_lowercase().contains("limit") && statement.to_lowercase().contains("select") {
-                    statement = format!("{} LIMIT 1000", statement);
-                }
-                let task = QueryTask::new(conn.clone(), statement, id, tab_idx, idx, table.clone());
-                let res = async_proc_input_tx.send(task).await;
-                if let Err(e) = res {
-                    return Err(Error::from(e));
-                }
-            }
-            return Ok(QueryTaskEnqueueResult {
-                conn_id,
-                tab_idx,
-                status: QueryTaskStatus::Progress,
-                result_sets: statements.iter().map(|s| s.1.clone()).collect(),
-            });
-        }
-        Err(e) => Err(e),
+    )?;
+    if statements.is_empty() {
+        return Err(Error::from(anyhow!("No statements found")));
     }
+    let statements: Vec<(String, QueryType, String)> = statements
+        .into_iter()
+        .map(|s| {
+            let id = conn.config.id.to_string() + &tab_idx.to_string() + &s.to_string();
+            (s.to_string(), get_query_type(s), md5_hash(&id))
+        })
+        .collect();
+    let async_proc_input_tx = async_state.tasks.lock().await;
+    let enqueued_ids: Vec<String> = vec![];
+    for (idx, stmt) in statements.iter().enumerate() {
+        let (mut statement, t, id) = stmt.clone();
+        info!("Got statement {:?}", statement);
+        if enqueued_ids.contains(&id) {
+            continue;
+        }
+        if auto_limit && !statement.to_lowercase().contains("limit") && t == QueryType::Select {
+            statement = format!("{} LIMIT 1000", statement);
+        }
+        let task = QueryTask::new(conn.clone(), statement, t, id, tab_idx, idx, table.clone());
+        let res = async_proc_input_tx.send(task).await;
+        if let Err(e) = res {
+            return Err(Error::from(e));
+        }
+    }
+    Ok(QueryTaskEnqueueResult {
+        conn_id,
+        tab_idx,
+        status: QueryTaskStatus::Progress,
+        result_sets: statements.iter().map(|s| (s.2.clone())).collect(),
+    })
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -117,8 +119,25 @@ pub async fn execute_query(
     conn_id: String,
     query: String,
 ) -> CommandResult<Value> {
-    let connection = app_handle.acquire_connection(conn_id);
-    let result = connection.execute_query(&query).await?;
+    let conn = app_handle.acquire_connection(conn_id);
+    let statements = Parser::parse_sql(
+        dialect_from_str(conn.config.dialect.to_string())
+            .expect("Failed to get dialect")
+            .as_ref(),
+        &query,
+    )?;
+    if statements.is_empty() {
+        return Err(Error::from(anyhow!("No statements found")));
+    }
+    let statements: Vec<(String, QueryType, String)> = statements
+        .into_iter()
+        .map(|s| {
+            let id = conn.config.id.to_string() + &s.to_string();
+            (s.to_string(), get_query_type(s), md5_hash(&id))
+        })
+        .collect();
+    let stmt = &statements[0];
+    let result = conn.execute_query(&stmt.0, stmt.1).await?;
     Ok(json!(result))
 }
 
@@ -238,7 +257,11 @@ pub async fn download_csv(source: &str, destination: &str) -> CommandResult<()> 
         .iter()
         .map(|row| {
             keys.iter()
-                .map(|k| row.get(k).unwrap_or_else(|| panic!("Failed to get key {} from {}", k, row)).to_string())
+                .map(|k| {
+                    row.get(k)
+                        .unwrap_or_else(|| panic!("Failed to get key {} from {}", k, row))
+                        .to_string()
+                })
                 .collect::<Vec<String>>()
                 .join(",")
         })

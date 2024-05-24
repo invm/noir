@@ -4,24 +4,15 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt};
 use uuid::Uuid;
 
-use deadpool_postgres::{Config as PsqlConfig, Pool as PostgresqlPool};
-use deadpool_sqlite::{Config as SqliteConfig, Pool as SqlitePool};
-use mysql::{Opts, Pool as MysqlPool};
+use deadpool_postgres::Pool as PostgresqlPool;
+use deadpool_sqlite::Pool as SqlitePool;
 
 #[derive(Debug, Clone)]
 pub enum ConnectionPool {
-    Mysql(MysqlPool),
+    Mysql(sqlx::MySqlPool),
+    MariaDB(sqlx::MySqlPool),
     Postgresql(PostgresqlPool),
     Sqlite(SqlitePool),
-    MariaDB(MysqlPool),
-}
-
-#[derive(Debug, Clone)]
-pub enum ConnectionOpts {
-    Mysql(Opts),
-    MariaDB(Opts),
-    Postgresql(Box<PsqlConfig>),
-    Sqlite(SqliteConfig),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -135,8 +126,8 @@ impl ConnectionConfig {
                     // later before connecting those keys are omitted and everything else is passed to cfg builder
                     "ssl_mode",
                     "ca_cert",
-                    "client_p12",
-                    "client_p12_pass",
+                    "client_cert",
+                    "client_key",
                 ];
                 credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 let schema = credentials

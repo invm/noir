@@ -1,16 +1,15 @@
 use anyhow::Result;
 use serde_json::Value;
 
-use super::config::{ConnectionConfig, ConnectionOpts, ConnectionPool};
+use super::config::{ConnectionConfig, ConnectionPool};
 use super::result::ResultSet;
+use crate::database::QueryType;
 use crate::engine::exec;
-use crate::utils::error::Error;
 
 #[derive(Debug, Clone)]
 pub struct InitiatedConnection {
     pub config: ConnectionConfig,
     pub pool: ConnectionPool,
-    pub opts: ConnectionOpts,
     pub schema: String,
 }
 
@@ -64,11 +63,11 @@ impl InitiatedConnection {
         exec::get_views(self).await
     }
 
-    pub async fn execute_query(&self, q: &str) -> Result<ResultSet> {
-        exec::execute_query(self, q).await
+    pub async fn execute_query(&self, q: &str, t: QueryType) -> Result<ResultSet> {
+        exec::execute_query(self, q, t).await
     }
 
-    pub async fn execute_tx(&self, queries: Vec<&str>) -> Result<(), Error> {
+    pub async fn execute_tx(&self, queries: Vec<&str>) -> Result<()> {
         exec::execute_tx(self, queries).await
     }
 }
