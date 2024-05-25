@@ -20,9 +20,17 @@ import {
   bracketMatching,
   foldKeymap,
 } from '@codemirror/language';
-import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
+import {
+  history,
+  // defaultKeymap,
+  historyKeymap,
+} from '@codemirror/commands';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
-import { closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
+import {
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+} from '@codemirror/autocomplete';
 import { lintKeymap } from '@codemirror/lint';
 
 const basicSetup = (() => [
@@ -46,7 +54,7 @@ const basicSetup = (() => [
   highlightSelectionMatches(),
   keymap.of([
     ...closeBracketsKeymap,
-    ...defaultKeymap,
+    // ...defaultKeymap,
     ...searchKeymap,
     ...historyKeymap,
     ...foldKeymap,

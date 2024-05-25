@@ -35,7 +35,8 @@ export const Main = () => {
             }}
             class="tab"
             tabIndex={0}
-            classList={{ 'tab-active': screen() === 'home' }}>
+            classList={{ 'tab-active': screen() === 'home' }}
+          >
             <span class="text-md font-bold">
               <HomeIcon />
             </span>
@@ -52,7 +53,8 @@ export const Main = () => {
                   classList={{
                     'tab-active': screen() === 'console' && store.idx === idx(),
                   }}
-                  tabindex={0}>
+                  tabindex={0}
+                >
                   <span class="text-md font-bold">{tab.label}</span>
                 </button>
                 <div class="w-8">
@@ -60,7 +62,8 @@ export const Main = () => {
                     <button
                       class="btn btn-xs btn-ghost p-1 ml-2"
                       tabindex={0}
-                      onClick={() => handleCloseConnection(tab.id!)}>
+                      onClick={() => handleCloseConnection(tab.id!)}
+                    >
                       <CloseIcon />
                     </button>
                   </Show>
@@ -71,13 +74,26 @@ export const Main = () => {
         </div>
         <div class="flex items-center py-2">
           <ThemeSwitch />
-          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.read_docs')}>
-            <a href="https://noirdb.dev" target="_blank" class="btn btn-square btn-ghost btn-sm">
+          <div
+            class="tooltip tooltip-primary tooltip-bottom px-3"
+            data-tip={t('settings.read_docs')}
+          >
+            <a
+              href="https://noirdb.dev"
+              target="_blank"
+              class="btn btn-square btn-ghost btn-sm"
+            >
               <QuestionMark />
             </a>
           </div>
-          <div class="tooltip tooltip-primary tooltip-bottom px-3" data-tip={t('settings.settings')}>
-            <button class="btn btn-square btn-ghost btn-sm" onClick={() => toggleScreen('settings')}>
+          <div
+            class="tooltip tooltip-primary tooltip-bottom px-3"
+            data-tip={t('settings.settings')}
+          >
+            <button
+              class="btn btn-square btn-ghost btn-sm"
+              onClick={() => toggleScreen('settings')}
+            >
               <Cog />
             </button>
           </div>

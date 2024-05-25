@@ -1,6 +1,5 @@
 use serde::Serialize;
 
-use crate::queues::query::QueryTask;
 // A custom error type that represents all possible in our command
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -10,8 +9,6 @@ pub enum Error {
     Utf8(#[from] std::string::FromUtf8Error),
     #[error("Uuid parse error")]
     UUID(#[from] uuid::Error),
-    #[error("Queue send error: {0}")]
-    Send(#[from] tokio::sync::mpsc::error::SendError<QueryTask>),
     #[error("{0}")]
     Sqlx(#[from] sqlx::error::Error),
     #[error("Postgresql error: {0}")]

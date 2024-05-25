@@ -30,13 +30,13 @@ export const Pagination = (props: PaginationProps) => {
   const {
     connections: { selectNextQuery, selectPrevQuery, queryIdx, getContentData },
     backend: { pageSize, setPageSize },
-    app: { altOrMeta },
+    app: { altOrMeta, cmdOrCtrl },
   } = useAppSelector();
 
-  createShortcut(['Control', 'Shift', 'N'], selectNextQuery);
-  createShortcut(['Control', 'Shift', 'P'], selectPrevQuery);
-  createShortcut(['Control', 'N'], props.onNextPage);
-  createShortcut(['Control', 'P'], props.onPrevPage);
+  createShortcut(['Control', 'Shift', 'E'], selectNextQuery);
+  createShortcut(['Control', 'Shift', 'Q'], selectPrevQuery);
+  createShortcut([cmdOrCtrl(), 'Shift', 'N'], props.onNextPage);
+  createShortcut([cmdOrCtrl(), 'Shift', 'P'], props.onPrevPage);
   createShortcut(['Control', 'Shift', 'J'], () => props.onBtnExport('json'));
   createShortcut(['Control', 'Shift', 'C'], () => props.onBtnExport('csv'));
   createShortcut([altOrMeta(), 'N'], () =>
@@ -45,7 +45,7 @@ export const Pagination = (props: PaginationProps) => {
       : null
   );
 
-  const [resultSet, setResultSet] = createStore<ResultSet>({});
+  const [resultSet, setResultSet] = createStore<ResultSet>({ loading: false });
 
   createEffect(() => {
     const rs = getContentData('Query').result_sets[queryIdx()];

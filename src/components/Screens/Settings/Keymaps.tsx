@@ -11,6 +11,7 @@ const ALL_KEYMAPS = [
     category: 'Navigation',
     keys: [
       { action: 'Select tab', keys: ['Alt/Cmd', 'number'] },
+
       { action: 'Select connection tab', keys: ['Ctrl/Cmd', 'number'] },
       { action: 'Add new connection', keys: ['Ctrl/Cmd', '` (backtick)'] },
     ],
@@ -35,8 +36,8 @@ const ALL_KEYMAPS = [
       { action: 'Navigate to top/bottom', keys: ['Ctrl/Cmd', '↑', '↓'] },
       { action: 'Next cell', keys: ['Tab'] },
       { action: 'Previous cell', keys: ['Shift', 'Tab'] },
-      { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'N/P'] },
-      { action: 'Select next/previous page', keys: ['Ctrl', 'N/P'] },
+      { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'Q/E'] },
+      { action: 'Select next/previous page', keys: ['Ctrl/Cmd', 'Shift', 'N/P'] },
       { action: 'Export as CSV', keys: ['Ctrl', 'Shift', 'C'] },
       { action: 'Export as JSON array', keys: ['Ctrl', 'Shift', 'J'] },
     ],
@@ -52,7 +53,7 @@ const ALL_KEYMAPS = [
   {
     category: 'Editor in Vim Mode',
     description: 'Most of the Vim commands are supported. The following are custom commands',
-    keys: [{ action: 'Scroll autocomplete suggestions up/down', keys: ['Ctrl', 'J/K'] }],
+    keys: [{ action: 'Scroll autocomplete suggestions up/down', keys: ['Ctrl', 'N/P'] }],
   },
 ];
 

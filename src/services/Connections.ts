@@ -398,7 +398,7 @@ export const ConnectionsService = () => {
         s.tabs[s.idx].tabs[tabIdx]['data'] = {
           ...curr,
           result_sets: (curr as QueryContentTabData).result_sets.map((r, i) =>
-            i === query_idx ? { ...r, ...data } : r
+            i === query_idx ? { ...r, ...data, loading: false } : r
           ),
         };
       })

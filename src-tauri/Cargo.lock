@@ -2677,6 +2677,7 @@ dependencies = [
  "tauri-plugin-window-state",
  "thiserror",
  "tokio",
+ "tokio-util",
  "tracing",
  "tracing-subscriber",
  "uuid",

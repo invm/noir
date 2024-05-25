@@ -52,6 +52,7 @@ pub enum Mode {
     Host,
     Socket,
     File,
+    Ssh,
 }
 
 impl fmt::Display for Mode {
@@ -60,6 +61,7 @@ impl fmt::Display for Mode {
             Mode::Host => write!(f, "Host"),
             Mode::Socket => write!(f, "Socket"),
             Mode::File => write!(f, "File"),
+            Mode::Ssh => write!(f, "File"),
         }
     }
 }
@@ -71,6 +73,7 @@ impl FromSql for Mode {
             "Host" => Ok(Mode::Host),
             "Socket" => Ok(Mode::Socket),
             "File" => Ok(Mode::File),
+            "Ssh" => Ok(Mode::Ssh),
             _ => Err(types::FromSqlError::InvalidType),
         }
     }

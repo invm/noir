@@ -53,7 +53,9 @@
         "reset": "Reset",
         "apply": "Apply",
         "change": "change",
-        "changes": "changes"
+        "changes": "changes",
+        "cancel": "Cancel",
+        "cancel_all_queries": "Cancel all running queries"
       },
       "no_results": "No results returned",
       "result_set": "Result set ",
@@ -147,7 +149,7 @@
       "stack": "Stack",
       "relaunch_app": "Relaunch app"
     },
-    "keymaps":{
+    "keymaps": {
       "title": "Available keyboard shortcuts",
       "see_all": "See all shortcuts",
       "description": "Some keyboard shortcuts are only available in certain modes or when some elements are visible on screen, like the editor or the results table."

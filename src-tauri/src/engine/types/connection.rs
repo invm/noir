@@ -2,7 +2,7 @@ use anyhow::Result;
 use serde_json::Value;
 
 use super::config::{ConnectionConfig, ConnectionPool};
-use super::result::ResultSet;
+use super::result::{ResultSet, TableMetadata};
 use crate::database::QueryType;
 use crate::engine::exec;
 
@@ -33,6 +33,18 @@ impl InitiatedConnection {
 
     pub async fn get_columns(&self, table: Option<&str>) -> Result<Vec<Value>> {
         exec::get_columns(self, table).await
+    }
+
+    pub async fn get_table_metadata(&self, table: &str) -> Result<TableMetadata> {
+        let foreign_keys = self.get_foreign_keys(table).await?;
+        let primary_key = self.get_primary_key(table).await?;
+        let columns = self.get_columns(Some(table)).await?;
+        Ok(TableMetadata {
+            table: table.to_string(),
+            foreign_keys: Some(foreign_keys),
+            primary_key: Some(primary_key),
+            columns: Some(columns),
+        })
     }
 
     pub async fn get_foreign_keys(&self, table: &str) -> Result<Vec<Value>> {

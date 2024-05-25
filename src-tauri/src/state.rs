@@ -2,21 +2,20 @@ use anyhow::Result;
 use deadpool_sqlite::rusqlite::Connection;
 use std::collections::HashMap;
 use tauri::{AppHandle, Manager, State};
-use tokio::sync::{mpsc, Mutex};
-use tracing::error;
+use tokio::sync::Mutex;
+use tokio_util::sync::CancellationToken;
+use tracing::{error, info};
 
-use crate::{engine::types::connection::InitiatedConnection, queues::query::QueryTask};
+use crate::engine::types::connection::InitiatedConnection;
 
+#[derive(Default)]
 pub struct AppState {
     pub db: std::sync::Mutex<Option<Connection>>,
     pub connections: std::sync::Mutex<HashMap<String, InitiatedConnection>>,
+    pub cancel_tokens: Mutex<HashMap<String, CancellationToken>>,
 }
 
-pub struct AsyncState {
-    pub tasks: Mutex<mpsc::Sender<QueryTask>>,
-    pub connections: Mutex<HashMap<String, InitiatedConnection>>,
-}
-
+#[allow(async_fn_in_trait)]
 pub trait ServiceAccess {
     fn db<F, TResult>(&self, operation: F) -> TResult
     where
@@ -30,6 +29,7 @@ pub trait ServiceAccess {
     fn update_connection(&self, conn: InitiatedConnection) -> Result<()>;
     fn disconnect(&mut self, conn_id: &str) -> Result<()>;
     fn connect(&mut self, conn: &InitiatedConnection) -> Result<()>;
+    async fn cancel_token(&self, id: String) -> Result<()>;
 }
 
 impl ServiceAccess for AppHandle {
@@ -106,6 +106,18 @@ impl ServiceAccess for AppHandle {
                 connection_guard.insert(conn.config.id.to_string().clone(), conn.clone());
             }
             Err(e) => error!("Error: {}", e),
+        }
+        Ok(())
+    }
+
+    async fn cancel_token(&self, id: String) -> Result<()> {
+        let state: State<AppState> = self.state();
+        let mut binding = state.cancel_tokens.lock().await;
+        let token = binding.get(&id);
+        if let Some(token) = token {
+            info!(?id, "cancel_token");
+            token.cancel();
+            binding.remove(&id);
         }
         Ok(())
     }

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use chrono::{DateTime, Utc};
 use serde_json::{self, json, Value};
 use sqlx::mysql::MySqlRow;
@@ -7,14 +5,13 @@ use sqlx::Decode;
 use sqlx::{Column, Row, TypeInfo, ValueRef};
 
 pub fn row_to_json(row: MySqlRow) -> Value {
-    json!(row
-        .columns()
-        .iter()
-        .map(|column| {
-            let value: Value = sql_to_json(&row, column);
-            (column.name().to_string(), value)
-        })
-        .collect::<HashMap<_, _>>())
+    let mut object = json!({});
+    for column in row.columns().iter() {
+        let value: Value = sql_to_json(&row, column);
+        let name = column.name().to_string();
+        object[name] = value;
+    }
+    object
 }
 
 pub fn sql_to_json(row: &MySqlRow, col: &sqlx::mysql::MySqlColumn) -> Value {

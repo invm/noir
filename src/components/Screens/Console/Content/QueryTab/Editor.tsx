@@ -1,5 +1,9 @@
-import { createCodeMirror, createEditorControlledValue, createEditorFocus } from 'solid-codemirror';
-import { createEffect, createSignal, on } from 'solid-js';
+import {
+  createCodeMirror,
+  createEditorControlledValue,
+  createEditorFocus,
+} from 'solid-codemirror';
+import { Show, createEffect, createSignal, on } from 'solid-js';
 import { EditorView } from '@codemirror/view';
 import { MySQL, sql, SQLite, PostgreSQL, MariaSQL } from '@codemirror/lang-sql';
 
@@ -14,11 +18,15 @@ import { createShortcut } from '@solid-primitives/keyboard';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
-import { moveCompletionSelection, autocompletion } from '@codemirror/autocomplete';
+import {
+  moveCompletionSelection,
+  autocompletion,
+} from '@codemirror/autocomplete';
 
 import { EditorTheme } from 'services/App';
 import { editorThemes } from './components/EditorThemes';
 import { basicSetup } from './components/EditorExtensions';
+import { QueryContentTabData } from 'services/Connections';
 
 const SQLDialects = {
   [Dialect.Mysql]: MySQL,
@@ -29,9 +37,19 @@ const SQLDialects = {
 
 export const Editor = (props: { editorTheme: EditorTheme }) => {
   const {
-    connections: { store, updateContentTab, getConnection, getContentData, getSchemaEntity },
+    connections: {
+      store,
+      updateContentTab,
+      getConnection,
+      getContentData,
+      getSchemaEntity,
+      getContent,
+      queryIdx,
+      updateResultSet,
+    },
     app: { vimModeOn, toggleVimModeOn },
     messages: { notify },
+    backend: { cancelTask },
   } = useAppSelector();
   const idx = () => store.tabs[store.idx].idx;
   const [code, setCode] = createSignal('');
@@ -40,7 +58,10 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   const [autoLimit, setAutoLimit] = createSignal(true);
 
   const updateQuery = debounce(() => {
-    updateContentTab('data', { query: code(), cursor: editorView()?.state.selection.ranges[0].from ?? 0 });
+    updateContentTab('data', {
+      query: code(),
+      cursor: editorView()?.state.selection.ranges[0].from ?? 0,
+    });
   }, 300);
 
   const updateQueryText = (query: string) => {
@@ -60,7 +81,9 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   createExtension(basicSetup);
   createExtension(autocompletion);
   createExtension(() => (vimModeOn() ? vim() : []));
-  createExtension(() => sql({ dialect: SQLDialects[getConnection().connection.dialect], schema }));
+  createExtension(() =>
+    sql({ dialect: SQLDialects[getConnection().connection.dialect], schema })
+  );
   const { setFocused, focused } = createEditorFocus(editorView);
 
   const onFormat = () => {
@@ -82,16 +105,20 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     const selectedText = getSelection();
     const conn = getConnection();
     try {
-      const { result_sets } = await invoke<QueryTaskEnqueueResult>('enqueue_query', {
-        connId: conn.id,
-        sql: selectedText || code(),
-        autoLimit: autoLimit(),
-        tabIdx: conn.idx,
-      });
+      const { result_sets } = await invoke<QueryTaskEnqueueResult>(
+        'enqueue_query',
+        {
+          connId: conn.id,
+          sql: selectedText || code(),
+          autoLimit: autoLimit(),
+          tabIdx: conn.idx,
+        }
+      );
       updateContentTab('data', {
         query: code(),
         cursor: editorView().state.selection.ranges[0].from,
         result_sets: result_sets.map((id) => ({
+          loading: true,
           id,
         })),
       });
@@ -122,17 +149,23 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     })
   );
 
-  createShortcut(['Control', 'k'], () => {
+  createShortcut(['Control', 'p'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(false);
       fn(editorView());
     }
   });
 
-  createShortcut(['Control', 'j'], () => {
+  createShortcut(['Control', 'n'], () => {
     if (focused() && vimModeOn()) {
       const fn = moveCompletionSelection(true);
       fn(editorView());
+    }
+  });
+
+  createShortcut(['Control', 'e'], () => {
+    if (focused() && vimModeOn()) {
+      onExecute();
     }
   });
 
@@ -147,10 +180,11 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     <div class="flex-1 flex flex-col h-full">
       <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
         <div class="flex items-center">
-          {/*
-          <ActionRowButton dataTip={'Testing'} onClick={dummyAction} icon={<EditIcon />} />
-           */}
-          <ActionRowButton dataTip={t('console.actions.format')} onClick={onFormat} icon={<EditIcon />} />
+          <ActionRowButton
+            dataTip={t('console.actions.format')}
+            onClick={onFormat}
+            icon={<EditIcon />}
+          />
           <ActionRowButton
             dataTip={t('console.actions.execute')}
             onClick={onExecute}
@@ -158,12 +192,21 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
             icon={<FireIcon />}
           />
 
-          <ActionRowButton dataTip={t('console.actions.copy_query')} onClick={copyQueryToClipboard} icon={<Copy />} />
+          <ActionRowButton
+            dataTip={t('console.actions.copy_query')}
+            onClick={copyQueryToClipboard}
+            icon={<Copy />}
+          />
 
-          <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('console.actions.auto_limit')}>
+          <div
+            class="tooltip tooltip-primary tooltip-bottom"
+            data-tip={t('console.actions.auto_limit')}
+          >
             <div class="form-control">
               <label class="cursor-pointer label">
-                <span class="label-text font-semibold mr-2 text-primary mt-1">{t('console.actions.limit')}</span>
+                <span class="label-text font-semibold mr-2 text-primary mt-1">
+                  {t('console.actions.limit')}
+                </span>
                 <input
                   type="checkbox"
                   checked={autoLimit()}
@@ -174,7 +217,10 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
             </div>
           </div>
 
-          <div class="tooltip tooltip-primary tooltip-bottom" data-tip={t('console.actions.vim_mode_on')}>
+          <div
+            class="tooltip tooltip-primary tooltip-bottom"
+            data-tip={t('console.actions.vim_mode_on')}
+          >
             <div class="flex items-center mx-2">
               <span class="mr-2">
                 <VimIcon />
@@ -191,6 +237,31 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
             </div>
           </div>
         </div>
+        <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
+          <div
+            class="tooltip tooltip-error tooltip-left"
+            data-tip={t('console.actions.cancel_all_queries')}
+          >
+            <button
+              class="btn btn-error btn-xs"
+              onClick={async () => {
+                const ids = (
+                  getContent().data as QueryContentTabData
+                ).result_sets
+                  .map((t) => t?.id ?? '')
+                  .filter(Boolean);
+                if (ids.length) {
+                  await cancelTask(ids);
+                  ids.forEach((_, i) => {
+                    updateResultSet(store.idx, i, { loading: false });
+                  });
+                }
+              }}
+            >
+              {t('console.actions.cancel')}
+            </button>
+          </div>
+        </Show>
       </div>
       <div class="overflow-hidden w-full h-full">
         <div ref={ref} class="w-full h-full" />

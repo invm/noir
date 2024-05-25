@@ -2,13 +2,13 @@ use std::{fs::read_to_string, path::PathBuf};
 
 use crate::{
     database::QueryType,
-    queues::query::{QueryTask, QueryTaskEnqueueResult, QueryTaskStatus},
-    state::{AsyncState, ServiceAccess},
+    query::{Events, QueryTask, QueryTaskEnqueueResult, QueryTaskResult, QueryTaskStatus},
+    state::{AppState, ServiceAccess},
     utils::{
         self,
         crypto::md5_hash,
         error::{CommandResult, Error},
-        fs::paginate_file,
+        fs::{paginate_file, write_query},
     },
 };
 use anyhow::anyhow;
@@ -16,7 +16,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
-use tauri::{command, AppHandle, State};
+use tauri::{command, AppHandle, Manager, State};
+use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 fn get_query_type(s: Statement) -> QueryType {
@@ -32,7 +33,7 @@ fn get_query_type(s: Statement) -> QueryType {
 #[command]
 pub async fn enqueue_query(
     app_handle: AppHandle,
-    async_state: State<'_, AsyncState>,
+    state: State<'_, AppState>,
     conn_id: String,
     tab_idx: usize,
     sql: &str,
@@ -41,39 +42,73 @@ pub async fn enqueue_query(
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!(sql, conn_id, tab_idx, "enqueue_query");
     let conn = app_handle.acquire_connection(conn_id.clone());
-    // ignore sqlparser when dialect is sqlite and statements contain pragma
     let statements = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
             .expect("Failed to get dialect")
             .as_ref(),
         sql,
-    )?;
+    )
+    .unwrap_or_default();
     if statements.is_empty() {
         return Err(Error::from(anyhow!("No statements found")));
     }
     let statements: Vec<(String, QueryType, String)> = statements
         .into_iter()
         .map(|s| {
-            let id = conn.config.id.to_string() + &tab_idx.to_string() + &s.to_string();
-            (s.to_string(), get_query_type(s), md5_hash(&id))
+            let query_type = get_query_type(s.clone());
+            let mut statement = s.to_string();
+            if auto_limit
+                && !statement.to_lowercase().contains("limit")
+                && query_type == QueryType::Select
+            {
+                statement = format!("{} LIMIT 1000", statement);
+            }
+            let id = conn.config.id.to_string() + &tab_idx.to_string() + &statement.to_string();
+            (statement, query_type, md5_hash(&id))
         })
         .collect();
-    let async_proc_input_tx = async_state.tasks.lock().await;
-    let enqueued_ids: Vec<String> = vec![];
+    let mut binding = state.cancel_tokens.lock().await;
     for (idx, stmt) in statements.iter().enumerate() {
-        let (mut statement, t, id) = stmt.clone();
-        info!("Got statement {:?}", statement);
-        if enqueued_ids.contains(&id) {
-            continue;
-        }
-        if auto_limit && !statement.to_lowercase().contains("limit") && t == QueryType::Select {
-            statement = format!("{} LIMIT 1000", statement);
-        }
-        let task = QueryTask::new(conn.clone(), statement, t, id, tab_idx, idx, table.clone());
-        let res = async_proc_input_tx.send(task).await;
-        if let Err(e) = res {
-            return Err(Error::from(e));
-        }
+        let token = CancellationToken::new();
+        let task = QueryTask::new(
+            conn.clone(),
+            stmt.to_owned(),
+            tab_idx,
+            idx,
+            table.clone(),
+            token.clone(),
+        );
+        binding.insert(stmt.2.clone(), token);
+        let handle = app_handle.clone();
+        tokio::spawn(async move {
+            tokio::select! {
+                _ = task.cancel_token.cancelled() => {},
+                res = task.conn.execute_query(&task.query, task.query_type) => {
+                    match res {
+                        Ok(mut result_set) => {
+                            if let Some(table) = task.table.clone() {
+                                result_set.table = task.conn.get_table_metadata(&table).await.unwrap_or_default();
+                            }
+                            match write_query(&task.id, &result_set) {
+                                Ok(path) => {
+                                    handle
+                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
+                                        .expect("Failed to emit query_finished event");
+                                },
+                                Err(e) =>
+                                handle
+                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                        .expect("Failed to emit query_finished event"),
+                            }
+                        }
+                        Err(e) =>
+                            handle
+                                .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                .expect("Failed to emit query_finished event"),
+                    }
+                }
+            }
+        });
     }
     Ok(QueryTaskEnqueueResult {
         conn_id,

@@ -1,21 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-
 use state::AppState;
 use std::path::PathBuf;
 use std::{fs, panic};
 use tauri::{Manager, State};
-use tokio::sync::mpsc;
-use tokio::sync::Mutex;
 use tracing::error;
-
 
 use noir::{
     database::init::initialize_database,
-    handlers::{connections, queries},
-    queues::query::{async_process_model, rs2js},
-    state::{self, AsyncState},
+    handlers::{connections, general, queries, task},
+    state::{self},
     utils::{fs::get_app_path, init},
 };
 
@@ -33,21 +28,12 @@ fn main() {
         let path = get_app_path();
         let ts = chrono::offset::Utc::now();
         let dest = format!("{}/error.log", path.to_str().expect("Failed to get path"));
-        fs::write(PathBuf::from(dest), format!("{} - {:?}", ts, info)).expect("Failed to write error log");
+        fs::write(PathBuf::from(dest), format!("{} - {:?}", ts, info))
+            .expect("Failed to write error log");
     }));
 
-    let (async_proc_input_tx, async_proc_input_rx) = mpsc::channel(1);
-    let (async_proc_output_tx, mut async_proc_output_rx) = mpsc::channel(1);
-
     tauri::Builder::default()
-        .manage(AsyncState {
-            tasks: Mutex::new(async_proc_input_tx),
-            connections: Default::default(),
-        })
-        .manage(AppState {
-            db: Default::default(),
-            connections: Default::default(),
-        })
+        .manage(AppState::default())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
@@ -63,18 +49,6 @@ fn main() {
             let app_state: State<AppState> = handle.state();
             let db = initialize_database().expect("Database initialize should succeed");
             *app_state.db.lock().expect("Failed to lock db") = Some(db);
-
-            tauri::async_runtime::spawn(async move {
-                async_process_model(async_proc_input_rx, async_proc_output_tx).await
-            });
-
-            tauri::async_runtime::spawn(async move {
-                loop {
-                    if let Some(output) = async_proc_output_rx.recv().await {
-                        rs2js(output, &handle).await
-                    }
-                }
-            });
 
             Ok(())
         })
@@ -103,6 +77,8 @@ fn main() {
             queries::download_json,
             queries::download_csv,
             queries::invalidate_query,
+            task::cancel_task_token,
+            general::request_port_forward,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -24,6 +24,7 @@ export const dialects = [
 export const Mode = {
   Host: 'Host',
   Socket: 'Socket',
+  Ssh: 'Ssh',
   File: 'File',
 } as const;
 
@@ -37,9 +38,9 @@ export const SocketPathDefaults = {
 } as const;
 
 export const AvailableModes = {
-  [Dialect.MariaDB]: [Mode.Host, Mode.Socket],
-  [Dialect.Mysql]: [Mode.Host, Mode.Socket],
-  [Dialect.Postgresql]: [Mode.Host, Mode.Socket],
+  [Dialect.MariaDB]: [Mode.Host, Mode.Socket, Mode.Ssh],
+  [Dialect.Mysql]: [Mode.Host, Mode.Socket, Mode.Ssh],
+  [Dialect.Postgresql]: [Mode.Host, Mode.Socket, Mode.Ssh],
   [Dialect.Sqlite]: [Mode.File],
 } as const;
 
@@ -49,7 +50,7 @@ export const SslMode = {
   require: 'require',
 } as const;
 
-export const connectionModes = [Mode.Host, Mode.Socket, Mode.File] as const;
+export const connectionModes = [Mode.Host, Mode.Socket, Mode.File, Mode.Ssh] as const;
 
 export const sslModes = [
   SslMode.disable,
@@ -119,6 +120,7 @@ export type JSONValue =
 export type Row = Record<string, JSONValue>;
 
 export type ResultSet = {
+  loading: boolean;
   id?: string;
   count?: number;
   affected_rows?: number;
