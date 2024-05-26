@@ -1,6 +1,7 @@
 {
   "translation": {
     "noir_titlecase": "Noir",
+    "restoring_connections": "Restoring connections",
     "add_connection_form": {
       "title": "Add New Connection",
       "refresh_connections": "Refresh connections list",
@@ -74,7 +75,7 @@
           "add_row": "Add row",
           "delete_row": "Delete row"
         },
-        "affected_rows": "affected rows",
+        "affected_rows": "{{rows}} affected row/s",
         "ran": "Ran in {{duration}} ms",
         "primary_key": "Primary key",
         "foreign_key": "Foreign key -> {{table}}.{{column}}",
@@ -115,7 +116,8 @@
       "show_trigger": "Show trigger",
       "show_create_statement": "Show create statement",
       "show_process_list": "Show process list",
-      "process_list": "Process list"
+      "process_list": "Process list",
+      "drop_database": "Drop database"
     },
     "settings": {
       "read_docs": "Read docs",

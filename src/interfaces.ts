@@ -50,7 +50,12 @@ export const SslMode = {
   require: 'require',
 } as const;
 
-export const connectionModes = [Mode.Host, Mode.Socket, Mode.File, Mode.Ssh] as const;
+export const connectionModes = [
+  Mode.Host,
+  Mode.Socket,
+  Mode.File,
+  Mode.Ssh,
+] as const;
 
 export const sslModes = [
   SslMode.disable,
@@ -119,11 +124,14 @@ export type JSONValue =
 
 export type Row = Record<string, JSONValue>;
 
+export type QueryType = 'Select' | 'Other';
+
 export type ResultSet = {
   loading: boolean;
   id?: string;
   count?: number;
   affected_rows?: number;
+  query_type?: QueryType;
   rows?: Row[];
   table?: string;
   foreign_keys?: Row[];

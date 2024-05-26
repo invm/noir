@@ -107,7 +107,7 @@ export const Search = (props: SearchProps) => {
         tabIdx: conn.idx,
         table: props.table,
       });
-      const result_sets = res.map((id) => ({ id, columns: props.columns, table: props.table }));
+      const result_sets = res.map((id) => ({ id, loading: true, columns: props.columns, table: props.table }));
       updateContentTab('data', { result_sets });
     } catch (error) {
       notify(error);

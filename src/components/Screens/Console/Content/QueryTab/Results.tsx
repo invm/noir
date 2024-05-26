@@ -176,6 +176,8 @@ export const Results = (props: {
           count: result_set.count,
           exhausted: rows.length < pageSizeVal,
           path: result_set.path,
+          affectedRows: result_set.affected_rows,
+          queryType: result_set.query_type,
           start_time,
           end_time,
         };
@@ -259,7 +261,7 @@ export const Results = (props: {
         getConnection().idx
       );
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id })),
+        result_sets: result_sets.map((id) => ({ id, loading: true })),
       });
       Object.keys(changes).forEach((key) => {
         const count = Object.keys(changes[key as keyof typeof changes]).length;
@@ -377,12 +379,17 @@ export const Results = (props: {
             onNextPage,
             onPrevPage,
             loading: data.loading,
-            hasResults: !!data()?.rows.length,
+            query: {
+              hasResults: !!data()?.rows.length,
+              executionTime:
+                (data()?.end_time ?? 0) - (data()?.start_time ?? 0),
+              count: data()?.count ?? 0,
+              affectedRows: data()?.affectedRows ?? 0,
+              queryType: data()?.queryType ?? 'Select',
+            },
             onPageSizeChange,
             onBtnExport,
-            count: data()?.count ?? 0,
             openDrawerForm: props.editable ? openDrawerForm : undefined,
-            executionTime: (data()?.end_time ?? 0) - (data()?.start_time ?? 0),
           }}
         />
         <Search table={table.name} columns={table.columns} />
@@ -390,7 +397,7 @@ export const Results = (props: {
       <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
         <AgGridSolid
           noRowsOverlayComponent={() =>
-            data()?.notReady ? (
+            data()?.notReady || data()?.queryType === 'Other' ? (
               <Keymaps short />
             ) : (
               <NoResults error={data()?.error} />

@@ -21,7 +21,9 @@ export const Select: Component<SelectProps> = (props) => {
         class="select select-bordered border-base-content select-sm w-full"
         classList={{ 'border-red-500': props.isInvalid }}>
         {props.options.map((opt) => (
-          <option value={opt}>{props.suppressTitlecase ? opt : titleCase(opt)}</option>
+          <option
+            selected={props.value === opt}
+            value={opt}>{props.suppressTitlecase ? opt : titleCase(opt)}</option>
         ))}
       </select>
     </div>

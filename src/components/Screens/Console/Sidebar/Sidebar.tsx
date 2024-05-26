@@ -8,7 +8,6 @@ import { invoke } from '@tauri-apps/api';
 import { ResultSet } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { getAnyCase } from 'utils/utils';
-import { Select } from 'components/UI';
 
 export const Sidebar = () => {
   const {
@@ -26,21 +25,38 @@ export const Sidebar = () => {
 
   const routine_menu = 'sidebar-routine-menu';
   const trigger_menu = 'sidebar-trigger-menu';
+  const db_menu = 'sidebar-db-menu';
 
-  const { show: show_routine_menu, hideAll } = useContextMenu({ id: routine_menu, props: { routine: '1' } });
+  const { show: show_db_menu } = useContextMenu({
+    id: db_menu,
+    props: { schema: '' },
+  });
+
+  const { show: show_routine_menu, hideAll } = useContextMenu({
+    id: routine_menu,
+    props: { routine: '1' },
+  });
 
   const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
 
   const selectSchema = async (schema: string) => {
     updateConnectionTab('selectedSchema', schema);
     const config = getConnection();
-    await invoke('set_schema', { connId: config.id, schema, dialect: config.connection.dialect });
-    const { triggers, routines, tables, schemas, columns, views } = await fetchSchemaEntities(
-      config.id,
-      config.connection.dialect
-    );
+    await invoke('set_schema', {
+      connId: config.id,
+      schema,
+      dialect: config.connection.dialect,
+    });
+    const { triggers, routines, tables, schemas, columns, views } =
+      await fetchSchemaEntities(config.id, config.connection.dialect);
     updateConnectionTab('schemas', schemas);
-    updateSchemaDefinition(config.id, { triggers, routines, columns, tables, views });
+    updateSchemaDefinition(config.id, {
+      triggers,
+      routines,
+      columns,
+      tables,
+      views,
+    });
   };
 
   const refreshEntities = async () => {
@@ -48,12 +64,16 @@ export const Sidebar = () => {
     try {
       setLoading(true);
       await invoke('init_connection', { config });
-      const { triggers, routines, tables, schemas, columns, views } = await fetchSchemaEntities(
-        config.id,
-        config.dialect
-      );
+      const { triggers, routines, tables, schemas, columns, views } =
+        await fetchSchemaEntities(config.id, config.dialect);
       updateConnectionTab('schemas', schemas);
-      updateSchemaDefinition(config.id, { triggers, routines, columns, tables, views });
+      updateSchemaDefinition(config.id, {
+        triggers,
+        routines,
+        columns,
+        tables,
+        views,
+      });
     } catch (error) {
       notify(error);
     } finally {
@@ -113,19 +133,70 @@ export const Sidebar = () => {
     }
   };
 
+  const dropDatabase = async (schema: string) => {
+    try {
+      const selectedSchema = getConnection().selectedSchema;
+      const query = 'DROP SCHEMA ' + schema;
+      await invoke<ResultSet>('execute_query', {
+        connId: getConnection().id,
+        query,
+      });
+      if (selectedSchema === schema) {
+        selectSchema(getConnection().schemas[0] ?? '');
+      }
+      await refreshEntities();
+    } catch (error) {
+      notify(error);
+    }
+  };
+
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md flex justify-between items-center">
-        <Select
-          name="mode"
-          value={getConnection().selectedSchema}
-          suppressTitlecase 
-          onChange={(e) => selectSchema(e.currentTarget.value)}
-          options={getConnection().schemas ?? []}
-        />
+        <div class="dropdown dropdown-bottom w-full">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
+          >
+            {getConnection().selectedSchema}
+          </div>
+          <ul
+            tabindex="0"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            <For each={getConnection().schemas}>
+              {(schema) => (
+                <li
+                  onContextMenu={(e) => {
+                    hideAll();
+                    show_db_menu(e, { props: { schema } });
+                  }}
+                  onClick={() => {
+                    const elem = document.activeElement;
+                    if (elem) {
+                      // @ts-ignore fu ts!
+                      elem?.blur();
+                    }
+                    selectSchema(schema);
+                  }}
+                >
+                  <a>{schema}</a>
+                </li>
+              )}
+            </For>
+          </ul>
+        </div>
         <div class="flex">
-          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.show_process_list')}>
-            <button onClick={showProcessList} disabled={loading()} class="ml-2 btn btn-xs">
+          <div
+            class="tooltip tooltip-primary tooltip-right"
+            data-tip={t('sidebar.show_process_list')}
+          >
+            <button
+              onClick={showProcessList}
+              disabled={loading()}
+              class="ml-2 btn btn-xs"
+            >
               <Switch>
                 <Match when={loading()}>
                   <span class="loading text-primary loading-bars loading-xs"></span>
@@ -136,8 +207,15 @@ export const Sidebar = () => {
               </Switch>
             </button>
           </div>
-          <div class="tooltip tooltip-primary tooltip-right" data-tip={t('sidebar.refresh_schema')}>
-            <button onClick={refreshEntities} disabled={loading()} class="ml-2 btn btn-xs">
+          <div
+            class="tooltip tooltip-primary tooltip-right"
+            data-tip={t('sidebar.refresh_schema')}
+          >
+            <button
+              onClick={refreshEntities}
+              disabled={loading()}
+              class="ml-2 btn btn-xs"
+            >
               <Switch>
                 <Match when={loading()}>
                   <span class="loading text-primary loading-bars loading-xs"></span>
@@ -155,7 +233,11 @@ export const Sidebar = () => {
         <For each={getSchemaEntity('tables')}>
           {(table) => (
             <div class="min-w-full w-fit">
-              <TableColumnsCollapse title={table.name} entity="tables" columns={table.columns} />
+              <TableColumnsCollapse
+                title={table.name}
+                entity="tables"
+                columns={table.columns}
+              />
             </div>
           )}
         </For>
@@ -164,7 +246,11 @@ export const Sidebar = () => {
           <For each={getSchemaEntity('views')}>
             {(table) => (
               <div class="min-w-full w-fit">
-                <TableColumnsCollapse title={table.name} entity="views" columns={table.columns} />
+                <TableColumnsCollapse
+                  title={table.name}
+                  entity="views"
+                  columns={table.columns}
+                />
               </div>
             )}
           </For>
@@ -173,13 +259,18 @@ export const Sidebar = () => {
           <Item
             onClick={({ props }) => {
               showRoutine(getAnyCase(props.routine, 'routine_name'));
-            }}>
+            }}
+          >
             {t('sidebar.show_routine')}
           </Item>
           <Item
             onClick={({ props: { routine } }) => {
-              showCreateStatement(getAnyCase(routine, 'routine_name'), getAnyCase(routine, 'routine_definition'));
-            }}>
+              showCreateStatement(
+                getAnyCase(routine, 'routine_name'),
+                getAnyCase(routine, 'routine_definition')
+              );
+            }}
+          >
             {t('sidebar.show_create_statement')}
           </Item>
         </Menu>
@@ -192,11 +283,13 @@ export const Sidebar = () => {
                   onContextMenu={(e) => {
                     hideAll();
                     show_routine_menu(e, { props: { routine } });
-                  }}>
+                  }}
+                >
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
-                      data-tip={t(`sidebar.tooltips.routines`)}>
+                      data-tip={t(`sidebar.tooltips.routines`)}
+                    >
                       <Function />
                     </div>
                   </span>
@@ -208,17 +301,31 @@ export const Sidebar = () => {
             )}
           </For>
         </Show>
+        <Menu id={db_menu} animation={animation.fade} theme={'dark'}>
+          <Item
+            onClick={({ props: { schema } }) => {
+              dropDatabase(schema);
+            }}
+          >
+            {t('sidebar.drop_database')}
+          </Item>
+        </Menu>
         <Menu id={trigger_menu} animation={animation.fade} theme={'dark'}>
           <Item
             onClick={({ props: { trigger } }) => {
               showTrigger(getAnyCase(trigger, 'trigger_name'));
-            }}>
+            }}
+          >
             {t('sidebar.show_trigger')}
           </Item>
           <Item
             onClick={({ props: { trigger } }) => {
-              showCreateStatement(getAnyCase(trigger, 'trigger_name'), getAnyCase(trigger, 'action_statement'));
-            }}>
+              showCreateStatement(
+                getAnyCase(trigger, 'trigger_name'),
+                getAnyCase(trigger, 'action_statement')
+              );
+            }}
+          >
             {t('sidebar.show_create_statement')}
           </Item>
         </Menu>
@@ -231,16 +338,21 @@ export const Sidebar = () => {
                   onContextMenu={(e) => {
                     hideAll();
                     show_trigger_menu(e, { props: { trigger } });
-                  }}>
+                  }}
+                >
                   <span class="px-2">
                     <div
                       class="tooltip tooltip-info tooltip-right tooltip-xs"
-                      data-tip={t(`sidebar.tooltips.triggers`)}>
+                      data-tip={t(`sidebar.tooltips.triggers`)}
+                    >
                       <ShareNodes />
                     </div>
                   </span>
                   <span class="text-xs font-semibold cursor-pointer">
-                    {getAnyCase(trigger, 'trigger_name') + ' (' + getAnyCase(trigger, 'event_object_table') + ')'}
+                    {getAnyCase(trigger, 'trigger_name') +
+                      ' (' +
+                      getAnyCase(trigger, 'event_object_table') +
+                      ')'}
                   </span>
                 </div>
               </div>

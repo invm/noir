@@ -23,8 +23,8 @@ const ALL_KEYMAPS = [
       { action: 'New tab', keys: ['Ctrl/Cmd', 'T'] },
       { action: 'Close current tab', keys: ['Ctrl/Cmd', 'W'] },
       { action: 'Focus on editor', keys: ['Ctrl', 'L'] },
-      { action: 'Format query', keys: ['Ctrl', 'Shift', 'F'] },
       { action: 'Trigger autocomplete in editor', keys: ['Ctrl', 'Space'] },
+      { action: 'Format query', keys: ['Ctrl', 'Shift', 'F'] },
       { action: 'Search', keys: ['Ctrl/Cmd', 'F'] },
     ],
   },
@@ -78,7 +78,7 @@ const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
             </div>
             <div class="grid grid-cols-2">
               <div class="flex flex-col items-end pr-1">
-                <For each={keys}>
+                <For each={props.short ? keys.slice(0, 5) : keys}>
                   {({ action }) => (
                     <div class="h-[30px] flex items-center align-middle text-base-content">
                       <span class="text-md font-medium">{action}</span>
@@ -87,7 +87,7 @@ const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
                 </For>
               </div>
               <div class="flex flex-col items-start pl-1">
-                <For each={keys}>
+                <For each={props.short ? keys.slice(0, 5) : keys}>
                   {({ keys }) => (
                     <div class="h-[30px] flex items-center">
                       <span class="flex gap-2">

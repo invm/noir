@@ -51,7 +51,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       addContentTab(newContentTab(table, 'Data', data));
       const result_sets = await selectAllFrom(table, conn.id, conn.idx);
       updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id })),
+        result_sets: result_sets.map((id) => ({ id, loading: true })),
       });
     } catch (error) {
       notify(error);
@@ -167,7 +167,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
               <div
                 tabindex={1}
                 onClick={() => insertColumnName(column.name)}
-                class="flex btn-ghost w-full justify-between items-center w-full border-b-2 border-base-300">
+                class="flex btn-ghost w-full justify-between items-center border-b-2 border-base-300">
                 <span class="text-xs font-medium">{column.name}</span>
                 <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'column_type')}</span>
               </div>

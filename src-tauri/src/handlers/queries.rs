@@ -22,7 +22,17 @@ use tracing::info;
 
 fn get_query_type(s: Statement) -> QueryType {
     match s {
-        Statement::Query(_) => QueryType::Select,
+        Statement::Query(_)
+        | Statement::Explain { .. }
+        | Statement::Analyze { .. }
+        | Statement::ShowVariables { .. }
+        | Statement::ShowCreate { .. }
+        | Statement::ShowFunctions { .. }
+        | Statement::ShowCollation { .. }
+        | Statement::ShowVariable { .. }
+        | Statement::ShowColumns { .. }
+        | Statement::ShowStatus { .. }
+        | Statement::ShowTables { .. } => QueryType::Select,
         //Statement::Insert { .. } => QueryType::Insert,
         //Statement::Update { .. } => QueryType::Update,
         //Statement::Delete { .. } => QueryType::Delete,
@@ -58,8 +68,10 @@ pub async fn enqueue_query(
             let query_type = get_query_type(s.clone());
             let mut statement = s.to_string();
             if auto_limit
-                && !statement.to_lowercase().contains("limit")
                 && query_type == QueryType::Select
+                && ["show", "analyze", "explain", "limit"]
+                    .iter()
+                    .all(|k| !statement.to_lowercase().contains(k))
             {
                 statement = format!("{} LIMIT 1000", statement);
             }
@@ -89,7 +101,7 @@ pub async fn enqueue_query(
                             if let Some(table) = task.table.clone() {
                                 result_set.table = task.conn.get_table_metadata(&table).await.unwrap_or_default();
                             }
-                            match write_query(&task.id, &result_set) {
+                            match write_query(&task.id, &result_set, task.query_type) {
                                 Ok(path) => {
                                     handle
                                         .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
@@ -155,6 +167,7 @@ pub async fn execute_query(
     query: String,
 ) -> CommandResult<Value> {
     let conn = app_handle.acquire_connection(conn_id);
+    info!(?query, "execute_query");
     let statements = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
             .expect("Failed to get dialect")

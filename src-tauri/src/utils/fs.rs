@@ -1,4 +1,4 @@
-use crate::engine::types::result::ResultSet;
+use crate::{database::QueryType, engine::types::result::ResultSet};
 use anyhow::Result;
 use fs::metadata;
 use serde_json::json;
@@ -87,12 +87,13 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn write_query(id: &str, result_set: &ResultSet) -> Result<String> {
+pub fn write_query(id: &str, result_set: &ResultSet, query_type: QueryType) -> Result<String> {
     let mut rows = String::from("");
     result_set.rows.iter().for_each(|row| {
         rows += &(row.to_string() + "\n");
     });
     let metadata = json!({
+        "query_type": query_type.to_string(),
         "start_time": result_set.start_time,
         "end_time": result_set.end_time,
         "count": result_set.rows.len(),

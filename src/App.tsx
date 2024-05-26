@@ -137,8 +137,9 @@ function App() {
     <>
       <Switch>
         <Match when={loading()}>
-          <div class="flex justify-center items-center h-full bg-base-200 w-full">
+          <div class="flex justify-center flex-col gap-4 items-center h-full bg-base-200 w-full">
             <Loader />
+            <div class="text-lg">{t('restoring_connections')}</div>
           </div>
         </Match>
         <Match when={!loading()}>
