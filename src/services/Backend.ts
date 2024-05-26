@@ -77,11 +77,7 @@ export const BackendService = () => {
   const cancelTask = (ids: string[]) =>
     invoke<void>('cancel_task_token', { ids });
 
-  const requestPortForward = () =>
-    invoke<void>('request_port_forward', { connId: '1' });
-
   return {
-    requestPortForward,
     cancelTask,
     pageSize,
     setPageSize,

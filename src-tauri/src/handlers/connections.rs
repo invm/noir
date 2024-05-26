@@ -4,9 +4,11 @@ use crate::{
         init::init_conn,
         types::config::{ConnectionConfig, Credentials, Dialect, Mode},
     },
+    handlers::task::cancel_task_token,
     state::ServiceAccess,
     utils::error::{CommandResult, Error},
 };
+use anyhow::anyhow;
 use tauri::{command, AppHandle};
 use tracing::info;
 
@@ -36,10 +38,11 @@ pub async fn test_connection(
     color: &str,
 ) -> CommandResult<()> {
     info!(?name, ?dialect, ?mode, ?color, "test_connection");
-    let cfg = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
-    let conn = init_conn(cfg).await?;
+    let config = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    let conn = init_conn(config, app_handle.clone()).await?;
     app_handle.connect(&conn.clone())?;
     let id = conn.config.id.clone().to_string();
+    cancel_task_token(app_handle.clone(), vec![id.to_string()]).await?;
     app_handle.disconnect(&id)?;
     Ok(())
 }
@@ -68,14 +71,26 @@ pub async fn init_connection(
 ) -> CommandResult<()> {
     info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
     app_handle.db(|db| queries::get_connection(db, &config.id.to_string()))?;
-    let conn = init_conn(config).await?;
-    app_handle.connect(&conn)?;
-    Ok(())
+    let conn = init_conn(config.clone(), app_handle.clone()).await;
+    match conn {
+        Ok(c) => match app_handle.connect(&c) {
+            Ok(_) => Ok(()),
+            Err(_) => {
+                cancel_task_token(app_handle.clone(), vec![config.id.to_string()]).await?;
+                Err(anyhow!("Failed to connect to the database").into())
+            }
+        },
+        Err(_) => {
+            cancel_task_token(app_handle.clone(), vec![config.id.to_string()]).await?;
+            Err(anyhow!("Failed to connect to the database").into())
+        }
+    }
 }
 
 #[command]
 pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()> {
     info!(?id, "disconnect");
+    cancel_task_token(app_handle.clone(), vec![id.to_string()]).await?;
     app_handle.disconnect(id)?;
     Ok(())
 }

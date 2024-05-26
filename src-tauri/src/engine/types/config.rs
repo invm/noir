@@ -61,7 +61,7 @@ impl fmt::Display for Mode {
             Mode::Host => write!(f, "Host"),
             Mode::Socket => write!(f, "Socket"),
             Mode::File => write!(f, "File"),
-            Mode::Ssh => write!(f, "File"),
+            Mode::Ssh => write!(f, "Ssh"),
         }
     }
 }
@@ -131,6 +131,10 @@ impl ConnectionConfig {
                     "ca_cert",
                     "client_cert",
                     "client_key",
+                    "ssh_host",
+                    "ssh_port",
+                    "ssh_user",
+                    "ssh_key",
                 ];
                 credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 let schema = credentials
@@ -166,6 +170,10 @@ impl ConnectionConfig {
                     "ca_cert",
                     "client_cert",
                     "client_key",
+                    "ssh_host",
+                    "ssh_port",
+                    "ssh_user",
+                    "ssh_key",
                 ];
                 credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
                 Ok(ConnectionConfig {

@@ -50,7 +50,28 @@ const CredentialsSchema = z.union([
     port: z
       .union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)])
       .optional(),
-    ssl_mode: z.enum(sslModes).optional(),
+    ssl_mode: z.enum(sslModes).default(SslMode.prefer).optional(),
+    ca_cert: zstr.optional().or(z.literal('')),
+    client_cert: zstr.optional().or(z.literal('')),
+    client_key: zstr.optional().or(z.literal('')),
+    ssh_host: zstr,
+    ssh_user: zstr,
+    ssh_key: zstr.optional().or(z.literal('')),
+    ssh_port: z
+      .union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)])
+      .default('22')
+      .optional(),
+  }),
+  z.object({
+    host: zstr.default('localhost'),
+    user: zstr,
+    password: zstr,
+    db_name: zstr,
+    port: z
+      .union([z.string(), z.coerce.number().min(MIN_PORT).max(MAX_PORT)])
+      .default('5432')
+      .optional(),
+    ssl_mode: z.enum(sslModes).default(SslMode.prefer).optional(),
     ca_cert: zstr.optional().or(z.literal('')),
     client_cert: zstr.optional().or(z.literal('')),
     client_key: zstr.optional().or(z.literal('')),
@@ -77,6 +98,7 @@ const schema = z.object({
 type Form = z.infer<typeof schema>;
 type Credentials = z.infer<typeof CredentialsSchema>;
 type HostCredentials = Extract<Credentials, { host: string }>;
+type SshCredentials = Extract<Credentials, { ssh_host: string }>;
 
 const defaultValues = {
   name: '',
@@ -85,15 +107,8 @@ const defaultValues = {
   mode: AvailableModes[Dialect.Postgresql][0],
   credentials: {
     port: 5432,
-    path: '',
     host: 'localhost',
-    user: '',
-    password: '',
-    db_name: '',
     ssl_mode: SslMode.prefer,
-    ca_cert: '',
-    client_cert: '',
-    client_key: '',
   },
 };
 
@@ -101,6 +116,14 @@ const normalize = (values: Form) => {
   if (values.mode === Mode.Host) {
     (values.credentials as HostCredentials).port = String(
       (values.credentials as HostCredentials).port
+    );
+  }
+  if (values.mode === Mode.Ssh) {
+    (values.credentials as HostCredentials).port = String(
+      (values.credentials as HostCredentials).port
+    );
+    (values.credentials as SshCredentials).ssh_port = String(
+      (values.credentials as SshCredentials).ssh_port
     );
   }
   if (!values.mode && values.dialect === Dialect.Sqlite) {
@@ -261,7 +284,56 @@ const AddConnectionForm = () => {
           </Show>
           <Show when={data('dialect') !== Dialect.Sqlite}>
             <Switch>
-              <Match when={data('mode') === Mode.Host}>
+              <Match when={[Mode.Host, Mode.Ssh].includes(data('mode'))}>
+                <Show when={data('mode') === Mode.Ssh}>
+                  <div class="col-span-6">
+                    <TextInput
+                      label={t('add_connection_form.labels.ssh_host')}
+                      errors={errors('credentials.ssh_host')}
+                      name="credentials.ssh_host"
+                    />
+                  </div>
+                  <div class="col-span-3">
+                    <TextInput
+                      label={t('add_connection_form.labels.ssh_port')}
+                      errors={errors('credentials.ssh_port')}
+                      name="credentials.ssh_port"
+                      required={false}
+                      type="number"
+                      min={1}
+                      max={65335}
+                    />
+                  </div>
+                  <div class="col-span-3">
+                    <TextInput
+                      label={t('add_connection_form.labels.ssh_user')}
+                      errors={errors('credentials.ssh_user')}
+                      name="credentials.ssh_user"
+                    />
+                  </div>
+                  <div class="col-span-12">
+                    <div class="block">
+                      <Label
+                        label={t('add_connection_form.labels.ssh_key')}
+                        for="credentials.ssh_key"
+                      />
+                    </div>
+                    <FilePicker
+                      name="credentials.ssh_key"
+                      onClear={() => {
+                        setFields('credentials.ssh_key', '');
+                      }}
+                      onChange={async () => {
+                        const path = (await open({
+                          multiple: false,
+                          title: t('add_connection_form.select_file'),
+                        })) as string;
+                        if (!path) return;
+                        setFields('credentials.ssh_key', path);
+                      }}
+                    />
+                  </div>
+                </Show>
                 <div class="col-span-6">
                   <TextInput
                     label={t('add_connection_form.labels.host')}

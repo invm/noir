@@ -9,7 +9,7 @@ use tracing::error;
 
 use noir::{
     database::init::initialize_database,
-    handlers::{connections, general, queries, task},
+    handlers::{connections, queries, task},
     state::{self},
     utils::{fs::get_app_path, init},
 };
@@ -78,7 +78,6 @@ fn main() {
             queries::download_csv,
             queries::invalidate_query,
             task::cancel_task_token,
-            general::request_port_forward,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

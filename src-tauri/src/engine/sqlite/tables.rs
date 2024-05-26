@@ -2,7 +2,6 @@ use anyhow::Result;
 use deadpool_sqlite::Pool;
 use futures::try_join;
 use serde_json::{json, Value};
-use tracing::info;
 
 use super::query::raw_query;
 
@@ -51,7 +50,6 @@ async fn get_table_columns(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     let mut res = vec![];
     columns.iter().for_each(|column| {
         let column = column.as_object().expect("Failed to get column info");
-        info!("column: {:?}", column);
         res.push(json!({
             "column_name": column["name"],
             "column_type": column["type"],

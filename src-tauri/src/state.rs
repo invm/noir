@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
-use tracing::{error, info};
+use tracing::error;
 
 use crate::engine::types::connection::InitiatedConnection;
 
@@ -115,7 +115,6 @@ impl ServiceAccess for AppHandle {
         let mut binding = state.cancel_tokens.lock().await;
         let token = binding.get(&id);
         if let Some(token) = token {
-            info!(?id, "cancel_token");
             token.cancel();
             binding.remove(&id);
         }

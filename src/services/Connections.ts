@@ -428,7 +428,6 @@ export const ConnectionsService = () => {
   };
 
   const fetchSchemaEntities = async (connId: string, dialect: DialectType) => {
-    console.log('403');
     const [_schemas, columns, routines, triggers, _views] = await Promise.all([
       invoke<RawQueryResult>('get_schemas', { connId }),
       invoke<RawQueryResult>('get_columns', { connId }),
@@ -436,7 +435,6 @@ export const ConnectionsService = () => {
       invoke<RawQueryResult>('get_triggers', { connId }),
       invoke<RawQueryResult>('get_views', { connId }),
     ]);
-    console.log('411');
 
     const { views, tables } = columnsToTables(columns, _views, dialect) ?? [];
     const schemas = _schemas.map((d) => String(d['schema']));
