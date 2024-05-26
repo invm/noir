@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/invm/noir/compare/v1.0.0...v1.1.0) (2024-05-26)
+
+
+### Features
+
+* add context menu on schemas dropdown, ui changes ([695934b](https://github.com/invm/noir/commit/695934b5282d3ba7b7d4c6f40f515fb00d01f352))
+* add query cancellation, remove async process ([0a60dd8](https://github.com/invm/noir/commit/0a60dd83a105907d5214be1f6ad6e73798d88c8c))
+* add ssh connection mode with port forwarding ([8c5e5a8](https://github.com/invm/noir/commit/8c5e5a86e31f87afed9918471c4fa1af5c15ba11))
+* migrate from rust-simple-mysql to sqlx ([5fcd686](https://github.com/invm/noir/commit/5fcd686ed037f23a64e111c94f09976c7b07a67f))
+
+
+### Bug Fixes
+
+* minor ui issues ([d657433](https://github.com/invm/noir/commit/d6574333d57f9e5503f573670289b359956a9564))
+
 ## [1.0.0](https://github.com/invm/noir/compare/v0.2.0...v1.0.0) (2024-02-28)
 
 
