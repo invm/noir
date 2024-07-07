@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/invm/noir/compare/v1.1.0...v1.1.1) (2024-07-07)
+
+
+### Features
+
+* add drop table, fix json value in grid ([1e41a7b](https://github.com/invm/noir/commit/1e41a7b2257526f50f7ef738675fdce77fc0fe9d))
+
 ## [1.1.0](https://github.com/invm/noir/compare/v1.0.0...v1.1.0) (2024-05-26)
 
 
