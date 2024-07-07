@@ -394,7 +394,10 @@ export const Results = (props: {
         />
         <Search table={table.name} columns={table.columns} />
       </div>
-      <div class={'ag-theme-' + props.gridTheme} style={{ height: '100%' }}>
+      <div
+        class={'select-text ag-theme-' + props.gridTheme}
+        style={{ height: '100%' }}
+      >
         <AgGridSolid
           noRowsOverlayComponent={() =>
             data()?.notReady || data()?.queryType === 'Other' ? (

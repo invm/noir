@@ -1,5 +1,4 @@
 use rusqlite::{types::ValueRef, Row};
-use serde::Serialize;
 
 use serde_json::json;
 
@@ -31,11 +30,3 @@ pub fn row_to_object(row: &Row, column_count: usize) -> serde_json::Value {
     object
 }
 
-#[derive(Serialize)]
-struct ColumnInfo {
-    table_name: String,
-    column_name: String,
-    is_nullable: bool,
-    data_type: String,
-    character_maximum_length: Option<usize>,
-}

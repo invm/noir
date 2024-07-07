@@ -78,9 +78,9 @@ pub fn sql_nonnull_to_json<'r>(
                     .map_or_else(ToString::to_string, DateTime::to_rfc3339),
             )
         }
-        "JSON" | "JSON[]" | "JSONB" | "JSONB[]" => {
-            <Value as Decode<sqlx::MySql>>::decode(raw_value).unwrap_or_default()
-        }
+        // "JSON" | "JSON[]" | "JSONB" | "JSONB[]" => {
+        //     <Value as Decode<sqlx::MySql>>::decode(raw_value).unwrap_or_default()
+        // }
         // Deserialize as a string by default
         _ => <String as Decode<sqlx::MySql>>::decode(raw_value)
             .unwrap_or_default()

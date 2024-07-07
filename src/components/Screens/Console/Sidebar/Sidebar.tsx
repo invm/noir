@@ -237,6 +237,7 @@ export const Sidebar = () => {
                 title={table.name}
                 entity="tables"
                 columns={table.columns}
+                refresh={refreshEntities}
               />
             </div>
           )}
@@ -250,6 +251,7 @@ export const Sidebar = () => {
                   title={table.name}
                   entity="views"
                   columns={table.columns}
+                  refresh={refreshEntities}
                 />
               </div>
             )}

@@ -437,7 +437,7 @@ export const ConnectionsService = () => {
     ]);
 
     const { views, tables } = columnsToTables(columns, _views, dialect) ?? [];
-    const schemas = _schemas.map((d) => String(d['schema']));
+    const schemas = _schemas.map((d) => String(d['schema'])).sort();
     return { schemas, tables, views, routines, columns, triggers };
   };
 

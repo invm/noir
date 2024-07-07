@@ -1,7 +1,7 @@
 {
   "translation": {
     "noir_titlecase": "Noir",
-    "restoring_connections": "Restoring connections",
+    "connecting": "Connecting",
     "add_connection_form": {
       "title": "Add New Connection",
       "refresh_connections": "Refresh connections list",
@@ -97,7 +97,9 @@
       "show_table_structure": "Show table structure",
       "view_data": "View data",
       "truncate_table": "Truncate table",
+      "drop_table": "Drop table",
       "confirm_truncate": "Are you sure you want to truncate table {{table}}?",
+      "confirm_drop": "Are you sure you want to drop table {{table}}?",
       "yes": "Yes",
       "cancel": "Cancel",
       "tooltips": {
@@ -111,6 +113,7 @@
       "routines": "Routines",
       "triggers": "Triggers",
       "table_was_truncated": "Table {{table}} was truncated",
+      "table_was_dropped": "Table {{table}} was dropped",
       "refresh_schema": "Refresh schema",
       "show_routine": "Show routine",
       "show_trigger": "Show trigger",

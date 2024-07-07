@@ -3,7 +3,10 @@ import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { invoke } from '@tauri-apps/api';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
-import { newContentTab, TableStructureContentTabData } from 'services/Connections';
+import {
+  newContentTab,
+  TableStructureContentTabData,
+} from 'services/Connections';
 import { SwapChevronDown, SwapChevronRight, Table } from 'components/UI/Icons';
 import { Column, ResultSet } from 'interfaces';
 import { getAnyCase } from 'utils/utils';
@@ -12,14 +15,22 @@ type TableColumnsCollapseProps = {
   entity: 'views' | 'tables';
   title: string;
   columns: Column[];
+  refresh: () => Promise<void>
 };
+
+const initModal = { visible: false, title: '', action: '' };
 
 export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   const [open, setOpen] = createSignal(false);
-  const [showModal, setShowModal] = createSignal(false);
+  const [modal, setModal] = createSignal(initModal);
 
   const {
-    connections: { insertColumnName, addContentTab, getConnection, updateContentTab },
+    connections: {
+      insertColumnName,
+      addContentTab,
+      getConnection,
+      updateContentTab,
+    },
     backend: { selectAllFrom },
     messages: { notify },
   } = useAppSelector();
@@ -34,10 +45,13 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
 
   const addTableStructureTab = async (table: string) => {
     try {
-      const data = await invoke<TableStructureContentTabData>('get_table_structure', {
-        connId: getConnection().id,
-        table,
-      });
+      const data = await invoke<TableStructureContentTabData>(
+        'get_table_structure',
+        {
+          connId: getConnection().id,
+          table,
+        }
+      );
       addContentTab(newContentTab(table, 'TableStructure', data));
     } catch (error) {
       notify(error);
@@ -58,6 +72,30 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
     }
   };
 
+  const handleModalAccept = async () => {
+    if (modal().action === 'truncate') {
+      await truncateTable(props.title);
+      return;
+    }
+    await dropTable(props.title);
+  };
+
+  const dropTable = async (table: string) => {
+    try {
+      const query = 'DROP TABLE ' + table;
+      await invoke<ResultSet>('execute_query', {
+        connId: getConnection().id,
+        query,
+      });
+      notify(t('sidebar.table_was_dropped', { table }), 'success');
+      await props.refresh();
+    } catch (error) {
+      notify(error);
+    } finally {
+      setModal(initModal);
+    }
+  };
+
   const truncateTable = async (table: string) => {
     try {
       const query = 'TRUNCATE TABLE ' + table;
@@ -69,41 +107,36 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
     } catch (error) {
       notify(error);
     } finally {
-      setShowModal(false);
+      setModal(initModal);
     }
   };
 
   return (
     <>
-      <Show when={showModal()}>
+      <Show when={modal().visible}>
         <dialog id={modal_id} class="modal">
           <form method="dialog" class="modal-box">
-            <h3 class="font-bold text-lg">{t('connections_list.actions.confirm_action')}</h3>
-            <p class="py-4">{t('sidebar.confirm_truncate', { table: props.title })}</p>
+            <h3 class="font-bold text-lg">
+              {t('connections_list.actions.confirm_action')}
+            </h3>
+            <p class="py-4">{t(modal().title, { table: props.title })}</p>
             <div class="flex justify-between w-full gap-3">
               <button
                 class="btn btn-error btn-sm"
-                onClick={() => {
-                  truncateTable(props.title);
-                }}>
+                onClick={() => handleModalAccept()}
+              >
                 {t('sidebar.yes')}
               </button>
               <button
-                onClick={() => {
-                  setShowModal(false);
-                }}
-                class="btn btn-primary btn-sm">
+                onClick={() => setModal(initModal)}
+                class="btn btn-primary btn-sm"
+              >
                 {t('sidebar.cancel')}
               </button>
             </div>
           </form>
           <form method="dialog" class="modal-backdrop">
-            <button
-              onClick={() => {
-                setShowModal(false);
-              }}>
-              close
-            </button>
+            <button onClick={() => setModal(initModal)}>close</button>
           </form>
         </dialog>
       </Show>
@@ -111,21 +144,44 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
         <Item
           onClick={({ props }) => {
             addTableStructureTab(props.table);
-          }}>
+          }}
+        >
           {t('sidebar.show_table_structure')}
         </Item>
         <Item
           onClick={({ props }) => {
             listData(props.table);
-          }}>
+          }}
+        >
           {t('sidebar.view_data')}
         </Item>
         <Item
           onClick={() => {
-            setShowModal(true);
-            (document.getElementById(modal_id) as HTMLDialogElement).showModal();
-          }}>
+            setModal({
+              visible: true,
+              title: 'sidebar.confirm_truncate',
+              action: 'truncate',
+            });
+            (
+              document.getElementById(modal_id) as HTMLDialogElement
+            ).showModal();
+          }}
+        >
           {t('sidebar.truncate_table')}
+        </Item>
+        <Item
+          onClick={() => {
+            setModal({
+              visible: true,
+              title: 'sidebar.confirm_drop',
+              action: 'drop',
+            });
+            (
+              document.getElementById(modal_id) as HTMLDialogElement
+            ).showModal();
+          }}
+        >
+          {t('sidebar.drop_table')}
         </Item>
       </Menu>
       <div
@@ -134,7 +190,8 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
         onContextMenu={(e) => {
           hideAll();
           show(e);
-        }}>
+        }}
+      >
         <div class="pt-1 flex items-center">
           <span class="collapse">
             <label class={`swap text-6xl ${open() ? 'swap-active' : ''}`}>
@@ -144,7 +201,10 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           </span>
 
           <span class="px-2 flex items-center">
-            <div class="tooltip tooltip-info tooltip-right tooltip-xs" data-tip={t(`sidebar.tooltips.${props.entity}`)}>
+            <div
+              class="tooltip tooltip-info tooltip-right tooltip-xs"
+              data-tip={t(`sidebar.tooltips.${props.entity}`)}
+            >
               <Table color={props.entity === 'tables' ? 'info' : 'warning'} />
             </div>
           </span>
@@ -160,16 +220,20 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           'mb-2': open(),
           'border-b-[1px]': open(),
           'border-base-200': open(),
-        }}>
+        }}
+      >
         <Show when={open()}>
           <For each={props.columns}>
             {(column) => (
               <div
                 tabindex={1}
                 onClick={() => insertColumnName(column.name)}
-                class="flex btn-ghost w-full justify-between items-center border-b-2 border-base-300">
+                class="flex btn-ghost w-full justify-between items-center border-b-2 border-base-300"
+              >
                 <span class="text-xs font-medium">{column.name}</span>
-                <span class="text-xs font-light ml-2">{getAnyCase(column.props, 'column_type')}</span>
+                <span class="text-xs font-light ml-2">
+                  {getAnyCase(column.props, 'column_type')}
+                </span>
               </div>
             )}
           </For>
