@@ -28,7 +28,7 @@ pub trait ServiceAccess {
     fn acquire_connection(&self, conn_id: String) -> InitiatedConnection;
     fn update_connection(&self, conn: InitiatedConnection) -> Result<()>;
     fn disconnect(&mut self, conn_id: &str) -> Result<()>;
-    fn connect(&mut self, conn: &InitiatedConnection) -> Result<()>;
+    fn connect(&mut self, conn: &InitiatedConnection) -> Result<String>;
     async fn cancel_token(&self, id: String) -> Result<()>;
 }
 
@@ -71,7 +71,7 @@ impl ServiceAccess for AppHandle {
         connection.clone()
     }
 
-    fn connect(&mut self, conn: &InitiatedConnection) -> Result<()> {
+    fn connect(&mut self, conn: &InitiatedConnection) -> Result<String> {
         let app_state: State<AppState> = self.state();
         let mut binding = app_state.connections.lock();
         let connection_guard = binding.as_mut();
@@ -81,7 +81,7 @@ impl ServiceAccess for AppHandle {
             }
             Err(e) => error!("Error: {}", e),
         }
-        Ok(())
+        Ok(conn.get_schema())
     }
 
     fn disconnect(&mut self, conn_id: &str) -> Result<()> {

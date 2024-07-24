@@ -19,7 +19,18 @@ impl InitiatedConnection {
     }
 
     pub fn set_schema(mut self, schema: String) -> Self {
-        self.schema = schema;
+        self.schema = schema.clone();
+        match self.config.dialect {
+            super::config::Dialect::Mysql | super::config::Dialect::MariaDB => {
+                self.config.credentials.insert("db_name".to_string(), schema);
+            }
+            super::config::Dialect::Postgresql => {
+                self.config.credentials.insert("schema".to_string(), schema);
+            }
+            super::config::Dialect::Sqlite => {
+                self.config.credentials.insert("path".to_string(), schema);
+            }
+        };
         self
     }
 

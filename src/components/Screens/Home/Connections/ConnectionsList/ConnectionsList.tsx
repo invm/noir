@@ -27,7 +27,7 @@ export const ConnectionsList = () => {
   const onConnect = async (config: ConnectionConfig) => {
     setLoading(true);
     try {
-      await invoke('init_connection', { config });
+      const selectedSchema = await invoke<string>('init_connection', { config });
       const { triggers, columns, routines, tables, schemas, views } = await fetchSchemaEntities(
         config.id,
         config.dialect
@@ -35,7 +35,7 @@ export const ConnectionsList = () => {
       await addConnectionTab({
         id: config.id,
         label: config.name,
-        selectedSchema: config.schema,
+        selectedSchema,
         definition: { [config.schema]: { columns, routines, triggers, tables, views } },
         schemas,
         connection: config,

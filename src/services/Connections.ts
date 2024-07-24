@@ -173,7 +173,8 @@ export const ConnectionsService = () => {
         async (acc, conn) => {
           const res = await acc;
           try {
-            await invoke('init_connection', { config: conn.connection });
+            const selectedSchema = await invoke<string>('init_connection', { config: conn.connection });
+            conn.selectedSchema = selectedSchema;
             return Promise.resolve([...res, conn]);
           } catch (e) {
             conn_tabs.idx = 0;

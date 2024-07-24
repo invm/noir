@@ -46,9 +46,11 @@ pub fn sql_nonnull_to_json<'r>(
                 .unwrap_or(f64::NAN)
                 .into()
         }
-        "INT8" | "BIGINT" | "INTEGER" => <i64 as Decode<sqlx::MySql>>::decode(raw_value)
-            .unwrap_or_default()
-            .into(),
+        "INT8" | "BIGINT" | "INTEGER" | "INT UNSIGNED" | "BIGINT UNSIGNED" => {
+            <u64 as Decode<sqlx::MySql>>::decode(raw_value)
+                .unwrap_or_default()
+                .into()
+        }
         "INT" | "INT4" => <i32 as Decode<sqlx::MySql>>::decode(raw_value)
             .unwrap_or_default()
             .into(),

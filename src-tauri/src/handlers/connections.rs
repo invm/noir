@@ -68,13 +68,13 @@ pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionCon
 pub async fn init_connection(
     mut app_handle: AppHandle,
     config: ConnectionConfig,
-) -> CommandResult<()> {
+) -> CommandResult<String> {
     info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
     app_handle.db(|db| queries::get_connection(db, &config.id.to_string()))?;
     let conn = init_conn(config.clone(), app_handle.clone()).await;
     match conn {
         Ok(c) => match app_handle.connect(&c) {
-            Ok(_) => Ok(()),
+            Ok(schema) => Ok(schema),
             Err(_) => {
                 cancel_task_token(app_handle.clone(), vec![config.id.to_string()]).await?;
                 Err(anyhow!("Failed to connect to the database").into())
@@ -97,13 +97,31 @@ pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()
 
 #[command]
 pub async fn set_schema(
-    app_handle: AppHandle,
+    mut app_handle: AppHandle,
     conn_id: String,
     schema: String,
 ) -> CommandResult<()> {
     info!(?conn_id, ?schema, "set_schema");
     let conn = app_handle.acquire_connection(conn_id.clone());
     let conn = conn.set_schema(schema.clone());
-    app_handle.db(|db| queries::update_connection_schema(db, &conn_id, &schema))?;
-    Ok(app_handle.update_connection(conn)?)
+    cancel_task_token(app_handle.clone(), vec![conn.config.id.to_string()]).await?;
+    app_handle.clone().disconnect(&conn.config.id.to_string())?;
+    info!(?conn.config, ?schema, "set_schema");
+    let conn = init_conn(conn.config.clone(), app_handle.clone()).await;
+    match conn {
+        Ok(c) => match app_handle.connect(&c) {
+            Ok(schema) => {
+                app_handle.db(|db| queries::update_connection_schema(db, &conn_id, &schema))?;
+                Ok(app_handle.update_connection(c)?)
+            }
+            Err(_) => {
+                cancel_task_token(app_handle.clone(), vec![conn_id.to_string()]).await?;
+                Err(anyhow!("Failed to connect to the database").into())
+            }
+        },
+        Err(_) => {
+            cancel_task_token(app_handle.clone(), vec![conn_id.to_string()]).await?;
+            Err(anyhow!("Failed to connect to the database").into())
+        }
+    }
 }
