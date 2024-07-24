@@ -153,11 +153,11 @@ export const Sidebar = () => {
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
       <div class="pb-2 rounded-md flex justify-between items-center">
-        <div class="dropdown dropdown-bottom w-full">
+        <div class="dropdown truncate dropdown-bottom w-full">
           <div
             tabindex="0"
             role="button"
-            class="btn btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
+            class="btn truncate btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
           >
             {getConnection().selectedSchema}
           </div>
