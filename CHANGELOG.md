@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/invm/noir/compare/v1.1.1...v1.1.2) (2024-07-24)
+
+
+### Bug Fixes
+
+* unsigned bitint render error and handle schema changes properly ([1d602f1](https://github.com/invm/noir/commit/1d602f13075672a498fea42637186ef315de945f))
+
 ### [1.1.1](https://github.com/invm/noir/compare/v1.1.0...v1.1.1) (2024-07-07)
 
 
