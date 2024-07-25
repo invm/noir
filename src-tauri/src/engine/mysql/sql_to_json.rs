@@ -41,23 +41,33 @@ pub fn sql_nonnull_to_json<'r>(
 ) -> Value {
     let raw_value = get_ref();
     match raw_value.type_info().name() {
-        "REAL" | "FLOAT" | "NUMERIC" | "DECIMAL" | "FLOAT4" | "FLOAT8" | "DOUBLE" => {
+        "REAL" | "FLOAT" | "NUMERIC" | "DECIMAL" | "DOUBLE" | "FIXED" => {
             <f64 as Decode<sqlx::MySql>>::decode(raw_value)
                 .unwrap_or(f64::NAN)
                 .into()
         }
-        "INT8" | "BIGINT" | "INTEGER" | "INT UNSIGNED" | "BIGINT UNSIGNED" => {
-            <u64 as Decode<sqlx::MySql>>::decode(raw_value)
-                .unwrap_or_default()
-                .into()
-        }
-        "INT" | "INT4" => <i32 as Decode<sqlx::MySql>>::decode(raw_value)
+        "BIGINT UNSIGNED" => <u64 as Decode<sqlx::MySql>>::decode(raw_value)
             .unwrap_or_default()
             .into(),
-        "INT2" | "SMALLINT" => <i16 as Decode<sqlx::MySql>>::decode(raw_value)
+        "INT UNSIGNED" => <u32 as Decode<sqlx::MySql>>::decode(raw_value)
             .unwrap_or_default()
             .into(),
-        "BOOL" | "BOOLEAN" => <bool as Decode<sqlx::MySql>>::decode(raw_value)
+        "SMALLINT UNSIGNED" => <u16 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
+            .into(),
+        "TINYINT UNSIGNED" => <u8 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
+            .into(),
+        "BIGINT" => <i64 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
+            .into(),
+        "INT" | "INTEGER" => <i32 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
+            .into(),
+        "SMALLINT" => <i16 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
+            .into(),
+        "BOOL" | "BOOLEAN" | "TINYINT" => <i8 as Decode<sqlx::MySql>>::decode(raw_value)
             .unwrap_or_default()
             .into(),
         "DATE" => <chrono::NaiveDate as Decode<sqlx::MySql>>::decode(raw_value)
@@ -67,6 +77,9 @@ pub fn sql_nonnull_to_json<'r>(
         "TIME" => <chrono::NaiveTime as Decode<sqlx::MySql>>::decode(raw_value)
             .as_ref()
             .map_or_else(ToString::to_string, ToString::to_string)
+            .into(),
+        "YEAR" => <i16 as Decode<sqlx::MySql>>::decode(raw_value)
+            .unwrap_or_default()
             .into(),
         "DATETIME" | "DATETIME2" | "DATETIMEOFFSET" | "TIMESTAMP" | "TIMESTAMPTZ" => {
             let mut date_time = <DateTime<Utc> as Decode<sqlx::MySql>>::decode(get_ref());
