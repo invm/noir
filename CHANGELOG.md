@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/invm/noir/compare/v1.1.2...v1.1.3) (2024-07-25)
+
+
+### Bug Fixes
+
+* missing datatypes in mysql ([7337b32](https://github.com/invm/noir/commit/7337b32477698f41627ae3b35f60241f9d4f6a7a))
+* truncate large schema names ([752c2d5](https://github.com/invm/noir/commit/752c2d52fde9b7da6ad08d236e5039773dfb9a2e))
+
 ### [1.1.2](https://github.com/invm/noir/compare/v1.1.1...v1.1.2) (2024-07-24)
 
 
