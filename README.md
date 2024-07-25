@@ -12,9 +12,9 @@
     <a href="https://noirdb.dev/"><strong>Explore the docs »</strong></a>
     <br/>
     <br/>
-    <a href="https://github.com/invm/noir/issues">Report Bug</a>
+    <a href="https://github.com/invm/noir/issues">Report a Bug</a>
     .
-    <a href="https://github.com/invm/noir/issues">Request Feature</a>
+    <a href="https://github.com/invm/noir/issues">Request a Feature</a>
   </p>
 </p>
 
