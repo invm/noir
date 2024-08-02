@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/invm/noir/compare/v1.1.3...v1.1.4) (2024-08-02)
+
+
+### Features
+
+* update logging system to tauri log plugin ([6059a45](https://github.com/invm/noir/commit/6059a453ed913545564ea2b3aa0954d9203ac8f7))
+
+
+### Bug Fixes
+
+* copy numeric cells ([6f2b4f8](https://github.com/invm/noir/commit/6f2b4f8bfe5f927368720fe93085baf0b82f692f))
+* schemas dropdown overflow hidden ([14d57e8](https://github.com/invm/noir/commit/14d57e8ef493be6e4e0ef947b5810e9fa77f3708))
+
 ### [1.1.3](https://github.com/invm/noir/compare/v1.1.2...v1.1.3) (2024-07-25)
 
 
