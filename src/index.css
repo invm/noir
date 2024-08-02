@@ -56,17 +56,17 @@ input[type='number'] {
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: #888;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #000;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -137,4 +137,8 @@ div[class*='ag-theme'] {
   --ag-grid-size: 4px;
   --ag-list-item-height: 16px;
   --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
+}
+
+.tabs-lifted > .tab.tab-active:not(.tab-disabled):not([disabled]), .tabs-lifted > .tab:is(input:checked) {
+  border-width: 0;
 }

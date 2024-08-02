@@ -152,18 +152,20 @@ export const Sidebar = () => {
 
   return (
     <div class="p-2 bg-base-300 h-full rounded-tr-lg">
-      <div class="pb-2 rounded-md flex justify-between items-center">
-        <div class="dropdown truncate dropdown-bottom w-full">
+      <div class="pb-2 rounded-md flex justify-between items-center gap-2">
+        <div class="dropdown dropdown-bottom w-4/6">
           <div
             tabindex="0"
             role="button"
-            class="btn truncate btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
+            class="btn btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
           >
-            {getConnection().selectedSchema}
+            <span class="overflow-hidden">
+              {getConnection().selectedSchema}
+            </span>
           </div>
           <ul
             tabindex="0"
-            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box"
           >
             <For each={getConnection().schemas}>
               {(schema) => (
@@ -187,7 +189,7 @@ export const Sidebar = () => {
             </For>
           </ul>
         </div>
-        <div class="flex">
+        <div class="flex flex-1 w-2/6 gap-2 justify-end">
           <div
             class="tooltip tooltip-primary tooltip-right"
             data-tip={t('sidebar.show_process_list')}
@@ -195,7 +197,7 @@ export const Sidebar = () => {
             <button
               onClick={showProcessList}
               disabled={loading()}
-              class="ml-2 btn btn-xs"
+              class="btn btn-xs"
             >
               <Switch>
                 <Match when={loading()}>
@@ -214,7 +216,7 @@ export const Sidebar = () => {
             <button
               onClick={refreshEntities}
               disabled={loading()}
-              class="ml-2 btn btn-xs"
+              class="btn btn-xs"
             >
               <Switch>
                 <Match when={loading()}>
