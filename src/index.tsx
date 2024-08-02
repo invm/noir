@@ -6,6 +6,9 @@ import { ErrorBoundary } from 'solid-js';
 import App from './App';
 import { StoreProvider } from 'services/Context';
 import { Error } from 'components/Error';
+import { attachConsole } from 'tauri-plugin-log-api';
+
+attachConsole();
 
 render(
   () => (

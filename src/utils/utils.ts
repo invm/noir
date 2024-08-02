@@ -1,10 +1,9 @@
 import { Dialect, DialectType, Row, Table } from 'interfaces';
 
-export const log = (msg: string) => console.log(`[${new Date().toISOString()}] - ${msg}`);
-
 export const randomId = () => {
   const length = 36;
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let id = '';
   for (let i = 0; i < length; i++) {
     id += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -14,7 +13,9 @@ export const randomId = () => {
 
 export const getAnyCase = (obj: Row, key: string) => {
   if (typeof obj !== 'object') return '';
-  return (obj[key.toLowerCase()] ? obj[key.toLowerCase()] : obj[key.toUpperCase()]) as string;
+  return (
+    obj[key.toLowerCase()] ? obj[key.toLowerCase()] : obj[key.toUpperCase()]
+  ) as string;
 };
 
 export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
@@ -31,12 +32,26 @@ export const debounce = (func: (...args: unknown[]) => void, wait: number) => {
   };
 };
 
-export const columnsToTables = (allColumns: Row[], views: Row[], dialect: DialectType) => {
-  if ([Dialect.MariaDB, Dialect.Mysql, Dialect.Postgresql, Dialect.Sqlite].includes(dialect)) {
+export const columnsToTables = (
+  allColumns: Row[],
+  views: Row[],
+  dialect: DialectType
+) => {
+  if (
+    [
+      Dialect.MariaDB,
+      Dialect.Mysql,
+      Dialect.Postgresql,
+      Dialect.Sqlite,
+    ].includes(dialect)
+  ) {
     const schema = allColumns.reduce((acc, col) => {
       const table_name = getAnyCase(col, 'table_name');
       const column_name = getAnyCase(col, 'column_name');
-      acc[table_name] = { ...(acc[table_name] as Record<string, string>), [column_name]: col };
+      acc[table_name] = {
+        ...(acc[table_name] as Record<string, string>),
+        [column_name]: col,
+      };
       return acc;
     }, {});
     const viewNames = views.map(({ table_name }) => table_name);
@@ -67,12 +82,16 @@ export const columnsToTables = (allColumns: Row[], views: Row[], dialect: Dialec
   };
 };
 
-export const parseObjRecursive = (obj: unknown): Record<string, unknown | unknown[]> | null | unknown => {
+export const parseObjRecursive = (
+  obj: unknown
+): Record<string, unknown | unknown[]> | null | unknown => {
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
       return obj.map(parseObjRecursive);
     } else if (obj !== null) {
-      return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)]));
+      return Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k, parseObjRecursive(v)])
+      );
     } else {
       return obj;
     }

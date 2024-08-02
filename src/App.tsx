@@ -16,6 +16,7 @@ import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
 import { relaunch } from '@tauri-apps/api/process';
 import { t } from 'utils/i18n';
 import { isDev } from 'solid-js/web';
+import { error } from 'tauri-plugin-log-api';
 
 function App() {
   const {
@@ -89,16 +90,18 @@ function App() {
   }
 
   addEventListener('unhandledrejection', (e) => {
-    console.error(e);
-    console.log({
-      message: 'Unhandled rejection',
-      info: (e.reason?.message || e.reason || e).toString(),
-    });
+    error(
+      JSON.stringify({
+        message: 'Unhandled rejection',
+        info: (e.reason?.message || e.reason || e).toString(),
+        error: e,
+      })
+    );
     notify(e.reason?.message || e, 'error');
   });
 
   window.addEventListener('error', (e) => {
-    console.log({ message: 'Unhandled error', error: e.error });
+    error(JSON.stringify({ message: 'Unhandled error', error: e.error }));
     notify(e.message);
   });
 
@@ -127,7 +130,6 @@ function App() {
     setLoading(false);
 
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
-      console.log(event);
       await compareAndAssign(event.payload);
     });
     await checkForUpdates();

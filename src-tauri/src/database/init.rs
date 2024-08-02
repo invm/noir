@@ -3,7 +3,7 @@ use deadpool_sqlite::rusqlite::{Connection as AppConnection, Error};
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
 use rusqlite_migration::Migrations;
-use tracing::error;
+use log::error;
 
 static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/database/migrations");
 

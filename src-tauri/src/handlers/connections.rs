@@ -9,8 +9,8 @@ use crate::{
     utils::error::{CommandResult, Error},
 };
 use anyhow::anyhow;
+use log::info;
 use tauri::{command, AppHandle};
-use tracing::info;
 
 #[command]
 pub fn add_connection(
@@ -21,7 +21,7 @@ pub fn add_connection(
     name: &str,
     color: &str,
 ) -> CommandResult<()> {
-    info!(?name, ?dialect, ?mode, ?color, "add_connection");
+    info!("Add connection: {name}, {dialect}, {mode}, {color}");
     let conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
     app_handle
         .db(|db| queries::add_connection(db, &conn))
@@ -37,7 +37,7 @@ pub async fn test_connection(
     name: &str,
     color: &str,
 ) -> CommandResult<()> {
-    info!(?name, ?dialect, ?mode, ?color, "test_connection");
+    info!("Test connection: {name}, {dialect}, {mode}, {color}");
     let config = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
     let conn = init_conn(config, app_handle.clone()).await?;
     app_handle.connect(&conn.clone())?;
@@ -49,7 +49,7 @@ pub async fn test_connection(
 
 #[command]
 pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()> {
-    info!(?id, "delete_connection");
+    info!("Delete connection: {id}");
     let id = uuid::Uuid::parse_str(id.as_str()).map_err(Error::from)?;
     app_handle
         .db(|db| queries::delete_connection(db, &id))
@@ -58,7 +58,6 @@ pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()>
 
 #[command]
 pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionConfig>> {
-    info!("get_connections");
     app_handle
         .db(queries::get_all_connections)
         .map_err(Error::from)
@@ -69,7 +68,10 @@ pub async fn init_connection(
     mut app_handle: AppHandle,
     config: ConnectionConfig,
 ) -> CommandResult<String> {
-    info!(?config.name, ?config.dialect, ?config.mode, "init_connection");
+    let name = config.name.clone();
+    let dialect = config.dialect.clone();
+    let mode = config.mode.clone();
+    info!("Init connection: {name}, {dialect}, {mode}");
     app_handle.db(|db| queries::get_connection(db, &config.id.to_string()))?;
     let conn = init_conn(config.clone(), app_handle.clone()).await;
     match conn {
@@ -89,7 +91,7 @@ pub async fn init_connection(
 
 #[command]
 pub async fn disconnect(mut app_handle: AppHandle, id: &str) -> CommandResult<()> {
-    info!(?id, "disconnect");
+    info!("Disconnect: {id}");
     cancel_task_token(app_handle.clone(), vec![id.to_string()]).await?;
     app_handle.disconnect(id)?;
     Ok(())
@@ -101,12 +103,11 @@ pub async fn set_schema(
     conn_id: String,
     schema: String,
 ) -> CommandResult<()> {
-    info!(?conn_id, ?schema, "set_schema");
+    info!("Set schema: {conn_id}, {schema}");
     let conn = app_handle.acquire_connection(conn_id.clone());
     let conn = conn.set_schema(schema.clone());
     cancel_task_token(app_handle.clone(), vec![conn.config.id.to_string()]).await?;
     app_handle.clone().disconnect(&conn.config.id.to_string())?;
-    info!(?conn.config, ?schema, "set_schema");
     let conn = init_conn(conn.config.clone(), app_handle.clone()).await;
     match conn {
         Ok(c) => match app_handle.connect(&c) {

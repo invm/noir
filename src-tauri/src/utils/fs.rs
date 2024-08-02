@@ -4,7 +4,7 @@ use fs::metadata;
 use serde_json::json;
 use std::{fs, path::PathBuf};
 use tauri::api::{dir::with_temp_dir, path::app_config_dir};
-use tracing::error;
+use log::error;
 
 use rand::{distributions::Alphanumeric, Rng};
 

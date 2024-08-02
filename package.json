@@ -53,6 +53,7 @@
     "split.js": "^1.6.5",
     "sql-bricks": "^3.0.1",
     "sql-formatter": "^15.2.0",
+    "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log#v1",
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
     "tippy.js": "^6.3.7",

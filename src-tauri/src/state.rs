@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
-use tracing::error;
+use log::error;
 
 use crate::engine::types::connection::InitiatedConnection;
 

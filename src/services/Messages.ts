@@ -1,5 +1,6 @@
 import { AlertTypes } from 'components/UI';
 import { createStore } from 'solid-js/store';
+import { info } from 'tauri-plugin-log-api';
 import { randomId } from 'utils/utils';
 
 type Error = {
@@ -12,7 +13,7 @@ export const MessageService = () => {
   const [messages, setMessages] = createStore<Error[]>([]);
 
   const notify = (message: string | unknown, type: AlertTypes = 'error') => {
-    console.log(message);
+    info(String(message));
     const id = randomId();
     setMessages(messages.concat({ message: String(message), id, type }));
 

@@ -1,17 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use noir::utils::init::{app_setup, init_logger};
 use state::AppState;
 use std::path::PathBuf;
 use std::{fs, panic};
-use tauri::{Manager, State};
-use tracing::error;
+use tauri::Manager;
+use log::error;
 
 use noir::{
-    database::init::initialize_database,
     handlers::{connections, queries, task},
     state::{self},
-    utils::{fs::get_app_path, init},
+    utils::fs::get_app_path,
 };
 
 #[derive(Clone, serde::Serialize)]
@@ -21,8 +21,6 @@ struct Payload {
 }
 
 fn main() {
-    tracing_subscriber::fmt::init();
-
     panic::set_hook(Box::new(|info| {
         error!("Panicked: {:?}", info);
         let path = get_app_path();
@@ -33,6 +31,7 @@ fn main() {
     }));
 
     tauri::Builder::default()
+        .plugin(init_logger().build())
         .manage(AppState::default())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -42,16 +41,7 @@ fn main() {
             app.emit_all("single-instance", Payload { args: argv, cwd })
                 .expect("failed to emit");
         }))
-        .setup(|app| {
-            init::init_app()?;
-            let handle = app.handle();
-
-            let app_state: State<AppState> = handle.state();
-            let db = initialize_database().expect("Database initialize should succeed");
-            *app_state.db.lock().expect("Failed to lock db") = Some(db);
-
-            Ok(())
-        })
+        .setup(app_setup)
         .invoke_handler(tauri::generate_handler![
             connections::test_connection,
             connections::add_connection,

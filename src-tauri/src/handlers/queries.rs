@@ -12,13 +12,13 @@ use crate::{
     },
 };
 use anyhow::anyhow;
+use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
 use tauri::{command, AppHandle, Manager, State};
 use tokio_util::sync::CancellationToken;
-use tracing::info;
 
 fn get_query_type(s: Statement) -> QueryType {
     match s {
@@ -50,7 +50,7 @@ pub async fn enqueue_query(
     auto_limit: bool,
     table: Option<String>,
 ) -> CommandResult<QueryTaskEnqueueResult> {
-    info!(sql, conn_id, tab_idx, "enqueue_query");
+    info!("Enqueue query on {conn_id}, tab:{tab_idx} - sql:{sql}");
     let conn = app_handle.acquire_connection(conn_id.clone());
     let statements = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
@@ -60,7 +60,7 @@ pub async fn enqueue_query(
     )
     .unwrap_or_default();
     if statements.is_empty() {
-        return Err(Error::from(anyhow!("No statements found")));
+        return Err(Error::from(anyhow!("No valid statements found")));
     }
     let statements: Vec<(String, QueryType, String)> = statements
         .into_iter()
@@ -167,7 +167,7 @@ pub async fn execute_query(
     query: String,
 ) -> CommandResult<Value> {
     let conn = app_handle.acquire_connection(conn_id);
-    info!(?query, "execute_query");
+    info!("Execute query: {query}");
     let statements = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.to_string())
             .expect("Failed to get dialect")
@@ -175,7 +175,7 @@ pub async fn execute_query(
         &query,
     )?;
     if statements.is_empty() {
-        return Err(Error::from(anyhow!("No statements found")));
+        return Err(Error::from(anyhow!("No valid statements found")));
     }
     let statements: Vec<(String, QueryType, String)> = statements
         .into_iter()
@@ -203,7 +203,7 @@ pub async fn query_results(
     _app_handle: AppHandle,
     params: QueryResultParams,
 ) -> CommandResult<Value> {
-    info!(?params, "query_results");
+    info!("Query results: {:?}", params);
     let data = paginate_file(&params.path, params.page, params.page_size);
     match data {
         Ok(data) => Ok(Value::from(data)),

@@ -2,9 +2,10 @@ import { ConnectionsService } from 'services/Connections';
 import { t } from 'utils/i18n';
 import { OpenIssue } from './Screens/Settings/OpenIssue';
 import { relaunch } from '@tauri-apps/api/process';
+import { info } from 'tauri-plugin-log-api';
 
 const Error = (props: { err: Record<'message' | 'stack', string> }) => {
-  console.log({ error: props.err, stack: props.err?.stack });
+  info(JSON.stringify({ error: props.err, stack: props.err?.stack }));
 
   return (
     <div class="flex flex-col items-center justify-center h-full w-full px-20">
