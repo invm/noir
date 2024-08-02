@@ -75,7 +75,7 @@ const PopupCellRenderer = (props: PopupCellRendererProps) => {
       await writeText(JSON.stringify(props.data)).catch((e) => console.error(e));
     }
     if (option === 'copy-cell') {
-      await writeText(props.value);
+      await writeText(String(props.value));
     }
 
     if (option === 'add-row') {

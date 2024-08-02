@@ -130,7 +130,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   };
 
   const copyQueryToClipboard = () => {
-    navigator.clipboard.writeText(code());
+    navigator.clipboard.writeText(String(code()));
   };
 
   createEffect(
