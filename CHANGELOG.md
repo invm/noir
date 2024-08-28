@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.5](https://github.com/invm/noir/compare/v1.1.4...v1.1.5) (2024-08-28)
+
+
+### Bug Fixes
+
+* sidebar buttons overflow ([32e7164](https://github.com/invm/noir/commit/32e7164d7b17bdfbc092ea15e405112d44d01ae3))
+
 ### [1.1.4](https://github.com/invm/noir/compare/v1.1.3...v1.1.4) (2024-08-02)
 
 
