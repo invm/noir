@@ -7,7 +7,7 @@ export const Console = () => {
   createEffect(() => {
     const s = Split(['#sidebar', '#main'], {
       sizes: [15, 85],
-      minSize: [150, 200],
+      minSize: [180, 200],
       maxSize: [400, Infinity],
       gutterSize: 4,
     });

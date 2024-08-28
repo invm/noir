@@ -159,7 +159,7 @@ export const Sidebar = () => {
             role="button"
             class="btn btn-xs btn-block py-0 px-0 rounded-sm btn-secondary hover:scale-105 transition-all"
           >
-            <span class="overflow-hidden">
+            <span class="overflow-hidden line-clamp-1 px-1">
               {getConnection().selectedSchema}
             </span>
           </div>
@@ -189,7 +189,7 @@ export const Sidebar = () => {
             </For>
           </ul>
         </div>
-        <div class="flex flex-1 w-2/6 gap-2 justify-end">
+        <div class="flex flex-1 gap-2 justify-end">
           <div
             class="tooltip tooltip-primary tooltip-right"
             data-tip={t('sidebar.show_process_list')}
@@ -197,7 +197,7 @@ export const Sidebar = () => {
             <button
               onClick={showProcessList}
               disabled={loading()}
-              class="btn btn-xs"
+              class="btn btn-xs rounded-md px-1"
             >
               <Switch>
                 <Match when={loading()}>
@@ -216,7 +216,7 @@ export const Sidebar = () => {
             <button
               onClick={refreshEntities}
               disabled={loading()}
-              class="btn btn-xs"
+              class="btn btn-xs rounded-md px-1"
             >
               <Switch>
                 <Match when={loading()}>
