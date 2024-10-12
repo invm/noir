@@ -142,6 +142,9 @@ importers:
       tippy.js:
         specifier: ^6.3.7
         version: 6.3.7
+      virtua:
+        specifier: ^0.34.2
+        version: 0.34.2(solid-js@1.8.19)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -2920,6 +2923,26 @@ packages:
 
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
+
+  virtua@0.34.2:
+    resolution: {integrity: sha512-r43hQsryJRqVChrf6Go52rScyc89szl/IxFclOJRXF5qd6fv1Lzb68K51htI1NhtaPk+GQxuS2Gd21YL5ZGeDg==}
+    peerDependencies:
+      react: '>=16.14.0'
+      react-dom: '>=16.14.0'
+      solid-js: '>=1.0'
+      svelte: '>=4.0'
+      vue: '>=3.2'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      solid-js:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
 
   vite-plugin-solid@2.10.2:
     resolution: {integrity: sha512-AOEtwMe2baBSXMXdo+BUwECC8IFHcKS6WQV/1NEd+Q7vHPap5fmIhLcAzr+DUJ04/KHx/1UBU0l1/GWP+rMAPQ==}
@@ -6115,6 +6138,10 @@ snapshots:
     dependencies:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
+
+  virtua@0.34.2(solid-js@1.8.19):
+    optionalDependencies:
+      solid-js: 1.8.19
 
   vite-plugin-solid@2.10.2(solid-js@1.8.19)(vite@5.3.5(@types/node@20.11.22)):
     dependencies:

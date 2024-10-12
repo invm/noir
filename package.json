@@ -57,6 +57,7 @@
     "tauri-plugin-store-api": "github:tauri-apps/tauri-plugin-store#v1",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
     "tippy.js": "^6.3.7",
+    "virtua": "^0.34.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {

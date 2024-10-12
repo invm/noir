@@ -1,13 +1,16 @@
 import { TableColumnsCollapse } from './TableColumnsCollapse';
 import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
-import { createSignal, For, Match, Show, Switch } from 'solid-js';
+import { createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
 import { Function, Refresh, ShareNodes, Terminal } from 'components/UI/Icons';
 import { invoke } from '@tauri-apps/api';
-import { ResultSet } from 'interfaces';
+import { ResultSet, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { getAnyCase } from 'utils/utils';
+// @ts-ignore
+import { VList } from 'virtua/solid';
+import { createStore } from 'solid-js/store';
 
 export const Sidebar = () => {
   const {
@@ -22,6 +25,11 @@ export const Sidebar = () => {
     },
   } = useAppSelector();
   const [loading, setLoading] = createSignal(false);
+  const [itemCollapseState, setItemCollapseState] = createStore<
+    Record<string, boolean>
+  >({});
+  const tables = createMemo(() => getSchemaEntity('tables'));
+  const views = createMemo(() => getSchemaEntity('views'));
 
   const routine_menu = 'sidebar-routine-menu';
   const trigger_menu = 'sidebar-trigger-menu';
@@ -232,32 +240,46 @@ export const Sidebar = () => {
       </div>
       <div class="overflow-y-auto h-full pb-10 pr-2">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
-        <For each={getSchemaEntity('tables')}>
-          {(table) => (
+        <VList data={tables()} class="flex-1 bg-background">
+          {(table: Table) => (
             <div class="min-w-full w-fit">
               <TableColumnsCollapse
                 title={table.name}
                 entity="tables"
                 columns={table.columns}
                 refresh={refreshEntities}
+                open={itemCollapseState['t_' + table.name]}
+                onOpen={() =>
+                  setItemCollapseState((state) => ({
+                    ...state,
+                    ['t_' + table.name]: !state['t_' + table.name],
+                  }))
+                }
               />
             </div>
           )}
-        </For>
-        <Show when={getSchemaEntity('views').length > 0}>
+        </VList>
+        <Show when={views().length > 0}>
           <div class="text-xs font-bold py-1">{t('sidebar.views')}</div>
-          <For each={getSchemaEntity('views')}>
-            {(table) => (
+          <VList data={views()} class="flex-1 bg-background">
+            {(view: Table) => (
               <div class="min-w-full w-fit">
                 <TableColumnsCollapse
-                  title={table.name}
+                  title={view.name}
                   entity="views"
-                  columns={table.columns}
+                  columns={view.columns}
                   refresh={refreshEntities}
+                  open={itemCollapseState['v_' + view.name]}
+                  onOpen={() =>
+                    setItemCollapseState((state) => ({
+                      ...state,
+                      ['v_' + view.name]: !state['v_' + view.name],
+                    }))
+                  }
                 />
               </div>
             )}
-          </For>
+          </VList>
         </Show>
         <Menu id={routine_menu} animation={animation.fade} theme={'dark'}>
           <Item
