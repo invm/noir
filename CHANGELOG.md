@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/invm/noir/compare/v1.1.5...v1.2.0) (2024-10-12)
+
+
+### Features
+
+* render tables and views in virutal list ([2ff63a5](https://github.com/invm/noir/commit/2ff63a53019f980e2f21729d32df66d44bdeaa3c))
+
 ### [1.1.5](https://github.com/invm/noir/compare/v1.1.4...v1.1.5) (2024-08-28)
 
 
