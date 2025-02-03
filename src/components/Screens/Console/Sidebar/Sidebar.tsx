@@ -238,7 +238,7 @@ export const Sidebar = () => {
           </div>
         </div>
       </div>
-      <div class="overflow-y-auto h-full pb-10 pr-2">
+      <div class="overflow-y-auto pb-10 pr-2">
         <div class="text-xs font-bold py-1">{t('sidebar.tables')}</div>
         <VList data={tables()} class="flex-1 bg-background">
           {(table: Table) => (

@@ -1,5 +1,5 @@
 import { Results } from './Results';
-import { createEffect, onCleanup, Show } from 'solid-js';
+import { createEffect, onCleanup } from 'solid-js';
 import Split from 'split.js';
 import { Editor } from './Editor';
 import { useAppSelector } from 'services/Context';
@@ -18,20 +18,16 @@ export const QueryTab = () => {
   });
 
   const {
-    app: { gridTheme, editorTheme },
+    app: { gridTheme },
   } = useAppSelector();
 
   return (
     <div class="flex flex-col h-full">
       <div id="query" class="flex flex-col">
-        <Show when={editorTheme()} keyed>
-          {(_) => <Editor editorTheme={editorTheme()} />}
-        </Show>
+        <Editor />
       </div>
       <div id="results">
-        <Show when={editorTheme()} keyed>
-          {(_) => <Results editable={false} gridTheme={gridTheme()} editorTheme={editorTheme()} />}
-        </Show>
+        <Results editable={false} gridTheme={gridTheme()} />
       </div>
     </div>
   );

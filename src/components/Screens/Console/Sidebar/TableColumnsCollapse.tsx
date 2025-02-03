@@ -187,13 +187,13 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       </Menu>
       <div
         onClick={props.onOpen}
-        class="cursor-pointer w-full flex items-center mt-1 hover:bg-base-100"
+        class="cursor-pointer h-5 w-full flex items-center mt-1 hover:bg-base-100"
         onContextMenu={(e) => {
           hideAll();
           show(e);
         }}
       >
-        <div class="pt-1 flex items-center">
+        <div class="pt-1 flex items-center content-center">
           <span class="collapse">
             <label class={`swap text-6xl ${props.open ? 'swap-active' : ''}`}>
               <SwapChevronRight />
@@ -216,7 +216,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       </div>
 
       <div
-        class="pl-4"
+        class="pl-4 h-8"
         classList={{
           'mb-2': props.open,
           'border-b-[1px]': props.open,

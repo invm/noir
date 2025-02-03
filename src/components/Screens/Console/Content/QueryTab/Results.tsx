@@ -1,10 +1,4 @@
 import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
-import { EditorView } from 'codemirror';
-import { json } from '@codemirror/lang-json';
-import {
-  createCodeMirror,
-  createEditorControlledValue,
-} from 'solid-codemirror';
 import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useAppSelector } from 'services/Context';
@@ -16,7 +10,6 @@ import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
 import { deleteFrom, insert, update } from 'sql-bricks';
-import { EditorTheme } from 'services/App';
 import { tippy } from 'solid-tippy';
 import { t } from 'utils/i18n';
 import { Drawer } from './Table/Drawer';
@@ -26,14 +19,11 @@ import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
 import Keymaps from 'components/Screens/Settings/Keymaps';
 import { DrawerState } from './Table/PopupCellRenderer';
-import { editorThemes } from './components/EditorThemes';
-import { basicSetup } from './components/EditorExtensions';
 tippy;
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
 
 export const Results = (props: {
-  editorTheme: EditorTheme;
   gridTheme: string;
   editable?: boolean;
   table?: string;
@@ -71,16 +61,6 @@ export const Results = (props: {
   });
   const [changes, setChanges] = createStore<Changes>(defaultChanges);
   const idx = () => getConnection().idx;
-
-  const { ref, editorView, createExtension } = createCodeMirror({
-    onValueChange: setCode,
-  });
-  createEditorControlledValue(editorView, code);
-  createExtension(editorThemes[props.editorTheme]);
-  createExtension(basicSetup);
-  createExtension(json);
-  const lineWrapping = EditorView.lineWrapping;
-  createExtension(lineWrapping);
 
   const openDrawerForm = ({
     rowIndex,
@@ -357,9 +337,7 @@ export const Results = (props: {
     <div class="flex flex-col h-full overflow-hidden">
       <dialog id="row_modal" class="modal">
         <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
-          <div class="h-full">
-            <div ref={ref} class="h-full" />
-          </div>
+          <div class="h-full">{/* <div ref={ref} class="h-full" /> */}</div>
         </div>
         <form method="dialog" class="modal-backdrop">
           <button>close</button>
@@ -400,7 +378,11 @@ export const Results = (props: {
       >
         <AgGridSolid
           noRowsOverlayComponent={() =>
-            data()?.notReady || data()?.queryType === 'Other' ? (
+            getContentData('Query').result_sets[queryIdx()]?.loading ? (
+              <div>
+                <Loader />
+              </div>
+            ) : data()?.notReady || data()?.queryType === 'Other' ? (
               <Keymaps short />
             ) : (
               <NoResults error={data()?.error} />

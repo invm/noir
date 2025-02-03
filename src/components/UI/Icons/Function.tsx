@@ -1,6 +1,6 @@
 export const Function = () => {
   return (
-    <svg class="w-3 h-3 text-success" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg class="size-4 text-success" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         fill-rule="evenodd"
         stroke="currentColor"

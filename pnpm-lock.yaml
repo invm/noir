@@ -109,6 +109,12 @@ importers:
       i18next:
         specifier: ^23.12.2
         version: 23.12.2
+      monaco-editor:
+        specifier: ^0.52.2
+        version: 0.52.2
+      monaco-vim:
+        specifier: ^0.4.2
+        version: 0.4.2(monaco-editor@0.52.2)
       solid-codemirror:
         specifier: ^2.3.1
         version: 2.3.1(@codemirror/state@6.4.1)(@codemirror/view@6.29.1)(solid-js@1.8.19)
@@ -118,6 +124,9 @@ importers:
       solid-js:
         specifier: ^1.8.19
         version: 1.8.19
+      solid-monaco:
+        specifier: ^0.3.0
+        version: 0.3.0(monaco-editor@0.52.2)(solid-js@1.8.19)
       solid-tippy:
         specifier: ^0.2.1
         version: 0.2.1(solid-js@1.8.19)(tippy.js@6.3.7)
@@ -634,6 +643,11 @@ packages:
 
   '@manypkg/get-packages@1.1.3':
     resolution: {integrity: sha512-fo+QhuU3qE/2TQMQmbVMqaQ6EWbMhi4ABWP+O4AM1NqPBuy0OrApV5LO6BrrgnhtAHS2NH6RrVk9OL181tTi8A==}
+
+  '@monaco-editor/loader@1.4.0':
+    resolution: {integrity: sha512-00ioBig0x642hytVspPl7DbQyaSWRaolYie/UFNjoTdvoKPzo6xrXLhTk9ixgIKcLH5b5vDOjVNiGyY+uDCUlg==}
+    peerDependencies:
+      monaco-editor: '>= 0.21.0 < 1'
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2143,6 +2157,14 @@ packages:
     resolution: {integrity: sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==}
     engines: {node: '>=0.10.0'}
 
+  monaco-editor@0.52.2:
+    resolution: {integrity: sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ==}
+
+  monaco-vim@0.4.2:
+    resolution: {integrity: sha512-rdbQC3O2rmpwX2Orzig/6gZjZfH7q7TIeB+uEl49sa+QyNm3jCKJOw5mwxBdFzTqbrPD+URfg6A2lEkuL5kymw==}
+    peerDependencies:
+      monaco-editor: '*'
+
   moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
 
@@ -2617,6 +2639,13 @@ packages:
   solid-js@1.8.19:
     resolution: {integrity: sha512-h8z/TvTQYsf894LM9Iau/ZW2iAKrCzAWDwjPhMcXnonmW1OIIihc28wp82b1wwei1p81fH5+gnfNOe8RzLbDRQ==}
 
+  solid-monaco@0.3.0:
+    resolution: {integrity: sha512-MsJLrCWysv5ONdOjC4kShNoBXJWuwjP6JplJLQWG7pL00XSfvqBEKUF0wLVdaKfntf50Qz8NAd7Yx7dq67bjPA==}
+    engines: {node: '>=18', pnpm: '>=8.6.0'}
+    peerDependencies:
+      monaco-editor: ^0.48.0
+      solid-js: ^1.8.0
+
   solid-refresh@0.6.3:
     resolution: {integrity: sha512-F3aPsX6hVw9ttm5LYlth8Q15x6MlI/J3Dn+o3EQyRTtTxidepSTwAYdozt01/YA+7ObcciagGEyXIopGZzQtbA==}
     peerDependencies:
@@ -2681,6 +2710,9 @@ packages:
     resolution: {integrity: sha512-3zWJ/mmZQsOaO+fOlsa0+QK90pwhNd042qEcw6hKFNoLFs7peGyvPffpEBbK/DSGPbyOvli0mUIFv5A4qTjh2Q==}
     engines: {node: '>=10'}
     hasBin: true
+
+  state-local@1.0.7:
+    resolution: {integrity: sha512-HTEHMNieakEnoe33shBYcZ7NX83ACUjCu8c40iOGEZsngj9zRnkqS9j1pqQPXwobB0ZcVTk27REb7COQ0UR59w==}
 
   stream-transform@2.1.3:
     resolution: {integrity: sha512-9GHUiM5hMiCi6Y03jD2ARC1ettBXkQBoQAe7nJsPknnI0ow10aXjTnew8QtYQmLjzn974BnmWEAJgCY6ZP1DeQ==}
@@ -3646,6 +3678,11 @@ snapshots:
       fs-extra: 8.1.0
       globby: 11.1.0
       read-yaml-file: 1.1.0
+
+  '@monaco-editor/loader@1.4.0(monaco-editor@0.52.2)':
+    dependencies:
+      monaco-editor: 0.52.2
+      state-local: 1.0.7
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -5327,6 +5364,12 @@ snapshots:
 
   modify-values@1.0.1: {}
 
+  monaco-editor@0.52.2: {}
+
+  monaco-vim@0.4.2(monaco-editor@0.52.2):
+    dependencies:
+      monaco-editor: 0.52.2
+
   moo@0.5.2: {}
 
   ms@2.1.2: {}
@@ -5790,6 +5833,12 @@ snapshots:
       seroval: 1.1.1
       seroval-plugins: 1.1.1(seroval@1.1.1)
 
+  solid-monaco@0.3.0(monaco-editor@0.52.2)(solid-js@1.8.19):
+    dependencies:
+      '@monaco-editor/loader': 1.4.0(monaco-editor@0.52.2)
+      monaco-editor: 0.52.2
+      solid-js: 1.8.19
+
   solid-refresh@0.6.3(solid-js@1.8.19):
     dependencies:
       '@babel/generator': 7.25.0
@@ -5869,6 +5918,8 @@ snapshots:
       semver: 7.6.0
       stringify-package: 1.0.1
       yargs: 16.2.0
+
+  state-local@1.0.7: {}
 
   stream-transform@2.1.3:
     dependencies:

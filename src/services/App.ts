@@ -1,4 +1,3 @@
-import { editorThemes } from 'components/Screens/Console/Content/QueryTab/components/EditorThemes';
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';
@@ -11,12 +10,32 @@ const INTERVAL = 2000;
 const APP_KEY = '__app__';
 
 export const THEMES = {
-  ui: ['retro', 'forest', 'autumn', 'garden', 'business', 'synthwave', 'dracula', 'dark', 'night', 'cupcake'],
-  editor: Object.keys(editorThemes) as EditorTheme[],
-  grid: ['alpine', 'alpine-dark', 'balham', 'balham-dark', 'material', 'quartz', 'quartz-dark'],
+  ui: [
+    'retro',
+    'forest',
+    'autumn',
+    'garden',
+    'business',
+    'synthwave',
+    'dracula',
+    'dark',
+    'night',
+    'cupcake',
+    'black',
+  ],
+  editor: [] as EditorTheme[],
+  grid: [
+    'alpine',
+    'alpine-dark',
+    'balham',
+    'balham-dark',
+    'material',
+    'quartz',
+    'quartz-dark',
+  ],
 } as const;
 
-export type EditorTheme = keyof typeof editorThemes;
+export type EditorTheme = 'TokyoNightStorm';
 export type ThemeCategory = keyof typeof THEMES;
 
 type AppStore = {
@@ -44,7 +63,7 @@ export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     vimModeOn: false,
     gridTheme: 'alpine-dark',
-    editorTheme: 'Dracula',
+    editorTheme: 'TokyoNightStorm',
     osType: 'Linux',
     enableDevTools: false,
   });
@@ -86,7 +105,10 @@ export const AppService = () => {
     updateStore();
   };
 
-  const updateTheme = <T extends ThemeCategory>(t: T, theme: (typeof THEMES)[T][number]) => {
+  const updateTheme = <T extends ThemeCategory>(
+    t: T,
+    theme: (typeof THEMES)[T][number]
+  ) => {
     if (t === 'ui') {
       document.documentElement.dataset.theme = theme;
       localStorage.setItem('theme', theme);

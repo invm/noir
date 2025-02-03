@@ -1,41 +1,135 @@
-import {
-  createCodeMirror,
-  createEditorControlledValue,
-  createEditorFocus,
-} from 'solid-codemirror';
-import { Show, createEffect, createSignal, on } from 'solid-js';
-import { EditorView } from '@codemirror/view';
-import { MySQL, sql, SQLite, PostgreSQL, MariaSQL } from '@codemirror/lang-sql';
-
-import { vim } from '@replit/codemirror-vim';
+import { Show, createEffect, createSignal, on, onMount } from 'solid-js';
 import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api';
-import { Copy, EditIcon, FireIcon, VimIcon } from 'components/UI/Icons';
+import {
+  Copy,
+  EditIcon,
+  FireIcon,
+  // VimIcon
+} from 'components/UI/Icons';
 import { useAppSelector } from 'services/Context';
-import { Dialect, QueryTaskEnqueueResult } from 'interfaces';
+import { QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
-import { createShortcut } from '@solid-primitives/keyboard';
+
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { debounce } from 'utils/utils';
-import {
-  moveCompletionSelection,
-  autocompletion,
-} from '@codemirror/autocomplete';
+// @ts-ignore
+// import { initVimMode } from 'monaco-vim';
 
-import { EditorTheme } from 'services/App';
-import { editorThemes } from './components/EditorThemes';
-import { basicSetup } from './components/EditorExtensions';
+import { loader, MonacoEditor } from 'solid-monaco';
+import * as monaco from 'monaco-editor';
 import { QueryContentTabData } from 'services/Connections';
 
-const SQLDialects = {
-  [Dialect.Mysql]: MySQL,
-  [Dialect.MariaDB]: MariaSQL,
-  [Dialect.Postgresql]: PostgreSQL,
-  [Dialect.Sqlite]: SQLite,
+const DEFAULT_SQL_KEYWORDS = [
+  'SELECT',
+  'FROM',
+  'WHERE',
+  'JOIN',
+  'INNER',
+  'OUTER',
+  'LEFT',
+  'RIGHT',
+  'ON',
+  'GROUP BY',
+  'ORDER BY',
+  'HAVING',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'VALUES',
+  'CREATE',
+  'DROP',
+  'ALTER',
+  'TABLE',
+  'INDEX',
+  'VIEW',
+  'TRIGGER',
+  'PROCEDURE',
+  'FUNCTION',
+  'DISTINCT',
+  'AND',
+  'OR',
+  'NOT',
+  'BETWEEN',
+  'IN',
+  'LIKE',
+  'IS',
+  'NULL',
+  'EXISTS',
+  'ALL',
+  'ANY',
+  'UNION',
+  'INTERSECT',
+  'EXCEPT',
+  'AS',
+  'WITH',
+  'LIMIT',
+  'OFFSET',
+  'INNER JOIN',
+  'FULL OUTER JOIN',
+  'CROSS JOIN',
+  'SET',
+  'CONSTRAINT',
+  'PRIMARY KEY',
+  'FOREIGN KEY',
+  'CHECK',
+  'UNIQUE',
+  'DEFAULT',
+  'REFERENCES',
+  'AUTO_INCREMENT',
+];
+
+interface Range {
+  startLineNumber: number;
+  endLineNumber: number;
+  startColumn: number;
+  endColumn: number;
+}
+
+const getEditorAutoCompleteSuggestion = (
+  range: Range,
+  schema: Record<string, string[]>
+): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
+  const suggestionsFromDefaultKeywords = DEFAULT_SQL_KEYWORDS.map(
+    (kw: string) => ({
+      label: `${kw.toUpperCase()}`,
+      kind: monaco.languages.CompletionItemKind.Keyword,
+      detail: 'Keyword',
+      insertText: `${kw.toUpperCase()} `,
+      range: range,
+    })
+  );
+
+  const tableNameKeywords = Object.keys(schema)?.map((tableName: string) => ({
+    label: tableName,
+    kind: monaco.languages.CompletionItemKind.Interface,
+    detail: 'Table',
+    insertText: tableName,
+    range: range,
+  }));
+
+  const columns = Object.values(schema)
+    .flat()
+    ?.map((col: string) => ({
+      label: col, // TODO: add table in parens
+      kind: monaco.languages.CompletionItemKind.Property,
+      detail: 'Column',
+      insertText: col,
+      range: range,
+    }));
+
+  const suggestions = {
+    suggestions: [
+      ...suggestionsFromDefaultKeywords,
+      ...tableNameKeywords,
+      ...columns,
+    ],
+  };
+  return suggestions;
 };
 
-export const Editor = (props: { editorTheme: EditorTheme }) => {
+export const Editor = () => {
   const {
     connections: {
       store,
@@ -47,7 +141,10 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
       queryIdx,
       updateResultSet,
     },
-    app: { vimModeOn, toggleVimModeOn },
+    app: {
+      vimModeOn,
+      // toggleVimModeOn
+    },
     messages: { notify },
     backend: { cancelTask },
   } = useAppSelector();
@@ -56,11 +153,15 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
+  // const [vimMode, setVimMode] = createSignal<any>(null);
+  const [editor, setEditor] =
+    createSignal<monaco.editor.IStandaloneCodeEditor>();
 
   const updateQuery = debounce(() => {
     updateContentTab('data', {
       query: code(),
-      cursor: editorView()?.state.selection.ranges[0].from ?? 0,
+      cursor: 0,
+      // cursor: editorView()?.state.selection.ranges[0].from ?? 0,
     });
   }, 300);
 
@@ -70,22 +171,6 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     updateQuery();
   };
 
-  const { ref, editorView, createExtension } = createCodeMirror({
-    value: code(),
-    onValueChange: updateQueryText,
-  });
-  createEditorControlledValue(editorView, code);
-  const lineWrapping = EditorView.lineWrapping;
-  createExtension(lineWrapping);
-  createExtension(editorThemes[props.editorTheme]);
-  createExtension(basicSetup);
-  createExtension(autocompletion);
-  createExtension(() => (vimModeOn() ? vim() : []));
-  createExtension(() =>
-    sql({ dialect: SQLDialects[getConnection().connection.dialect], schema })
-  );
-  const { setFocused, focused } = createEditorFocus(editorView);
-
   const onFormat = () => {
     const formatted = format(code());
     setCode(formatted);
@@ -93,10 +178,7 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   };
 
   const getSelection = () => {
-    return editorView().state.sliceDoc(
-      editorView().state.selection.ranges[0].from,
-      editorView().state.selection.ranges[0].to
-    );
+    return editor()!.getSelection();
   };
 
   const onExecute = async () => {
@@ -105,18 +187,19 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     const selectedText = getSelection();
     const conn = getConnection();
     try {
+      console.log(selectedText || code());
       const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
         {
           connId: conn.id,
-          sql: selectedText || code(),
+          sql: code(),
           autoLimit: autoLimit(),
           tabIdx: conn.idx,
         }
       );
       updateContentTab('data', {
         query: code(),
-        cursor: editorView().state.selection.ranges[0].from,
+        cursor: editor()!.getPosition()?.column,
         result_sets: result_sets.map((id) => ({
           loading: true,
           id,
@@ -132,6 +215,15 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
   const copyQueryToClipboard = () => {
     navigator.clipboard.writeText(String(code()));
   };
+
+  createEffect(() => {
+    if (vimModeOn() && editor()) {
+      // const vimm = initVimMode(editor());
+    } else {
+      // vimMode()?.dispose();
+      // setVimMode(null);
+    }
+  });
 
   createEffect(
     on(idx, () => {
@@ -149,30 +241,36 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
     })
   );
 
-  createShortcut(['Control', 'p'], () => {
-    if (focused() && vimModeOn()) {
-      const fn = moveCompletionSelection(false);
-      fn(editorView());
-    }
-  });
+  const [isThemeLoaded, setIsThemeLoaded] = createSignal(false);
 
-  createShortcut(['Control', 'n'], () => {
-    if (focused() && vimModeOn()) {
-      const fn = moveCompletionSelection(true);
-      fn(editorView());
-    }
-  });
+  onMount(async () => {
+    loader.init().then((monaco) => {
+      import('./monaco/tokyo-night-storm.json').then((data) => {
+        // @ts-ignore
+        monaco.editor.defineTheme('TokyoNightStorm', data);
+        setIsThemeLoaded(true);
+      });
 
-  createShortcut(['Control', 'e'], () => {
-    if (focused() && vimModeOn()) {
-      onExecute();
-    }
-  });
+      const provider = monaco.languages.registerCompletionItemProvider('sql', {
+        triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
 
-  createShortcut(['Control', 'e'], onExecute);
-  createShortcut(['Control', 'Enter'], onExecute);
-  createShortcut(['Control', 'l'], () => setFocused(true));
-  createShortcut(['Control', 'Shift', 'F'], onFormat);
+        provideCompletionItems: (model, position) => {
+          const word = model.getWordUntilPosition(position);
+          const range = {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: word.startColumn,
+            endColumn: word.endColumn,
+          };
+          return getEditorAutoCompleteSuggestion(range, schema);
+        },
+      });
+
+      return () => {
+        provider.dispose();
+      };
+    });
+  });
 
   // const dummyAction = async () => {};
 
@@ -217,25 +315,25 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
             </div>
           </div>
 
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t('console.actions.vim_mode_on')}
-          >
-            <div class="flex items-center mx-2">
-              <span class="mr-2">
-                <VimIcon />
-              </span>
-              <input
-                type="checkbox"
-                class="toggle toggle-sm"
-                classList={{
-                  'toggle-primary': vimModeOn(),
-                }}
-                checked={vimModeOn()}
-                onChange={() => toggleVimModeOn()}
-              />
-            </div>
-          </div>
+          {/* <div */}
+          {/*   class="tooltip tooltip-primary tooltip-bottom" */}
+          {/*   data-tip={t('console.actions.vim_mode_on')} */}
+          {/* > */}
+          {/*   <div class="flex items-center mx-2"> */}
+          {/*     <span class="mr-2"> */}
+          {/*       <VimIcon /> */}
+          {/*     </span> */}
+          {/*     <input */}
+          {/*       type="checkbox" */}
+          {/*       class="toggle toggle-sm" */}
+          {/*       classList={{ */}
+          {/*         'toggle-primary': vimModeOn(), */}
+          {/*       }} */}
+          {/*       checked={vimModeOn()} */}
+          {/*       onChange={() => toggleVimModeOn()} */}
+          {/*     /> */}
+          {/*   </div> */}
+          {/* </div> */}
         </div>
         <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
           <div
@@ -263,8 +361,45 @@ export const Editor = (props: { editorTheme: EditorTheme }) => {
           </div>
         </Show>
       </div>
-      <div class="overflow-hidden w-full h-full">
-        <div ref={ref} class="w-full h-full" />
+      <div class="flex-1">
+        <MonacoEditor
+          options={{
+            glyphMargin: false,
+            tabSize: 2,
+            lineNumbers: 'on',
+            fontSize: 14,
+            folding: true,
+            theme: isThemeLoaded() ? 'TokyoNightStorm' : 'vs-dark',
+            language: 'sql',
+            wordWrap: 'on',
+          }}
+          onMount={(_m, e) => {
+            setEditor(e);
+
+            e.addCommand(
+              monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+              onExecute
+            );
+            e.addCommand(
+              monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE,
+              onExecute
+            );
+            e.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL, () =>
+              editor()?.focus()
+            );
+
+            // either make this work or delete the shortcut from the shortcut list
+            // e.addCommand(
+            //   monaco.KeyMod.CtrlCmd |
+            //     monaco.KeyMod.Shift |
+            //     monaco.KeyCode.KeyE,
+            //   onFormat
+            // );
+          }}
+          language={'sql'}
+          onChange={updateQueryText}
+          value={code()}
+        />
       </div>
     </div>
   );

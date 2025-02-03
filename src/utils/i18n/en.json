@@ -149,7 +149,7 @@
     },
     "update_toast": {
       "title": "New version available",
-      "download": "Click here to update and relaod",
+      "download": "Click here to update and reload",
       "release_notes": "Release notes",
       "close": "Close"
     },

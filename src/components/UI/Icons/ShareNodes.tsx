@@ -1,7 +1,7 @@
 export const ShareNodes = () => {
   return (
     <svg
-      class="w-3 h-3 text-error"
+      class="size-4 text-error"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
