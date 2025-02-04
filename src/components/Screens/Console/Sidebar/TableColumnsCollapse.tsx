@@ -7,7 +7,7 @@ import {
   newContentTab,
   TableStructureContentTabData,
 } from 'services/Connections';
-import { SwapChevronDown, SwapChevronRight, Table } from 'components/UI/Icons';
+import { SwapChevronDown, SwapChevronRight, Table } from '@/components/UI-old/Icons';
 import { Column, ResultSet } from 'interfaces';
 import { getAnyCase } from 'utils/utils';
 

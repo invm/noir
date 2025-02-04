@@ -6,8 +6,7 @@ import 'ag-grid-community/styles/ag-theme-quartz.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import 'tippy.js/dist/tippy.css';
 import './index.css';
-import { Main } from 'components/Screens/Main';
-import { Loader } from 'components/UI';
+import { Loader } from 'components/UI-old';
 import { onMount, Switch, Match, createSignal, Show } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
@@ -17,6 +16,13 @@ import { relaunch } from '@tauri-apps/api/process';
 import { t } from 'utils/i18n';
 import { isDev } from 'solid-js/web';
 import { error } from 'tauri-plugin-log-api';
+import { AppRouter } from 'Router';
+import {
+  ColorModeProvider,
+  ColorModeScript,
+  createLocalStorageManager,
+} from '@kobalte/core';
+import { restoreTheme } from 'components/theme-customizer';
 
 function App() {
   const {
@@ -125,13 +131,9 @@ function App() {
   };
 
   onMount(async () => {
-    const theme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.dataset.theme = theme;
-    await restoreAppStore();
-    await restoreConnectionStore();
-    if (store.tabs.length === 0) {
-      setScreen('home');
-    }
+    restoreTheme();
+    // await restoreAppStore();
+    // await restoreConnectionStore();
     setLoading(false);
 
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {
@@ -140,55 +142,63 @@ function App() {
     await checkForUpdates();
   });
 
+  const storageManager = createLocalStorageManager('ui-theme');
+
   return (
     <>
-      <Switch>
-        <Match when={loading()}>
-          <div class="flex justify-center flex-col gap-4 items-center h-full bg-base-200 w-full">
-            <Loader />
-            <div class="text-lg">{t('connecting')}</div>
-          </div>
-        </Match>
-        <Match when={!loading()}>
-          <Main />
-        </Match>
-      </Switch>
-      <Show when={shouldUpdate()}>
-        <div class="toast z-50 whitespace-normal">
-          <div class="bg-base-300 rounded-lg w-[500px]">
-            <div class="flex flex-col items-start p-4">
-              <div class="flex items-center w-full">
-                <div class="text-base-content font-bold text-lg">
-                  {t('update_toast.title')}: {updateManifest().version}
+      <ColorModeScript storageType={storageManager.type} />
+      <ColorModeProvider
+        initialColorMode="dark"
+        storageManager={storageManager}
+      >
+        <Switch>
+          <Match when={loading()}>
+            <div class="flex justify-center flex-col gap-4 items-center h-full bg-base-200 w-full">
+              <Loader />
+              <div class="text-lg">{t('connecting')}</div>
+            </div>
+          </Match>
+          <Match when={!loading()}>
+            <AppRouter />
+          </Match>
+        </Switch>
+        <Show when={shouldUpdate()}>
+          <div class="toast z-50 whitespace-normal">
+            <div class="bg-base-300 rounded-lg w-[500px]">
+              <div class="flex flex-col items-start p-4">
+                <div class="flex items-center w-full">
+                  <div class="text-base-content font-bold text-lg">
+                    {t('update_toast.title')}: {updateManifest().version}
+                  </div>
+                  <button
+                    class="ml-auto fill-current text-gray-700 w-6 h-6 cursor-pointer"
+                    onClick={() => {
+                      setShouldUpdate(false);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                      <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z" />
+                    </svg>
+                  </button>
                 </div>
-                <button
-                  class="ml-auto fill-current text-gray-700 w-6 h-6 cursor-pointer"
-                  onClick={() => {
-                    setShouldUpdate(false);
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                    <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z" />
-                  </svg>
-                </button>
-              </div>
-              <div class="divider my-0.5"></div>
-              <span class="">{t('update_toast.release_notes')}</span>
-              <div>{updateManifest().body}</div>
-              <hr class="py-2" />
-              <div class="ml-auto">
-                <button
-                  disabled={updating()}
-                  onClick={handleUpdate}
-                  class="btn btn-primary btn-sm"
-                >
-                  {t('update_toast.download')}
-                </button>
+                <div class="divider my-0.5"></div>
+                <span class="">{t('update_toast.release_notes')}</span>
+                <div>{updateManifest().body}</div>
+                <hr class="py-2" />
+                <div class="ml-auto">
+                  <button
+                    disabled={updating()}
+                    onClick={handleUpdate}
+                    class="btn btn-primary btn-sm"
+                  >
+                    {t('update_toast.download')}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Show>
+        </Show>
+      </ColorModeProvider>
     </>
   );
 }

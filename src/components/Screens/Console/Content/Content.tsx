@@ -1,6 +1,6 @@
 import { For, Match, Show, Switch } from 'solid-js';
 import { useAppSelector } from 'services/Context';
-import { AddIcon, CloseIcon } from 'components/UI/Icons';
+import { AddIcon, CloseIcon } from '@/components/UI-old/Icons';
 import { QueryTab } from './QueryTab/QueryTab';
 import { TableStructureTab } from './TableStructure/TableStructureTab';
 import { ContentTab } from 'services/Connections';

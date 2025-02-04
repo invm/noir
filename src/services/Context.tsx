@@ -28,8 +28,7 @@ export const StoreProvider: ParentComponent = (props) => {
   const [osType, setOsType] = createSignal<OsType>('Linux');
 
   onMount(async () => {
-    const osType = await type();
-    setOsType(osType);
+    setOsType(await type());
     setLoaded(true);
   });
 

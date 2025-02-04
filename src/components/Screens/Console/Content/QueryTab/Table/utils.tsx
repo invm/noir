@@ -3,7 +3,7 @@ import { getAnyCase } from 'utils/utils';
 import { Row } from 'interfaces';
 import { Show } from 'solid-js';
 import { ColDef } from 'ag-grid-community';
-import { Key } from 'components/UI/Icons';
+import { Key } from '@/components/UI-old/Icons';
 import { t } from 'utils/i18n';
 import { SetStoreFunction } from 'solid-js/store';
 

@@ -5,10 +5,10 @@ import sql from 'sql-bricks';
 import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, Row } from 'interfaces';
 import { t } from 'utils/i18n';
-import { CloseIcon } from 'components/UI/Icons';
+import { CloseIcon } from '@/components/UI-old/Icons';
 import { getAnyCase } from 'utils/utils';
 import { createForm } from '@felte/solid';
-import { Select, TextInput } from 'components/UI';
+import { Select, TextInput } from '@/components/UI-old';
 import { validator } from '@felte/validator-zod';
 
 export const schema = z.object({

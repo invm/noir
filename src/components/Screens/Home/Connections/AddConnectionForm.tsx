@@ -10,7 +10,7 @@ import {
   Alert,
   FilePicker,
   Label,
-} from 'components/UI';
+} from '@/components/UI-old';
 import {
   PORTS_MAP,
   Dialect,

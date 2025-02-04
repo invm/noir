@@ -1,11 +1,11 @@
 import { invoke } from '@tauri-apps/api';
 import { createSignal, For } from 'solid-js';
 import { ConnectionConfig, Mode } from 'interfaces';
-import { ColorCircle } from 'components/UI';
+import { ColorCircle } from '@/components/UI-old';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
-import { Refresh } from 'components/UI/Icons';
+import { Refresh } from '@/components/UI-old/Icons';
 
 export const ConnectionsList = () => {
   const {

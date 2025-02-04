@@ -5,7 +5,7 @@ import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
-import { Loader } from 'components/UI';
+import { Loader } from '@/components/UI-old';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';

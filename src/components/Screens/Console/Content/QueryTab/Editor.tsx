@@ -6,7 +6,7 @@ import {
   EditIcon,
   FireIcon,
   // VimIcon
-} from 'components/UI/Icons';
+} from '@/components/UI-old/Icons';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';

@@ -1,13 +1,13 @@
-import { Alerts } from 'components/UI';
+import { Alerts } from '@/components/UI-old';
 import { invoke } from '@tauri-apps/api';
-import { CloseIcon, Cog, HomeIcon, QuestionMark } from 'components/UI/Icons';
+import { CloseIcon, Cog, HomeIcon, QuestionMark } from '@/components/UI-old/Icons';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
-import { ThemeSwitch } from 'components/UI/ThemeSwitch';
+import { ThemeSwitch } from '@/components/UI-old/ThemeSwitch';
 import Keymaps from './Settings/Keymaps';
 
 export const Main = () => {

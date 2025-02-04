@@ -3,7 +3,7 @@ import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
-import { Function, Refresh, ShareNodes, Terminal } from 'components/UI/Icons';
+import { Function, Refresh, ShareNodes, Terminal } from '@/components/UI-old/Icons';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';

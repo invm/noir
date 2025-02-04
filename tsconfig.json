@@ -8,27 +8,16 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "sourceMap": false,
     "noEmit": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "baseUrl": "./src",
     "paths": {
-      "components": [
-        "src/components"
-      ],
-      "services": [
-        "src/services"
-      ],
-      "utils": [
-        "src/utils"
-      ],
-      "src/*": [
-        "src/*"
-      ]
+      "components": ["components"],
+      "services": ["services"],
+      "utils": ["utils"]
     }
   }
 }
