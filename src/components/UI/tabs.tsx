@@ -63,7 +63,7 @@ export const TabsContent = <T extends ValidComponent = "div">(
 	return (
 		<TabsPrimitive.Content
 			class={cn(
-				"transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-[1.5px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[orientation=horizontal]:mt-2 data-[orientation=vertical]:ml-2",
+				"transition-shadow duration-200 focus-visible:outline-none focus-visible:ring-[1.5px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[orientation=vertical]:ml-2",
 				local.class,
 			)}
 			{...rest}

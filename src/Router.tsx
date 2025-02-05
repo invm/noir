@@ -1,6 +1,6 @@
 import { Router, Route } from '@solidjs/router';
 import { Connections } from 'pages/connections';
-import { Console } from 'pages/console';
+import { Console } from 'pages/console/console';
 import { Help } from 'pages/help';
 import { Settings } from 'pages/settings';
 

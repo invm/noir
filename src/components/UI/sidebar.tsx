@@ -34,9 +34,9 @@ import {
 } from './textfield';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 import { cn } from 'utils/cn';
-import { useIsMobile } from '../lib/use-mobile';
-import { callHandler } from '../lib/call-handler';
-import { combineStyle } from '../lib/combine-props';
+import { useIsMobile } from '../../pages/console/sidebar/lib/use-mobile';
+import { callHandler } from '../../pages/console/sidebar/lib/call-handler';
+import { combineStyle } from '../../pages/console/sidebar/lib/combine-props';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

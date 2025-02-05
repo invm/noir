@@ -1,7 +1,6 @@
-import { QueryEditor } from 'components/editor/query-editor';
-import { DbSidebar } from 'components/sidebar/db-sidebar';
-import ThemeCustomizer from 'components/theme-customizer';
 import { SidebarInset, SidebarProvider } from 'components/ui/sidebar';
+import { DbSidebar } from './sidebar/db-sidebar';
+import QueryEditor from './query-editor';
 
 export const Console = () => {
   return (
@@ -9,7 +8,6 @@ export const Console = () => {
       <DbSidebar />
       <SidebarInset class="bg-background">
         <QueryEditor />
-        <ThemeCustomizer />
       </SidebarInset>
     </SidebarProvider>
   );

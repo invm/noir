@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 import { createStore } from 'solid-js/store';
 import { createSignal, For } from 'solid-js';
 import { useSideBar } from 'components/ui/sidebar';
+import Resizable from '@corvu/resizable';
 
 interface QueryTab {
   id: string;
@@ -23,7 +24,7 @@ interface QueryTab {
   content: string;
 }
 
-export const QueryEditor = () => {
+export default function QueryEditor() {
   const [tabs, setTabs] = createStore<QueryTab[]>([
     { id: '1', name: 'Query 1', content: 'SELECT * FROM users;' },
     { id: '2', name: 'media_types', content: 'SELECT * FROM media_types;' },
@@ -62,7 +63,7 @@ export const QueryEditor = () => {
   };
 
   return (
-    <div class="flex h-full flex-col bg-background text-foreground">
+    <div class="flex h-full flex-col text-foreground">
       <div class="flex w-full items-center justify-between border-b px-2 relative">
         <Tooltip>
           <TooltipTrigger>
@@ -129,67 +130,116 @@ export const QueryEditor = () => {
           <TooltipContent>Toggle Sidebar</TooltipContent>
         </Tooltip>
       </div>
-      <Tabs value={activeTab()} class="flex-1">
-        <For each={tabs}>
-          {(tab) => (
-            <TabsContent
-              value={tab.id}
-              class="h-full border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
-            >
-              <div class="flex items-center gap-2 border-b bg-muted/40 px-2 py-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={runQuery}
-                  disabled={isLoading()}
-                >
-                  {isLoading() ? (
-                    <Loader class="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <Play class="mr-2 size-4" />
-                  )}
-                  Run
-                </Button>
-                <Button size="sm" variant="ghost">
-                  <Save class="mr-2 size-4" />
-                  Save
-                </Button>
-                <Button size="sm" variant="ghost">
-                  <Download class="mr-2 size-4" />
-                  Export
-                </Button>
-                <div class="flex items-center">
-                  <span class="mr-2 text-sm">Limit:</span>
-                  <Input
-                    type="number"
-                    value={limit()}
-                    onChange={(e) => setLimit(e.target.value)}
-                    class="h-8 w-20"
-                  />
-                </div>
-                {isLoading() && (
-                  <div class="ml-auto flex items-center">
-                    <Loader class="mr-2 size-4 animate-spin" />
-                    <span class="text-sm">Running query...</span>
-                  </div>
-                )}
-              </div>
-              <div class="relative flex-1">
-                <textarea
-                  class="h-full w-full resize-none bg-background p-4 font-mono text-sm focus:outline-none"
-                  value={tab.content}
-                  onChange={(e) => {
-                    const newTabs = tabs.map((t) =>
-                      t.id === tab.id ? { ...t, content: e.target.value } : t
-                    );
-                    setTabs(newTabs);
-                  }}
-                />
-              </div>
-            </TabsContent>
+      <div class="flex items-center gap-2 border-b bg-muted/40 px-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={runQuery}
+          disabled={isLoading()}
+        >
+          {isLoading() ? (
+            <Loader class="mr-2 size-4 animate-spin" />
+          ) : (
+            <Play class="mr-2 size-4" />
           )}
-        </For>
-      </Tabs>
+          Run
+        </Button>
+        <Button size="sm" variant="ghost">
+          <Save class="mr-2 size-4" />
+          Save
+        </Button>
+        <Button size="sm" variant="ghost">
+          <Download class="mr-2 size-4" />
+          Export
+        </Button>
+        <div class="flex items-center">
+          <span class="mr-2 text-sm">Limit:</span>
+          <Input
+            type="number"
+            value={limit()}
+            onChange={(e) => setLimit(e.target.value)}
+            class="h-8 w-20"
+          />
+        </div>
+        {isLoading() && (
+          <div class="ml-auto flex items-center">
+            <Loader class="mr-2 size-4 animate-spin" />
+            <span class="text-sm">Running query...</span>
+          </div>
+        )}
+      </div>
+      <div class="size-full">
+        <Resizable class="size-full" orientation="vertical">
+          <Resizable.Panel
+            initialSize={0.4}
+            minSize={0.3}
+            collapsible
+            collapsedSize={0.1}
+            class="flex items-center justify-center overflow-hidden rounded-lg bg-corvu-100"
+          >
+            <Tabs value={activeTab()} class="flex-1 flex">
+              <For each={tabs}>
+                {(tab) => (
+                  <TabsContent
+                    value={tab.id}
+                    class="h-full flex-col flex-1 border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+                  >
+                    <textarea
+                      class="h-full w-full resize-none bg-background p-4 font-mono text-sm focus:outline-none"
+                      value={tab.content}
+                      onChange={(e) => {
+                        const newTabs = tabs.map((t) =>
+                          t.id === tab.id
+                            ? { ...t, content: e.target.value }
+                            : t
+                        );
+                        setTabs(newTabs);
+                      }}
+                    />
+                  </TabsContent>
+                )}
+              </For>
+            </Tabs>
+          </Resizable.Panel>
+          <Resizable.Handle
+            aria-label="Resize Handle"
+            class="group basis-2 px-2 overflow-hidden"
+          >
+            <div class="size-full bg-accent active:bg-primary hover:bg-primary rounded-lg transition-colors group-data-active:bg-corvu-300 group-data-dragging:bg-corvu-100" />
+          </Resizable.Handle>
+          <Resizable.Panel
+            collapsible
+            initialSize={0.6}
+            minSize={0.3}
+            collapsedSize={0.1}
+            class="rounded-lg bg-corvu-100"
+          >
+            <Tabs value={activeTab()} class="flex-1 flex">
+              <For each={tabs}>
+                {(tab) => (
+                  <TabsContent
+                    value={tab.id}
+                    class="h-full flex-col flex-1 border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+                  >
+                    <textarea
+                      class="h-full w-full resize-none bg-background p-4 font-mono text-sm focus:outline-none"
+                      value={tab.content}
+                      onChange={(e) => {
+                        const newTabs = tabs.map((t) =>
+                          t.id === tab.id
+                            ? { ...t, content: e.target.value }
+                            : t
+                        );
+                        setTabs(newTabs);
+                      }}
+                    />
+                  </TabsContent>
+                )}
+              </For>
+            </Tabs>
+          </Resizable.Panel>
+        </Resizable>
+      </div>
     </div>
   );
-};
+}

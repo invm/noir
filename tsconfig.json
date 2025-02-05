@@ -15,9 +15,9 @@
     "resolveJsonModule": true,
     "baseUrl": "./src",
     "paths": {
-      "components": ["components"],
-      "services": ["services"],
-      "utils": ["utils"]
+      "components/": ["components/"],
+      "services/": ["services/"],
+      "utils/": ["utils/"]
     }
   }
 }

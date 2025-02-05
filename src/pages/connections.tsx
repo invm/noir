@@ -1,19 +1,9 @@
-import { A } from '@solidjs/router';
-import { Button } from 'components/ui/button';
-import { Separator } from 'components/ui/separator';
+import { ConnectionManager } from 'components/connections/manager';
 
 export const Connections = () => {
   return (
-    <div>
-      <h1>Connections</h1>
-      <Button>this is a button</Button>
-      <Separator />
-      <div>
-        <A href="/">Connections</A>
-        <A href="/console/asd">Console</A>
-        <A href="/help">Help</A>
-        <A href="/settings">Settings</A>
-      </div>
-    </div>
+    <main class="min-h-screen py-20 bg-background p-4 h-full overflow-auto">
+      <ConnectionManager />
+    </main>
   );
 };

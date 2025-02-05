@@ -1,6 +1,7 @@
 import { Show } from 'solid-js';
 import { t } from 'utils/i18n';
-import { AddIcon, CloseIcon } from './Icons';
+import { VsClose as CloseIcon } from 'solid-icons/vs';
+import { FaSolidPlus as AddIcon } from 'solid-icons/fa';
 
 type FilePickerProps = {
   onChange: () => void;
@@ -11,16 +12,12 @@ type FilePickerProps = {
 
 export const FilePicker = (props: FilePickerProps) => {
   return (
-    <div class="join w-full block flex relative">
-      <button
-        onClick={props.onChange}
-        class="rounded-r-none btn hover:btn-accent btn-ghost hover:border-base-content btn-sm btn-bordered border-base-content">
+    <div class="w-full flex relative border rounded-md h-8">
+      <button class="px-2" onClick={props.onChange}>
         {t('file_input.choose_file')}
       </button>
       <Show when={props.onCreate}>
-        <button
-          onClick={props.onCreate}
-          class="rounded-none btn hover:btn-accent btn-ghost hover:border-base-content btn-sm btn-bordered border-base-content">
+        <button class="px-2 border-r border-l" onClick={props.onCreate}>
           <AddIcon />
         </button>
       </Show>
@@ -30,11 +27,11 @@ export const FilePicker = (props: FilePickerProps) => {
         readonly
         onClick={props.onChange}
         placeholder="No file selected"
-        class="input active input-bordered input-sm rounded-l-none flex-1 border-base-content"
+        class="flex-1 flex items-center px-2 relative bg-accent"
       />
       <Show when={props.onClear}>
-        <div class="absolute z-10 right-0">
-          <button onClick={props.onClear} class="z-10 btn btn-sm btn-ghost px-2">
+        <div class="z-10 right-0">
+          <button onClick={props.onClear} class="z-10 px-2 h-full bg-accent">
             <CloseIcon />
           </button>
         </div>

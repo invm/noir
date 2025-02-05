@@ -181,8 +181,9 @@ export const ConnectionsService = () => {
           } catch (e) {
             conn_tabs.idx = 0;
             return Promise.resolve(res);
+          } finally {
+            setTimeout(() => Promise.resolve(), 10000);
           }
-          setTimeout(() => Promise.resolve(), 10000);
         },
         Promise.resolve([] as ConnectionTab[])
       );

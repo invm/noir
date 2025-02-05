@@ -4,7 +4,6 @@ import 'ag-grid-community/styles/ag-theme-alpine.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
-import 'tippy.js/dist/tippy.css';
 import './index.css';
 import { Loader } from 'components/UI-old';
 import { onMount, Switch, Match, createSignal, Show } from 'solid-js';
@@ -132,8 +131,8 @@ function App() {
 
   onMount(async () => {
     restoreTheme();
-    // await restoreAppStore();
-    // await restoreConnectionStore();
+    await restoreAppStore();
+    await restoreConnectionStore();
     setLoading(false);
 
     await listen<QueryTaskResult>(Events.QueryFinished, async (event) => {

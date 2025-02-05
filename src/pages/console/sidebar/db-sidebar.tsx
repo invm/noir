@@ -75,7 +75,7 @@ const data = {
   ],
 };
 
-export const DbSidebar = () => {
+const DbSidebar = () => {
   return (
     <Sidebar>
       <SidebarHeader>
@@ -173,3 +173,5 @@ export const DbSidebar = () => {
     </Sidebar>
   );
 };
+
+export { DbSidebar };
