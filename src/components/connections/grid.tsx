@@ -73,6 +73,7 @@ export function ConnectionGrid(props: { class?: string }) {
         idx: 0,
       });
       navigate('/console/' + config.id);
+      console.log(config.id);
     } catch (error) {
       notify(error);
     } finally {
@@ -81,7 +82,7 @@ export function ConnectionGrid(props: { class?: string }) {
   };
 
   return (
-    <div class={cn('grid gap-4 self-start', props.class)}>
+    <div class={cn('grid gap-4 self-start overflow-auto', props.class)}>
       <For each={connections}>
         {(connection) => (
           <AlertDialog>

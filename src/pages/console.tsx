@@ -1,6 +1,6 @@
 import { SidebarInset, SidebarProvider } from 'components/ui/sidebar';
-import { DbSidebar } from './sidebar/db-sidebar';
-import QueryEditor from './query-editor';
+import { DbSidebar } from 'components/sidebar/db-sidebar';
+import QueryEditor from '../components/query-editor';
 
 export const Console = () => {
   return (

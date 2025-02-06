@@ -15,7 +15,7 @@ import { relaunch } from '@tauri-apps/api/process';
 import { t } from 'utils/i18n';
 import { isDev } from 'solid-js/web';
 import { error } from 'tauri-plugin-log-api';
-import { AppRouter } from 'Router';
+import { Router } from 'Router';
 import {
   ColorModeProvider,
   ColorModeScript,
@@ -158,7 +158,7 @@ function App() {
             </div>
           </Match>
           <Match when={!loading()}>
-            <AppRouter />
+            <Router />
           </Match>
         </Switch>
         <Show when={shouldUpdate()}>

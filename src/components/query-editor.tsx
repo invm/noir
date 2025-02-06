@@ -24,7 +24,9 @@ interface QueryTab {
   content: string;
 }
 
-export default function QueryEditor() {
+interface QueryEditorProps {}
+
+export default function QueryEditor(_props: QueryEditorProps) {
   const [tabs, setTabs] = createStore<QueryTab[]>([
     { id: '1', name: 'Query 1', content: 'SELECT * FROM users;' },
     { id: '2', name: 'media_types', content: 'SELECT * FROM media_types;' },
@@ -97,7 +99,7 @@ export default function QueryEditor() {
                   >
                     <TabsTrigger
                       value={tab.id}
-                      class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-muted-foreground"
+                      class="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-primary transition-all"
                       classList={{ '!text-primary': tab.id == activeTab() }}
                     >
                       {tab.name} {tab.id}

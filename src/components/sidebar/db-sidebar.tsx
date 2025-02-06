@@ -74,12 +74,20 @@ const data = {
     { name: 'calculate_total_revenue', type: 'function' },
   ],
 };
+import { CommandPalette } from 'components/command-palette';
 
-const DbSidebar = () => {
+interface DbSidebarProps {}
+
+const DbSidebar = (_props: DbSidebarProps) => {
   return (
     <Sidebar>
       <SidebarHeader>
-        <DbConnectionHeader name="sample_db" host="localhost:5432" />
+        <DbConnectionHeader
+          setOpen={() => {}} // TODO: this should open the command palette, maybe wrap the command palette with a provider and be able to open everywhere and add or remove actions based on components
+          name="sample_db"
+          host="localhost:5432"
+        />
+        <CommandPalette />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

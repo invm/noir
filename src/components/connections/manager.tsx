@@ -10,7 +10,7 @@ export function ConnectionManager() {
   const [showNewConnection, setShowNewConnection] = createSignal(true);
 
   return (
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-7xl h-full overflow-hidden pt-10">
       <div class="mb-8 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold">Database Connections</h1>
@@ -22,8 +22,8 @@ export function ConnectionManager() {
         </Button>
       </div>
 
-      <div class="flex space-x-8">
-        <div class={'flex-1'}>
+      <div class="flex space-x-8 h-full">
+        <div class={'flex-1 min-h-0 overflow-auto pb-32 no-scrollbar'}>
           <ConnectionGrid
             class={showNewConnection() ? 'grid-cols-1' : 'grid-cols-2'}
           />

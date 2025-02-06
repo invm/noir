@@ -25,7 +25,6 @@ export default defineConfig(async () => ({
     sourcemap: !!process.env.TAURI_DEBUG,
   },
   optimizeDeps: {
-    // Add both @codemirror/state and @codemirror/view to included deps to optimize
-    include: ['@codemirror/state', '@codemirror/view'],
+    include: [],
   },
 }));
