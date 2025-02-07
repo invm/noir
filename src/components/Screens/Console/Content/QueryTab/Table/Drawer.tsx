@@ -1,4 +1,4 @@
-import { Key } from '@/components/UI-old/Icons';
+import { Key } from 'components/UI-old/Icons';
 import { NumericTypes } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';

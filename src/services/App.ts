@@ -9,39 +9,19 @@ const INTERVAL = 2000;
 
 const APP_KEY = '__app__';
 
-export const THEMES = {
-  ui: [
-    'retro',
-    'forest',
-    'autumn',
-    'garden',
-    'business',
-    'synthwave',
-    'dracula',
-    'dark',
-    'night',
-    'cupcake',
-    'black',
-  ],
-  editor: [] as EditorTheme[],
-  grid: [
-    'alpine',
-    'alpine-dark',
-    'balham',
-    'balham-dark',
-    'material',
-    'quartz',
-    'quartz-dark',
-  ],
-} as const;
-
-export type EditorTheme = 'TokyoNightStorm';
-export type ThemeCategory = keyof typeof THEMES;
+export const GRID_THEMES = [
+  'alpine',
+  'alpine-dark',
+  'balham',
+  'balham-dark',
+  'material',
+  'quartz',
+  'quartz-dark',
+];
 
 type AppStore = {
   vimModeOn: boolean;
   gridTheme: string;
-  editorTheme: EditorTheme;
   osType: OsType;
   enableDevTools: boolean;
 };
@@ -63,7 +43,6 @@ export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     vimModeOn: false,
     gridTheme: 'alpine-dark',
-    editorTheme: 'TokyoNightStorm',
     osType: 'Linux',
     enableDevTools: false,
   });
@@ -78,7 +57,6 @@ export const AppService = () => {
 
   const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
-  const editorTheme = () => appStore.editorTheme;
 
   const toggleScreen = (s: Screen) => {
     if (screen() === s) {
@@ -105,18 +83,8 @@ export const AppService = () => {
     updateStore();
   };
 
-  const updateTheme = <T extends ThemeCategory>(
-    t: T,
-    theme: (typeof THEMES)[T][number]
-  ) => {
-    if (t === 'ui') {
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem('theme', theme);
-    } else if (t === 'editor') {
-      setAppStore('editorTheme', theme as EditorTheme);
-    } else if (t === 'grid') {
-      setAppStore('gridTheme', theme);
-    }
+  const updateGridTheme = (theme: (typeof GRID_THEMES)[number]) => {
+    setAppStore('gridTheme', theme);
     updateStore();
   };
 
@@ -136,8 +104,7 @@ export const AppService = () => {
     setScreen,
     toggleScreen,
     gridTheme,
-    editorTheme,
-    updateTheme,
+    updateTheme: updateGridTheme,
     cmdOrCtrl,
     altOrMeta,
   };

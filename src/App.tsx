@@ -5,8 +5,7 @@ import 'ag-grid-community/styles/ag-theme-balham.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
 import './index.css';
-import { Loader } from 'components/UI-old';
-import { onMount, Switch, Match, createSignal, Show } from 'solid-js';
+import { onMount, createSignal, Show } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
@@ -21,19 +20,17 @@ import {
   ColorModeScript,
   createLocalStorageManager,
 } from '@kobalte/core';
-import { restoreTheme } from 'components/theme-customizer';
+import { restoreTheme } from 'pages/settings/themes/ui';
 
 function App() {
   const {
     connections: {
-      store,
       restoreConnectionStore,
       getConnection,
       updateResultSet,
-      loading,
       setLoading,
     },
-    app: { restoreAppStore, setScreen, appStore },
+    app: { restoreAppStore, appStore },
     backend: { getQueryMetadata },
     messages: { notify },
   } = useAppSelector();
@@ -150,17 +147,7 @@ function App() {
         initialColorMode="dark"
         storageManager={storageManager}
       >
-        <Switch>
-          <Match when={loading()}>
-            <div class="flex justify-center flex-col gap-4 items-center h-full bg-base-200 w-full">
-              <Loader />
-              <div class="text-lg">{t('connecting')}</div>
-            </div>
-          </Match>
-          <Match when={!loading()}>
-            <Router />
-          </Match>
-        </Switch>
+        <Router />
         <Show when={shouldUpdate()}>
           <div class="toast z-50 whitespace-normal">
             <div class="bg-base-300 rounded-lg w-[500px]">

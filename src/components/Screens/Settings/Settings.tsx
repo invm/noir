@@ -2,7 +2,7 @@ import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
 import { version } from '../../../../package.json';
-import Keymaps from './Keymaps';
+import Keymaps from '../../../pages/settings/keymaps';
 import { OpenIssue } from './OpenIssue';
 
 export const Settings = () => {
@@ -16,7 +16,8 @@ export const Settings = () => {
       <div class="flex flex-col items-center pb-4">
         <div>
           <span class="text-md font-semibold text-primary">
-            🕵️ Noir - keyboard driven database management client for Postgresql, MySQL, MariaDB and SQLite.
+            🕵️ Noir - keyboard driven database management client for Postgresql,
+            MySQL, MariaDB and SQLite.
           </span>
         </div>
         <OpenIssue />
@@ -24,7 +25,10 @@ export const Settings = () => {
         <Keymaps
           short
           suffix={
-            <button onClick={() => setScreen('keymaps')} class="btn btn-sm btn-primary w-md mt-2">
+            <button
+              onClick={() => setScreen('keymaps')}
+              class="btn btn-sm btn-primary w-md mt-2"
+            >
               {t('keymaps.see_all')}
             </button>
           }
@@ -34,12 +38,18 @@ export const Settings = () => {
         <div class="flex items-center justify-center w-full py-6">
           <span class="text-sm text-gray-500 dark:text-gray-400">
             Made with 🩸 🥵 and 😭 by{' '}
-            <a href="https://github.com/invm/noir" target="_blank" class="underline">
+            <a
+              href="https://github.com/invm/noir"
+              target="_blank"
+              class="underline"
+            >
               invm
             </a>
           </span>
         </div>
-        <span class="text-sm text-gray-500 dark:text-gray-400">Version: {version}</span>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+          Version: {version}
+        </span>
         <div class="flex gap-4 py-4">
           <button class="btn btn-xs btn-accent" onClick={clearStore}>
             {t('settings.clear_cache')}

@@ -7,43 +7,46 @@ import {
   CommandList,
 } from 'components/ui/command';
 
-import { createEffect, createSignal } from 'solid-js';
+import { Accessor, createEffect, Setter } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { createShortcut } from '@solid-primitives/keyboard';
 import { useHead } from 'utils/use-head';
 import { invoke } from '@tauri-apps/api';
 import { useNavigate } from '@solidjs/router';
 
-interface CommandPaletteProps {}
+interface CommandPaletteProps {
+  open: Accessor<boolean>;
+  setOpen: Setter<boolean>;
+}
 
-export const CommandPalette = (_props: CommandPaletteProps) => {
+export const CommandPalette = (props: CommandPaletteProps) => {
   const {
-    connections: { removeConnectionTab, store },
+    connections: { removeConnection, store },
     app: { cmdOrCtrl },
   } = useAppSelector();
 
-  const [open, setOpen] = createSignal(false);
-  const close = () => setOpen(false);
+  const close = () => props.setOpen(false);
   const getConnId = useHead();
   const navigate = useNavigate();
 
   createEffect(() => {
     createShortcut([cmdOrCtrl(), 'k'], () => {
-      setOpen((open) => !open);
+      props.setOpen((open) => !open);
     });
   }, []);
 
   const handleCloseConnection = async () => {
     const id = getConnId();
+    console.log('id', id);
     await invoke<string>('disconnect', { id });
-    await removeConnectionTab(id);
-    console.log(store.tabs);
+    await removeConnection(id);
     navigate('/');
+    console.log(store.connections, id);
     // if (store.tabs.length === 0) {
     // }
   };
   return (
-    <CommandDialog open={open()} onOpenChange={setOpen}>
+    <CommandDialog open={props.open()} onOpenChange={props.setOpen}>
       <CommandInput placeholder="Search all commands..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>

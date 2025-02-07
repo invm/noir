@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from 'components/ui/card';
-import { For } from 'solid-js';
+import { For, Match, Switch } from 'solid-js';
 import { cn } from 'utils/cn';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
@@ -33,6 +33,8 @@ import {
 } from 'components/ui/alert-dialog';
 import { AlertDialogTriggerProps } from '@kobalte/core/alert-dialog';
 import { useNavigate } from '@solidjs/router';
+import { Loader } from 'components/ui/loader';
+import { createStore } from 'solid-js/store';
 
 export function ConnectionGrid(props: { class?: string }) {
   const navigate = useNavigate();
@@ -43,9 +45,9 @@ export function ConnectionGrid(props: { class?: string }) {
       refreshConnections,
       addConnectionTab,
       fetchSchemaEntities,
-      setLoading,
     },
   } = useAppSelector();
+  const [state, setState] = createStore({ id: '', loading: false });
 
   const deleteConnection = async (id: string) => {
     await invoke('delete_connection', { id });
@@ -53,7 +55,7 @@ export function ConnectionGrid(props: { class?: string }) {
   };
 
   const onConnect = async (config: ConnectionConfig) => {
-    setLoading(true);
+    setState({ loading: true, id: config.id });
     try {
       const selectedSchema = await invoke<string>('init_connection', {
         config,
@@ -73,11 +75,10 @@ export function ConnectionGrid(props: { class?: string }) {
         idx: 0,
       });
       navigate('/console/' + config.id);
-      console.log(config.id);
     } catch (error) {
       notify(error);
     } finally {
-      setLoading(false);
+      setState({ loading: false, id: '' });
     }
   };
 
@@ -117,8 +118,18 @@ export function ConnectionGrid(props: { class?: string }) {
                         onClick={() => onConnect(connection)}
                         variant="ghost"
                         size="sm"
+                        disabled={state.loading}
                       >
-                        <TbPlugConnected class="size-5" />
+                        <Switch>
+                          <Match
+                            when={state.loading && state.id === connection.id}
+                          >
+                            <Loader size="md" />
+                          </Match>
+                          <Match when={state.id !== connection.id}>
+                            <TbPlugConnected class="size-5" />
+                          </Match>
+                        </Switch>
                       </Button>
                       {/* TODO: add this option */}
                       {/* <Button variant="ghost" size="sm"> */}

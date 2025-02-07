@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from 'components/ui/sidebar';
-import { For } from 'solid-js';
+import { createSignal, For } from 'solid-js';
 
 // Sample data structure with more detailed tables
 const data = {
@@ -75,19 +75,27 @@ const data = {
   ],
 };
 import { CommandPalette } from 'components/command-palette';
+import { useAppSelector } from 'services/Context';
 
 interface DbSidebarProps {}
 
 const DbSidebar = (_props: DbSidebarProps) => {
+  const [open, setOpen] = createSignal(false);
+  const {
+    connections: { getConnection },
+  } = useAppSelector();
+  const current = getConnection();
+
   return (
     <Sidebar>
       <SidebarHeader>
         <DbConnectionHeader
-          setOpen={() => {}} // TODO: this should open the command palette, maybe wrap the command palette with a provider and be able to open everywhere and add or remove actions based on components
-          name="sample_db"
-          host="localhost:5432"
+          setOpen={setOpen}
+          name={current.connection?.name ?? ''}
+          host={current.selectedSchema.substring(0, 20)}
+          color={current.connection?.color ?? 'sky'}
         />
-        <CommandPalette />
+        <CommandPalette setOpen={setOpen} open={open} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

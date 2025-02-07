@@ -1,4 +1,4 @@
-import { AlertTypes } from '@/components/UI-old';
+import { AlertTypes } from 'components/UI-old';
 import { createStore } from 'solid-js/store';
 import { info } from 'tauri-plugin-log-api';
 import { randomId } from 'utils/utils';

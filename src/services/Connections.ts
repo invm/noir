@@ -18,13 +18,6 @@ import { createSignal } from 'solid-js';
 const cache = new Store('.connections.dat');
 const INTERVAL = 1000;
 
-export const MessageType = {
-  error: 'error',
-  info: 'info',
-  success: 'success',
-  warning: 'warning',
-} as const;
-
 export const ContentTab = {
   Query: 'Query',
   TableStructure: 'TableStructure',
@@ -133,30 +126,30 @@ type ConnectionTab = {
 
 const CONNECTIONS_KEY = '_conn_tabs';
 
-type StoreSavedData = {
-  [CONNECTIONS_KEY]: ConnectionStore;
-};
+// type StoreSavedData = {
+//   [CONNECTIONS_KEY]: ConnectionStore;
+// };
 
-const getSavedData = async <T extends keyof StoreSavedData>(key: T) => {
-  const str = await cache.get(key);
-  if (!str) return {} as StoreSavedData[T];
-  try {
-    const res = JSON.parse(str as string);
-    return res as StoreSavedData[T];
-  } catch (e) {
-    return {} as StoreSavedData[T];
-  }
-};
+// const getSavedData = async <T extends keyof StoreSavedData>(key: T) => {
+//   const str = await cache.get(key);
+//   if (!str) return {} as StoreSavedData[T];
+//   try {
+//     const res = JSON.parse(str as string);
+//     return res as StoreSavedData[T];
+//   } catch (e) {
+//     return {} as StoreSavedData[T];
+//   }
+// };
 
 type ConnectionStore = {
-  tabs: ConnectionTab[];
+  connections: ConnectionTab[];
   idx: number;
 };
 
 export const ConnectionsService = () => {
   const [loading, setLoading] = createSignal(true);
   const [store, setStore] = createStore<ConnectionStore>({
-    tabs: [],
+    connections: [],
     idx: 0,
   });
 
@@ -166,34 +159,35 @@ export const ConnectionsService = () => {
   const restoreConnectionStore = async () => {
     const res = await invoke('get_connections', {});
     setConnections(res as ConnectionConfig[]);
-    try {
-      const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
-      if (!conn_tabs.tabs) return;
-      const tabs = await conn_tabs.tabs.reduce(
-        async (acc, conn) => {
-          const res = await acc;
-          try {
-            const selectedSchema = await invoke<string>('init_connection', {
-              config: conn.connection,
-            });
-            conn.selectedSchema = selectedSchema;
-            return Promise.resolve([...res, conn]);
-          } catch (e) {
-            conn_tabs.idx = 0;
-            return Promise.resolve(res);
-          } finally {
-            setTimeout(() => Promise.resolve(), 10000);
-          }
-        },
-        Promise.resolve([] as ConnectionTab[])
-      );
-      if (tabs.length) {
-        setStore(() => ({ ...conn_tabs, tabs }));
-      }
-      updateStore();
-    } finally {
-      setLoading(false);
-    }
+    updateStore();
+    // try {
+    //   const conn_tabs: ConnectionStore = await getSavedData(CONNECTIONS_KEY);
+    //   if (!conn_tabs.tabs) return;
+    //   const tabs = await conn_tabs.tabs.reduce(
+    //     async (acc, conn) => {
+    //       const res = await acc;
+    //       try {
+    //         const selectedSchema = await invoke<string>('init_connection', {
+    //           config: conn.connection,
+    //         });
+    //         conn.selectedSchema = selectedSchema;
+    //         return Promise.resolve([...res, conn]);
+    //       } catch (e) {
+    //         conn_tabs.idx = 0;
+    //         return Promise.resolve(res);
+    //       } finally {
+    //         setTimeout(() => Promise.resolve(), 10000);
+    //       }
+    //     },
+    //     Promise.resolve([] as ConnectionTab[])
+    //   );
+    //   if (tabs.length) {
+    //     setStore(() => ({ ...conn_tabs, tabs }));
+    //   }
+    //   updateStore();
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const updateStore = debounce(async () => {
@@ -202,18 +196,18 @@ export const ConnectionsService = () => {
   }, INTERVAL);
 
   const addConnectionTab = async (tab: ConnectionTab) => {
-    if (store.tabs.length === 10) return;
-    if (store.tabs.find((t) => t.id === tab.id)) {
+    if (store.connections.length === 10) return;
+    if (store.connections.find((t) => t.id === tab.id)) {
       setStore(
         'idx',
-        store.tabs.findIndex((t) => t.id === tab.id)
+        store.connections.findIndex((t) => t.id === tab.id)
       );
       return;
     }
     setStore(
       produce((s) => {
-        s.tabs.push(tab);
-        s.idx = s.tabs.length - 1;
+        s.connections.push(tab);
+        s.idx = s.connections.length - 1;
         tab.tabs = [newContentTab('Query', ContentTab.Query)];
         tab.idx = 0;
       })
@@ -237,11 +231,11 @@ export const ConnectionsService = () => {
     await refreshConnections();
   };
 
-  const removeConnectionTab = async (id: string) => {
+  const removeConnection = async (id: string) => {
     setStore('idx', 0);
     setStore(
-      'tabs',
-      store.tabs.filter((t) => t.id !== id)
+      'connections',
+      store.connections.filter((t) => t.id !== id)
     );
     updateStore();
   };
@@ -252,7 +246,7 @@ export const ConnectionsService = () => {
   };
 
   const getConnection = () => {
-    return store.tabs?.[store.idx] ?? {};
+    return store.connections?.[store.idx] ?? {};
   };
 
   const getContent = () => {
@@ -270,11 +264,11 @@ export const ConnectionsService = () => {
     if (conn.tabs.length === 10) return;
     setStore(
       produce((s) => {
-        s.tabs[s.idx].tabs = [
-          ...s.tabs[s.idx].tabs,
+        s.connections[s.idx].tabs = [
+          ...s.connections[s.idx].tabs,
           tab ?? newContentTab('Query', ContentTab.Query),
         ];
-        s.tabs[s.idx].idx = s.tabs[s.idx].tabs.length - 1;
+        s.connections[s.idx].idx = s.connections[s.idx].tabs.length - 1;
       })
     );
     updateStore();
@@ -285,15 +279,15 @@ export const ConnectionsService = () => {
     if (conn.tabs.length === 1) return;
     setStore(
       produce((s) => {
-        s.tabs[s.idx].tabs.splice(idx ?? s.tabs[s.idx].idx, 1);
-        s.tabs[s.idx].idx = s.tabs[s.idx].tabs.length - 1;
+        s.connections[s.idx].tabs.splice(idx ?? s.connections[s.idx].idx, 1);
+        s.connections[s.idx].idx = s.connections[s.idx].tabs.length - 1;
       })
     );
     updateStore();
   };
 
   const setConnectionIdx = (i: number) => {
-    if (i < store.tabs.length) {
+    if (i < store.connections.length) {
       setStore('idx', i);
     }
   };
@@ -303,7 +297,7 @@ export const ConnectionsService = () => {
     if (i < conn.tabs.length) {
       setStore(
         produce((s) => {
-          s.tabs[s.idx].idx = i;
+          s.connections[s.idx].idx = i;
         })
       );
       setQueryIdx(0);
@@ -313,7 +307,8 @@ export const ConnectionsService = () => {
   const setNextContentIdx = () => {
     setStore(
       produce((s) => {
-        s.tabs[s.idx].idx = (s.tabs[s.idx].idx + 1) % s.tabs[s.idx].tabs.length;
+        s.connections[s.idx].idx =
+          (s.connections[s.idx].idx + 1) % s.connections[s.idx].tabs.length;
       })
     );
   };
@@ -321,22 +316,22 @@ export const ConnectionsService = () => {
   const setPrevContentIdx = () => {
     setStore(
       produce((s) => {
-        const idx = s.tabs[s.idx].idx;
-        s.tabs[s.idx].idx =
-          (idx - 1 >= 0 ? idx - 1 : s.tabs[s.idx].tabs.length - 1) %
-          s.tabs[s.idx].tabs.length;
+        const idx = s.connections[s.idx].idx;
+        s.connections[s.idx].idx =
+          (idx - 1 >= 0 ? idx - 1 : s.connections[s.idx].tabs.length - 1) %
+          s.connections[s.idx].tabs.length;
       })
     );
   };
 
-  const updateConnectionTab = <T extends keyof ConnectionTab>(
+  const updateConnection = <T extends keyof ConnectionTab>(
     key: T,
     data: ConnectionTab[T],
     idx?: number
   ) => {
     const tab = getConnection();
     if (!tab) return;
-    setStore('tabs', idx ?? store.idx, key, data);
+    setStore('connections', idx ?? store.idx, key, data);
     updateStore();
   };
 
@@ -346,7 +341,7 @@ export const ConnectionsService = () => {
     if (!tab) return;
     setStore(
       produce((s) => {
-        s.tabs = s.tabs.map((t) => {
+        s.connections = s.connections.map((t) => {
           if (conn_id === t.id) {
             t.definition[schema] = { ...t.definition[schema], ...data };
           }
@@ -365,7 +360,7 @@ export const ConnectionsService = () => {
     const tab = getContent();
     if (!tab) return;
     const tabIdx = idx ?? getConnection().idx;
-    setStore('tabs', store.idx, 'tabs', (tabs) =>
+    setStore('connections', store.idx, 'tabs', (tabs) =>
       tabs.map((t, i) => {
         return i === tabIdx ? { ...t, [key]: { ...t[key], ...data } } : t;
       })
@@ -380,9 +375,9 @@ export const ConnectionsService = () => {
         query.slice(0, cursor) + column + ', ' + query.slice(cursor);
       setStore(
         produce((s) => {
-          const tabIdx = s.tabs[s.idx].idx;
-          const data = s.tabs[s.idx].tabs[tabIdx]['data'];
-          s.tabs[s.idx].tabs[tabIdx]['data'] = {
+          const tabIdx = s.connections[s.idx].idx;
+          const data = s.connections[s.idx].tabs[tabIdx]['data'];
+          s.connections[s.idx].tabs[tabIdx]['data'] = {
             ...data,
             query: _query,
             cursor: cursor + column.length + 2,
@@ -399,8 +394,8 @@ export const ConnectionsService = () => {
   ) => {
     setStore(
       produce((s) => {
-        const curr = s.tabs[s.idx].tabs[tabIdx]['data'];
-        s.tabs[s.idx].tabs[tabIdx]['data'] = {
+        const curr = s.connections[s.idx].tabs[tabIdx]['data'];
+        s.connections[s.idx].tabs[tabIdx]['data'] = {
           ...curr,
           result_sets: (curr as QueryContentTabData).result_sets.map((r, i) =>
             i === query_idx ? { ...r, ...data, loading: false } : r
@@ -450,7 +445,7 @@ export const ConnectionsService = () => {
     store,
     setStore,
     addConnectionTab,
-    removeConnectionTab,
+    removeConnection,
     clearStore,
     getConnection,
     getContent,
@@ -462,7 +457,7 @@ export const ConnectionsService = () => {
     addContentTab,
     updateContentTab,
     removeContentTab,
-    updateConnectionTab,
+    updateConnection,
     selectPrevQuery,
     selectNextQuery,
     queryIdx,

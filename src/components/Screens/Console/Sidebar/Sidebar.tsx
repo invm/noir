@@ -3,7 +3,12 @@ import { useAppSelector } from 'services/Context';
 import { useContextMenu, Menu, animation, Item } from 'solid-contextmenu';
 import { createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
-import { Function, Refresh, ShareNodes, Terminal } from '@/components/UI-old/Icons';
+import {
+  Function,
+  Refresh,
+  ShareNodes,
+  Terminal,
+} from 'components/UI-old/Icons';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
@@ -17,7 +22,7 @@ export const Sidebar = () => {
     messages: { notify },
     connections: {
       getConnection,
-      updateConnectionTab,
+      updateConnection,
       addContentTab,
       getSchemaEntity,
       fetchSchemaEntities,
@@ -48,7 +53,7 @@ export const Sidebar = () => {
   const { show: show_trigger_menu } = useContextMenu({ id: trigger_menu });
 
   const selectSchema = async (schema: string) => {
-    updateConnectionTab('selectedSchema', schema);
+    updateConnection('selectedSchema', schema);
     const config = getConnection();
     await invoke('set_schema', {
       connId: config.id,
@@ -57,7 +62,7 @@ export const Sidebar = () => {
     });
     const { triggers, routines, tables, schemas, columns, views } =
       await fetchSchemaEntities(config.id, config.connection.dialect);
-    updateConnectionTab('schemas', schemas);
+    updateConnection('schemas', schemas);
     updateSchemaDefinition(config.id, {
       triggers,
       routines,
@@ -74,7 +79,7 @@ export const Sidebar = () => {
       await invoke('init_connection', { config });
       const { triggers, routines, tables, schemas, columns, views } =
         await fetchSchemaEntities(config.id, config.dialect);
-      updateConnectionTab('schemas', schemas);
+      updateConnection('schemas', schemas);
       updateSchemaDefinition(config.id, {
         triggers,
         routines,

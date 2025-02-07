@@ -77,7 +77,7 @@
 
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -87,7 +87,7 @@
 
 html,
 body {
-  @apply m-0 overflow-hidden select-text;
+  @apply m-0 overflow-hidden select-none;
 }
 
 html {
@@ -98,6 +98,12 @@ html {
 body,
 #root {
   @apply w-full h-full;
+}
+
+div[class*='ag-theme'] {
+  --ag-grid-size: 4px;
+  --ag-list-item-height: 16px;
+  --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
 }
 
 @layer utilities {

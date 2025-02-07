@@ -6,20 +6,20 @@ import {
   EditIcon,
   FireIcon,
   // VimIcon
-} from '@/components/UI-old/Icons';
+} from 'components/UI-old/Icons';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
 
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
-import { debounce } from 'utils/utils';
 // @ts-ignore
 // import { initVimMode } from 'monaco-vim';
 
 import { loader, MonacoEditor } from 'solid-monaco';
 import * as monaco from 'monaco-editor';
 import { QueryContentTabData } from 'services/Connections';
+import { useColorMode } from '@kobalte/core/color-mode';
 
 const DEFAULT_SQL_KEYWORDS = [
   'SELECT',
@@ -129,7 +129,12 @@ const getEditorAutoCompleteSuggestion = (
   return suggestions;
 };
 
-export const Editor = () => {
+interface EditorProps {
+  readOnly?: boolean;
+  value?: string;
+}
+
+export const Editor = (props: EditorProps) => {
   const {
     connections: {
       store,
@@ -148,8 +153,9 @@ export const Editor = () => {
     messages: { notify },
     backend: { cancelTask },
   } = useAppSelector();
-  const idx = () => store.tabs[store.idx].idx;
-  const [code, setCode] = createSignal('');
+  const { colorMode } = useColorMode();
+  const idx = () => store.connections[store.idx].idx;
+  const [code, setCode] = createSignal(props.value ?? '');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
@@ -157,18 +163,19 @@ export const Editor = () => {
   const [editor, setEditor] =
     createSignal<monaco.editor.IStandaloneCodeEditor>();
 
-  const updateQuery = debounce(() => {
-    updateContentTab('data', {
-      query: code(),
-      cursor: 0,
-      // cursor: editorView()?.state.selection.ranges[0].from ?? 0,
-    });
-  }, 300);
+  // TODO: this was to persist the cursor position, should be implemented for monaco
+  // const updateQuery = debounce(() => {
+  //   updateContentTab('data', {
+  //     query: code(),
+  //     cursor: 0,
+  //     // cursor: editorView()?.state.selection.ranges[0].from ?? 0,
+  //   });
+  // }, 300);
 
   const updateQueryText = (query: string) => {
     if (code() === query) return;
     setCode(query);
-    updateQuery();
+    // updateQuery();
   };
 
   const onFormat = () => {
@@ -241,16 +248,8 @@ export const Editor = () => {
     })
   );
 
-  const [isThemeLoaded, setIsThemeLoaded] = createSignal(false);
-
   onMount(async () => {
     loader.init().then((monaco) => {
-      import('./monaco/tokyo-night-storm.json').then((data) => {
-        // @ts-ignore
-        monaco.editor.defineTheme('TokyoNightStorm', data);
-        setIsThemeLoaded(true);
-      });
-
       const provider = monaco.languages.registerCompletionItemProvider('sql', {
         triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
 
@@ -276,8 +275,8 @@ export const Editor = () => {
 
   return (
     <div class="flex-1 flex flex-col h-full">
-      <div class="w-full px-2 py-1 bg-base-100 border-b-2 border-accent flex justify-between items-center">
-        <div class="flex items-center">
+      <div class="w-full border-b-2 border-accent flex justify-between items-center">
+        <div class="flex items-center p-1 gap-2 bg-background ">
           <ActionRowButton
             dataTip={t('console.actions.format')}
             onClick={onFormat}
@@ -369,9 +368,10 @@ export const Editor = () => {
             lineNumbers: 'on',
             fontSize: 14,
             folding: true,
-            theme: isThemeLoaded() ? 'TokyoNightStorm' : 'vs-dark',
+            theme: colorMode() === 'dark' ? 'vs-dark' : 'vs-light',
             language: 'sql',
             wordWrap: 'on',
+            readOnly: props.readOnly,
           }}
           onMount={(_m, e) => {
             setEditor(e);

@@ -3,7 +3,7 @@ import { validator } from '@felte/validator-zod';
 import { t } from 'i18next';
 import { createSignal, Match, Show, Switch } from 'solid-js';
 import { createForm } from '@felte/solid';
-import { ColorCircle } from 'components/UI-old';
+import { ColorCircle } from 'components/ui/color-circle';
 import {
   PORTS_MAP,
   Dialect,
@@ -205,7 +205,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
   form; // ts-server - stfu
 
   return (
-    <div class="w-full flex justify-center items-around bg-base-200">
+    <div class="w-full flex justify-center items-around">
       <form use:form class="flex w-full flex-col gap-1" autocomplete="off">
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>
@@ -539,7 +539,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
                     {(state) => state.selectedOption() as string}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent />
+                <SelectContent class="max-h-48 overflow-auto" />
               </Select>
               <ColorCircle color={data('color')} />
             </div>

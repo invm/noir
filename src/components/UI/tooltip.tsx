@@ -35,7 +35,7 @@ export const TooltipContent = <T extends ValidComponent = "div">(
 		<TooltipPrimitive.Portal>
 			<TooltipPrimitive.Content
 				class={cn(
-					"z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground data-[expanded]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95",
+					"z-50 overflow-hidden rounded-md bg-background px-3 py-1.5 text-xs text-foreground border data-[expanded]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 font-normal",
 					local.class,
 				)}
 				{...rest}

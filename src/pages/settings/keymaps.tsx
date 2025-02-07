@@ -62,7 +62,7 @@ const CATEGORY_LIMIT = 3;
 const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
   const keymaps = props.short ? ALL_KEYMAPS.slice(0, CATEGORY_LIMIT) : ALL_KEYMAPS;
   return (
-    <div class="flex items-center flex-col">
+    <div class="flex items-center flex-col flex-1">
       <Show when={!props.suffix && !props.short}>
         <h2 class="text-2xl font-bold mt-4 text-primary pb-5">{t('keymaps.title')}</h2>
         <span class="max-w-lg font-medium text-center pb-5">{t('keymaps.description')}</span>

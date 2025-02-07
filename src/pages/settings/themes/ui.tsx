@@ -15,7 +15,7 @@ import {
 import { Label } from 'components/ui/label';
 import { createStore } from 'solid-js/store';
 import { createEffect, For } from 'solid-js';
-import { Button } from './ui/button';
+import { Button } from 'components/ui/button';
 import { useColorMode } from '@kobalte/core';
 
 const RADIUS = '--radius';
@@ -53,7 +53,7 @@ const transformValues = (radius: string, color: string) => {
   return { radiusRem: `${radius}rem`, hue: hue };
 };
 
-export default function ThemeCustomizer() {
+export default function UIThemeCustomizer() {
   const { setColorMode, colorMode } = useColorMode();
   const { primary, radius } = getSavedValues();
   const [theme, setTheme] = createStore({
@@ -83,10 +83,10 @@ export default function ThemeCustomizer() {
   });
 
   return (
-    <Card class="w-full max-w-[400px]">
+    <Card class="flex-1">
       <CardHeader>
         <CardTitle class="flex items-center justify-between">
-          Theme Customizer
+          User Interface
           <Button
             variant="ghost"
             size="icon"
@@ -98,7 +98,7 @@ export default function ThemeCustomizer() {
             <IoRefresh class="h-4 w-4" />
           </Button>
         </CardTitle>
-        <CardDescription>Customize your theme colors.</CardDescription>
+        <CardDescription>Customize user interface colors.</CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="space-y-2">

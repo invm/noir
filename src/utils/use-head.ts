@@ -2,6 +2,7 @@ import { useLocation } from '@solidjs/router';
 
 export const useHead = () => {
   const location = useLocation();
-  const head = () => location.pathname.split('/')[1];
+  const parts = location.pathname.split('/');
+  const head = () => parts[parts.length - 1];
   return head;
 };

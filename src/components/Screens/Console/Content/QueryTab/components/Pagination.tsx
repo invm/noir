@@ -1,12 +1,21 @@
 import { createShortcut } from '@solid-primitives/keyboard';
-import { Accessor, createEffect, For, Match, Show, Switch } from 'solid-js';
+import { Accessor, createEffect, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { QueryType, ResultSet } from 'interfaces';
-import { ChevronLeft, ChevronRight } from '@/components/UI-old/Icons';
-import { Alert } from '@/components/UI-old';
+import { ChevronLeft, ChevronRight } from 'components/UI-old/Icons';
+import { Alert } from 'components/ui/alert';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 import { DrawerState } from '../Table/PopupCellRenderer';
+import { Button } from 'components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'components/ui/select';
+import { Loader } from 'components/ui/loader';
 
 type PaginationProps = {
   page: Accessor<number>;
@@ -57,7 +66,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="w-full flex justify-between items-top gap-2 bg-base-100 px-2 py-1">
+    <div class="w-full flex justify-between gap-2 bg-base-100 px-2">
       <div class="flex items-center gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="join">
@@ -136,97 +145,99 @@ export const Pagination = (props: PaginationProps) => {
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed'}>
-        <div class="flex items-center">
+        <div class="flex items-center gap-2 py-0.5">
           <Show when={props.changesCount > 0}>
             <div class="px-2 gap-4 flex">
-              <button
-                class="btn btn-xs btn-outline"
-                onClick={props.undoChanges}
-              >
+              <Button size="sm" variant="outline" onClick={props.undoChanges}>
                 {t('console.actions.reset')}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={props.applyChanges}
-                class="btn btn-xs btn-outline btn-error"
               >
                 {t('console.actions.apply')} {props.changesCount}{' '}
                 {t(
                   `console.actions.${props.changesCount > 1 ? 'changes' : 'change'}`
                 )}
-              </button>
+              </Button>
             </div>
           </Show>
           <Show when={props.query.hasResults}>
-            <button
-              class="btn btn-ghost btn-xs"
-              onClick={(_) => props.onBtnExport('csv')}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => props.onBtnExport('csv')}
             >
               {t('console.table.csv')}
-            </button>
-            <button
-              class="btn btn-ghost btn-xs"
-              onClick={(_) => props.onBtnExport('json')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => props.onBtnExport('json')}
             >
               {t('console.table.json')}
-            </button>
+            </Button>
           </Show>
-          <div class="px-3">
-            <select
-              value={pageSize()}
-              onChange={(e) => {
-                setPageSize(+e.currentTarget.value);
-                props.onPageSizeChange();
-              }}
-              class="select select-accent select-bordered select-xs w-full"
+          <Select
+            class="w-20"
+            options={PAGE_SIZE_OPTIONS}
+            value={pageSize()}
+            // onChange={(value) => {
+            //   setFields(
+            //     'color',
+            //     value as (typeof connectionColors)[number]
+            //   );
+            // }}
+            onChange={(value) => {
+              setPageSize(value || PAGE_SIZE_OPTIONS[0]);
+              props.onPageSizeChange();
+            }}
+            itemComponent={(props) => (
+              <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+            )}
+          >
+            <SelectTrigger class="h-8 w-full">
+              <SelectValue>
+                {(state) => state.selectedOption() as string}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent class="max-h-48 overflow-auto" />
+          </Select>
+          <div class="flex items-center gap-2 rounded-md">
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={props.loading || !props.page()}
+              onClick={props.onPrevPage}
+              class="text-primary"
             >
-              <For each={PAGE_SIZE_OPTIONS}>
-                {(n) => <option value={n}>{n}</option>}
-              </For>
-            </select>
-          </div>
-          <div class="join">
-            <div
-              class="tooltip tooltip-primary tooltip-left"
-              data-tip={t('console.actions.previous_page')}
-            >
-              <button
-                class="join-item btn btn-xs"
-                disabled={props.loading || !props.page()}
-                onClick={props.onPrevPage}
-              >
-                <ChevronLeft />
-              </button>
-            </div>
-            <button
-              disabled
-              class="join-item btn btn-xs btn-disabled !text-base-content w-[50px]"
-            >
+              <ChevronLeft />
+            </Button>
+            <span class="text-sm text-white min-w-8 text-center">
               <Switch>
                 <Match when={props.loading}>
-                  <span class="loading text-primary loading-bars loading-xs"></span>
+                  <Loader />
                 </Match>
                 <Match when={!props.loading}>
                   <span>{props.page() + 1}</span>
                 </Match>
               </Switch>
-            </button>
-
-            <div
-              class="tooltip tooltip-primary tooltip-left"
-              data-tip={t('console.actions.next_page')}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={
+                props.loading ||
+                props.page() * pageSize() + pageSize() >=
+                  (resultSet?.count ?? 0)
+              }
+              onClick={props.onNextPage}
+              class="text-primary"
             >
-              <button
-                class="join-item btn btn-xs"
-                disabled={
-                  props.loading ||
-                  props.page() * pageSize() + pageSize() >=
-                    (resultSet?.count ?? 0)
-                }
-                onClick={props.onNextPage}
-              >
-                <ChevronRight />
-              </button>
-            </div>
+              <ChevronRight />
+              <span class="sr-only">Next page</span>
+            </Button>
           </div>
         </div>
       </Show>

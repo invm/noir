@@ -1,25 +1,30 @@
-import { Alerts } from '@/components/UI-old';
+import { Alerts } from 'components/UI-old';
 import { invoke } from '@tauri-apps/api';
-import { CloseIcon, Cog, HomeIcon, QuestionMark } from '@/components/UI-old/Icons';
+import {
+  CloseIcon,
+  Cog,
+  HomeIcon,
+  QuestionMark,
+} from 'components/UI-old/Icons';
 import { useAppSelector } from 'services/Context';
 import { For, Match, Show, Switch } from 'solid-js';
 import { Console } from './Console/Console';
 import { Home } from './Home/Home';
 import { Settings } from './Settings/Settings';
 import { t } from 'utils/i18n';
-import { ThemeSwitch } from '@/components/UI-old/ThemeSwitch';
-import Keymaps from './Settings/Keymaps';
+import { ThemeSwitch } from 'components/UI-old/ThemeSwitch';
+import Keymaps from '../../pages/settings/keymaps';
 
 export const Main = () => {
   const {
     app: { screen, setScreen, toggleScreen },
-    connections: { removeConnectionTab, store, setStore },
+    connections: { removeConnection, store, setStore },
   } = useAppSelector();
 
   const handleCloseConnection = async (id: string) => {
     await invoke<string>('disconnect', { id });
-    await removeConnectionTab(id);
-    if (store.tabs.length === 0) {
+    await removeConnection(id);
+    if (store.connections.length === 0) {
       setScreen('home');
     }
   };
@@ -41,7 +46,7 @@ export const Main = () => {
               <HomeIcon />
             </span>
           </button>
-          <For each={store.tabs}>
+          <For each={store.connections}>
             {(tab, idx) => (
               <div class="flex items-center">
                 <button

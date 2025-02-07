@@ -5,21 +5,21 @@ import { useAppSelector } from 'services/Context';
 import { Row } from 'interfaces';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
-import { Loader } from '@/components/UI-old';
+import { Loader } from 'components/ui/loader';
 import { getAnyCase } from 'utils/utils';
 import { save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
 import { deleteFrom, insert, update } from 'sql-bricks';
-import { tippy } from 'solid-tippy';
 import { t } from 'utils/i18n';
 import { Drawer } from './Table/Drawer';
 import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
-import Keymaps from 'components/Screens/Settings/Keymaps';
+import Keymaps from 'pages/settings/keymaps';
 import { DrawerState } from './Table/PopupCellRenderer';
-tippy;
+import { Editor } from './Editor';
+import { Dialog, DialogContent } from 'components/ui/dialog';
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
 
@@ -40,6 +40,8 @@ export const Results = (props: {
     messages: { notify },
     app: { cmdOrCtrl },
   } = useAppSelector();
+  // TODO: provide setOpen to columndef context menu to open row in editor
+  const [open, _setOpen] = createSignal(false);
 
   const [drawerOpen, setDrawerOpen] = createStore<DrawerState>({
     mode: 'add' as 'add' | 'edit',
@@ -335,15 +337,16 @@ export const Results = (props: {
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
-      <dialog id="row_modal" class="modal">
-        <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
-          <div class="h-full">{/* <div ref={ref} class="h-full" /> */}</div>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-      <div class="flex flex-col">
+      <Dialog open={open()}>
+        <DialogContent>
+          <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
+            <div class="h-full">
+              <Editor readOnly value={code()} />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div>
         <Pagination
           {...{
             changesCount: Object.keys(changes).reduce((acc, key) => {
@@ -383,12 +386,18 @@ export const Results = (props: {
                 <Loader />
               </div>
             ) : data()?.notReady || data()?.queryType === 'Other' ? (
-              <Keymaps short />
+              <Keymaps short /> // TODO: replace with cmd K kbd component and not that big component
             ) : (
               <NoResults error={data()?.error} />
             )
           }
-          loadingOverlayComponent={Loader}
+          loadingOverlayComponent={() =>
+            getContentData('Query').result_sets[queryIdx()]?.loading ? (
+              <Loader />
+            ) : (
+              <Keymaps short />
+            )
+          }
           ref={gridRef!}
           columnDefs={data()?.colDef}
           rowSelection="multiple"
@@ -402,6 +411,7 @@ export const Results = (props: {
           onCellEditingStopped={onCellEditingStopped}
         />
       </div>
+      {/* TODO: change drawer to shadcn sheet */}
       <Show when={props.editable}>
         <div class="absolute right-0 top-0">
           <Drawer
