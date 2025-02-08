@@ -441,6 +441,22 @@ export const ConnectionsService = () => {
     return { schemas, tables, views, routines, columns, triggers };
   };
 
+  const refreshEntities = async () => {
+    const config = getConnection().connection;
+    setLoading(true);
+    await invoke('init_connection', { config });
+    const { triggers, routines, tables, schemas, columns, views } =
+      await fetchSchemaEntities(config.id, config.dialect);
+    updateConnection('schemas', schemas);
+    updateSchemaDefinition(config.id, {
+      triggers,
+      routines,
+      columns,
+      tables,
+      views,
+    });
+  };
+
   return {
     store,
     setStore,
@@ -474,5 +490,6 @@ export const ConnectionsService = () => {
     refreshConnections,
     setPrevContentIdx,
     setNextContentIdx,
+    refreshEntities,
   };
 };

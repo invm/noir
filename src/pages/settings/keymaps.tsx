@@ -37,14 +37,18 @@ const ALL_KEYMAPS = [
       { action: 'Next cell', keys: ['Tab'] },
       { action: 'Previous cell', keys: ['Shift', 'Tab'] },
       { action: 'Select next/previous result', keys: ['Ctrl', 'Shift', 'Q/E'] },
-      { action: 'Select next/previous page', keys: ['Ctrl/Cmd', 'Shift', 'N/P'] },
+      {
+        action: 'Select next/previous page',
+        keys: ['Ctrl/Cmd', 'Shift', 'N/P'],
+      },
       { action: 'Export as CSV', keys: ['Ctrl', 'Shift', 'C'] },
       { action: 'Export as JSON array', keys: ['Ctrl', 'Shift', 'J'] },
     ],
   },
   {
     category: 'Data tab table',
-    description: 'When right-clicking on a table/view and selecting "View data", the following shortcuts are available',
+    description:
+      'When right-clicking on a table/view and selecting "View data", the following shortcuts are available',
     keys: [
       { action: 'Add row', keys: ['Alt/Cmd', 'N'] },
       { action: 'Save add/edit row form', keys: ['Ctrl/Cmd', 'S'] },
@@ -52,20 +56,42 @@ const ALL_KEYMAPS = [
   },
   {
     category: 'Editor in Vim Mode',
-    description: 'Most of the Vim commands are supported. The following are custom commands',
-    keys: [{ action: 'Scroll autocomplete suggestions up/down', keys: ['Ctrl', 'N/P'] }],
+    description:
+      'Most of the Vim commands are supported. The following are custom commands',
+    keys: [
+      {
+        action: 'Scroll autocomplete suggestions up/down',
+        keys: ['Ctrl', 'N/P'],
+      },
+    ],
   },
 ];
 
-const CATEGORY_LIMIT = 3;
-
 const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
-  const keymaps = props.short ? ALL_KEYMAPS.slice(0, CATEGORY_LIMIT) : ALL_KEYMAPS;
+  if (props.short) {
+    return (
+      <div>
+        <div class="flex gap-2">
+          <span>Command Palette </span>
+          <div>
+            <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span class="text-xs">⌘</span>K
+            </kbd>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  const keymaps = ALL_KEYMAPS;
   return (
     <div class="flex items-center flex-col flex-1">
       <Show when={!props.suffix && !props.short}>
-        <h2 class="text-2xl font-bold mt-4 text-primary pb-5">{t('keymaps.title')}</h2>
-        <span class="max-w-lg font-medium text-center pb-5">{t('keymaps.description')}</span>
+        <h2 class="text-2xl font-bold mt-4 text-primary pb-5">
+          {t('keymaps.title')}
+        </h2>
+        <span class="max-w-lg font-medium text-center pb-5">
+          {t('keymaps.description')}
+        </span>
       </Show>
       <For each={keymaps}>
         {({ category, keys, description }) => (
@@ -73,7 +99,9 @@ const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
             <div class="flex flex-col items-center">
               <h3 class="text-lg font-bold text-primary">{category}</h3>
               <Show when={description}>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{description}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  {description}
+                </span>
               </Show>
             </div>
             <div class="grid grid-cols-2">
@@ -91,7 +119,13 @@ const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
                   {({ keys }) => (
                     <div class="h-[30px] flex items-center">
                       <span class="flex gap-2">
-                        <For each={keys}>{(key) => <kbd class="kbd kbd-xs text-base-content">{key}</kbd>}</For>
+                        <For each={keys}>
+                          {(key) => (
+                            <kbd class="kbd kbd-xs text-base-content">
+                              {key}
+                            </kbd>
+                          )}
+                        </For>
                       </span>
                     </div>
                   )}

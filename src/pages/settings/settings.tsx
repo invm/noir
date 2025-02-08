@@ -4,6 +4,7 @@ import { createSignal } from 'solid-js';
 import Keymaps from './keymaps';
 import { useNavigate } from '@solidjs/router';
 import ThemeCustomization from './themes/theme-customization';
+import { Button } from 'components/ui/button';
 
 type SettingsTab = 'theme' | 'connections' | 'shortcuts';
 
@@ -29,40 +30,34 @@ export function Settings() {
           <nav>
             <ul class="space-y-2">
               <li>
-                <button
-                  class={`w-full text-left px-4 py-2 rounded ${
-                    activeTab() === 'theme'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-accent'
-                  }`}
+                <Button
+                  class="w-full"
+                  variant={activeTab() === 'theme' ? 'default' : 'ghost'}
                   onClick={() => setActiveTab('theme')}
                 >
                   Theme Customization
-                </button>
+                </Button>
               </li>
+              {/* <li> */}
+              {/*   <Button */}
+              {/*     class={`w-full text-left px-4 py-2 rounded ${ */}
+              {/*       activeTab() === 'connections' */}
+              {/*         ? 'bg-primary text-primary-foreground' */}
+              {/*         : 'text-foreground hover:bg-accent' */}
+              {/*     }`} */}
+              {/*     onClick={() => setActiveTab('connections')} */}
+              {/*   > */}
+              {/*     Connection Settings */}
+              {/*   </Button> */}
+              {/* </li> */}
               <li>
-                <button
-                  class={`w-full text-left px-4 py-2 rounded ${
-                    activeTab() === 'connections'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-accent'
-                  }`}
-                  onClick={() => setActiveTab('connections')}
-                >
-                  Connection Settings
-                </button>
-              </li>
-              <li>
-                <button
-                  class={`w-full text-left px-4 py-2 rounded ${
-                    activeTab() === 'shortcuts'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-accent'
-                  }`}
+                <Button
+                  class="w-full"
+                  variant={activeTab() === 'shortcuts' ? 'default' : 'ghost'}
                   onClick={() => setActiveTab('shortcuts')}
                 >
                   Keyboard Shortcuts
-                </button>
+                </Button>
               </li>
             </ul>
           </nav>

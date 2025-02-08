@@ -1,5 +1,5 @@
 import { Navigate, Route, Router as SolidRouter } from '@solidjs/router';
-import { Connections } from 'pages/manager/connections';
+import { ConnectionManager } from 'pages/connections/manager';
 import { Console } from 'pages/console/console';
 import { Settings } from 'pages/settings/settings';
 import { ParentComponent } from 'solid-js';
@@ -12,7 +12,7 @@ export const Router = () => {
   return (
     <SolidRouter>
       <Route component={NavbarWrapper}>
-        <Route path="/" component={Connections} />
+        <Route path="/" component={ConnectionManager} />
         <Route path="/settings" component={Settings} />
         <Route path="/console/:id" component={Console} />
         <Route path="*" component={() => <Navigate href={'/'} />} />

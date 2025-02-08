@@ -117,3 +117,7 @@ div[class*='ag-theme'] {
     scrollbar-width: none; /* Firefox */
   }
 }
+
+.info-table td {
+  padding: 0 10px; /* Adjust the value as needed */
+}

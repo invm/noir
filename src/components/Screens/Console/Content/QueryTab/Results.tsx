@@ -386,7 +386,7 @@ export const Results = (props: {
                 <Loader />
               </div>
             ) : data()?.notReady || data()?.queryType === 'Other' ? (
-              <Keymaps short /> // TODO: replace with cmd K kbd component and not that big component
+              <Keymaps short />
             ) : (
               <NoResults error={data()?.error} />
             )

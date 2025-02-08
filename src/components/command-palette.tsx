@@ -60,8 +60,8 @@ export const CommandPalette = (props: CommandPaletteProps) => {
           >
             Disconnect from current db
           </CommandItem>
-          <CommandItem>Show Table Data</CommandItem>
-          <CommandItem>Export Results</CommandItem>
+          {/* <CommandItem>Show Table Data</CommandItem> */}
+          {/* <CommandItem>Export Results</CommandItem> */}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

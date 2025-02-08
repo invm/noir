@@ -1,6 +1,5 @@
 import { Button } from 'components/ui/button';
 import { FaSolidServer as Server } from 'solid-icons/fa';
-// import { VsSettings as Settings2 } from 'solid-icons/vs';
 import { TbPlugConnected } from 'solid-icons/tb';
 import { ConnectionConfig } from 'interfaces';
 import {
@@ -131,10 +130,6 @@ export function ConnectionGrid(props: { class?: string }) {
                           </Match>
                         </Switch>
                       </Button>
-                      {/* TODO: add this option */}
-                      {/* <Button variant="ghost" size="sm"> */}
-                      {/*   <Settings2 class="h-4 w-4" /> */}
-                      {/* </Button> */}
                     </div>
                   </CardContent>
                 </Card>

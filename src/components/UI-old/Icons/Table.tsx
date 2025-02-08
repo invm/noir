@@ -1,9 +1,9 @@
 export const Table = (props: { color: 'success' | 'warning' | 'info' | 'error' }) => {
   const styles = {
-    success: 'size-4 text-success',
-    warning: 'size-4 text-warning',
-    info: 'size-4 text-info',
-    error: 'size-4 text-error',
+    success: 'size-4 text-emerald-500',
+    warning: 'size-4 text-orange-500',
+    info: 'size-4 text-sky-500',
+    error: 'size-4 text-rose-600',
   };
   const cls = styles[props.color];
   return (

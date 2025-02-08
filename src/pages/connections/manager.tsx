@@ -4,8 +4,8 @@ import { Button } from 'components/ui/button';
 import { createSignal, Show } from 'solid-js';
 import { VsSettings } from 'solid-icons/vs';
 
-import { ConnectionGrid } from './grid';
-import { AddConnectionForm } from 'pages/manager/connections/form';
+import { ConnectionGrid } from './connections/grid';
+import { AddConnectionForm } from 'pages/connections/connections/form';
 import { A } from '@solidjs/router';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 

@@ -1,6 +1,6 @@
 import Split from 'split.js';
 import { createEffect, onCleanup } from 'solid-js';
-import { Sidebar } from 'components/Screens/Console/Sidebar/Sidebar';
+import { DbSidebarContent } from 'pages/console/sidebar/Sidebar';
 import { Content } from 'components/Screens/Console/Content/Content';
 
 export const Console = () => {
@@ -19,7 +19,7 @@ export const Console = () => {
       <div class="flex w-full h-full">
         <div id="sidebar" class="h-full">
           <div class="bg-base-200 w-full h-full rounded-tr-lg">
-            <Sidebar />
+            <DbSidebarContent />
           </div>
         </div>
         <div id="main">
