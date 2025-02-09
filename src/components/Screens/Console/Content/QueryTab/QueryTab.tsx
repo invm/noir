@@ -1,6 +1,6 @@
 import { Results } from './Results';
 import Resizable from '@corvu/resizable';
-import { Editor } from './Editor';
+import { QueryEditor } from './QueryEditor';
 import { useAppSelector } from 'services/Context';
 import { Tabs, TabsContent } from 'components/ui/tabs';
 import { For } from 'solid-js';
@@ -29,7 +29,7 @@ export const QueryTab = () => {
                 value={idx().toString()}
                 class="h-full flex-col flex-1 border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
               >
-                <Editor />
+                <QueryEditor />
               </TabsContent>
             )}
           </For>

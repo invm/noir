@@ -8,8 +8,18 @@ import { t } from 'utils/i18n';
 import { CloseIcon } from 'components/UI-old/Icons';
 import { getAnyCase } from 'utils/utils';
 import { createForm } from '@felte/solid';
-import { Select, TextInput } from 'components/UI-old';
 import { validator } from '@felte/validator-zod';
+import { TextField, TextFieldRoot } from 'components/ui/textfield';
+import { Button } from 'components/ui/button';
+import { Loader } from 'components/ui/loader';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'components/ui/select';
 
 export const schema = z.object({
   column: z.string().max(1024),
@@ -138,57 +148,94 @@ export const Search = (props: SearchProps) => {
   createEffect(() => {
     if (cols().length) {
       setFields('column', getAnyCase(cols()[0], 'column_name'));
+      setFields('operator', '=');
     }
   });
 
   return (
     <Show when={props.table}>
       <form use:form autocomplete="off">
-        <div class="w-full pb-2 bg-base-100 px-2 py-1 grid grid-cols-12 gap-2">
+        <div class="w-full pb-2 px-2 grid grid-cols-12 gap-2 grid-rows-1">
           <div class="col-span-3">
             <Select
-              suppressTitlecase
               name="column"
+              value={data('column')}
               options={cols().map((c) => getAnyCase(c, 'column_name'))}
-            />
+              onChange={(value) => {
+                setFields('column', value || '');
+              }}
+              itemComponent={(props) => (
+                <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+              )}
+            >
+              <SelectTrigger class="h-8 w-full">
+                <SelectValue>
+                  {(state) => state.selectedOption() as string}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent />
+            </Select>
           </div>
           <div class="col-span-1">
             <Select
+              class="w-full"
               name="operator"
+              value={data('operator')}
+              onChange={(value) => {
+                setFields('operator', value || '=');
+              }}
               options={Object.keys(COMPARISON_OPERATORS)}
-            />
-          </div>
-          <div class="col-span-8 flex items-center justify-between gap-3">
-            <TextInput
-              name="value"
-              placeholder={t('console.search.placeholder', {
-                table: props.table,
-              })}
-              class="input input-bordered input-sm border-base-content w-full"
-            />
-            <div
-              class="tooltip tooltip-primary tooltip-left"
-              data-tip={t('console.search.clear')}
+              itemComponent={(props) => (
+                <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+              )}
             >
-              <Switch>
-                <Match when={loading()}>
-                  <span class="loading text-primary loading-bars loading-xs"></span>
-                </Match>
-                <Match when={!loading()}>
-                  <button
-                    onClick={() => {
-                      reset();
-                      setFields('column', getAnyCase(cols()[0], 'column_name'));
-                      onSubmit(data());
-                    }}
-                    class="btn btn-sm btn-ghost"
-                    type="button"
-                  >
-                    <CloseIcon />
-                  </button>
-                </Match>
-              </Switch>
-            </div>
+              <SelectTrigger class="h-8 w-full">
+                <SelectValue>
+                  {(state) => state.selectedOption() as string}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent />
+            </Select>
+          </div>
+          <div class="col-span-8 flex items-center justify-between gap-2">
+            <TextFieldRoot class="w-full">
+              <TextField
+                placeholder={t('console.search.placeholder', {
+                  table: props.table,
+                })}
+                name="value"
+                size="sm"
+                class="h-8 w-full"
+              />
+            </TextFieldRoot>
+            <Tooltip>
+              <TooltipTrigger>
+                <Switch>
+                  <Match when={loading()}>
+                    <Loader />
+                  </Match>
+                  <Match when={!loading()}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      class="h-8"
+                      onClick={() => {
+                        reset();
+                        setFields(
+                          'column',
+                          getAnyCase(cols()[0], 'column_name')
+                        );
+                        onSubmit(data());
+                      }}
+                      type="button"
+                    >
+                      <CloseIcon />
+                    </Button>
+                  </Match>
+                </Switch>
+              </TooltipTrigger>
+              <TooltipContent>{t('console.search.clear')}</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </form>

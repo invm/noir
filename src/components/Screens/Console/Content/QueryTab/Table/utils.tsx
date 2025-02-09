@@ -1,31 +1,51 @@
-import PopupCellRenderer, { DrawerState, PopupCellRendererProps } from './PopupCellRenderer';
+import PopupCellRenderer, {
+  DrawerState,
+  PopupCellRendererProps,
+} from './PopupCellRenderer';
 import { getAnyCase } from 'utils/utils';
 import { Row } from 'interfaces';
 import { Show } from 'solid-js';
 import { ColDef } from 'ag-grid-community';
-import { Key } from 'components/UI-old/Icons';
+import { IoKey as Key } from 'solid-icons/io';
 import { t } from 'utils/i18n';
 import { SetStoreFunction } from 'solid-js/store';
 
+export type UpdageChange = {
+  [rowIndex: string]: {
+    condition: Row;
+    data: Row;
+    changes: Row;
+  };
+};
+
+export type DeleteChange = {
+  [rowIndex: string]: {
+    condition: Row;
+    data: Row;
+    rowIndex: number;
+  };
+};
+
+export type AddChange = {
+  [createKey: string]: Row;
+};
+
 export type Changes = {
-  update: {
-    [rowIndex: string]: {
-      condition: Row;
-      changes: Row;
-    };
-  };
-  delete: {
-    [rowIndex: string]: {
-      condition: Row;
-    };
-  };
-  add: {
-    [createKey: string]: Row;
-  };
+  update: UpdageChange;
+  delete: DeleteChange;
+  add: AddChange;
 };
 const headerComponent = (
   name: string,
-  { visible_type, pk, fk }: { visible_type?: string; pk?: boolean; fk?: { table: string; column: string } }
+  {
+    visible_type,
+    pk,
+    fk,
+  }: {
+    visible_type?: string;
+    pk?: boolean;
+    fk?: { table: string; column: string };
+  }
 ) => (
   <div class="flex items-center justify-between w-full">
     <div>
@@ -38,9 +58,15 @@ const headerComponent = (
       <div
         class={`tooltip tooltip-${pk ? 'success' : 'warning'} tooltip-left px-3 text-xs font-light`}
         data-tip={
-          pk ? t('console.table.primary_key') : t('console.table.foreign_key', { table: fk?.table, column: fk?.column })
-        }>
-        <Key color={pk ? 'success' : 'warning'} />
+          pk
+            ? t('console.table.primary_key')
+            : t('console.table.foreign_key', {
+                table: fk?.table,
+                column: fk?.column,
+              })
+        }
+      >
+        <Key class={pk ? 'text-emerald-500' : 'text-yellow-500'} />
       </div>
     </Show>
   </div>
@@ -50,7 +76,7 @@ export const getColumnDefs = ({
   columns,
   foreign_keys,
   primary_key,
-  setCode,
+  openModal,
   editable,
   setChanges,
   row,
@@ -59,14 +85,17 @@ export const getColumnDefs = ({
   columns: Row[];
   foreign_keys: Row[];
   primary_key: Row[];
-  setCode: (code: string) => void;
+  openModal: (code: string) => void;
   editable: boolean;
   setChanges: SetStoreFunction<Changes>;
   row: Row;
   openDrawerForm: (s: Pick<DrawerState, 'mode' | 'data' | 'rowIndex'>) => void;
 }): ColDef[] => {
   const cellRenderer = (p: PopupCellRendererProps) => (
-    <PopupCellRenderer {...p} {...{ setChanges, editable, setCode, primary_key, openDrawerForm }} />
+    <PopupCellRenderer
+      {...p}
+      {...{ setChanges, editable, openModal, primary_key, openDrawerForm }}
+    />
   );
 
   if (columns.length) {
@@ -89,7 +118,12 @@ export const getColumnDefs = ({
           headerComponent(field, {
             visible_type,
             pk,
-            fk: fk ? { table: getAnyCase(fk, 'table_name'), column: getAnyCase(fk, 'column_name') } : undefined,
+            fk: fk
+              ? {
+                  table: getAnyCase(fk, 'table_name'),
+                  column: getAnyCase(fk, 'column_name'),
+                }
+              : undefined,
           }),
         field,
         headerName: field,

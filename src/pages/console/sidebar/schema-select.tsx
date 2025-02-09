@@ -35,7 +35,6 @@ import {
 } from 'components/ui/alert-dialog';
 
 export const SchemaSelect = () => {
-  console.log('render SchemaSelect');
   const {
     messages: { notify },
     connections: {

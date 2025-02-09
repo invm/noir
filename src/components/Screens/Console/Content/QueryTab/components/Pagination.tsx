@@ -113,23 +113,6 @@ export const Pagination = (props: PaginationProps) => {
             {t('console.table.total_rows')} {props.query.count}
           </span>
         </Show>
-        <Show when={props.openDrawerForm}>
-          <div
-            class="tooltip tooltip-primary tooltip-bottom px-3"
-            data-tip={altOrMeta(true) + ' + N'}
-          >
-            <button
-              class="btn btn-xs btn-ghost"
-              onClick={() =>
-                props.openDrawerForm
-                  ? props.openDrawerForm({ mode: 'add', data: {} })
-                  : null
-              }
-            >
-              {t('console.table.row_actions.add_row')}
-            </button>
-          </div>
-        </Show>
         <Show when={props.query.executionTime}>
           <span class="text-xs font-medium">
             {t('console.table.ran', { duration: props.query.executionTime })}
@@ -142,6 +125,24 @@ export const Pagination = (props: PaginationProps) => {
               rows: props.query.affectedRows,
             })}
           </span>
+        </Show>
+        <Show when={props.openDrawerForm}>
+          <div
+            class="tooltip tooltip-primary tooltip-bottom px-3"
+            data-tip={altOrMeta(true) + ' + N'}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                props.openDrawerForm
+                  ? props.openDrawerForm({ mode: 'add', data: {} })
+                  : null
+              }
+            >
+              {t('console.table.row_actions.add_row')}
+            </Button>
+          </div>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed'}>

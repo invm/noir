@@ -7,6 +7,7 @@ import { invoke } from '@tauri-apps/api';
 import { ResultSet, Row, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { getAnyCase } from 'utils/utils';
+// @ts-ignore
 import { VList } from 'virtua/solid';
 import { createStore } from 'solid-js/store';
 import {
@@ -100,52 +101,50 @@ export const DbSidebarContent = () => {
   return (
     <VList
       class="pb-16 no-scrollbar"
-      data={
-        [
-          {
-            title: 'Tables',
-            type: 'tables',
-            tables: tables(),
-          },
-          {
-            title: 'Views',
-            type: 'tables',
-            tables: views(),
-          },
-          {
-            title: 'Routines',
-            type: 'routine',
-            rows: routines(),
-            icon: () => <Function class="size-4 text-emerald-500" />,
-            name: (row: Row) => getAnyCase(row, 'routine_name'),
-            show: (row: Row) => showRoutine(getAnyCase(row, 'routine_name')),
-            statement: (row: Row) =>
-              showCreateStatement(
-                getAnyCase(row, 'routine_name'),
-                getAnyCase(row, 'routine_definition')
-              ),
-          },
-          {
-            title: 'Triggers',
-            type: 'trigger',
-            rows: triggers(),
-            icon: () => <ShareNodes class="size-4 text-yellow-500" />,
-            show: (row: Row) => showTrigger(getAnyCase(row, 'trigger_name')),
-            statement: (row: Row) =>
-              showCreateStatement(
-                getAnyCase(row, 'trigger_name'),
-                getAnyCase(row, 'action_statement')
-              ),
-            name: (row: Row) =>
-              getAnyCase(row, 'trigger_name') +
-              (getAnyCase(row, 'event_object_table')
-                ? ' (' + getAnyCase(row, 'event_object_table') + ')'
-                : ''),
-          },
-        ] as VListCategory[]
-      }
+      data={[
+        {
+          title: 'Tables',
+          type: 'tables',
+          tables: tables(),
+        },
+        {
+          title: 'Views',
+          type: 'tables',
+          tables: views(),
+        },
+        {
+          title: 'Routines',
+          type: 'routine',
+          rows: routines(),
+          icon: () => <Function class="size-4 text-emerald-500" />,
+          name: (row: Row) => getAnyCase(row, 'routine_name'),
+          show: (row: Row) => showRoutine(getAnyCase(row, 'routine_name')),
+          statement: (row: Row) =>
+            showCreateStatement(
+              getAnyCase(row, 'routine_name'),
+              getAnyCase(row, 'routine_definition')
+            ),
+        },
+        {
+          title: 'Triggers',
+          type: 'trigger',
+          rows: triggers(),
+          icon: () => <ShareNodes class="size-4 text-yellow-500" />,
+          show: (row: Row) => showTrigger(getAnyCase(row, 'trigger_name')),
+          statement: (row: Row) =>
+            showCreateStatement(
+              getAnyCase(row, 'trigger_name'),
+              getAnyCase(row, 'action_statement')
+            ),
+          name: (row: Row) =>
+            getAnyCase(row, 'trigger_name') +
+            (getAnyCase(row, 'event_object_table')
+              ? ' (' + getAnyCase(row, 'event_object_table') + ')'
+              : ''),
+        },
+      ]}
     >
-      {(entity) => (
+      {(entity: VListCategory) => (
         <SidebarGroup class="h-full py-0">
           <SidebarGroupLabel class="gap-2 p-0 font-semibold text-sm">
             {entity.title}

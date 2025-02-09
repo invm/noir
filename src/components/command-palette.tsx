@@ -21,7 +21,7 @@ interface CommandPaletteProps {
 
 export const CommandPalette = (props: CommandPaletteProps) => {
   const {
-    connections: { removeConnection, store },
+    connections: { removeConnection },
     app: { cmdOrCtrl },
   } = useAppSelector();
 
@@ -37,13 +37,9 @@ export const CommandPalette = (props: CommandPaletteProps) => {
 
   const handleCloseConnection = async () => {
     const id = getConnId();
-    console.log('id', id);
     await invoke<string>('disconnect', { id });
     await removeConnection(id);
     navigate('/');
-    console.log(store.connections, id);
-    // if (store.tabs.length === 0) {
-    // }
   };
   return (
     <CommandDialog open={props.open()} onOpenChange={props.setOpen}>

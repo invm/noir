@@ -18,10 +18,15 @@ import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
 import Keymaps from 'pages/settings/keymaps';
 import { DrawerState } from './Table/PopupCellRenderer';
+import { Dialog, DialogContent, DialogTitle } from 'components/ui/dialog';
 import { Editor } from './Editor';
-import { Dialog, DialogContent } from 'components/ui/dialog';
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
+
+const addRowId = (row: Row, index: number) => ({
+  ...row,
+  __noir_id: `noir_${index}`,
+});
 
 export const Results = (props: {
   gridTheme: string;
@@ -40,8 +45,7 @@ export const Results = (props: {
     messages: { notify },
     app: { cmdOrCtrl },
   } = useAppSelector();
-  // TODO: provide setOpen to columndef context menu to open row in editor
-  const [open, _setOpen] = createSignal(false);
+  const [open, setOpen] = createSignal(false);
 
   const [drawerOpen, setDrawerOpen] = createStore<DrawerState>({
     mode: 'add' as 'add' | 'edit',
@@ -90,6 +94,11 @@ export const Results = (props: {
     if (drawerOpen.open) setDrawerOpen({ open: false });
   });
 
+  const openModal = (s: string) => {
+    setCode(s);
+    setOpen(true);
+  };
+
   const [data] = createResource(
     () =>
       [
@@ -117,7 +126,7 @@ export const Results = (props: {
           columns,
           foreign_keys,
           primary_key,
-          setCode,
+          openModal,
           editable: !!props.editable,
           setChanges,
           row: result_set?.rows?.[0] ?? {},
@@ -125,7 +134,7 @@ export const Results = (props: {
         });
         if (result_set?.rows?.length) {
           return {
-            rows: result_set.rows,
+            rows: result_set.rows.map(addRowId),
             columns,
             colDef,
             count: result_set.count,
@@ -145,15 +154,15 @@ export const Results = (props: {
           columns,
           foreign_keys,
           primary_key,
-          setCode,
+          openModal,
           editable: !!props.editable,
           setChanges,
-          row: rows[0] ?? {},
+          row: rows[0] ? addRowId(rows[0], 0) : {},
           openDrawerForm,
         });
         return {
           columns,
-          rows,
+          rows: rows.map(addRowId),
           colDef,
           count: result_set.count,
           exhausted: rows.length < pageSizeVal,
@@ -267,9 +276,19 @@ export const Results = (props: {
   };
 
   const undoChanges = async () => {
-    const undoSize = gridRef.api?.getCurrentUndoSize();
-    for (let i = 0; i < undoSize!; i++) {
-      gridRef.api?.undoCellEditing();
+    if (Object.keys(changes['update']).length) {
+      gridRef.api.applyTransaction({
+        update: Object.values(changes['update']).map((d) => d.data),
+      });
+    }
+    if (Object.keys(changes['delete']).length) {
+      // return rows to their place
+      Object.values(changes['delete']).forEach((d) => {
+        gridRef.api.applyTransaction({
+          addIndex: d.rowIndex,
+          add: [d.data],
+        });
+      });
     }
     resetChanges();
   };
@@ -287,6 +306,7 @@ export const Results = (props: {
       const idx = String(e.rowIndex);
       setChanges('update', idx, {
         condition,
+        data: { ...e.data, [change]: e.oldValue },
         changes: { [change]: e.newValue },
       });
     }
@@ -309,7 +329,11 @@ export const Results = (props: {
       setChanges('add', key, { changes: drawerOpen.data });
     } else {
       const idx = String(drawerOpen.rowIndex);
-      setChanges('update', idx, { condition, changes: drawerOpen.data });
+      setChanges('update', idx, {
+        condition,
+        data: drawerOpen.originalData,
+        changes: drawerOpen.data,
+      });
     }
     await applyChanges();
     setDrawerOpen({ open: false, data: {} });
@@ -337,12 +361,10 @@ export const Results = (props: {
 
   return (
     <div class="flex flex-col h-full overflow-hidden">
-      <Dialog open={open()}>
-        <DialogContent>
-          <div class="modal-box min-w-[1000px] max-h-full h-[80%]">
-            <div class="h-full">
-              <Editor readOnly value={code()} />
-            </div>
+      <Dialog open={open()} onOpenChange={(isOpen) => setOpen(isOpen)}>
+        <DialogContent class="min-w-[1000px]">
+          <div class="modal-box pt-10 max-h-full min-h-[80vh] h-[80%]">
+            <Editor language="json" readOnly value={code()} />
           </div>
         </DialogContent>
       </Dialog>
@@ -403,16 +425,20 @@ export const Results = (props: {
           rowSelection="multiple"
           rowData={data()?.rows}
           defaultColDef={defaultColDef}
-          enableCellChangeFlash={true}
-          enableCellTextSelection={true}
-          undoRedoCellEditing={true}
-          suppressExcelExport={true}
+          enableCellChangeFlash
+          enableCellTextSelection
+          undoRedoCellEditing
+          suppressExcelExport
+          getRowId={(params) => {
+            return params.data.__noir_id;
+          }}
+          undoRedoCellEditingLimit={0}
           suppressCsvExport={false}
           onCellEditingStopped={onCellEditingStopped}
         />
       </div>
       {/* TODO: change drawer to shadcn sheet */}
-      <Show when={props.editable}>
+      <Show when={false}>
         <div class="absolute right-0 top-0">
           <Drawer
             {...{
