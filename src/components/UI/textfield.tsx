@@ -1,15 +1,16 @@
-import { splitProps, type ValidComponent, type VoidProps } from 'solid-js';
-import type { PolymorphicProps } from '@kobalte/core/polymorphic';
-import {
-  TextField as TextFieldPrimitive,
-  type TextFieldDescriptionProps,
-  type TextFieldErrorMessageProps,
-  type TextFieldInputProps,
-  type TextFieldLabelProps,
-  type TextFieldRootProps,
-} from '@kobalte/core/text-field';
-import { cva } from 'class-variance-authority';
 import { cn } from 'utils/cn';
+import type { PolymorphicProps } from '@kobalte/core/polymorphic';
+import type {
+  TextFieldDescriptionProps,
+  TextFieldErrorMessageProps,
+  TextFieldInputProps,
+  TextFieldLabelProps,
+  TextFieldRootProps,
+} from '@kobalte/core/text-field';
+import { TextField as TextFieldPrimitive } from '@kobalte/core/text-field';
+import { cva } from 'class-variance-authority';
+import type { ValidComponent, VoidProps } from 'solid-js';
+import { splitProps } from 'solid-js';
 
 type textFieldProps<T extends ValidComponent = 'div'> =
   TextFieldRootProps<T> & {
@@ -105,7 +106,7 @@ export const TextFieldDescription = <T extends ValidComponent = 'div'>(
   );
 };
 
-export type textFieldInputProps<T extends ValidComponent = 'input'> = VoidProps<
+type textFieldInputProps<T extends ValidComponent = 'input'> = VoidProps<
   TextFieldInputProps<T> & {
     class?: string;
   }
@@ -119,7 +120,7 @@ export const TextField = <T extends ValidComponent = 'input'>(
   return (
     <TextFieldPrimitive.Input
       class={cn(
-        'border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-shadow file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-[1.5px] disabled:cursor-not-allowed disabled:opacity-50',
+        'flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-shadow file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[1.5px] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
         local.class
       )}
       {...rest}

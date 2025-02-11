@@ -1,5 +1,5 @@
 import { useAppSelector } from 'services/Context';
-import { Results } from '../QueryTab/Results';
+import { Results } from './QueryTab/Results';
 
 const DataTab = () => {
   const {

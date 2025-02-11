@@ -80,11 +80,11 @@ export default function GridThemeCustomizer() {
         </div>
 
         <div class={'select-text h-[240px] ag-theme-' + gridTheme()}>
-          <AgGridSolid
+          {/* <AgGridSolid
             columnDefs={columnsDef}
             rowSelection="multiple"
             rowData={data}
-          />
+          /> */}
         </div>
       </CardContent>
     </Card>

@@ -27,8 +27,8 @@ fn format(out: FormatCallback, message: &Arguments, record: &Record) {
         target = target.split("::").last().unwrap_or(target)
     }
     let mut target = String::from(target);
-    target.truncate(8);
-    let target = format!("{:>10}", target);
+    target.truncate(10);
+    let target = format!("{:<10}", target);
     // time in date - time foramt with seconds
     let ts = chrono::offset::Utc::now()
         .format("%Y-%m-%d %H:%M:%S%.3f")

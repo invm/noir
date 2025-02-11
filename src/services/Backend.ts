@@ -10,7 +10,7 @@ import { select } from 'sql-bricks';
 import { getAnyCase } from 'utils/utils';
 
 export const BackendService = () => {
-  const [pageSize, setPageSize] = createSignal<number>(25);
+  const [pageSize, setPageSize] = createSignal<number>(50);
 
   const getQueryResults = async (
     path: string,

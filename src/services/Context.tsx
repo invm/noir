@@ -1,20 +1,24 @@
-import { createContext, createSignal, onMount, ParentComponent, Show, useContext } from 'solid-js';
+import {
+  createContext,
+  createSignal,
+  onMount,
+  ParentComponent,
+  Show,
+  useContext,
+} from 'solid-js';
 import { OsType, type } from '@tauri-apps/api/os';
-import { MessageService } from './Messages';
 import { ConnectionsService } from './Connections';
 import { AppService } from './App';
 import { BackendService } from './Backend';
 import { RegisterKeymaps } from './RegisterKeymaps';
 
 export type RootState = {
-  messages: ReturnType<typeof MessageService>;
   connections: ReturnType<typeof ConnectionsService>;
   app: ReturnType<typeof AppService>;
   backend: ReturnType<typeof BackendService>;
 };
 
 const rootState: RootState = {
-  messages: MessageService(),
   connections: ConnectionsService(),
   app: AppService(),
   backend: BackendService(),

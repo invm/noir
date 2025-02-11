@@ -8,7 +8,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from 'src/components/ui/hover-card';
+} from 'components/ui/hover-card';
 import { useAppSelector } from 'services/Context';
 import { Match, Show, Switch } from 'solid-js';
 import { cn } from 'utils/cn';

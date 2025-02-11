@@ -34,11 +34,11 @@ import { AlertDialogTriggerProps } from '@kobalte/core/alert-dialog';
 import { useNavigate } from '@solidjs/router';
 import { Loader } from 'components/ui/loader';
 import { createStore } from 'solid-js/store';
+import { toast } from 'solid-sonner';
 
 export function ConnectionGrid(props: { class?: string }) {
   const navigate = useNavigate();
   const {
-    messages: { notify },
     connections: {
       connections,
       refreshConnections,
@@ -75,7 +75,9 @@ export function ConnectionGrid(props: { class?: string }) {
       });
       navigate('/console/' + config.id);
     } catch (error) {
-      notify(error);
+      toast.error('Could not connect to ' + config.name, {
+        description: (error as Error).message || (error as string),
+      });
     } finally {
       setState({ loading: false, id: '' });
     }

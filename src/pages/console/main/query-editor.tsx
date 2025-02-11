@@ -9,7 +9,7 @@ import { createEffect, For, Match, Show, Switch } from 'solid-js';
 import { useSideBar } from 'components/ui/sidebar';
 import { useAppSelector } from 'services/Context';
 import { A } from '@solidjs/router';
-import { Content } from 'components/Screens/Console/Content/Content';
+import { Content } from 'pages/console/console-content/Content';
 
 interface QueryEditorProps {}
 

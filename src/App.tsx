@@ -21,6 +21,7 @@ import {
   createLocalStorageManager,
 } from '@kobalte/core';
 import { restoreTheme } from 'pages/settings/themes/ui';
+import { toast } from 'solid-sonner';
 
 function App() {
   const {
@@ -32,7 +33,6 @@ function App() {
     },
     app: { restoreAppStore, appStore },
     backend: { getQueryMetadata },
-    messages: { notify },
   } = useAppSelector();
 
   const [updating, setUpdating] = createSignal(false);
@@ -64,7 +64,9 @@ function App() {
       await installUpdate();
       await relaunch();
     } catch (error) {
-      notify(error);
+      toast.error('Could not update app', {
+        description: (error as Error).message || (error as string),
+      });
     } finally {
       setUpdating(false);
       setShouldUpdate(false);
@@ -99,17 +101,17 @@ function App() {
         error: e,
       })
     );
-    notify(e.reason?.message || e, 'error');
+    toast.error('Error occured', { description: e.reason?.message || e });
   });
 
   window.addEventListener('error', (e) => {
-    if (
-      e?.message ===
-      'ResizeObserver loop completed with undelivered notifications.'
-    )
-      return;
+    // if (
+    //   e?.message ===
+    //   'ResizeObserver loop completed with undelivered notifications.'
+    // )
+    //   return;
     error(JSON.stringify({ message: 'Unhandled error', error: e.error }));
-    notify(e.message);
+    toast.error('Error', { description: e.message });
   });
 
   const compareAndAssign = async (event: QueryTaskResult) => {
@@ -121,7 +123,7 @@ function App() {
         updateResultSet(tab_idx, query_idx, metadata);
       } else if (status === 'Error') {
         updateResultSet(tab_idx, query_idx, { status, error: event.error });
-        notify(event.error, 'error');
+        toast.error('Error in query', { description: event.error });
       }
     }
   };

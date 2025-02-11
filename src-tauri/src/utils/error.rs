@@ -29,7 +29,7 @@ pub enum Error {
     DeadpoolPostgresqlCreatePoolError(#[from] deadpool_postgres::CreatePoolError),
     #[error("{0}")]
     SQLParse(#[from] sqlparser::parser::ParserError),
-    #[error("General error occurred: {0}")]
+    #[error("Error: {0}")]
     General(#[from] anyhow::Error),
     #[error("Query results expired, please re-run the query.")]
     QueryExpired,

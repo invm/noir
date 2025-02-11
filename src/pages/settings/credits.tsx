@@ -1,9 +1,9 @@
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
-import { version } from '../../../../package.json';
-import Keymaps from '../../../pages/settings/keymaps';
-import { OpenIssue } from './OpenIssue';
+import { version } from '../../../package.json';
+import Keymaps from './keymaps';
+import { OpenIssue } from './open-issue';
 
 export const Settings = () => {
   const {

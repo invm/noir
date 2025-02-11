@@ -19,7 +19,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from 'src/components/ui/popover';
+} from 'components/ui/popover';
 import { t } from 'i18next';
 import {
   ContextMenu,
@@ -27,6 +27,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from 'components/ui/context-menu';
+import { toast } from 'solid-sonner';
 
 type VListCategory = {
   title: string;
@@ -48,7 +49,6 @@ type VListCategory = {
 
 export const DbSidebarContent = () => {
   const {
-    messages: { notify },
     connections: {
       getConnection,
       addContentTab,
@@ -74,7 +74,9 @@ export const DbSidebarContent = () => {
       const data = { query, result_sets: [res], cursor: 0 };
       addContentTab(newContentTab(routine, 'Query', data));
     } catch (error) {
-      notify(error);
+      toast.error('Could not show routine', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 
@@ -94,7 +96,9 @@ export const DbSidebarContent = () => {
       const data = { query, result_sets: [res], cursor: 0 };
       addContentTab(newContentTab(trigger, 'Query', data));
     } catch (error) {
-      notify(error);
+      toast.error('Could not show trigger', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 

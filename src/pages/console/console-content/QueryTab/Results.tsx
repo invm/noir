@@ -1,4 +1,11 @@
-import { createEffect, createResource, createSignal, on, Show } from 'solid-js';
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  on,
+  Show,
+  Suspense,
+} from 'solid-js';
 import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useAppSelector } from 'services/Context';
@@ -18,15 +25,11 @@ import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
 import Keymaps from 'pages/settings/keymaps';
 import { DrawerState } from './Table/PopupCellRenderer';
-import { Dialog, DialogContent, DialogTitle } from 'components/ui/dialog';
+import { Dialog, DialogContent } from 'components/ui/dialog';
 import { Editor } from './Editor';
+import { toast } from 'solid-sonner';
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
-
-const addRowId = (row: Row, index: number) => ({
-  ...row,
-  __noir_id: `noir_${index}`,
-});
 
 export const Results = (props: {
   gridTheme: string;
@@ -42,7 +45,6 @@ export const Results = (props: {
       downloadJSON,
       selectAllFrom,
     },
-    messages: { notify },
     app: { cmdOrCtrl },
   } = useAppSelector();
   const [open, setOpen] = createSignal(false);
@@ -134,7 +136,7 @@ export const Results = (props: {
         });
         if (result_set?.rows?.length) {
           return {
-            rows: result_set.rows.map(addRowId),
+            rows: result_set.rows,
             columns,
             colDef,
             count: result_set.count,
@@ -157,12 +159,12 @@ export const Results = (props: {
           openModal,
           editable: !!props.editable,
           setChanges,
-          row: rows[0] ? addRowId(rows[0], 0) : {},
+          row: rows[0] || {},
           openDrawerForm,
         });
         return {
           columns,
-          rows: rows.map(addRowId),
+          rows,
           colDef,
           count: result_set.count,
           exhausted: rows.length < pageSizeVal,
@@ -173,7 +175,9 @@ export const Results = (props: {
           end_time,
         };
       } catch (error) {
-        notify(error);
+        toast.error('Could not get data', {
+          description: (error as Error).message || (error as string),
+        });
         return { rows: [], columns: [], colDef: [], exhausted: true, error };
       }
     }
@@ -209,9 +213,17 @@ export const Results = (props: {
     const dataPath = data()?.path;
     if (!filePath || !dataPath) return;
     if (t === 'json') {
-      await downloadJSON(dataPath, filePath).catch((err) => notify(err));
+      await downloadJSON(dataPath, filePath).catch((error) => {
+        toast.error('Could not download JSON', {
+          description: (error as Error).message || (error as string),
+        });
+      });
     } else {
-      await downloadCsv(dataPath, filePath).catch((err) => notify(err));
+      await downloadCsv(dataPath, filePath).catch((error) => {
+        toast.error('Could not download JSON', {
+          description: (error as Error).message || (error as string),
+        });
+      });
     }
   };
 
@@ -257,11 +269,15 @@ export const Results = (props: {
       Object.keys(changes).forEach((key) => {
         const count = Object.keys(changes[key as keyof typeof changes]).length;
         if (count)
-          notify(t(`console.table.successfull_${key}`, { count }), 'success');
+          toast.success(t(`console.table.successfull_${key}`, { count }));
       }, 0);
       resetChanges();
+      return true;
     } catch (error) {
-      notify(error);
+      toast.error('Could not apply changes', {
+        description: (error as Error).message || (error as string),
+      });
+      return false;
     }
   };
 
@@ -277,6 +293,7 @@ export const Results = (props: {
 
   const undoChanges = async () => {
     if (Object.keys(changes['update']).length) {
+      // TODO: delete and insert at index? try that see how it works
       gridRef.api.applyTransaction({
         update: Object.values(changes['update']).map((d) => d.data),
       });
@@ -314,37 +331,44 @@ export const Results = (props: {
 
   const saveForm = async () => {
     if (!drawerOpen.data) return;
-    const changed = Object.keys(drawerOpen.data).filter(
-      (key) => drawerOpen.data[key] !== drawerOpen.originalData[key]
+    const data = { ...drawerOpen.data };
+    const changed = Object.keys(data).filter(
+      (key) => data[key] !== drawerOpen.originalData[key]
     );
     const columns = (
-      table.primary_key.length ? table.primary_key : table.columns
+      table.primary_key.filter(
+        (c) => !changed.includes(getAnyCase(c, 'column_name'))
+      ).length
+        ? table.primary_key
+        : table.columns
     ).filter((c) => !changed.includes(getAnyCase(c, 'column_name')));
     const condition = columns.reduce((acc, c) => {
       const col = getAnyCase(c, 'column_name');
-      return { ...acc, [col]: drawerOpen.data[col] };
+      return { ...acc, [col]: data[col] };
     }, {});
     if (drawerOpen.mode === 'add') {
       const key = Object.values(condition).join('_');
-      setChanges('add', key, { changes: drawerOpen.data });
+      setChanges('add', key, { changes: data });
     } else {
       const idx = String(drawerOpen.rowIndex);
       setChanges('update', idx, {
         condition,
         data: drawerOpen.originalData,
-        changes: drawerOpen.data,
+        changes: data,
       });
     }
-    await applyChanges();
-    setDrawerOpen({ open: false, data: {} });
+    const success = await applyChanges();
+    if (success) {
+      setDrawerOpen({ open: false, data: {} });
+    }
   };
 
-  createShortcut([cmdOrCtrl(), 's'], () => {
+  createShortcut([cmdOrCtrl(), 's'], async () => {
     if (!props.editable) return;
     if (drawerOpen.open) {
-      saveForm();
+      await saveForm();
     } else {
-      applyChanges();
+      await applyChanges();
     }
   });
 
@@ -401,54 +425,50 @@ export const Results = (props: {
         class={'select-text ag-theme-' + props.gridTheme}
         style={{ height: '100%' }}
       >
-        <AgGridSolid
-          noRowsOverlayComponent={() =>
-            getContentData('Query').result_sets[queryIdx()]?.loading ? (
-              <div>
+        <Suspense>
+          <AgGridSolid
+            noRowsOverlayComponent={() =>
+              getContentData('Query').result_sets[queryIdx()]?.loading ? (
+                <div>
+                  <Loader />
+                </div>
+              ) : data()?.notReady || data()?.queryType === 'Other' ? (
+                <Keymaps short />
+              ) : (
+                <NoResults error={data()?.error} />
+              )
+            }
+            loadingOverlayComponent={() =>
+              getContentData('Query').result_sets[queryIdx()]?.loading ? (
                 <Loader />
-              </div>
-            ) : data()?.notReady || data()?.queryType === 'Other' ? (
-              <Keymaps short />
-            ) : (
-              <NoResults error={data()?.error} />
-            )
-          }
-          loadingOverlayComponent={() =>
-            getContentData('Query').result_sets[queryIdx()]?.loading ? (
-              <Loader />
-            ) : (
-              <Keymaps short />
-            )
-          }
-          ref={gridRef!}
-          columnDefs={data()?.colDef}
-          rowSelection="multiple"
-          rowData={data()?.rows}
-          defaultColDef={defaultColDef}
-          enableCellChangeFlash
-          enableCellTextSelection
-          undoRedoCellEditing
-          suppressExcelExport
-          getRowId={(params) => {
-            return params.data.__noir_id;
-          }}
-          undoRedoCellEditingLimit={0}
-          suppressCsvExport={false}
-          onCellEditingStopped={onCellEditingStopped}
-        />
-      </div>
-      {/* TODO: change drawer to shadcn sheet */}
-      <Show when={false}>
-        <div class="absolute right-0 top-0">
-          <Drawer
-            {...{
-              drawerOpen,
-              setDrawerOpen,
-              table: props.table ?? '',
-              saveForm,
-            }}
+              ) : (
+                <Keymaps short />
+              )
+            }
+            ref={gridRef!}
+            columnDefs={data()?.colDef}
+            rowSelection="multiple"
+            rowData={data()?.rows}
+            defaultColDef={defaultColDef}
+            enableCellChangeFlash
+            enableCellTextSelection
+            undoRedoCellEditing
+            suppressExcelExport
+            undoRedoCellEditingLimit={0}
+            suppressCsvExport={false}
+            onCellEditingStopped={onCellEditingStopped}
           />
-        </div>
+        </Suspense>
+      </div>
+      <Show when={drawerOpen.open}>
+        <Drawer
+          {...{
+            drawerOpen,
+            setDrawerOpen,
+            table: props.table ?? '',
+            saveForm,
+          }}
+        />
       </Show>
     </div>
   );

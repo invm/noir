@@ -1,5 +1,5 @@
 import { GridApi } from 'ag-grid-community';
-import { JSONValue, Row } from 'interfaces';
+import { Row } from 'interfaces';
 import { For } from 'solid-js';
 import { getAnyCase, parseObjRecursive } from 'utils/utils';
 import { writeText } from '@tauri-apps/api/clipboard';
@@ -78,22 +78,16 @@ export type PopupCellRendererProps = {
   openDrawerForm: (s: Pick<DrawerState, 'mode' | 'rowIndex' | 'data'>) => void;
 };
 
-const removeNoirId = (obj: Record<string | '__noir_id', JSONValue>) => {
-  delete obj.__noir_id;
-  return obj;
-};
-
 const PopupCellRenderer = (props: PopupCellRendererProps) => {
   const onClickHandler = async (option: RowAction) => {
-    // TODO: check all these actions
     if (option === 'view') {
       const data = parseObjRecursive(props.data);
       // @ts-ignore
-      props.openModal(JSON.stringify(removeNoirId(data), null, 4));
+      props.openModal(JSON.stringify(data, null, 4));
       return;
     }
     if (option === 'copy-row') {
-      await writeText(JSON.stringify(removeNoirId(props.data)));
+      await writeText(JSON.stringify(props.data));
       return;
     }
     if (option === 'copy-cell') {

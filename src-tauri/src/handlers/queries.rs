@@ -155,6 +155,9 @@ pub async fn execute_tx(
     conn_id: String,
     queries: Vec<&str>,
 ) -> CommandResult<()> {
+    for query in &queries {
+        info!("Execute tx on {}, sql:{query}", conn_id.clone());
+    }
     let connection = app_handle.acquire_connection(conn_id);
     connection.execute_tx(queries).await?;
     Ok(())

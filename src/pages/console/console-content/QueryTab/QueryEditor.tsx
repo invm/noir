@@ -1,12 +1,9 @@
 import { Show, createEffect, createSignal, on } from 'solid-js';
 import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api';
-import {
-  Copy,
-  EditIcon,
-  FireIcon,
-  // VimIcon
-} from 'components/UI-old/Icons';
+import { HiSolidPlay as Play } from 'solid-icons/hi';
+import { IoCopyOutline as Copy } from 'solid-icons/io';
+import { CgFormatIndentIncrease as EditIcon } from 'solid-icons/cg';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
@@ -19,6 +16,7 @@ import { ActionRowButton } from './components/ActionRowButton';
 import * as monaco from 'monaco-editor';
 import { QueryContentTabData } from 'services/Connections';
 import { Editor } from './Editor';
+import { toast } from 'solid-sonner';
 
 interface EditorProps {
   readOnly?: boolean;
@@ -41,7 +39,6 @@ export const QueryEditor = (props: EditorProps) => {
       vimModeOn,
       // toggleVimModeOn
     },
-    messages: { notify },
     backend: { cancelTask },
   } = useAppSelector();
   const idx = () => store.connections[store.idx].idx;
@@ -74,23 +71,22 @@ export const QueryEditor = (props: EditorProps) => {
     updateQueryText(formatted);
   };
 
-  // TODO:
-  // const getSelection = () => {
-  //   return editor()!.getSelection();
-  // };
+  const getSelection = () => {
+    return editor()!.getModel()?.getValueInRange(editor()!.getSelection()!);
+  };
 
   const onExecute = async () => {
     if (loading() || !code()) return;
     setLoading(true);
-    // const selectedText = getSelection();
+    const selectedText = getSelection();
     const conn = getConnection();
     try {
-      // console.log(selectedText || code());
+      const sql = selectedText || code();
       const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
         {
           connId: conn.id,
-          sql: code(),
+          sql,
           autoLimit: autoLimit(),
           tabIdx: conn.idx,
         }
@@ -104,7 +100,9 @@ export const QueryEditor = (props: EditorProps) => {
         })),
       });
     } catch (error) {
-      notify(error);
+      toast.error('Could not enqueue query', {
+        description: (error as Error).message || (error as string),
+      });
     } finally {
       setLoading(false);
     }
@@ -154,7 +152,7 @@ export const QueryEditor = (props: EditorProps) => {
             dataTip={t('console.actions.execute')}
             onClick={onExecute}
             loading={loading()}
-            icon={<FireIcon />}
+            icon={<Play />}
           />
 
           <ActionRowButton

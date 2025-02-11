@@ -15,11 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'components/ui/collapsible';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from 'src/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from 'components/ui/popover';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -38,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from 'components/ui/alert-dialog';
 import { titleCase } from 'utils/formatters';
+import { toast } from 'solid-sonner';
 
 type TableColumnsCollapseProps = {
   entity: 'views' | 'tables';
@@ -62,7 +59,6 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       updateContentTab,
     },
     backend: { selectAllFrom },
-    messages: { notify },
   } = useAppSelector();
 
   const addTableStructureTab = async (table: string) => {
@@ -76,7 +72,9 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       );
       addContentTab(newContentTab(table, 'TableStructure', data));
     } catch (error) {
-      notify(error);
+      toast.error('Could not get table structure', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 
@@ -90,7 +88,9 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
         result_sets: result_sets.map((id) => ({ id, loading: true })),
       });
     } catch (error) {
-      notify(error);
+      toast.error('Could not list data', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 
@@ -101,10 +101,12 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
         connId: getConnection().id,
         query,
       });
-      notify(t('sidebar.table_was_dropped', { table }), 'success');
+      toast.success(t('sidebar.table_was_dropped', { table }));
       await props.refresh();
     } catch (error) {
-      notify(error);
+      toast.error('Could not drop table', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 
@@ -115,9 +117,11 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
         connId: getConnection().id,
         query,
       });
-      notify(t('sidebar.table_was_truncated', { table }), 'success');
+      toast.success(t('sidebar.table_was_truncated', { table }));
     } catch (error) {
-      notify(error);
+      toast.error('Could not truncate table', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 

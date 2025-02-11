@@ -44,6 +44,7 @@ import {
   CheckboxLabel,
 } from 'components/ui/checkbox';
 import { Button } from 'components/ui/button';
+import { toast } from 'solid-sonner';
 
 const MIN_LENGTH_STR = 1;
 const MAX_LENGTH_STR = 255;
@@ -155,7 +156,6 @@ type AddConnectionFormProps = {
 const AddConnectionForm = (props: AddConnectionFormProps) => {
   const {
     connections: { addConnection },
-    messages: { notify },
   } = useAppSelector();
   const [testing, setTesting] = createSignal(false);
   const [error, setError] = createSignal('');
@@ -166,10 +166,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
       setTesting(true);
       const values = data();
       await invoke('test_connection', normalize(values));
-      notify(
-        t('add_connection_form.success', { name: values.name }),
-        'success'
-      );
+      toast.success(t('add_connection_form.success'));
       setError('');
     } catch (error) {
       setError(String(error));

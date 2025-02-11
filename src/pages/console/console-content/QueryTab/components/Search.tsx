@@ -1,11 +1,11 @@
 import * as z from 'zod';
 import { useAppSelector } from 'services/Context';
+import { VsChromeClose as Close } from 'solid-icons/vs';
 import { createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import sql from 'sql-bricks';
 import { invoke } from '@tauri-apps/api';
 import { QueryTaskEnqueueResult, Row } from 'interfaces';
 import { t } from 'utils/i18n';
-import { CloseIcon } from 'components/UI-old/Icons';
 import { getAnyCase } from 'utils/utils';
 import { createForm } from '@felte/solid';
 import { validator } from '@felte/validator-zod';
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'components/ui/select';
+import { toast } from 'solid-sonner';
 
 export const schema = z.object({
   column: z.string().max(1024),
@@ -93,7 +94,6 @@ type SearchProps = {
 export const Search = (props: SearchProps) => {
   const {
     connections: { updateContentTab, getConnection },
-    messages: { notify },
   } = useAppSelector();
 
   const [loading, setLoading] = createSignal(false);
@@ -133,7 +133,9 @@ export const Search = (props: SearchProps) => {
       }));
       updateContentTab('data', { result_sets });
     } catch (error) {
-      notify(error);
+      toast.error('Could not enqueue query', {
+        description: (error as Error).message || (error as string),
+      });
     } finally {
       setLoading(false);
     }
@@ -229,7 +231,7 @@ export const Search = (props: SearchProps) => {
                       }}
                       type="button"
                     >
-                      <CloseIcon />
+                      <Close />
                     </Button>
                   </Match>
                 </Switch>

@@ -3,9 +3,15 @@ import { ConnectionManager } from 'pages/connections/manager';
 import { Console } from 'pages/console/console';
 import { Settings } from 'pages/settings/settings';
 import { ParentComponent } from 'solid-js';
+import { Toaster } from 'components/ui/sonner';
 
 const NavbarWrapper: ParentComponent = (props) => {
-  return <main class="h-full w-full">{props.children}</main>;
+  return (
+    <main class="h-full w-full flex flex-col">
+      <div class="flex-1">{props.children}</div>
+      <Toaster position="bottom-center" />
+    </main>
+  );
 };
 
 export const Router = () => {

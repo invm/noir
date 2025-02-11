@@ -1,8 +1,11 @@
 import { createShortcut } from '@solid-primitives/keyboard';
 import { Accessor, createEffect, Match, Show, Switch } from 'solid-js';
+import {
+  FaSolidChevronLeft as ChevronLeft,
+  FaSolidChevronRight as ChevronRight,
+} from 'solid-icons/fa';
 import { createStore } from 'solid-js/store';
 import { QueryType, ResultSet } from 'interfaces';
-import { ChevronLeft, ChevronRight } from 'components/UI-old/Icons';
 import { Alert } from 'components/ui/alert';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
@@ -16,6 +19,7 @@ import {
   SelectValue,
 } from 'components/ui/select';
 import { Loader } from 'components/ui/loader';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 
 type PaginationProps = {
   page: Accessor<number>;
@@ -69,28 +73,37 @@ export const Pagination = (props: PaginationProps) => {
     <div class="w-full flex justify-between gap-2 bg-base-100 px-2">
       <div class="flex items-center gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
-          <div class="join">
-            <div
-              class="join-item tooltip tooltip-primary tooltip-right"
-              data-tip={t('console.actions.previous_result_set')}
-            >
-              <button class="join-item btn btn-sm" onClick={selectPrevQuery}>
-                <ChevronLeft />
-              </button>
-            </div>
-            <button class="join-item !text-info text-md text-upper px-4 mx-1">
-              <span class="mt-1">
-                {t('console.result_set')} #{queryIdx() + 1}
-              </span>
-            </button>
-            <div
-              class="join-item tooltip tooltip-primary tooltip-right"
-              data-tip={t('console.actions.next_result_set')}
-            >
-              <button class="join-item btn btn-sm" onClick={selectNextQuery}>
-                <ChevronRight />
-              </button>
-            </div>
+          <div class="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="ghost" size="icon" onClick={selectPrevQuery}>
+                  <ChevronLeft />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t('console.actions.previous_result_set')}
+              </TooltipContent>
+            </Tooltip>
+            <span class="text-sm text-white min-w-8 text-center">
+              <Switch>
+                <Match when={props.loading}>
+                  <Loader />
+                </Match>
+                <Match when={!props.loading}>
+                  {t('console.result_set')} #{queryIdx() + 1}
+                </Match>
+              </Switch>
+            </span>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button variant="ghost" size="icon" onClick={selectNextQuery}>
+                  <ChevronRight />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t('console.actions.next_result_set')}
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div class="flex-1">
             <Show

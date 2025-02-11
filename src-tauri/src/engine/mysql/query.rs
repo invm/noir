@@ -1,6 +1,6 @@
 use crate::database::QueryType;
 use crate::engine::types::result::{ResultSet, TableMetadata};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use sqlx::MySqlPool;
 
 use super::sql_to_json::row_to_json;
@@ -46,7 +46,14 @@ pub async fn execute_tx(pool: &MySqlPool, queries: Vec<&str>) -> Result<()> {
     let mut transaction = pool.begin().await?;
 
     for q in queries {
-        sqlx::query(q).execute(&mut *transaction).await?;
+        match sqlx::query(q).execute(&mut *transaction).await {
+            Ok(_) => continue,
+            Err(e) => {
+                // Attempt to rollback the transaction
+                let _ = transaction.rollback();
+                return Err(anyhow!("Query failed: {}", e));
+            }
+        }
     }
     transaction.commit().await?;
     Ok(())

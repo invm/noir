@@ -1,9 +1,9 @@
 import { Match, Switch } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { QueryTab } from './QueryTab/QueryTab';
-import { TableStructureTab } from './TableStructure/TableStructureTab';
+import { TableStructureTab } from './TableStructureTab';
 import { ContentTab } from 'services/Connections';
-import { DataTab } from './DataTab/DataTab';
+import { DataTab } from './DataTab';
 
 export const Content = () => {
   const {

@@ -102,6 +102,7 @@ export const connectionColors = [
 
 export const NumericTypes = [
   'int',
+  'integer',
   'long',
   'float',
   'double',
@@ -119,6 +120,7 @@ export type JSONValue =
   | string
   | number
   | boolean
+  | null
   | { [x: string]: JSONValue }
   | Array<JSONValue>;
 

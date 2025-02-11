@@ -77,8 +77,14 @@ pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<()> {
         let tx = conn.transaction()?;
 
         for query in queries {
-            tx.execute(&query, [])
-                .expect("Failed to execute query in transaction");
+            match tx.execute(&query, []) {
+                Ok(_) => continue,
+                Err(e) => {
+                    // Attempt to rollback the transaction
+                    let _ = tx.rollback();
+                    return Err(anyhow!("Query failed: {}", e));
+                }
+            }
         }
 
         Ok(tx.commit()?)

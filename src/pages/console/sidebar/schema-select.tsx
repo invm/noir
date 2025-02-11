@@ -12,7 +12,7 @@ import {
 import { ResultSet } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { useAppSelector } from 'services/Context';
-import { createEffect, createSignal, Match, Switch } from 'solid-js';
+import { createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import { t } from 'utils/i18n';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 import { Loader } from 'components/ui/loader';
@@ -33,10 +33,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from 'components/ui/alert-dialog';
+import { toast } from 'solid-sonner';
 
 export const SchemaSelect = () => {
   const {
-    messages: { notify },
     connections: {
       getConnection,
       updateConnection,
@@ -82,7 +82,9 @@ export const SchemaSelect = () => {
       const data = { query, result_sets: [res], cursor: 0, auto_limit: false };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
     } catch (error) {
-      notify(error);
+      toast.error('Could not show process list', {
+        description: (error as Error).message || (error as string),
+      });
     }
     setLoading(false);
   };
@@ -92,7 +94,9 @@ export const SchemaSelect = () => {
     try {
       await refreshEntities();
     } catch (error) {
-      notify(error);
+      toast.error('Could not refresh', {
+        description: (error as Error).message || (error as string),
+      });
     }
     setLoading(false);
   };
@@ -110,7 +114,9 @@ export const SchemaSelect = () => {
       }
       await refreshEntities();
     } catch (error) {
-      notify(error);
+      toast.error('Could not drop database', {
+        description: (error as Error).message || (error as string),
+      });
     }
   };
 
@@ -131,9 +137,11 @@ export const SchemaSelect = () => {
               </ContextMenuTrigger>
 
               <ContextMenuContent>
-                <AlertDialogTrigger class="w-full">
-                  <ContextMenuItem>Drop database</ContextMenuItem>
-                </AlertDialogTrigger>
+                <Show when={conn.connection.dialect !== 'Sqlite'}>
+                  <AlertDialogTrigger class="w-full">
+                    <ContextMenuItem>Drop database</ContextMenuItem>
+                  </AlertDialogTrigger>
+                </Show>
               </ContextMenuContent>
             </ContextMenu>
 
@@ -165,26 +173,28 @@ export const SchemaSelect = () => {
         </SelectTrigger>
         <SelectContent />
       </Select>
-      <Tooltip>
-        <TooltipTrigger>
-          <Button
-            onClick={showProcessList}
-            disabled={loading()}
-            variant="ghost"
-            class="p-1 size-4 flex items-center"
-          >
-            <Switch>
-              <Match when={loading()}>
-                <Loader />
-              </Match>
-              <Match when={!loading()}>
-                <Terminal class="size-4" />
-              </Match>
-            </Switch>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{t('sidebar.show_process_list')}</TooltipContent>
-      </Tooltip>
+      <Show when={conn.connection.dialect !== 'Sqlite'}>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              onClick={showProcessList}
+              disabled={loading()}
+              variant="ghost"
+              class="p-1 size-4 flex items-center"
+            >
+              <Switch>
+                <Match when={loading()}>
+                  <Loader />
+                </Match>
+                <Match when={!loading()}>
+                  <Terminal class="size-4" />
+                </Match>
+              </Switch>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('sidebar.show_process_list')}</TooltipContent>
+        </Tooltip>
+      </Show>
       <Tooltip>
         <TooltipTrigger>
           <Button
