@@ -3,6 +3,7 @@ import { t } from 'utils/i18n';
 import { OpenIssue } from '../pages/settings/open-issue';
 import { relaunch } from '@tauri-apps/api/process';
 import { info } from 'tauri-plugin-log-api';
+import { Button } from './ui/button';
 
 const Error = (props: { err: Record<'message' | 'stack', string> }) => {
   info(JSON.stringify({ error: props.err, stack: props.err?.stack }));
@@ -14,19 +15,17 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
       </h2>
       <OpenIssue />
       <br />
-      <button
-        class="btn btn-sm btn-accent"
+      <Button
+        size="sm"
+        variant="outline"
         onClick={async () => await ConnectionsService().clearStore()}
       >
         {t('settings.clear_cache')}
-      </button>
+      </Button>
       <br />
-      <button
-        class="btn btn-sm btn-primary"
-        onClick={async () => await relaunch()}
-      >
+      <Button size="sm" onClick={relaunch}>
         {t('error.relaunch_app')}
-      </button>
+      </Button>
       <span class="text-lg pt-10">{props.err.message}</span>
       <br />
       <h4 class="text-xl font-bold text-error">{t('error.stack')}</h4>

@@ -70,7 +70,7 @@ export const Pagination = (props: PaginationProps) => {
   });
 
   return (
-    <div class="w-full flex justify-between gap-2 bg-base-100 px-2">
+    <div class="w-full flex justify-between gap-2 px-2">
       <div class="flex items-center gap-2">
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="flex items-center gap-1">

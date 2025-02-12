@@ -152,7 +152,7 @@ function App() {
         <Router />
         <Show when={shouldUpdate()}>
           <div class="toast z-50 whitespace-normal">
-            <div class="bg-base-300 rounded-lg w-[500px]">
+            <div class="rounded-lg w-[500px]">
               <div class="flex flex-col items-start p-4">
                 <div class="flex items-center w-full">
                   <div class="text-base-content font-bold text-lg">

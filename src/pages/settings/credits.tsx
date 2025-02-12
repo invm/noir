@@ -12,7 +12,7 @@ export const Settings = () => {
   } = useAppSelector();
 
   return (
-    <div class="p-4 bg-base-300 flex-1">
+    <div class="p-4 flex-1">
       <div class="flex flex-col items-center pb-4">
         <div>
           <span class="text-md font-semibold text-primary">

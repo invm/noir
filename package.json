@@ -32,6 +32,7 @@
     "@replit/codemirror-vim": "^6.2.1",
     "@solid-primitives/keyboard": "^1.2.8",
     "@solidjs/router": "^0.15.3",
+    "@tanstack/solid-table": "^8.21.2",
     "@tauri-apps/api": "^1.6.0",
     "@uiw/codemirror-theme-androidstudio": "^4.23.0",
     "@uiw/codemirror-theme-andromeda": "^4.23.0",

@@ -22,9 +22,9 @@
     "skipLibCheck": true,
     "paths": {
       "src": ["src"],
-      "components": ["src/components"],
-      "services": ["src/services"],
-      "utils": ["src/utils"]
+      "components": ["components"],
+      "services": ["services"],
+      "utils": ["utils"]
     }
   }
 }

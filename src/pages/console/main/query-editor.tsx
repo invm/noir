@@ -50,7 +50,6 @@ export function QueryEditor(_props: QueryEditorProps) {
         <div class="flex-1 min-w-0 overflow-hidden ">
           <Tabs
             value={`${conn.idx}`}
-            // onChange={(e) => setContentIdx(Number(e))}
             class="rounded-md overflow-auto no-scrollbar"
           >
             <TabsList class="h-10 gap-1 rounded-none bg-transparent p-0 ">
