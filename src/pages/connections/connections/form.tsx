@@ -203,6 +203,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
 
   return (
     <div class="w-full flex justify-center items-around">
+      {/* @ts-ignore */}
       <form use:form class="flex w-full flex-col gap-1" autocomplete="off">
         <div>
           <h2 class="text-2xl font-bold">{t('add_connection_form.title')}</h2>

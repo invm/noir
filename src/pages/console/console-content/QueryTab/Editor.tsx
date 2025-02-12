@@ -62,7 +62,6 @@ const getEditorAutoCompleteSuggestion = (
       })),
     ];
   }, [] as Column[]);
-  console.log(columns);
 
   const suggestions = {
     suggestions: [

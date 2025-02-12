@@ -156,6 +156,7 @@ export const Search = (props: SearchProps) => {
 
   return (
     <Show when={props.table}>
+      {/* @ts-ignore */}
       <form use:form autocomplete="off">
         <div class="w-full pb-2 px-2 grid grid-cols-12 gap-2 grid-rows-1">
           <div class="col-span-3">

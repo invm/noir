@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
-import 'solid-contextmenu/dist/style.css';
 import { ErrorBoundary } from 'solid-js';
 
 import App from './App';

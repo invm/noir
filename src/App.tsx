@@ -105,11 +105,6 @@ function App() {
   });
 
   window.addEventListener('error', (e) => {
-    // if (
-    //   e?.message ===
-    //   'ResizeObserver loop completed with undelivered notifications.'
-    // )
-    //   return;
     error(JSON.stringify({ message: 'Unhandled error', error: e.error }));
     toast.error('Error', { description: e.message });
   });

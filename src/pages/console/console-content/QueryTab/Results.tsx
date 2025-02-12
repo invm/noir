@@ -129,8 +129,12 @@ export const Results = (props: {
         setTable({
           name: result_set?.table ?? '',
           columns,
-          foreign_keys,
-          primary_key,
+          foreign_keys:
+            table.name === result_set?.table
+              ? table.foreign_keys
+              : foreign_keys,
+          primary_key:
+            table.name === result_set?.table ? table.primary_key : primary_key,
         });
         let colDef = getColumnDefs({
           columns,
@@ -393,13 +397,13 @@ export const Results = (props: {
 
   const getRowId: GetRowIdFunc<Row> = (params) => {
     const pks = table.primary_key.reduce((acc, curr) => {
-      return `${acc}_${params.data[curr.column_name as string]}`;
-    }, '');
+      return [...acc, params.data[curr.column_name as string] as string];
+    }, [] as string[]);
     const fks = table.foreign_keys.reduce((acc, curr) => {
-      return `${acc}_${params.data[curr.column_name as string]}`;
-    }, '');
-    if (pks || fks) {
-      return pks + fks;
+      return [...acc, params.data[curr.column_name as string] as string];
+    }, [] as string[]);
+    if (pks.length || fks.length) {
+      return [...pks, ...fks].join('_');
     }
 
     return Object.entries(params.data)
