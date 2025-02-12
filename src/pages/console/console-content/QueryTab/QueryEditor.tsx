@@ -17,6 +17,10 @@ import * as monaco from 'monaco-editor';
 import { QueryContentTabData } from 'services/Connections';
 import { Editor } from './Editor';
 import { toast } from 'solid-sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
+import { Checkbox } from '@kobalte/core/checkbox';
+import { CheckboxControl, CheckboxLabel } from 'components/ui/checkbox';
+import { Button } from 'components/ui/button';
 
 interface EditorProps {
   readOnly?: boolean;
@@ -141,45 +145,43 @@ export const QueryEditor = (props: EditorProps) => {
 
   return (
     <div class="flex-1 flex flex-col h-full">
-      <div class="w-full border-b-2 border-accent flex justify-between items-center">
-        <div class="flex items-center p-1 gap-2 bg-background ">
+      <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
+        <div class="flex items-center gap-2 bg-background ">
           <ActionRowButton
             dataTip={t('console.actions.format')}
             onClick={onFormat}
-            icon={<EditIcon />}
+            icon={<EditIcon class="size-5" />}
           />
           <ActionRowButton
             dataTip={t('console.actions.execute')}
             onClick={onExecute}
             loading={loading()}
-            icon={<Play />}
+            icon={<Play class="size-5" />}
           />
 
           <ActionRowButton
             dataTip={t('console.actions.copy_query')}
             onClick={copyQueryToClipboard}
-            icon={<Copy />}
+            icon={<Copy class="size-5" />}
           />
 
-          <div
-            class="tooltip tooltip-primary tooltip-bottom"
-            data-tip={t('console.actions.auto_limit')}
-          >
-            <div class="form-control">
-              <label class="cursor-pointer label">
-                <span class="label-text font-semibold mr-2 text-primary mt-1">
-                  {t('console.actions.limit')}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={autoLimit()}
-                  onChange={(e) => setAutoLimit(e.target.checked)}
-                  class="checkbox checkbox-sm checkbox-primary"
-                />
-              </label>
-            </div>
-          </div>
-
+          <Tooltip>
+            <TooltipTrigger>
+              <Checkbox
+                checked={autoLimit()}
+                onChange={(e) => setAutoLimit(e)}
+                class="flex items-center gap-2"
+              >
+                <CheckboxControl class="rounded-md border-accent" />
+                <div class="grid gap-1.5 leading-none">
+                  <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {t('console.actions.limit')}
+                  </CheckboxLabel>
+                </div>
+              </Checkbox>
+            </TooltipTrigger>
+            <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
+          </Tooltip>
           {/* <div */}
           {/*   class="tooltip tooltip-primary tooltip-bottom" */}
           {/*   data-tip={t('console.actions.vim_mode_on')} */}
@@ -201,29 +203,32 @@ export const QueryEditor = (props: EditorProps) => {
           {/* </div> */}
         </div>
         <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
-          <div
-            class="tooltip tooltip-error tooltip-left"
-            data-tip={t('console.actions.cancel_all_queries')}
-          >
-            <button
-              class="btn btn-error btn-xs"
-              onClick={async () => {
-                const ids = (
-                  getContent().data as QueryContentTabData
-                ).result_sets
-                  .map((t) => t?.id ?? '')
-                  .filter(Boolean);
-                if (ids.length) {
-                  await cancelTask(ids);
-                  ids.forEach((_, i) => {
-                    updateResultSet(store.idx, i, { loading: false });
-                  });
-                }
-              }}
-            >
-              {t('console.actions.cancel')}
-            </button>
-          </div>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                size="xs"
+                variant="destructive"
+                onClick={async () => {
+                  const ids = (
+                    getContent().data as QueryContentTabData
+                  ).result_sets
+                    .map((t) => t?.id ?? '')
+                    .filter(Boolean);
+                  if (ids.length) {
+                    await cancelTask(ids);
+                    ids.forEach((_, i) => {
+                      updateResultSet(store.idx, i, { loading: false });
+                    });
+                  }
+                }}
+              >
+                {t('console.actions.cancel')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t('console.actions.cancel_all_queries')}
+            </TooltipContent>
+          </Tooltip>
         </Show>
       </div>
       <div class="flex-1">

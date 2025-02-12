@@ -15,6 +15,7 @@ export type UpdageChange = {
     condition: Row;
     data: Row;
     changes: Row;
+    rowIndex: number;
   };
 };
 

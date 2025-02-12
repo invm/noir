@@ -89,7 +89,6 @@ export const TableStructureTab = (props: { tabIdx: number }) => {
                 <TableRow>
                   <TableHead class="w-[50px]"></TableHead>
                   <For each={columns()}>
-                    {x}
                     {(column) => <TableHead>{column}</TableHead>}
                   </For>
                 </TableRow>

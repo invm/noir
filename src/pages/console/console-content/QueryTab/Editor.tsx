@@ -2,6 +2,7 @@ import { loader, MonacoEditor } from 'solid-monaco';
 import * as monaco from 'monaco-editor';
 import { onMount } from 'solid-js';
 import { useColorMode } from '@kobalte/core/color-mode';
+import { DEFAULT_SQL_KEYWORDS } from 'interfaces';
 
 type EditorProps = {
   readOnly?: boolean;
@@ -12,64 +13,13 @@ type EditorProps = {
   language?: string;
 };
 
-const DEFAULT_SQL_KEYWORDS = [
-  'SELECT',
-  'FROM',
-  'WHERE',
-  'JOIN',
-  'INNER',
-  'OUTER',
-  'LEFT',
-  'RIGHT',
-  'ON',
-  'GROUP BY',
-  'ORDER BY',
-  'HAVING',
-  'INSERT',
-  'UPDATE',
-  'DELETE',
-  'VALUES',
-  'CREATE',
-  'DROP',
-  'ALTER',
-  'TABLE',
-  'INDEX',
-  'VIEW',
-  'TRIGGER',
-  'PROCEDURE',
-  'FUNCTION',
-  'DISTINCT',
-  'AND',
-  'OR',
-  'NOT',
-  'BETWEEN',
-  'IN',
-  'LIKE',
-  'IS',
-  'NULL',
-  'EXISTS',
-  'ALL',
-  'ANY',
-  'UNION',
-  'INTERSECT',
-  'EXCEPT',
-  'AS',
-  'WITH',
-  'LIMIT',
-  'OFFSET',
-  'INNER JOIN',
-  'FULL OUTER JOIN',
-  'CROSS JOIN',
-  'SET',
-  'CONSTRAINT',
-  'PRIMARY KEY',
-  'FOREIGN KEY',
-  'CHECK',
-  'UNIQUE',
-  'DEFAULT',
-  'REFERENCES',
-  'AUTO_INCREMENT',
-];
+type Column = {
+  label: string;
+  kind: monaco.languages.CompletionItemKind;
+  detail: string;
+  insertText: string;
+  range: Range;
+};
 
 interface Range {
   startLineNumber: number;
@@ -100,15 +50,19 @@ const getEditorAutoCompleteSuggestion = (
     range: range,
   }));
 
-  const columns = Object.values(schema)
-    .flat()
-    ?.map((col: string) => ({
-      label: col, // TODO: add table in parens
-      kind: monaco.languages.CompletionItemKind.Property,
-      detail: 'Column',
-      insertText: col,
-      range: range,
-    }));
+  const columns = Object.entries(schema)?.reduce((acc, [k, cols]) => {
+    return [
+      ...acc,
+      ...cols.map((col) => ({
+        label: `${col} [${k}]`,
+        kind: monaco.languages.CompletionItemKind.Property,
+        detail: 'Column',
+        insertText: col,
+        range: range,
+      })),
+    ];
+  }, [] as Column[]);
+  console.log(columns);
 
   const suggestions = {
     suggestions: [

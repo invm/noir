@@ -6,10 +6,14 @@ import {
   Show,
   Suspense,
 } from 'solid-js';
-import { CellEditingStoppedEvent, ColDef } from 'ag-grid-community';
+import {
+  CellEditingStoppedEvent,
+  ColDef,
+  GetRowIdFunc,
+} from 'ag-grid-community';
 import AgGridSolid, { AgGridSolidRef } from 'ag-grid-solid';
 import { useAppSelector } from 'services/Context';
-import { Row } from 'interfaces';
+import { loadingMessages, Row } from 'interfaces';
 import { Pagination } from './components/Pagination';
 import { NoResults } from './components/NoResults';
 import { Loader } from 'components/ui/loader';
@@ -30,6 +34,10 @@ import { Editor } from './Editor';
 import { toast } from 'solid-sonner';
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
+
+// Random message picker
+const getLoadingMessage = () =>
+  loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
 
 export const Results = (props: {
   gridTheme: string;
@@ -293,7 +301,6 @@ export const Results = (props: {
 
   const undoChanges = async () => {
     if (Object.keys(changes['update']).length) {
-      // TODO: delete and insert at index? try that see how it works
       gridRef.api.applyTransaction({
         update: Object.values(changes['update']).map((d) => d.data),
       });
@@ -325,6 +332,7 @@ export const Results = (props: {
         condition,
         data: { ...e.data, [change]: e.oldValue },
         changes: { [change]: e.newValue },
+        rowIndex: e.rowIndex || 0,
       });
     }
   };
@@ -383,6 +391,28 @@ export const Results = (props: {
     width: 300,
   };
 
+  const getRowId: GetRowIdFunc<Row> = (params) => {
+    const pks = table.primary_key.reduce((acc, curr) => {
+      return `${acc}_${params.data[curr.column_name as string]}`;
+    }, '');
+    const fks = table.foreign_keys.reduce((acc, curr) => {
+      return `${acc}_${params.data[curr.column_name as string]}`;
+    }, '');
+    if (pks || fks) {
+      return pks + fks;
+    }
+
+    return Object.entries(params.data)
+      .map(([_, value]) => {
+        if (value == null) return 'null';
+        if (typeof value === 'string' && value.length > 50) {
+          return `${value.substring(0, 50)}_${value.length}`;
+        }
+        return String(value);
+      })
+      .join('_');
+  };
+
   return (
     <div class="flex flex-col h-full overflow-hidden">
       <Dialog open={open()} onOpenChange={(isOpen) => setOpen(isOpen)}>
@@ -429,8 +459,11 @@ export const Results = (props: {
           <AgGridSolid
             noRowsOverlayComponent={() =>
               getContentData('Query').result_sets[queryIdx()]?.loading ? (
-                <div>
-                  <Loader />
+                <div class="text-center flex flex-col gap-2 items-center justify-center">
+                  <Loader size="lg" />
+                  <pre class="bg-background p-1 text-white rounded-sm px-1">
+                    <code>{getLoadingMessage()}</code>
+                  </pre>
                 </div>
               ) : data()?.notReady || data()?.queryType === 'Other' ? (
                 <Keymaps short />
@@ -445,6 +478,7 @@ export const Results = (props: {
                 <Keymaps short />
               )
             }
+            getRowId={getRowId}
             ref={gridRef!}
             columnDefs={data()?.colDef}
             rowSelection="multiple"

@@ -2,37 +2,40 @@ import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
 import { version } from '../../../package.json';
-import Keymaps from './keymaps';
-import { OpenIssue } from './open-issue';
+import { Button } from 'components/ui/button';
 
-export const Settings = () => {
+export const About = () => {
   const {
     connections: { clearStore },
-    app: { setScreen },
   } = useAppSelector();
 
   return (
-    <div class="p-4 flex-1">
-      <div class="flex flex-col items-center pb-4">
+    <div class="flex flex-1 flex-col w-full justify-center items-center">
+      <div class="flex flex-col items-center pb-4 max-w-xl gap-4">
         <div>
-          <span class="text-md font-semibold text-primary">
+          <span class="text-md font-semibold text-primary text-center">
             🕵️ Noir - keyboard driven database management client for Postgresql,
             MySQL, MariaDB and SQLite.
           </span>
         </div>
-        <OpenIssue />
-        <h2 class="text-xl font-bold mt-4">{t('settings.shortcuts')}</h2>
-        <Keymaps
-          short
-          suffix={
-            <button
-              onClick={() => setScreen('keymaps')}
-              class="btn btn-sm btn-primary w-md mt-2"
-            >
-              {t('keymaps.see_all')}
-            </button>
-          }
-        />
+        <Button
+          as="a"
+          href="https://github.com/invm/noir/issues/new"
+          target="_blank"
+          variant="outline"
+          class="text-destructive"
+        >
+          Report a bug
+        </Button>
+        <Button
+          as="a"
+          href="https://github.com/invm/noir/issues/new"
+          target="_blank"
+          variant="outline"
+          class="text-primary"
+        >
+          Request a feature?
+        </Button>
       </div>
       <div class="flex flex-col items-center">
         <div class="flex items-center justify-center w-full py-6">
@@ -51,9 +54,14 @@ export const Settings = () => {
           Version: {version}
         </span>
         <div class="flex gap-4 py-4">
-          <button class="btn btn-xs btn-accent" onClick={clearStore}>
+          <Button
+            size="sm"
+            variant="outline"
+            class="btn btn-xs btn-accent"
+            onClick={clearStore}
+          >
             {t('settings.clear_cache')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

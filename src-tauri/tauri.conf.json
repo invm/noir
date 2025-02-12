@@ -18,9 +18,6 @@
       "os": {
         "all": true
       },
-      "process": {
-        "relaunch": true
-      },
       "dialog": {
         "all": false,
         "save": true,

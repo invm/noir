@@ -21,7 +21,6 @@ tauri = { version = "1.5.4", features = [
   "dialog-open",
   "os-all",
   "updater",
-  "process-relaunch",
   "clipboard-all",
   "dialog-save",
   "shell-open",
@@ -50,7 +49,7 @@ tokio-util = "^0.7.10"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1", features = [
   "colored",
 ] }
-sqlparser = "0.49.0"
+sqlparser = "0.54.0"
 md-5 = "0.10.6"
 chrono = { version = "0.4.38", features = ["serde"] }
 postgres = { version = "0.19.7", features = [

@@ -5,8 +5,9 @@ import Keymaps from './keymaps';
 import { useNavigate } from '@solidjs/router';
 import ThemeCustomization from './themes/theme-customization';
 import { Button } from 'components/ui/button';
+import { About } from './about';
 
-type SettingsTab = 'theme' | 'connections' | 'shortcuts';
+type SettingsTab = 'theme' | 'connections' | 'shortcuts' | 'about';
 
 export function Settings() {
   const [activeTab, setActiveTab] = createSignal<SettingsTab>('theme');
@@ -59,6 +60,15 @@ export function Settings() {
                   Keyboard Shortcuts
                 </Button>
               </li>
+              <li>
+                <Button
+                  class="w-full"
+                  variant={activeTab() === 'about' ? 'default' : 'ghost'}
+                  onClick={() => setActiveTab('about')}
+                >
+                  About
+                </Button>
+              </li>
             </ul>
           </nav>
         </div>
@@ -69,6 +79,7 @@ export function Settings() {
             {activeTab() === 'theme' && <ThemeCustomization />}
             {activeTab() === 'connections' && <ConnectionSettings />}
             {activeTab() === 'shortcuts' && <Keymaps />}
+            {activeTab() === 'about' && <About />}
           </div>
         </div>
       </div>

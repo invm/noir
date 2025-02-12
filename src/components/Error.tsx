@@ -1,7 +1,5 @@
 import { ConnectionsService } from 'services/Connections';
 import { t } from 'utils/i18n';
-import { OpenIssue } from '../pages/settings/open-issue';
-import { relaunch } from '@tauri-apps/api/process';
 import { info } from 'tauri-plugin-log-api';
 import { Button } from './ui/button';
 
@@ -13,7 +11,15 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
       <h2 class="text-xl font-bold text-error">
         {t('error.something_went_wrong')}
       </h2>
-      <OpenIssue />
+      <Button
+        as="a"
+        href="https://github.com/invm/noir/issues/new"
+        target="_blank"
+        variant="outline"
+        class="text-destructive"
+      >
+        Report a bug
+      </Button>
       <br />
       <Button
         size="sm"
@@ -23,9 +29,6 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
         {t('settings.clear_cache')}
       </Button>
       <br />
-      <Button size="sm" onClick={relaunch}>
-        {t('error.relaunch_app')}
-      </Button>
       <span class="text-lg pt-10">{props.err.message}</span>
       <br />
       <h4 class="text-xl font-bold text-error">{t('error.stack')}</h4>

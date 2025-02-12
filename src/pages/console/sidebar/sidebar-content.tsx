@@ -15,11 +15,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
 } from 'components/ui/sidebar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from 'components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from 'components/ui/popover';
 import { t } from 'i18next';
 import {
   ContextMenu,
@@ -146,7 +142,7 @@ export const DbSidebarContent = () => {
               ? ' (' + getAnyCase(row, 'event_object_table') + ')'
               : ''),
         },
-      ]}
+      ].filter((e) => e.tables?.length || e.rows?.length)}
     >
       {(entity: VListCategory) => (
         <SidebarGroup class="h-full py-0">
