@@ -9,7 +9,7 @@ const ConnectedConnectionsProvider: ParentComponent = (props) => {
     connections: { store, selectConnection },
   } = useAppSelector();
   const navigate = useNavigate();
-  const [_actions, setActions] = createSignal<CommandPaletteAction[]>([]);
+  const [actions, setActions] = createSignal<CommandPaletteAction[]>([]);
   const connectionsChanged = () => store.connections;
 
   createEffect(
@@ -19,7 +19,6 @@ const ConnectedConnectionsProvider: ParentComponent = (props) => {
           id: '0-connection-' + conn.id,
           label: `Connect to ${conn.connection.name}`,
           callback: () => {
-            // FIXME: this does not cause rerender on the console
             selectConnection(conn.id);
             navigate('/console/' + conn.id);
           },
@@ -29,7 +28,7 @@ const ConnectedConnectionsProvider: ParentComponent = (props) => {
   );
 
   return (
-    <CommandPaletteContextWrapper actions={[]}>
+    <CommandPaletteContextWrapper actions={actions()}>
       {props.children}
     </CommandPaletteContextWrapper>
   );

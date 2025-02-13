@@ -1,3 +1,4 @@
+import { useAppSelector } from 'services/Context';
 import { For, JSX, Show } from 'solid-js';
 import { t } from 'utils/i18n';
 
@@ -68,6 +69,10 @@ const ALL_KEYMAPS = [
 ];
 
 const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
+  const {
+    app: { cmdOrCtrl },
+  } = useAppSelector();
+
   if (props.short) {
     return (
       <div>
@@ -75,7 +80,7 @@ const Keymaps = (props: { short?: boolean; suffix?: JSX.Element }) => {
           <span>Command Palette </span>
           <div>
             <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-              <span class="text-xs">⌘</span>K
+              <span class="text-xs">{cmdOrCtrl(true)}</span>K
             </kbd>
           </div>
         </div>

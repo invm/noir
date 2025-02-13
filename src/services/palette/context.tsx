@@ -34,7 +34,11 @@ export function createCommandPaletteContext() {
   const [open, setOpen] = createSignal(false);
 
   const addActions = (newActions: CommandPaletteAction[]) => {
-    setActions((prevActions) => [...prevActions, ...newActions]);
+    setActions((prevActions) =>
+      [...prevActions, ...newActions].sort(
+        (a, b) => a.label.charCodeAt(0) - b.label.charCodeAt(0)
+      )
+    );
   };
 
   const removeActions = (actionIds: string[]) => {

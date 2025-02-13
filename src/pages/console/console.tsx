@@ -38,7 +38,7 @@ export const Console = () => {
   ];
 
   return (
-    <Show when={current?.id} keyed>
+    <Show when={getConnection()?.id} keyed>
       <CommandPaletteContextWrapper actions={editorActions}>
         <SidebarProvider>
           <DbSidebar />

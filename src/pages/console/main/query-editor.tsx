@@ -15,6 +15,7 @@ interface QueryEditorProps {}
 
 export function QueryEditor(_props: QueryEditorProps) {
   const {
+    app: { cmdOrCtrl },
     connections: {
       setContentIdx,
       getConnection,
@@ -88,7 +89,8 @@ export function QueryEditor(_props: QueryEditorProps) {
                               <>
                                 Close current tab
                                 <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                                  <span class="text-xs">⌘</span>W
+                                  <span class="text-xs">{cmdOrCtrl(true)}</span>
+                                  W
                                 </kbd>
                               </>
                             </Match>
@@ -108,7 +110,7 @@ export function QueryEditor(_props: QueryEditorProps) {
               >
                 <span>New query</span>
                 <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                  <span class="text-xs">⌘</span>T
+                  <span class="text-xs">{cmdOrCtrl(true)}</span>T
                 </kbd>
               </Button>
             </TabsList>

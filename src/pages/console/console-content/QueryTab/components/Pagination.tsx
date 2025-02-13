@@ -47,7 +47,7 @@ export const Pagination = (props: PaginationProps) => {
   const {
     connections: { selectNextQuery, selectPrevQuery, queryIdx, getContentData },
     backend: { pageSize, setPageSize },
-    app: { altOrMeta, cmdOrCtrl },
+    app: { cmdOrCtrl },
   } = useAppSelector();
 
   createShortcut(['Control', 'Shift', 'E'], selectNextQuery);
@@ -56,7 +56,7 @@ export const Pagination = (props: PaginationProps) => {
   createShortcut([cmdOrCtrl(), 'Shift', 'P'], props.onPrevPage);
   createShortcut(['Control', 'Shift', 'J'], () => props.onBtnExport('json'));
   createShortcut(['Control', 'Shift', 'C'], () => props.onBtnExport('csv'));
-  createShortcut([altOrMeta(), 'N'], () =>
+  createShortcut(['Control', 'N'], () =>
     props.openDrawerForm
       ? props.openDrawerForm({ mode: 'add', data: {} })
       : null
@@ -140,22 +140,22 @@ export const Pagination = (props: PaginationProps) => {
           </span>
         </Show>
         <Show when={props.openDrawerForm}>
-          <div
-            class="tooltip tooltip-primary tooltip-bottom px-3"
-            data-tip={altOrMeta(true) + ' + N'}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                props.openDrawerForm
-                  ? props.openDrawerForm({ mode: 'add', data: {} })
-                  : null
-              }
-            >
-              {t('console.table.row_actions.add_row')}
-            </Button>
-          </div>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  props.openDrawerForm
+                    ? props.openDrawerForm({ mode: 'add', data: {} })
+                    : null
+                }
+              >
+                {t('console.table.row_actions.add_row')}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{cmdOrCtrl(true) + ' + N'}</TooltipContent>
+          </Tooltip>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed'}>

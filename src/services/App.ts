@@ -1,4 +1,3 @@
-import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Store } from 'tauri-plugin-store-api';
 import { debounce } from 'utils/utils';
@@ -37,8 +36,6 @@ const getSavedData = async (key: string) => {
   }
 };
 
-type Screen = 'console' | 'settings' | 'keymaps' | 'home';
-
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     vimModeOn: false,
@@ -46,9 +43,6 @@ export const AppService = () => {
     osType: 'Linux',
     enableDevTools: false,
   });
-
-  const [screen, setScreen] = createSignal<Screen>('console');
-  const [lastScreen, setLastScreen] = createSignal<Screen>('console');
 
   const updateStore = debounce(async () => {
     await store.set(APP_KEY, JSON.stringify(appStore));
@@ -58,24 +52,9 @@ export const AppService = () => {
   const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
 
-  const toggleScreen = (s: Screen) => {
-    if (screen() === s) {
-      const last = lastScreen();
-      setLastScreen(screen());
-      setScreen(last);
-      return;
-    }
-    setLastScreen(screen());
-    setScreen(s);
-  };
-
-  const altOrMeta = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
-    return 'Alt';
-  };
   const cmdOrCtrl = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
-    return short ? 'Ctrl' : 'Control';
+    if (appStore.osType === 'Darwin') return short ? '⌘' : 'Cmd';
+    return short ? '^' : 'Control';
   };
 
   const toggleVimModeOn = () => {
@@ -83,7 +62,7 @@ export const AppService = () => {
     updateStore();
   };
 
-  const updateGridTheme = (theme: (typeof GRID_THEMES)[number]) => {
+  const updateTheme = (theme: (typeof GRID_THEMES)[number]) => {
     setAppStore('gridTheme', theme);
     updateStore();
   };
@@ -101,11 +80,8 @@ export const AppService = () => {
     toggleVimModeOn,
     restoreAppStore,
     screen,
-    setScreen,
-    toggleScreen,
     gridTheme,
-    updateTheme: updateGridTheme,
+    updateTheme,
     cmdOrCtrl,
-    altOrMeta,
   };
 };

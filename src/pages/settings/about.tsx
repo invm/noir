@@ -37,6 +37,14 @@ export const About = () => {
           Request a feature?
         </Button>
       </div>
+      <p class="text-center max-w-xl">
+        Noir was built using amazing open source tools like Tauri, SolidJS,
+        Typescript, AgGrid, Monaco, Shadcn, Tailwind and much more, full list
+        available in package.json and cargo.toml files in the repository.
+      </p>
+      <b class="pt-2 text-primary text-lg">
+        Big shoutout to all the contributors and maintainers of these projects.
+      </b>
       <div class="flex flex-col items-center">
         <div class="flex items-center justify-center w-full py-6">
           <span class="text-sm text-gray-500 dark:text-gray-400">

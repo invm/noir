@@ -17,6 +17,7 @@ import { useCommandPalette } from 'services/palette/context';
 export function DbConnectionHeader() {
   const {
     connections: { getConnection },
+    app: { cmdOrCtrl },
   } = useAppSelector();
   const { setOpen } = useCommandPalette();
   const conn = getConnection();
@@ -50,7 +51,7 @@ export function DbConnectionHeader() {
                 </div>
               </div>
               <kbd class="pointer-events-none p-2 py-3 rounded-lg hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                <span class="text-xs">⌘</span>K
+                <span class="text-xs">{cmdOrCtrl(true)}</span>K
               </kbd>
             </SidebarMenuButton>
           </SidebarMenuItem>
