@@ -7,7 +7,6 @@ import { CgFormatIndentIncrease as EditIcon } from 'solid-icons/cg';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult } from 'interfaces';
 import { t } from 'utils/i18n';
-
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 // @ts-ignore
@@ -22,7 +21,7 @@ import { Checkbox } from '@kobalte/core/checkbox';
 import { CheckboxControl, CheckboxLabel } from 'components/ui/checkbox';
 import { Button } from 'components/ui/button';
 import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
-import { CommandPaletteAction } from 'services/palette/context';
+import { ActionGroup } from 'services/palette/context';
 
 interface EditorProps {
   readOnly?: boolean;
@@ -143,29 +142,37 @@ export const QueryEditor = (props: EditorProps) => {
     })
   );
 
-  const editorActions: CommandPaletteAction[] = [
+  const commandPaletteGroup: ActionGroup[] = [
     {
-      id: 'editor-focus',
-      label: 'Focus on editor',
-      callback: () => editor()?.focus(),
-      group: 'editor',
-    },
-    {
-      id: 'editor-execute-query',
-      label: 'Execute query',
-      callback: onExecute,
-      group: 'editor',
-    },
-    {
-      id: 'editor-format-query',
-      label: 'Format query',
-      callback: onFormat,
-      group: 'editor',
+      id: 'editor',
+      label: 'Editor',
+      actions: [
+        {
+          id: 'editor-focus',
+          label: 'Focus',
+          callback: () => {
+            editor()?.setPosition({ lineNumber: 1, column: 1 });
+            window.requestAnimationFrame(() => {
+              editor()?.focus();
+            });
+          },
+        },
+        {
+          id: 'editor-execute-query',
+          label: 'Execute query',
+          callback: onExecute,
+        },
+        {
+          id: 'editor-format-query',
+          label: 'Format',
+          callback: onFormat,
+        },
+      ],
     },
   ];
 
   return (
-    <CommandPaletteContextWrapper actions={editorActions}>
+    <CommandPaletteContextWrapper groups={commandPaletteGroup}>
       <div class="flex-1 flex flex-col h-full">
         <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
           <div class="flex items-center gap-2 bg-background ">
@@ -188,19 +195,18 @@ export const QueryEditor = (props: EditorProps) => {
             />
 
             <Tooltip>
-              <TooltipTrigger>
-                <Checkbox
-                  checked={autoLimit()}
-                  onChange={(e) => setAutoLimit(e)}
-                  class="flex items-center gap-2"
-                >
-                  <CheckboxControl class="rounded-md border-accent" />
-                  <div class="grid gap-1.5 leading-none">
-                    <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      {t('console.actions.limit')}
-                    </CheckboxLabel>
-                  </div>
-                </Checkbox>
+              <TooltipTrigger
+                as={Checkbox}
+                checked={autoLimit()}
+                onChange={(e: boolean) => setAutoLimit(e)}
+                class="flex items-center gap-2"
+              >
+                <CheckboxControl class="rounded-md border-accent" />
+                <div class="grid gap-1.5 leading-none">
+                  <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {t('console.actions.limit')}
+                  </CheckboxLabel>
+                </div>
               </TooltipTrigger>
               <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
             </Tooltip>
@@ -226,26 +232,25 @@ export const QueryEditor = (props: EditorProps) => {
           </div>
           <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
             <Tooltip>
-              <TooltipTrigger>
-                <Button
-                  size="xs"
-                  variant="destructive"
-                  onClick={async () => {
-                    const ids = (
-                      getContent().data as QueryContentTabData
-                    ).result_sets
-                      .map((t) => t?.id ?? '')
-                      .filter(Boolean);
-                    if (ids.length) {
-                      await cancelTask(ids);
-                      ids.forEach((_, i) => {
-                        updateResultSet(store.idx, i, { loading: false });
-                      });
-                    }
-                  }}
-                >
-                  {t('console.actions.cancel')}
-                </Button>
+              <TooltipTrigger
+                size="xs"
+                variant="destructive"
+                onClick={async () => {
+                  const ids = (
+                    getContent().data as QueryContentTabData
+                  ).result_sets
+                    .map((t) => t?.id ?? '')
+                    .filter(Boolean);
+                  if (ids.length) {
+                    await cancelTask(ids);
+                    ids.forEach((_, i) => {
+                      updateResultSet(store.idx, i, { loading: false });
+                    });
+                  }
+                }}
+                as={Button}
+              >
+                {t('console.actions.cancel')}
               </TooltipTrigger>
               <TooltipContent>
                 {t('console.actions.cancel_all_queries')}

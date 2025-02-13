@@ -7,7 +7,7 @@ import { useNavigate } from '@solidjs/router';
 import { useAppSelector } from 'services/Context';
 import { createEffect, Show } from 'solid-js';
 import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
-import { CommandPaletteAction } from 'services/palette/context';
+import { Action } from 'services/palette/context';
 
 export const Console = () => {
   const {
@@ -23,11 +23,10 @@ export const Console = () => {
     }
   });
 
-  const editorActions: CommandPaletteAction[] = [
+  const editorActions: Action[] = [
     {
       id: 'disconnect',
       label: 'Disconnect from current db',
-      group: 'console',
       callback: async () => {
         const id = getConnId();
         await invoke<string>('disconnect', { id });

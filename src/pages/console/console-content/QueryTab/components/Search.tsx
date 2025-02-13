@@ -211,34 +211,29 @@ export const Search = (props: SearchProps) => {
                 class="h-8 w-full"
               />
             </TextFieldRoot>
-            <Tooltip>
-              <TooltipTrigger>
-                <Switch>
-                  <Match when={loading()}>
-                    <Loader />
-                  </Match>
-                  <Match when={!loading()}>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      class="h-8"
-                      onClick={() => {
-                        reset();
-                        setFields(
-                          'column',
-                          getAnyCase(cols()[0], 'column_name')
-                        );
-                        onSubmit(data());
-                      }}
-                      type="button"
-                    >
-                      <Close />
-                    </Button>
-                  </Match>
-                </Switch>
-              </TooltipTrigger>
-              <TooltipContent>{t('console.search.clear')}</TooltipContent>
-            </Tooltip>
+            <Switch>
+              <Match when={loading()}>
+                <Loader />
+              </Match>
+              <Match when={!loading()}>
+                <Tooltip>
+                  <TooltipTrigger
+                    size="icon"
+                    variant="ghost"
+                    class="h-8"
+                    onClick={() => {
+                      reset();
+                      setFields('column', getAnyCase(cols()[0], 'column_name'));
+                      onSubmit(data());
+                    }}
+                    as={Button}
+                  >
+                    <Close />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('console.search.clear')}</TooltipContent>
+                </Tooltip>
+              </Match>
+            </Switch>
           </div>
         </div>
       </form>

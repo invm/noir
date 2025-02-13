@@ -75,10 +75,13 @@ export const Pagination = (props: PaginationProps) => {
         <Show when={getContentData('Query').result_sets.length > 1}>
           <div class="flex items-center gap-1">
             <Tooltip>
-              <TooltipTrigger>
-                <Button variant="ghost" size="icon" onClick={selectPrevQuery}>
-                  <ChevronLeft />
-                </Button>
+              <TooltipTrigger
+                variant="ghost"
+                size="icon"
+                onClick={selectPrevQuery}
+                as={Button}
+              >
+                <ChevronLeft />
               </TooltipTrigger>
               <TooltipContent>
                 {t('console.actions.previous_result_set')}
@@ -95,10 +98,13 @@ export const Pagination = (props: PaginationProps) => {
               </Switch>
             </span>
             <Tooltip>
-              <TooltipTrigger>
-                <Button variant="ghost" size="icon" onClick={selectNextQuery}>
-                  <ChevronRight />
-                </Button>
+              <TooltipTrigger
+                variant="ghost"
+                size="icon"
+                onClick={selectNextQuery}
+                as={Button}
+              >
+                <ChevronRight />
               </TooltipTrigger>
               <TooltipContent>
                 {t('console.actions.next_result_set')}
@@ -141,18 +147,17 @@ export const Pagination = (props: PaginationProps) => {
         </Show>
         <Show when={props.openDrawerForm}>
           <Tooltip>
-            <TooltipTrigger>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  props.openDrawerForm
-                    ? props.openDrawerForm({ mode: 'add', data: {} })
-                    : null
-                }
-              >
-                {t('console.table.row_actions.add_row')}
-              </Button>
+            <TooltipTrigger
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                props.openDrawerForm
+                  ? props.openDrawerForm({ mode: 'add', data: {} })
+                  : null
+              }
+              as={Button}
+            >
+              {t('console.table.row_actions.add_row')}
             </TooltipTrigger>
             <TooltipContent>{cmdOrCtrl(true) + ' + N'}</TooltipContent>
           </Tooltip>

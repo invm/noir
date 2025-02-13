@@ -12,10 +12,7 @@ import { Toaster } from 'components/ui/sonner';
 import { CommandPalette } from 'services/palette/palette';
 import { createShortcut } from '@solid-primitives/keyboard';
 import { useAppSelector } from 'services/Context';
-import {
-  CommandPaletteAction,
-  useCommandPalette,
-} from 'services/palette/context';
+import { Action, useCommandPalette } from 'services/palette/context';
 import { CommandPaletteProviderComponent } from 'services/palette/provider';
 import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
 import ConnectedConnectionsProvider from 'components/providers/connected-connections';
@@ -34,7 +31,7 @@ const Wrapper: ParentComponent = (props) => {
     });
   }, []);
 
-  const rootActions: CommandPaletteAction[] = [
+  const rootActions: Action[] = [
     {
       id: 'settings',
       label: 'Settings',

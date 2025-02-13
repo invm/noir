@@ -1,34 +1,35 @@
 import { useNavigate } from '@solidjs/router';
 import { useAppSelector } from 'services/Context';
-import { CommandPaletteAction } from 'services/palette/context';
+import { ActionGroup } from 'services/palette/context';
 import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
-import { createEffect, createSignal, on, ParentComponent } from 'solid-js';
+import { ParentComponent } from 'solid-js';
 
 const ConnectedConnectionsProvider: ParentComponent = (props) => {
   const {
     connections: { store, selectConnection },
   } = useAppSelector();
   const navigate = useNavigate();
-  const [actions, setActions] = createSignal<CommandPaletteAction[]>([]);
-  const connectionsChanged = () => store.connections;
 
-  createEffect(
-    on(connectionsChanged, () => {
-      setActions([
-        ...store.connections.map((conn) => ({
-          id: '0-connection-' + conn.id,
-          label: `Connect to ${conn.connection.name}`,
-          callback: () => {
-            selectConnection(conn.id);
-            navigate('/console/' + conn.id);
-          },
-        })),
-      ]);
-    })
-  );
+  const actions = () =>
+    store.connections.map((conn) => ({
+      id: '0-connection-' + conn.id,
+      label: `Connect to ${conn.connection.name}`,
+      callback: () => {
+        selectConnection(conn.id);
+        navigate('/console/' + conn.id);
+      },
+    }));
+
+  const actionGroups: ActionGroup[] = [
+    {
+      id: 'connections',
+      label: 'Connections',
+      actions: actions(),
+    },
+  ];
 
   return (
-    <CommandPaletteContextWrapper actions={actions()}>
+    <CommandPaletteContextWrapper groups={actionGroups}>
       {props.children}
     </CommandPaletteContextWrapper>
   );

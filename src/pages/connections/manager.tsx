@@ -7,7 +7,6 @@ import { VsSettings } from 'solid-icons/vs';
 import { ConnectionGrid } from './connections/grid';
 import { AddConnectionForm } from 'pages/connections/connections/form';
 import { A } from '@solidjs/router';
-import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 
 export function ConnectionManager() {
   const [showNewConnection, setShowNewConnection] = createSignal(false);
@@ -20,14 +19,9 @@ export function ConnectionManager() {
           <p class="text-muted-foreground">Manage your database connections</p>
         </div>
         <div class="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger>
-              <Button href="/settings" as={A}>
-                <VsSettings />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Settings</TooltipContent>
-          </Tooltip>
+          <Button href="/settings" as={A}>
+            <VsSettings />
+          </Button>
           <Button onClick={() => setShowNewConnection(!showNewConnection())}>
             <Plus class="mr-2 h-4 w-4" />
             New Connection

@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 import { createEffect, For, Match, Show, Switch } from 'solid-js';
 import { useSideBar } from 'components/ui/sidebar';
 import { useAppSelector } from 'services/Context';
-import { A } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { Content } from 'pages/console/console-content/Content';
 
 interface QueryEditorProps {}
@@ -25,6 +25,7 @@ export function QueryEditor(_props: QueryEditorProps) {
   } = useAppSelector();
 
   const conn = getConnection();
+  const navigate = useNavigate();
 
   const { toggleSidebar } = useSideBar();
 
@@ -34,16 +35,15 @@ export function QueryEditor(_props: QueryEditorProps) {
     <div class="flex h-full flex-col text-foreground">
       <div class="flex w-full items-center justify-between border-b px-2 relative">
         <Tooltip>
-          <TooltipTrigger>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="h-8 w-8"
-              onClick={toggleSidebar}
-            >
-              <PanelLeft class="size-4" />
-              <span class="sr-only">Toggle Sidebar</span>
-            </Button>
+          <TooltipTrigger
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8"
+            onClick={toggleSidebar}
+            as={Button}
+          >
+            <PanelLeft class="size-4" />
+            <span class="sr-only">Toggle Sidebar</span>
           </TooltipTrigger>
           <TooltipContent>Toggle Sidebar</TooltipContent>
         </Tooltip>
@@ -118,13 +118,15 @@ export function QueryEditor(_props: QueryEditorProps) {
         </div>
         <Separator orientation="vertical" class="mx-2 h-4" />
         <Tooltip>
-          <TooltipTrigger>
-            <A href="/settings">
-              <Button variant="ghost" size="icon" class="h-8 w-8">
-                <VsSettings class="size-4" />
-                <span class="sr-only">Settings</span>
-              </Button>
-            </A>
+          <TooltipTrigger
+            class="h-8 w-8"
+            variant="ghost"
+            size="icon"
+            as={Button}
+            onClick={() => navigate('/settings')}
+          >
+            <VsSettings class="size-4" />
+            <span class="sr-only">Settings</span>
           </TooltipTrigger>
           <TooltipContent>Settings</TooltipContent>
         </Tooltip>

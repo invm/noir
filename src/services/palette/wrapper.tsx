@@ -5,10 +5,11 @@ import {
   JSX,
   createEffect,
 } from 'solid-js';
-import { useCommandPalette } from './context';
+import { Action, ActionGroup, useCommandPalette } from './context';
 
 interface CommandPaletteContextWrapperProps {
-  actions: { id: string; label: string; callback: () => void }[];
+  actions?: Action[];
+  groups?: ActionGroup[];
   children: JSX.Element;
 }
 
@@ -16,40 +17,61 @@ export function CommandPaletteContextWrapper(
   props: CommandPaletteContextWrapperProps
 ) {
   const commandPalette = useCommandPalette();
-  let currentActionIds: string[] = []; // Keep track of the currently added action IDs
+  let currentActionIds: string[] = [];
+  let currentGroupIds: string[] = [];
 
   onMount(() => {
-    // Initial addition of actions
-    commandPalette.addActions(props.actions);
-    currentActionIds = props.actions.map((action) => action.id);
+    if (props.actions) {
+      commandPalette.addActions(props.actions);
+      currentActionIds = props.actions.map((action) => action.id);
+    }
+    if (props.groups) {
+      commandPalette.addGroups(props.groups);
+      currentGroupIds = props.groups.map((group) => group.id);
+    }
   });
 
   createEffect(() => {
-    // React to changes in the actions prop
-    const newActionIds = props.actions.map((action) => action.id);
+    const newActionIds = props.actions?.map((action) => action.id);
 
-    // Remove actions that are no longer present
     const actionsToRemove = currentActionIds.filter(
-      (id) => !newActionIds.includes(id)
+      (id) => !newActionIds?.includes(id)
     );
     if (actionsToRemove.length > 0) {
       commandPalette.removeActions(actionsToRemove);
     }
 
-    // Add actions that are new
-    const actionsToAdd = props.actions.filter(
+    const actionsToAdd = props.actions?.filter(
       (action) => !currentActionIds.includes(action.id)
     );
-    if (actionsToAdd.length > 0) {
+    if (actionsToAdd && actionsToAdd?.length > 0) {
       commandPalette.addActions(actionsToAdd);
     }
 
-    // Update the current action IDs
-    currentActionIds = newActionIds;
+    currentActionIds = newActionIds || [];
+  });
+
+  createEffect(() => {
+    const newGroupIds = props.groups?.map((group) => group.id);
+
+    const groupsToRemove = currentGroupIds.filter(
+      (id) => !newGroupIds?.includes(id)
+    );
+    if (groupsToRemove.length > 0) {
+      commandPalette.removeGroups(groupsToRemove);
+    }
+
+    const groupsToAdd = props.groups?.filter(
+      (group) => !currentGroupIds.includes(group.id)
+    );
+    if (groupsToAdd && groupsToAdd?.length > 0) {
+      commandPalette.addGroups(groupsToAdd);
+    }
+
+    currentGroupIds = newGroupIds || [];
   });
 
   onCleanup(() => {
-    // Remove all actions when the component unmounts
     commandPalette.removeActions(currentActionIds);
   });
 

@@ -175,43 +175,41 @@ export const SchemaSelect = () => {
       </Select>
       <Show when={conn.connection.dialect !== 'Sqlite'}>
         <Tooltip>
-          <TooltipTrigger>
-            <Button
-              onClick={showProcessList}
-              disabled={loading()}
-              variant="ghost"
-              class="p-1 size-4 flex items-center"
-            >
-              <Switch>
-                <Match when={loading()}>
-                  <Loader />
-                </Match>
-                <Match when={!loading()}>
-                  <Terminal class="size-4" />
-                </Match>
-              </Switch>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t('sidebar.show_process_list')}</TooltipContent>
-        </Tooltip>
-      </Show>
-      <Tooltip>
-        <TooltipTrigger>
-          <Button
-            onClick={refresh}
+          <TooltipTrigger
+            onClick={showProcessList}
             disabled={loading()}
             variant="ghost"
             class="p-1 size-4 flex items-center"
+            as={Button}
           >
             <Switch>
               <Match when={loading()}>
                 <Loader />
               </Match>
               <Match when={!loading()}>
-                <Refresh class="size-4" />
+                <Terminal class="size-4" />
               </Match>
             </Switch>
-          </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('sidebar.show_process_list')}</TooltipContent>
+        </Tooltip>
+      </Show>
+      <Tooltip>
+        <TooltipTrigger
+          onClick={refresh}
+          disabled={loading()}
+          variant="ghost"
+          class="p-1 size-4 flex items-center"
+          as={Button}
+        >
+          <Switch>
+            <Match when={loading()}>
+              <Loader />
+            </Match>
+            <Match when={!loading()}>
+              <Refresh class="size-4" />
+            </Match>
+          </Switch>
         </TooltipTrigger>
         <TooltipContent>{t('sidebar.refresh_schema')}</TooltipContent>
       </Tooltip>
