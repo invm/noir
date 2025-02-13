@@ -53,7 +53,7 @@ export const AppService = () => {
   const gridTheme = () => appStore.gridTheme;
 
   const cmdOrCtrl = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? '⌘' : 'Cmd';
+    if (appStore.osType === 'Darwin') return short ? '⌘' : 'Meta';
     return short ? '^' : 'Control';
   };
 

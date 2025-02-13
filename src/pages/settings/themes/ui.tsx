@@ -20,6 +20,7 @@ import { useColorMode } from '@kobalte/core';
 
 const RADIUS = '--radius';
 const PRIMARY = '--primary';
+const PRIMARY_FOREGROUND = '--primary-foreground';
 
 export const setProperty = (property: string, value: string) => {
   document.documentElement.style.setProperty(property, value);
@@ -34,9 +35,10 @@ const getSavedValues = () => {
 export const restoreTheme = () => {
   const { primary, radius } = getSavedValues();
   if (!radius || !primary) return;
-  const { radiusRem, hue } = transformValues(radius, primary);
+  const { radiusRem, hue, foreground } = transformValues(radius, primary);
   setProperty(RADIUS, radiusRem);
   setProperty(PRIMARY, hue!);
+  setProperty(PRIMARY_FOREGROUND, foreground!);
 };
 
 const transformValues = (radius: string, color: string) => {
@@ -50,7 +52,19 @@ const transformValues = (radius: string, color: string) => {
     yellow: '47.9 95.8% 53.1%',
     violet: '262.1 83.3% 57.8%',
   }[color];
-  return { radiusRem: `${radius}rem`, hue: hue };
+
+  const foreground = {
+    zinc: '240 5.9% 10%',
+    green: '240 5.9% 10%',
+    blue: '240 5.9% 10%',
+    yellow: '240 5.9% 10%',
+    red: '0 0% 100%',
+    rose: '0 0% 100%',
+    orange: '0 0% 100%',
+    violet: '0 0% 100%',
+  }[color];
+
+  return { radiusRem: `${radius}rem`, hue, foreground };
 };
 
 export default function UIThemeCustomizer() {
@@ -75,11 +89,15 @@ export default function UIThemeCustomizer() {
   const radiusOptions = ['0.3', '0.5', '0.7', '1.0'];
 
   createEffect(() => {
-    const { radiusRem, hue } = transformValues(theme.radius, theme.color);
+    const { radiusRem, hue, foreground } = transformValues(
+      theme.radius,
+      theme.color
+    );
     setProperty(RADIUS, radiusRem);
     localStorage.setItem(RADIUS, theme.radius);
     setProperty(PRIMARY, hue!);
     localStorage.setItem(PRIMARY, theme.color);
+    setProperty(PRIMARY_FOREGROUND, foreground!);
   });
 
   return (
@@ -114,11 +132,11 @@ export default function UIThemeCustomizer() {
               {(color) => (
                 <RadioGroupItem
                   value={color.value}
-                  class="flex items-center gap-2"
+                  class="flex items-center w-full gap-2"
                 >
                   <RadioGroupItemLabel
                     onClick={() => setTheme({ ...theme, color: color.value })}
-                    class={`flex items-center space-x-2 rounded-lg border py-1 px-4 cursor-pointer [&:has(:checked)]:bg-accent ${
+                    class={`flex items-center space-x-2 w-full rounded-lg border py-1 px-4 cursor-pointer [&:has(:checked)]:bg-accent ${
                       theme.color === color.value ? 'border-primary' : ''
                     }`}
                     classList={{ 'bg-accent': theme.color === color.value }}
