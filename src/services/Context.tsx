@@ -27,6 +27,7 @@ const rootState: RootState = {
 const StoreContext = createContext<RootState>();
 
 export const useAppSelector = () => useContext(StoreContext)!;
+
 export const StoreProvider: ParentComponent = (props) => {
   const [loaded, setLoaded] = createSignal(false);
   const [osType, setOsType] = createSignal<OsType>('Linux');

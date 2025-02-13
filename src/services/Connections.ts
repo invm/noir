@@ -113,7 +113,7 @@ type Schema = {
   views: Table[];
 };
 
-type ConnectionTab = {
+export type ConnectionTab = {
   label: string;
   id: string;
   selectedSchema: string;
@@ -289,6 +289,13 @@ export const ConnectionsService = () => {
   const setConnectionIdx = (i: number) => {
     if (i < store.connections.length) {
       setStore('idx', i);
+    }
+  };
+
+  const selectConnection = (id: string) => {
+    const idx = store.connections.findIndex((c) => c.id === id);
+    if (idx >= 0) {
+      setStore('idx', idx);
     }
   };
 
@@ -491,5 +498,6 @@ export const ConnectionsService = () => {
     setPrevContentIdx,
     setNextContentIdx,
     refreshEntities,
+    selectConnection,
   };
 };

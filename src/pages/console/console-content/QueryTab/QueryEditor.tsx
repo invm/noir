@@ -21,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 import { Checkbox } from '@kobalte/core/checkbox';
 import { CheckboxControl, CheckboxLabel } from 'components/ui/checkbox';
 import { Button } from 'components/ui/button';
+import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
+import { CommandPaletteAction } from 'services/palette/context';
 
 interface EditorProps {
   readOnly?: boolean;
@@ -141,127 +143,148 @@ export const QueryEditor = (props: EditorProps) => {
     })
   );
 
-  // const dummyAction = async () => {};
+  const editorActions: CommandPaletteAction[] = [
+    {
+      id: 'editor-focus',
+      label: 'Focus on editor',
+      callback: () => editor()?.focus(),
+      group: 'editor',
+    },
+    {
+      id: 'editor-execute-query',
+      label: 'Execute query',
+      callback: onExecute,
+      group: 'editor',
+    },
+    {
+      id: 'editor-format-query',
+      label: 'Format query',
+      callback: onFormat,
+      group: 'editor',
+    },
+  ];
 
   return (
-    <div class="flex-1 flex flex-col h-full">
-      <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
-        <div class="flex items-center gap-2 bg-background ">
-          <ActionRowButton
-            dataTip={t('console.actions.format')}
-            onClick={onFormat}
-            icon={<EditIcon class="size-5" />}
-          />
-          <ActionRowButton
-            dataTip={t('console.actions.execute')}
-            onClick={onExecute}
-            loading={loading()}
-            icon={<Play class="size-5" />}
-          />
+    <CommandPaletteContextWrapper actions={editorActions}>
+      <div class="flex-1 flex flex-col h-full">
+        <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
+          <div class="flex items-center gap-2 bg-background ">
+            <ActionRowButton
+              dataTip={t('console.actions.format')}
+              onClick={onFormat}
+              icon={<EditIcon class="size-5" />}
+            />
+            <ActionRowButton
+              dataTip={t('console.actions.execute')}
+              onClick={onExecute}
+              loading={loading()}
+              icon={<Play class="size-5" />}
+            />
 
-          <ActionRowButton
-            dataTip={t('console.actions.copy_query')}
-            onClick={copyQueryToClipboard}
-            icon={<Copy class="size-5" />}
-          />
+            <ActionRowButton
+              dataTip={t('console.actions.copy_query')}
+              onClick={copyQueryToClipboard}
+              icon={<Copy class="size-5" />}
+            />
 
-          <Tooltip>
-            <TooltipTrigger>
-              <Checkbox
-                checked={autoLimit()}
-                onChange={(e) => setAutoLimit(e)}
-                class="flex items-center gap-2"
-              >
-                <CheckboxControl class="rounded-md border-accent" />
-                <div class="grid gap-1.5 leading-none">
-                  <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {t('console.actions.limit')}
-                  </CheckboxLabel>
-                </div>
-              </Checkbox>
-            </TooltipTrigger>
-            <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
-          </Tooltip>
-          {/* <div */}
-          {/*   class="tooltip tooltip-primary tooltip-bottom" */}
-          {/*   data-tip={t('console.actions.vim_mode_on')} */}
-          {/* > */}
-          {/*   <div class="flex items-center mx-2"> */}
-          {/*     <span class="mr-2"> */}
-          {/*       <VimIcon /> */}
-          {/*     </span> */}
-          {/*     <input */}
-          {/*       type="checkbox" */}
-          {/*       class="toggle toggle-sm" */}
-          {/*       classList={{ */}
-          {/*         'toggle-primary': vimModeOn(), */}
-          {/*       }} */}
-          {/*       checked={vimModeOn()} */}
-          {/*       onChange={() => toggleVimModeOn()} */}
-          {/*     /> */}
-          {/*   </div> */}
-          {/* </div> */}
+            <Tooltip>
+              <TooltipTrigger>
+                <Checkbox
+                  checked={autoLimit()}
+                  onChange={(e) => setAutoLimit(e)}
+                  class="flex items-center gap-2"
+                >
+                  <CheckboxControl class="rounded-md border-accent" />
+                  <div class="grid gap-1.5 leading-none">
+                    <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      {t('console.actions.limit')}
+                    </CheckboxLabel>
+                  </div>
+                </Checkbox>
+              </TooltipTrigger>
+              <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
+            </Tooltip>
+            {/* <div */}
+            {/*   class="tooltip tooltip-primary tooltip-bottom" */}
+            {/*   data-tip={t('console.actions.vim_mode_on')} */}
+            {/* > */}
+            {/*   <div class="flex items-center mx-2"> */}
+            {/*     <span class="mr-2"> */}
+            {/*       <VimIcon /> */}
+            {/*     </span> */}
+            {/*     <input */}
+            {/*       type="checkbox" */}
+            {/*       class="toggle toggle-sm" */}
+            {/*       classList={{ */}
+            {/*         'toggle-primary': vimModeOn(), */}
+            {/*       }} */}
+            {/*       checked={vimModeOn()} */}
+            {/*       onChange={() => toggleVimModeOn()} */}
+            {/*     /> */}
+            {/*   </div> */}
+            {/* </div> */}
+          </div>
+          <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  size="xs"
+                  variant="destructive"
+                  onClick={async () => {
+                    const ids = (
+                      getContent().data as QueryContentTabData
+                    ).result_sets
+                      .map((t) => t?.id ?? '')
+                      .filter(Boolean);
+                    if (ids.length) {
+                      await cancelTask(ids);
+                      ids.forEach((_, i) => {
+                        updateResultSet(store.idx, i, { loading: false });
+                      });
+                    }
+                  }}
+                >
+                  {t('console.actions.cancel')}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {t('console.actions.cancel_all_queries')}
+              </TooltipContent>
+            </Tooltip>
+          </Show>
         </div>
-        <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                size="xs"
-                variant="destructive"
-                onClick={async () => {
-                  const ids = (
-                    getContent().data as QueryContentTabData
-                  ).result_sets
-                    .map((t) => t?.id ?? '')
-                    .filter(Boolean);
-                  if (ids.length) {
-                    await cancelTask(ids);
-                    ids.forEach((_, i) => {
-                      updateResultSet(store.idx, i, { loading: false });
-                    });
-                  }
-                }}
-              >
-                {t('console.actions.cancel')}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {t('console.actions.cancel_all_queries')}
-            </TooltipContent>
-          </Tooltip>
-        </Show>
-      </div>
-      <div class="flex-1">
-        <Editor
-          language="sql"
-          onMount={(_m, e) => {
-            setEditor(e);
+        <div class="flex-1">
+          <Editor
+            language="sql"
+            onMount={(_m, e) => {
+              setEditor(e);
 
-            e.addCommand(
-              monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-              onExecute
-            );
-            e.addCommand(
-              monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE,
-              onExecute
-            );
-            e.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL, () =>
-              editor()?.focus()
-            );
+              e.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                onExecute
+              );
+              e.addCommand(
+                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE,
+                onExecute
+              );
+              e.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL, () =>
+                editor()?.focus()
+              );
 
-            // either make this work or delete the shortcut from the shortcut list
-            // e.addCommand(
-            //   monaco.KeyMod.CtrlCmd |
-            //     monaco.KeyMod.Shift |
-            //     monaco.KeyCode.KeyE,
-            //   onFormat
-            // );
-          }}
-          onChange={updateQueryText}
-          value={code()}
-          schema={schema}
-        />
+              // either make this work or delete the shortcut from the shortcut list
+              // e.addCommand(
+              //   monaco.KeyMod.CtrlCmd |
+              //     monaco.KeyMod.Shift |
+              //     monaco.KeyCode.KeyE,
+              //   onFormat
+              // );
+            }}
+            onChange={updateQueryText}
+            value={code()}
+            schema={schema}
+          />
+        </div>
       </div>
-    </div>
+    </CommandPaletteContextWrapper>
   );
 };

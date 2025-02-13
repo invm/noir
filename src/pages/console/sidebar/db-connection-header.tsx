@@ -12,15 +12,13 @@ import {
 import { useAppSelector } from 'services/Context';
 import { Match, Show, Switch } from 'solid-js';
 import { cn } from 'utils/cn';
+import { useCommandPalette } from 'services/palette/context';
 
-interface DbConnectionProps {
-  setOpen: (x: boolean) => void;
-}
-
-export function DbConnectionHeader(props: DbConnectionProps) {
+export function DbConnectionHeader() {
   const {
     connections: { getConnection },
   } = useAppSelector();
+  const { setOpen } = useCommandPalette();
   const conn = getConnection();
 
   const host = conn.connection.credentials.host;
@@ -32,7 +30,7 @@ export function DbConnectionHeader(props: DbConnectionProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              onClick={() => props.setOpen(true)}
+              onClick={() => setOpen(true)}
               class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-accent transition-all flex items-center justify-between"
             >
               <div class="flex items-center gap-2">

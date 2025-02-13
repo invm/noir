@@ -84,13 +84,13 @@ export function ConnectionGrid(props: { class?: string }) {
   };
 
   return (
-    <div class={cn('grid gap-4 self-start overflow-auto', props.class)}>
+    <div class={cn('grid gap-4 overflow-auto', props.class)}>
       <For each={connections}>
         {(connection) => (
           <AlertDialog>
             <ContextMenu>
               <ContextMenuTrigger>
-                <Card class="relative overflow-hidden py-2">
+                <Card class="relative overflow-hidden">
                   <div
                     class={`absolute left-0 top-0 h-full w-1 bg-${connection.color}-500`}
                   />
