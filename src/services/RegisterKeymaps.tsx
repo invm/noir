@@ -14,6 +14,7 @@ export const RegisterKeymaps = (props: {
       setNextContentIdx,
       setPrevContentIdx,
       setConnectionIdx,
+      setContentIdx,
     },
     app: { setAppStore, cmdOrCtrl },
   } = useAppSelector();
@@ -37,6 +38,12 @@ export const RegisterKeymaps = (props: {
 
   for (let i = 1; i <= 9; i++) {
     createShortcut([cmdOrCtrl(), String(i)], () => {
+      setContentIdx(i - 1);
+    });
+  }
+
+  for (let i = 1; i <= 9; i++) {
+    createShortcut([cmdOrCtrl(), 'Shift', String(i)], () => {
       setConnectionIdx(i - 1);
     });
   }

@@ -136,99 +136,89 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   return (
     <>
       <AlertDialog>
-        <Collapsible open={props.open} class="w-full">
-          <CollapsibleTrigger class="w-full">
-            <ContextMenu>
-              <ContextMenuTrigger>
-                <div
-                  onClick={props.onOpen}
-                  class="cursor-pointer rounded-sm h-5 w-full flex items-center group hover:bg-accent"
-                >
-                  <div class="flex items-center justify-between w-full p-1">
-                    <div class="flex items-center gap-2">
-                      <Table
-                        class={
-                          props.entity === 'tables'
-                            ? 'text-sky-500'
-                            : 'text-orange-500'
-                        }
-                      />
-                      <span tabindex={0} class="text-xs font-semibold">
-                        {props.name}
-                      </span>
-                    </div>
-                    <TbArrowsMoveVertical class="size-4" />
+        <ContextMenu>
+          <Collapsible open={props.open} class="w-full">
+            <ContextMenuTrigger class="cursor-pointer rounded-sm h-5 w-full flex items-center group hover:bg-accent">
+              <CollapsibleTrigger onClick={props.onOpen} class="w-full">
+                <div class="flex items-center justify-between w-full p-1">
+                  <div class="flex items-center gap-2">
+                    <Table
+                      class={
+                        props.entity === 'tables'
+                          ? 'text-sky-500'
+                          : 'text-orange-500'
+                      }
+                    />
+                    <span class="text-xs font-semibold">{props.name}</span>
                   </div>
+                  <TbArrowsMoveVertical class="size-4" />
                 </div>
-              </ContextMenuTrigger>
-              <ContextMenuContent>
-                <ContextMenuItem
-                  onClick={() => {
-                    addTableStructureTab(props.name);
-                  }}
-                >
-                  {t('sidebar.show_table_structure')}
-                </ContextMenuItem>
-                <ContextMenuItem onClick={listData}>
-                  {t('sidebar.view_data')}
-                </ContextMenuItem>
-                <Show when={props.entity === 'tables'}>
-                  <AlertDialogTrigger class="w-full">
-                    <ContextMenuItem
-                      onSelect={() => setDialogAction('truncate')}
-                    >
-                      {t('sidebar.truncate_table')}
-                    </ContextMenuItem>
-                  </AlertDialogTrigger>
-                </Show>
-                <AlertDialogTrigger class="w-full">
-                  <ContextMenuItem onSelect={() => setDialogAction('drop')}>
-                    {t('sidebar.drop_table')}
-                  </ContextMenuItem>
-                </AlertDialogTrigger>
-              </ContextMenuContent>
-            </ContextMenu>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div class="px-1" classList={{ 'mb-2': props.open }}>
-              <Show when={props.open}>
-                <For each={props.columns}>
-                  {(column) => (
-                    <Popover>
-                      <PopoverTrigger
-                        onClick={() => insertColumnName(column.name)}
-                        class="flex w-full justify-between items-center border-b"
-                        as="div"
-                      >
-                        <span class="text-xs font-semibold truncate text-ellipsis">
-                          {column.name}
-                        </span>
-                        <div class="flex-1 flex justify-end">
-                          <span class="text-xs font-light max-w-[20ch] truncate">
-                            {getAnyCase(column.props, 'column_type')}
-                          </span>
-                        </div>
-                      </PopoverTrigger>
-                      <PopoverContent class="min-w-fit">
-                        <div class="flex overflow-auto w-full pt-6 justify-between items-center border-b">
-                          <span class="text-xs font-semibold">
+              </CollapsibleTrigger>
+            </ContextMenuTrigger>
+            <CollapsibleContent>
+              <div class="px-1" classList={{ 'mb-2': props.open }}>
+                <Show when={props.open}>
+                  <For each={props.columns}>
+                    {(column) => (
+                      <Popover>
+                        <PopoverTrigger
+                          onClick={() => insertColumnName(column.name)}
+                          class="flex w-full justify-between items-center border-b"
+                          as="div"
+                        >
+                          <span class="text-xs font-semibold truncate text-ellipsis">
                             {column.name}
                           </span>
                           <div class="flex-1 flex justify-end">
-                            <span class="text-xs font-light ml-2">
+                            <span class="text-xs font-light max-w-[20ch] truncate">
                               {getAnyCase(column.props, 'column_type')}
                             </span>
                           </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                </For>
-              </Show>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
+                        </PopoverTrigger>
+                        <PopoverContent class="min-w-fit">
+                          <div class="flex overflow-auto w-full pt-6 justify-between items-center border-b">
+                            <span class="text-xs font-semibold">
+                              {column.name}
+                            </span>
+                            <div class="flex-1 flex justify-end">
+                              <span class="text-xs font-light ml-2">
+                                {getAnyCase(column.props, 'column_type')}
+                              </span>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </For>
+                </Show>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={() => {
+                addTableStructureTab(props.name);
+              }}
+            >
+              {t('sidebar.show_table_structure')}
+            </ContextMenuItem>
+            <ContextMenuItem onClick={listData}>
+              {t('sidebar.view_data')}
+            </ContextMenuItem>
+            <Show when={props.entity === 'tables'}>
+              <AlertDialogTrigger class="w-full">
+                <ContextMenuItem onSelect={() => setDialogAction('truncate')}>
+                  {t('sidebar.truncate_table')}
+                </ContextMenuItem>
+              </AlertDialogTrigger>
+            </Show>
+            <AlertDialogTrigger class="w-full">
+              <ContextMenuItem onSelect={() => setDialogAction('drop')}>
+                {t('sidebar.drop_table')}
+              </ContextMenuItem>
+            </AlertDialogTrigger>
+          </ContextMenuContent>
+        </ContextMenu>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>

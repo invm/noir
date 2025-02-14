@@ -10,12 +10,12 @@ import { useSideBar } from 'components/ui/sidebar';
 import { useAppSelector } from 'services/Context';
 import { useNavigate } from '@solidjs/router';
 import { Content } from 'pages/console/console-content/Content';
+import { Kbd } from 'components/ui/kbd';
 
 interface QueryEditorProps {}
 
 export function QueryEditor(_props: QueryEditorProps) {
   const {
-    app: { cmdOrCtrl },
     connections: {
       setContentIdx,
       getConnection,
@@ -88,10 +88,7 @@ export function QueryEditor(_props: QueryEditorProps) {
                             <Match when={conn.idx === idx()}>
                               <>
                                 Close current tab
-                                <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                                  <span class="text-xs">{cmdOrCtrl(true)}</span>
-                                  W
-                                </kbd>
+                                <Kbd key="W" />
                               </>
                             </Match>
                             <Match when={conn.idx !== idx()}>Close tab</Match>
@@ -109,9 +106,7 @@ export function QueryEditor(_props: QueryEditorProps) {
                 onClick={() => addContentTab()}
               >
                 <span>New query</span>
-                <kbd class="pointer-events-none p-1 rounded-md hidden h-5 select-none items-center gap-1 border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                  <span class="text-xs">{cmdOrCtrl(true)}</span>T
-                </kbd>
+                <Kbd key="T" />
               </Button>
             </TabsList>
           </Tabs>

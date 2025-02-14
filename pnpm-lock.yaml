@@ -59,11 +59,8 @@ importers:
         specifier: ^23.12.2
         version: 23.12.2
       monaco-editor:
-        specifier: ^0.52.2
-        version: 0.52.2
-      monaco-vim:
-        specifier: ^0.4.2
-        version: 0.4.2(monaco-editor@0.52.2)
+        specifier: ^0.48.0
+        version: 0.48.0
       solid-icons:
         specifier: ^1.1.0
         version: 1.1.0(solid-js@1.8.19)
@@ -72,7 +69,7 @@ importers:
         version: 1.8.19
       solid-monaco:
         specifier: ^0.3.0
-        version: 0.3.0(monaco-editor@0.52.2)(solid-js@1.8.19)
+        version: 0.3.0(monaco-editor@0.48.0)(solid-js@1.8.19)
       solid-motionone:
         specifier: ^1.0.3
         version: 1.0.3(solid-js@1.8.19)
@@ -1811,13 +1808,8 @@ packages:
     resolution: {integrity: sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==}
     engines: {node: '>=0.10.0'}
 
-  monaco-editor@0.52.2:
-    resolution: {integrity: sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ==}
-
-  monaco-vim@0.4.2:
-    resolution: {integrity: sha512-rdbQC3O2rmpwX2Orzig/6gZjZfH7q7TIeB+uEl49sa+QyNm3jCKJOw5mwxBdFzTqbrPD+URfg6A2lEkuL5kymw==}
-    peerDependencies:
-      monaco-editor: '*'
+  monaco-editor@0.48.0:
+    resolution: {integrity: sha512-goSDElNqFfw7iDHMg8WDATkfcyeLTNpBHQpO8incK6p5qZt5G/1j41X0xdGzpIkGojGXM+QiRQyLjnfDVvrpwA==}
 
   moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
@@ -2971,9 +2963,9 @@ snapshots:
       '@solid-primitives/utils': 6.2.3(solid-js@1.8.19)
       solid-js: 1.8.19
 
-  '@monaco-editor/loader@1.4.0(monaco-editor@0.52.2)':
+  '@monaco-editor/loader@1.4.0(monaco-editor@0.48.0)':
     dependencies:
-      monaco-editor: 0.52.2
+      monaco-editor: 0.48.0
       state-local: 1.0.7
 
   '@motionone/animation@10.18.0':
@@ -4280,11 +4272,7 @@ snapshots:
 
   modify-values@1.0.1: {}
 
-  monaco-editor@0.52.2: {}
-
-  monaco-vim@0.4.2(monaco-editor@0.52.2):
-    dependencies:
-      monaco-editor: 0.52.2
+  monaco-editor@0.48.0: {}
 
   moo@0.5.2: {}
 
@@ -4632,10 +4620,10 @@ snapshots:
       seroval: 1.1.1
       seroval-plugins: 1.1.1(seroval@1.1.1)
 
-  solid-monaco@0.3.0(monaco-editor@0.52.2)(solid-js@1.8.19):
+  solid-monaco@0.3.0(monaco-editor@0.48.0)(solid-js@1.8.19):
     dependencies:
-      '@monaco-editor/loader': 1.4.0(monaco-editor@0.52.2)
-      monaco-editor: 0.52.2
+      '@monaco-editor/loader': 1.4.0(monaco-editor@0.48.0)
+      monaco-editor: 0.48.0
       solid-js: 1.8.19
 
   solid-motionone@1.0.3(solid-js@1.8.19):

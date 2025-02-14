@@ -22,6 +22,7 @@ import {
 } from '@kobalte/core';
 import { restoreTheme } from 'pages/settings/themes/ui';
 import { toast } from 'solid-sonner';
+import { CommandPaletteProviderComponent } from 'services/palette/provider';
 
 function App() {
   const {
@@ -105,6 +106,13 @@ function App() {
   });
 
   window.addEventListener('error', (e) => {
+    if (
+      ['ResizeObserver loop', 'focusableRange'].some((elem) =>
+        e?.message.includes(elem)
+      )
+    ) {
+      return;
+    }
     error(JSON.stringify({ message: 'Unhandled error', error: e.error }));
     toast.error('Error', { description: e.message });
   });
@@ -144,7 +152,9 @@ function App() {
         initialColorMode="dark"
         storageManager={storageManager}
       >
-        <Router />
+        <CommandPaletteProviderComponent>
+          <Router />
+        </CommandPaletteProviderComponent>
         <Show when={shouldUpdate()}>
           <div class="toast z-50 whitespace-normal">
             <div class="rounded-lg w-[500px]">

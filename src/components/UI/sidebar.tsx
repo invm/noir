@@ -33,10 +33,10 @@ import {
   type textFieldInputProps,
 } from './textfield';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
+import { callHandler } from 'components/lib/call-handler';
+import { combineStyle } from 'components/lib/combine-props';
+import { useIsMobile } from 'components/lib/use-mobile';
 import { cn } from 'utils/cn';
-import { useIsMobile } from '../lib/use-mobile';
-import { callHandler } from '../lib/call-handler';
-import { combineStyle } from '../lib/combine-props';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -383,7 +383,7 @@ export const SidebarInset = (props: ComponentProps<'main'>) => {
   return (
     <main
       class={cn(
-        'bg-background relative flex min-w-0 min-h-svh flex-1 flex-col',
+        'bg-background relative flex min-h-svh flex-1 flex-col',
         'peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow',
         local.class
       )}
