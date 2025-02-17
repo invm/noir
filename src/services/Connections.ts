@@ -274,6 +274,19 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
+  const removeCurrentContentTab = () => {
+    const conn = getConnection();
+    if (conn.tabs.length === 1) return;
+    const idx = conn.idx;
+    setStore(
+      produce((s) => {
+        s.connections[s.idx].tabs.splice(idx ?? s.connections[s.idx].idx, 1);
+        s.connections[s.idx].idx = s.connections[s.idx].tabs.length - 1;
+      })
+    );
+    updateStore();
+  };
+
   const removeContentTab = (idx?: number) => {
     const conn = getConnection();
     if (conn.tabs.length === 1) return;
@@ -499,5 +512,6 @@ export const ConnectionsService = () => {
     setNextContentIdx,
     refreshEntities,
     selectConnection,
+    removeCurrentContentTab,
   };
 };

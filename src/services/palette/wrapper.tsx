@@ -73,6 +73,7 @@ export function CommandPaletteContextWrapper(
 
   onCleanup(() => {
     commandPalette.removeActions(currentActionIds);
+    commandPalette.removeGroups(currentGroupIds);
   });
 
   return createComponent(() => props.children, {});

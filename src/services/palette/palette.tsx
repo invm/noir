@@ -26,6 +26,7 @@ export const CommandPalette = () => {
                 <For each={group.actions}>
                   {(action) => (
                     <CommandItem
+                      class="flex items-center justify-between"
                       onSelect={async () => {
                         try {
                           await action.callback();
@@ -39,6 +40,7 @@ export const CommandPalette = () => {
                       }}
                     >
                       {action.label}
+                      <Show when={action.shortcut}>{action.shortcut}</Show>
                     </CommandItem>
                   )}
                 </For>
@@ -50,6 +52,7 @@ export const CommandPalette = () => {
           <For each={actions()}>
             {(action) => (
               <CommandItem
+                class="flex items-center justify-between"
                 onSelect={async () => {
                   try {
                     await action.callback();
@@ -63,6 +66,7 @@ export const CommandPalette = () => {
                 }}
               >
                 {action.label}
+                <Show when={action.shortcut}>{action.shortcut}</Show>
               </CommandItem>
             )}
           </For>

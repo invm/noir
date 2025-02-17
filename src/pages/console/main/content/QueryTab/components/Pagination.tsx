@@ -20,6 +20,9 @@ import {
 } from 'components/ui/select';
 import { Loader } from 'components/ui/loader';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
+import { Kbd } from 'components/ui/kbd';
+import { CgInfo } from 'solid-icons/cg';
+import { TooltipTriggerProps } from '@kobalte/core/tooltip';
 
 type PaginationProps = {
   page: Accessor<number>;
@@ -56,7 +59,7 @@ export const Pagination = (props: PaginationProps) => {
   createShortcut([cmdOrCtrl(), 'Shift', 'P'], props.onPrevPage);
   createShortcut(['Control', 'Shift', 'J'], () => props.onBtnExport('json'));
   createShortcut(['Control', 'Shift', 'C'], () => props.onBtnExport('csv'));
-  createShortcut(['Control', 'N'], () =>
+  createShortcut([cmdOrCtrl(), 'N'], () =>
     props.openDrawerForm
       ? props.openDrawerForm({ mode: 'add', data: {} })
       : null
@@ -145,22 +148,37 @@ export const Pagination = (props: PaginationProps) => {
             })}
           </span>
         </Show>
-        <Show when={props.openDrawerForm}>
+        <Show when={props.query.count > 0}>
           <Tooltip>
             <TooltipTrigger
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                props.openDrawerForm
-                  ? props.openDrawerForm({ mode: 'add', data: {} })
-                  : null
-              }
-              as={Button}
-            >
-              {t('console.table.row_actions.add_row')}
-            </TooltipTrigger>
-            <TooltipContent>{cmdOrCtrl(true) + ' + N'}</TooltipContent>
+              as={(props: TooltipTriggerProps) => (
+                <Button size="xs" variant="ghost" class="flex gap-1" {...props}>
+                  <CgInfo class="size-4" />
+                </Button>
+              )}
+            />
+            <TooltipContent>
+              <p>
+                The tables is navigatable with the arrow keys, tab, shift-tab
+                and {cmdOrCtrl(true)} + arrow.
+              </p>
+            </TooltipContent>
           </Tooltip>
+        </Show>
+        <Show when={props.openDrawerForm}>
+          <Button
+            variant="outline"
+            size="sm"
+            class="gap-2"
+            onClick={() =>
+              props.openDrawerForm
+                ? props.openDrawerForm({ mode: 'add', data: {} })
+                : null
+            }
+          >
+            {t('console.table.row_actions.add_row')}
+            <Kbd key="N" />
+          </Button>
         </Show>
       </div>
       <Show when={resultSet.status === 'Completed'}>
@@ -187,12 +205,22 @@ export const Pagination = (props: PaginationProps) => {
               variant="outline"
               size="sm"
               onClick={() => props.onBtnExport('csv')}
+              tooltip={
+                <span class="flex items-center gap-2">
+                  {t('console.table.csv')} <Kbd control shift key="C" />
+                </span>
+              }
             >
               {t('console.table.csv')}
             </Button>
             <Button
               variant="outline"
               size="sm"
+              tooltip={
+                <span class="flex items-center gap-2">
+                  {t('console.table.json')} <Kbd control shift key="J" />
+                </span>
+              }
               onClick={() => props.onBtnExport('json')}
             >
               {t('console.table.json')}
@@ -229,6 +257,12 @@ export const Pagination = (props: PaginationProps) => {
               size="icon"
               disabled={props.loading || !props.page()}
               onClick={props.onPrevPage}
+              tooltip={
+                <span class="flex item-center gap-2">
+                  <span>Previous page</span>
+                  <Kbd shift key="P" />
+                </span>
+              }
               class="text-primary"
             >
               <ChevronLeft />
@@ -251,11 +285,16 @@ export const Pagination = (props: PaginationProps) => {
                 props.page() * pageSize() + pageSize() >=
                   (resultSet?.count ?? 0)
               }
+              tooltip={
+                <span class="flex item-center gap-2">
+                  <span>Next page</span>
+                  <Kbd shift key="N" />
+                </span>
+              }
               onClick={props.onNextPage}
               class="text-primary"
             >
               <ChevronRight />
-              <span class="sr-only">Next page</span>
             </Button>
           </div>
         </div>

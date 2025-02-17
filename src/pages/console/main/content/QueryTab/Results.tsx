@@ -27,7 +27,7 @@ import { createStore, produce } from 'solid-js/store';
 import { Search } from './components/Search';
 import { Changes, getColumnDefs } from './Table/utils';
 import { createShortcut } from '@solid-primitives/keyboard';
-import Keymaps from 'pages/settings/keymaps';
+import TriggerCommandPalette from 'pages/settings/trigger-command-palette';
 import { DrawerState } from './Table/PopupCellRenderer';
 import { Dialog, DialogContent } from 'components/ui/dialog';
 import { Editor } from './Editor';
@@ -470,7 +470,7 @@ export const Results = (props: {
                   </pre>
                 </div>
               ) : data()?.notReady || data()?.queryType === 'Other' ? (
-                <Keymaps short />
+                <TriggerCommandPalette />
               ) : (
                 <NoResults error={data()?.error} />
               )
@@ -479,7 +479,7 @@ export const Results = (props: {
               getContentData('Query').result_sets[queryIdx()]?.loading ? (
                 <Loader />
               ) : (
-                <Keymaps short />
+                <TriggerCommandPalette />
               )
             }
             getRowId={getRowId}

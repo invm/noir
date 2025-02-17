@@ -5,16 +5,14 @@ import { Button } from 'components/ui/button';
 import { Separator } from 'components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from 'components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
-import { createEffect, For, Match, Show, Switch } from 'solid-js';
+import { For, Match, Show, Switch } from 'solid-js';
 import { useSideBar } from 'components/ui/sidebar';
 import { useAppSelector } from 'services/Context';
 import { useNavigate } from '@solidjs/router';
-import { Content } from 'pages/console/console-content/Content';
+import { Content } from 'pages/console/main/content/Content';
 import { Kbd } from 'components/ui/kbd';
 
-interface QueryEditorProps {}
-
-export function QueryEditor(_props: QueryEditorProps) {
+export function Main() {
   const {
     connections: {
       setContentIdx,
@@ -28,8 +26,6 @@ export function QueryEditor(_props: QueryEditorProps) {
   const navigate = useNavigate();
 
   const { toggleSidebar } = useSideBar();
-
-  createEffect(() => {});
 
   return (
     <div class="flex h-full flex-col text-foreground">

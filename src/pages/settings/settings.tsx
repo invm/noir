@@ -1,7 +1,6 @@
 import { ConnectionSettings } from './connection-settings';
 import { BiRegularArrowBack as ArrowLeft } from 'solid-icons/bi';
 import { createSignal } from 'solid-js';
-import Keymaps from './keymaps';
 import { useNavigate } from '@solidjs/router';
 import ThemeCustomization from './themes/theme-customization';
 import { Button } from 'components/ui/button';
@@ -78,7 +77,6 @@ export function Settings() {
           <div class="flex-1 p-8 h-[600px] overflow-y-auto border">
             {activeTab() === 'theme' && <ThemeCustomization />}
             {activeTab() === 'connections' && <ConnectionSettings />}
-            {activeTab() === 'shortcuts' && <Keymaps />}
             {activeTab() === 'about' && <About />}
           </div>
         </div>

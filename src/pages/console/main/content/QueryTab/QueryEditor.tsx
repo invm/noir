@@ -152,7 +152,7 @@ export const QueryEditor = (props: EditorProps) => {
       actions: [
         {
           id: 'editor-focus',
-          label: 'Focus',
+          label: 'Focus on editor',
           callback: () => {
             editor()?.setPosition({ lineNumber: 1, column: 1 });
             window.requestAnimationFrame(() => {
