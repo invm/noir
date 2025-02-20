@@ -51,6 +51,7 @@ fn main() {
             connections::init_connection,
             connections::disconnect,
             connections::set_schema,
+            queries::sql_to_statements,
             queries::execute_query,
             queries::enqueue_query,
             queries::execute_tx,

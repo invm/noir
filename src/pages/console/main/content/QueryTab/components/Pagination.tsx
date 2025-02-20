@@ -140,7 +140,16 @@ export const Pagination = (props: PaginationProps) => {
             {t('console.table.ran', { duration: props.query.executionTime })}
           </span>
         </Show>
-        <Show when={props.query.queryType === 'Other'}>
+        <Show
+          when={(
+            [
+              QueryType.Update,
+              QueryType.Delete,
+              QueryType.Drop,
+              QueryType.Truncate,
+            ] as QueryType[]
+          ).includes(props.query.queryType)}
+        >
           <span class="font-medium">|</span>
           <span class="text-xs font-medium">
             {t('console.table.affected_rows', {

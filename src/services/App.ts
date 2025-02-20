@@ -23,6 +23,7 @@ type AppStore = {
   gridTheme: string;
   osType: OsType;
   enableDevTools: boolean;
+  sensitiveQueries: string[];
 };
 
 const getSavedData = async (key: string) => {
@@ -42,6 +43,7 @@ export const AppService = () => {
     gridTheme: 'alpine-dark',
     osType: 'Linux',
     enableDevTools: false,
+    sensitiveQueries: ['Delete', 'Drop', 'Alter', 'Update', 'Truncate'],
   });
 
   const updateStore = debounce(async () => {
@@ -73,6 +75,11 @@ export const AppService = () => {
     setAppStore(() => app_store);
   };
 
+  const updateSensitiveQueries = (options: string[]) => {
+    setAppStore('sensitiveQueries', options);
+    updateStore();
+  };
+
   return {
     appStore,
     setAppStore,
@@ -83,5 +90,6 @@ export const AppService = () => {
     gridTheme,
     updateTheme,
     cmdOrCtrl,
+    updateSensitiveQueries,
   };
 };

@@ -48,6 +48,7 @@ export function Main() {
           <Tabs
             value={`${conn.idx}`}
             class="rounded-md overflow-auto no-scrollbar w-full "
+            onChange={(i) => setContentIdx(+i)}
           >
             <TabsList class="h-10 gap-1 rounded-none p-0 px-2 bg-background">
               <For each={conn.tabs}>
@@ -56,12 +57,11 @@ export function Main() {
                     value={idx().toString()}
                     class="gap-2 text-sm text-muted-foreground max-w-[100px]"
                   >
-                    <div
-                      onClick={() => setContentIdx(idx())}
-                      class="flex group items-center rounded-lg h-8 border px-4 gap-2 border-transparent "
-                    >
+                    <div class="flex group items-center rounded-lg h-8 border px-4 gap-2 border-transparent ">
                       <span
-                        classList={{ 'text-primary font-semibold': conn.idx === idx() }}
+                        classList={{
+                          'text-primary font-semibold': conn.idx === idx(),
+                        }}
                         class="group-hover:text-primary transition-all"
                       >
                         {tab.label}
@@ -73,7 +73,7 @@ export function Main() {
                               class="group rounded-lg"
                               onClick={() => removeContentTab(idx())}
                             >
-                              <X class="size-4 group-hover:text-destructive" />
+                              <X class="size-4 hover:text-destructive" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent class="flex items-center gap-4">

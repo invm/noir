@@ -23,6 +23,17 @@ import { ToggleButton } from 'components/ui/toggle';
 import { TooltipTriggerProps } from '@kobalte/core/tooltip';
 import { Kbd } from 'components/ui/kbd';
 import { createShortcut } from '@solid-primitives/keyboard';
+import { intersection } from 'utils/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from 'components/ui/alert-dialog';
 
 export const QueryEditor = () => {
   const {
@@ -50,6 +61,7 @@ export const QueryEditor = () => {
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
   const [tabFocusMode, setTabFocusMode] = createSignal(false);
+  const [alertDialogOpen, setAlertDialogOpen] = createSignal(false);
   // const [vimMode, setVimMode] = createSignal<any>(null);
   const [editor, setEditor] =
     createSignal<monaco.editor.IStandaloneCodeEditor>();
@@ -81,20 +93,16 @@ export const QueryEditor = () => {
     return editor()!.getModel()?.getValueInRange(editor()!.getSelection()!);
   };
 
-  const onExecute = async () => {
-    if (loading() || !code()) return;
+  const enqueueQuery = async (connId: string, tabIdx: number, sql: string) => {
     setLoading(true);
-    const selectedText = getSelection();
-    const conn = getConnection();
     try {
-      const sql = selectedText || code();
       const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
         {
-          connId: conn.id,
+          connId,
           sql,
           autoLimit: autoLimit(),
-          tabIdx: conn.idx,
+          tabIdx,
         }
       );
       updateContentTab('data', {
@@ -109,8 +117,31 @@ export const QueryEditor = () => {
       toast.error('Could not enqueue query', {
         description: (error as Error).message || (error as string),
       });
-    } finally {
-      setLoading(false);
+    }
+    setLoading(false);
+  };
+
+  const getQuery = () => {
+    const selectedText = getSelection();
+    const conn = getConnection();
+    const sql = selectedText || code();
+    return { sql, conn };
+  };
+
+  const onExecute = async () => {
+    const { sql, conn } = getQuery();
+    if (loading() || !sql) return;
+    if (!conn.connection.metadata.sensitive) {
+      return enqueueQuery(conn.id, conn.idx, sql);
+    }
+    const queryTypes = await invoke<string[]>('sql_to_statements', {
+      dialect: conn.connection.dialect,
+      sql,
+    });
+    if (intersection(queryTypes, appStore.sensitiveQueries).length) {
+      setAlertDialogOpen(true);
+    } else {
+      enqueueQuery(conn.id, conn.idx, sql);
     }
   };
 
@@ -153,6 +184,7 @@ export const QueryEditor = () => {
 
   createShortcut([cmdOrCtrl(), 'L'], focusEditor);
   createShortcut([cmdOrCtrl(), 'Enter'], onExecute);
+  createShortcut([cmdOrCtrl(), 'Shift', 'F'], onFormat);
 
   const commandPaletteGroup: ActionGroup[] = [
     {
@@ -175,7 +207,7 @@ export const QueryEditor = () => {
           id: 'editor-format-query',
           label: 'Format',
           callback: onFormat,
-          shortcut: <Kbd key="Enter" />,
+          shortcut: <Kbd shift key="F" />,
         },
       ],
     },
@@ -335,6 +367,32 @@ export const QueryEditor = () => {
           />
         </div>
       </div>
+      <AlertDialog open={alertDialogOpen()} onOpenChange={setAlertDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This {getConnection().connection.name} database is marked as
+              sensitive and you are making a sensitive query type. This behavior
+              can be changed in the options on the settings screen.
+              <br />
+              Please confirm your action.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose>Cancel</AlertDialogClose>
+            <AlertDialogAction
+              onClick={() => {
+                const { sql, conn } = getQuery();
+                enqueueQuery(conn.id, conn.idx, sql);
+              }}
+              class="bg-destructive text-destructive-foreground"
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </CommandPaletteContextWrapper>
   );
 };

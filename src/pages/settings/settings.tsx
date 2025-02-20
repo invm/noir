@@ -1,4 +1,4 @@
-import { ConnectionSettings } from './connection-settings';
+import { Options } from './options';
 import { BiRegularArrowBack as ArrowLeft } from 'solid-icons/bi';
 import { createSignal } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
@@ -6,7 +6,7 @@ import ThemeCustomization from './themes/theme-customization';
 import { Button } from 'components/ui/button';
 import { About } from './about';
 
-type SettingsTab = 'theme' | 'connections' | 'shortcuts' | 'about';
+type SettingsTab = 'theme' | 'options' | 'about';
 
 export function Settings() {
   const [activeTab, setActiveTab] = createSignal<SettingsTab>('theme');
@@ -38,25 +38,13 @@ export function Settings() {
                   Theme Customization
                 </Button>
               </li>
-              {/* <li> */}
-              {/*   <Button */}
-              {/*     class={`w-full text-left px-4 py-2 rounded ${ */}
-              {/*       activeTab() === 'connections' */}
-              {/*         ? 'bg-primary text-primary-foreground' */}
-              {/*         : 'text-foreground hover:bg-accent' */}
-              {/*     }`} */}
-              {/*     onClick={() => setActiveTab('connections')} */}
-              {/*   > */}
-              {/*     Connection Settings */}
-              {/*   </Button> */}
-              {/* </li> */}
               <li>
                 <Button
                   class="w-full"
-                  variant={activeTab() === 'shortcuts' ? 'default' : 'ghost'}
-                  onClick={() => setActiveTab('shortcuts')}
+                  variant={activeTab() === 'options' ? 'default' : 'ghost'}
+                  onClick={() => setActiveTab('options')}
                 >
-                  Keyboard Shortcuts
+                  Options
                 </Button>
               </li>
               <li>
@@ -76,7 +64,7 @@ export function Settings() {
         <div class="flex-1 flex overflow-hidden">
           <div class="flex-1 p-8 h-[600px] overflow-y-auto border">
             {activeTab() === 'theme' && <ThemeCustomization />}
-            {activeTab() === 'connections' && <ConnectionSettings />}
+            {activeTab() === 'options' && <Options />}
             {activeTab() === 'about' && <About />}
           </div>
         </div>

@@ -32,7 +32,10 @@ export function DbConnectionHeader() {
             <SidebarMenuButton
               size="lg"
               onClick={() => setOpen(true)}
-              class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-accent transition-all flex items-center justify-between"
+              classList={{
+                'border border-destructive': conn.connection.metadata.sensitive,
+              }}
+              class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-accent  transition-all flex items-center justify-between"
             >
               <div class="flex items-center gap-2">
                 <div
@@ -100,6 +103,10 @@ export function DbConnectionHeader() {
                 <td>{conn.connection.credentials.user}</td>
               </tr>
             </Show>
+            <tr>
+              <td class="font-bold">Sensitive</td>
+              <td>{conn.connection.metadata.sensitive ? 'Yes' : 'No'} (Require confirmation on sensitive queries)</td>
+            </tr>
           </tbody>
         </table>
       </HoverCardContent>

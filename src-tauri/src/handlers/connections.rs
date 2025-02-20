@@ -40,7 +40,7 @@ pub fn update_connection(
     color: &str,
     metadata: Metadata,
 ) -> CommandResult<()> {
-    info!("Add connection: {name}, {dialect}, {mode}, {color}");
+    info!("Update connection: {name}, {dialect}, {mode}, {color}");
     let conn = ConnectionConfig::new(dialect, mode, credentials, name, color, metadata)?;
     app_handle
         .db(|db| queries::update_connection(db, id, &conn))

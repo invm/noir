@@ -58,7 +58,7 @@ export const columnsToTables = (
 
     return Object.keys(schema).reduce(
       (acc, name) => {
-        const columns = Object.values(schema[name]).map((props) => {
+        const columns = Object.values(schema[name] as object).map((props) => {
           const name = getAnyCase(props, 'column_name');
           return { name, props };
         });
@@ -102,4 +102,8 @@ export const parseObjRecursive = (
       return obj;
     }
   }
+};
+
+export const intersection = (arr: string[], arr2: string[]) => {
+  return arr.filter((value) => arr2.includes(value));
 };

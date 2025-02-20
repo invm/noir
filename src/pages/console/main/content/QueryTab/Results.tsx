@@ -157,7 +157,7 @@ export const Results = (props: {
           };
         }
         if (!result_set || result_set?.status !== 'Completed') {
-          return { rows: [], columns, colDef, exhausted: true, notReady: true };
+          return { rows: [], columns, colDef, exhausted: true, running: true };
         }
         const rows = await getQueryResults(
           result_set.path!,
@@ -469,7 +469,7 @@ export const Results = (props: {
                     <code>{getLoadingMessage()}</code>
                   </pre>
                 </div>
-              ) : data()?.notReady || data()?.queryType === 'Other' ? (
+              ) : data()?.running ? (
                 <TriggerCommandPalette />
               ) : (
                 <NoResults error={data()?.error} />

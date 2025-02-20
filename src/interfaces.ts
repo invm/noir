@@ -131,7 +131,22 @@ export type JSONValue =
 
 export type Row = Record<string, JSONValue>;
 
-export type QueryType = 'Select' | 'Other';
+export const QueryType = {
+  Alter: 'Alter',
+  Create: 'Create',
+  Delete: 'Delete',
+  Drop: 'Drop',
+  Insert: 'Insert',
+  Other: 'Other',
+  Select: 'Select',
+  Show: 'Show',
+  Truncate: 'Truncate',
+  Update: 'Update',
+} as const;
+
+export const QueryTypes = Object.keys(QueryType) as QueryType[];
+
+export type QueryType = keyof typeof QueryType;
 
 export type ResultSet = {
   loading: boolean;

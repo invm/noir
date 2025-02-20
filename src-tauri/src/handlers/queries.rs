@@ -22,22 +22,70 @@ use tokio_util::sync::CancellationToken;
 
 fn get_query_type(s: Statement) -> QueryType {
     match s {
-        Statement::Query(_)
-        | Statement::Explain { .. }
+        Statement::AlterIndex { .. } => QueryType::Alter,
+        Statement::AlterPolicy { .. } => QueryType::Alter,
+        Statement::AlterRole { .. } => QueryType::Alter,
+        Statement::AlterTable { .. } => QueryType::Alter,
+        Statement::AlterView { .. } => QueryType::Alter,
+        Statement::CreateDatabase { .. } => QueryType::Create,
+        Statement::CreateExtension { .. } => QueryType::Create,
+        Statement::CreateFunction { .. } => QueryType::Create,
+        Statement::CreateIndex { .. } => QueryType::Create,
+        Statement::CreateMacro { .. } => QueryType::Create,
+        Statement::CreatePolicy { .. } => QueryType::Create,
+        Statement::CreateProcedure { .. } => QueryType::Create,
+        Statement::CreateRole { .. } => QueryType::Create,
+        Statement::CreateSchema { .. } => QueryType::Create,
+        Statement::CreateSecret { .. } => QueryType::Create,
+        Statement::CreateSequence { .. } => QueryType::Create,
+        Statement::CreateStage { .. } => QueryType::Create,
+        Statement::CreateTable { .. } => QueryType::Create,
+        Statement::CreateTrigger { .. } => QueryType::Create,
+        Statement::CreateType { .. } => QueryType::Create,
+        Statement::CreateView { .. } => QueryType::Create,
+        Statement::CreateVirtualTable { .. } => QueryType::Create,
+        Statement::Delete { .. } => QueryType::Delete,
+        Statement::Drop { .. } => QueryType::Drop,
+        Statement::DropExtension { .. } => QueryType::Drop,
+        Statement::DropFunction { .. } => QueryType::Drop,
+        Statement::DropProcedure { .. } => QueryType::Drop,
+        Statement::DropSecret { .. } => QueryType::Drop,
+        Statement::DropTrigger { .. } => QueryType::Drop,
+        Statement::Insert { .. } => QueryType::Insert,
+        Statement::Query(_) => QueryType::Select,
+        Statement::Truncate { .. } => QueryType::Truncate,
+        Statement::Update { .. } => QueryType::Update,
+        Statement::Explain { .. }
         | Statement::Analyze { .. }
-        | Statement::ShowVariables { .. }
-        | Statement::ShowCreate { .. }
-        | Statement::ShowFunctions { .. }
         | Statement::ShowCollation { .. }
-        | Statement::ShowVariable { .. }
         | Statement::ShowColumns { .. }
+        | Statement::ShowCreate { .. }
+        | Statement::ShowDatabases { .. }
+        | Statement::ShowFunctions { .. }
+        | Statement::ShowSchemas { .. }
         | Statement::ShowStatus { .. }
-        | Statement::ShowTables { .. } => QueryType::Select,
-        //Statement::Insert { .. } => QueryType::Insert,
-        //Statement::Update { .. } => QueryType::Update,
-        //Statement::Delete { .. } => QueryType::Delete,
+        | Statement::ShowTables { .. }
+        | Statement::ShowVariable { .. }
+        | Statement::ShowVariables { .. }
+        | Statement::ShowViews { .. } => QueryType::Show,
         _ => QueryType::Other,
     }
+}
+
+// TODO: use this dialect when the fix for mysql is merged in sqlparser
+#[command]
+pub async fn sql_to_statements(dialect: String, sql: &str) -> CommandResult<Vec<QueryType>> {
+    let statements = Parser::parse_sql(
+        dialect_from_str("generic")
+            .expect("Failed to get dialect")
+            .as_ref(),
+        sql,
+    )
+    .unwrap_or_default();
+    if statements.is_empty() {
+        return Err(Error::from(anyhow!("No valid statements found")));
+    }
+    Ok(statements.into_iter().map(|s| get_query_type(s)).collect())
 }
 
 #[command]
