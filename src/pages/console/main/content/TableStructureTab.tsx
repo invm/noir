@@ -61,7 +61,7 @@ export const TableStructureTab = (props: { tabIdx: number }) => {
       value={tab()}
       class="p-2 flex flex-col gap-2 h-full"
     >
-      <div class="w-full grid grid-cols-12 pb-2 gap-4 ">
+      <div class="w-full grid grid-cols-12 pb-2 gap-4 h-8 ">
         <TextFieldRoot
           inputMode="text"
           value={search()}
@@ -83,7 +83,7 @@ export const TableStructureTab = (props: { tabIdx: number }) => {
       </div>
       <For each={TableStrucureEntities}>
         {(tab) => (
-          <TabsContent value={tab}>
+          <TabsContent value={tab} class="overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>

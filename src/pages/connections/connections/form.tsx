@@ -17,6 +17,7 @@ import {
   sslModes,
   SslMode,
   ModeType,
+  ConnectionConfig,
 } from 'interfaces';
 import { useAppSelector } from 'services/Context';
 import { invoke } from '@tauri-apps/api';
@@ -45,6 +46,7 @@ import {
 } from 'components/ui/checkbox';
 import { Button } from 'components/ui/button';
 import { toast } from 'solid-sonner';
+import { Tooltip, TooltipContent, TooltipTrigger } from 'components/ui/tooltip';
 
 const MIN_LENGTH_STR = 1;
 const MAX_LENGTH_STR = 255;
@@ -110,6 +112,9 @@ const schema = z.object({
   mode: z.enum(connectionModes).default(connectionModes[0]),
   credentials: CredentialsSchema,
   color: z.enum(connectionColors),
+  metadata: z.object({
+    sensitive: z.boolean().default(false),
+  }),
 });
 
 type Form = z.infer<typeof schema>;
@@ -149,13 +154,19 @@ const normalize = (values: Form) => {
   return values;
 };
 
+export type EditState = {
+  connection?: ConnectionConfig;
+};
+
 type AddConnectionFormProps = {
+  values: EditState;
   onClose: () => void;
+  onReset: () => void;
 };
 
 const AddConnectionForm = (props: AddConnectionFormProps) => {
   const {
-    connections: { addConnection },
+    connections: { addConnection, updateConnection },
   } = useAppSelector();
   const [testing, setTesting] = createSignal(false);
   const [error, setError] = createSignal('');
@@ -177,7 +188,15 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
 
   const onSubmit = async (values: Form) => {
     try {
-      await addConnection(normalize(values));
+      if (props.values.connection) {
+        await updateConnection({
+          ...normalize(values),
+          id: props.values.connection.id,
+          schema: props.values.connection.schema,
+        });
+      } else {
+        await addConnection(normalize(values));
+      }
       reset();
       props.onClose();
     } catch (error) {
@@ -196,7 +215,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
     reset,
   } = createForm<Form>({
     onSubmit,
-    initialValues: defaultValues,
+    initialValues: props.values.connection || defaultValues,
     extend: validator({ schema }),
   });
   form; // ts-server - stfu
@@ -542,13 +561,13 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
               <ColorCircle color={data('color')} />
             </div>
           </div>
-          <Show
-            when={
-              data('mode') === Mode.Host &&
-              data('credentials.ssl_mode') !== SslMode.disable
-            }
-          >
-            <div class="col-span-12 py-1">
+          <div class="col-span-12 py-1 flex iterms-center gap-2">
+            <Show
+              when={
+                data('mode') === Mode.Host &&
+                data('credentials.ssl_mode') !== SslMode.disable
+              }
+            >
               <Checkbox
                 checked={showCerts()}
                 onChange={(e) => setShowCerts(e)}
@@ -561,8 +580,31 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
                   </CheckboxLabel>
                 </div>
               </Checkbox>
-            </div>
-          </Show>
+            </Show>
+            <Checkbox
+              checked={data('metadata.sensitive')}
+              name="metadata.sensitive"
+              onChange={(e) => setFields('metadata.sensitive', e, true)}
+              class="flex items-center gap-2"
+            >
+              <Tooltip>
+                <TooltipTrigger as="div" class="flex items-center gap-2">
+                  <CheckboxControl class="rounded-md border-accent" />
+                  <div class="grid gap-1.5 leading-none">
+                    <CheckboxLabel class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Mark as sensitive
+                    </CheckboxLabel>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent class="max-w-lg">
+                  Marking a database as sensitive will show a SENSITIVE badge
+                  near the database name in the console and will require
+                  confirmation on specific queries, these queries can be later
+                  configured on the settings page.
+                </TooltipContent>
+              </Tooltip>
+            </Checkbox>
+          </div>
           <Show
             when={
               data('mode') === Mode.Host &&
@@ -657,14 +699,19 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
               {t('add_connection_form.test')}
             </Button>
             <Button
-              disabled={isSubmitting() || !isValid() || !isDirty()}
+              disabled={isSubmitting() || !isValid()}
               size="sm"
               type="submit"
             >
               <Show when={isSubmitting()}>
                 <span class="loading loading-spinner"></span>
               </Show>
-              {t('add_connection_form.title')}
+              <Show when={!props.values.connection}>
+                {t('add_connection_form.title')}
+              </Show>
+              <Show when={props.values.connection}>
+                {t('add_connection_form.update')}
+              </Show>
             </Button>
           </div>
         </div>

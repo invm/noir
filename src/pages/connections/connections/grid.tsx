@@ -1,6 +1,7 @@
 import { Button } from 'components/ui/button';
 import { FaSolidServer as Server } from 'solid-icons/fa';
 import { TbPlugConnected } from 'solid-icons/tb';
+import { FiEdit } from 'solid-icons/fi';
 import { ConnectionConfig } from 'interfaces';
 import {
   Card,
@@ -36,7 +37,12 @@ import { Loader } from 'components/ui/loader';
 import { createStore } from 'solid-js/store';
 import { toast } from 'solid-sonner';
 
-export function ConnectionGrid(props: { class?: string }) {
+type ConnectionGridProps = {
+  class: string;
+  onEditClick: (c: ConnectionConfig) => void;
+};
+
+export function ConnectionGrid(props: ConnectionGridProps) {
   const navigate = useNavigate();
   const {
     connections: {
@@ -115,23 +121,42 @@ export function ConnectionGrid(props: { class?: string }) {
                       <span class="text-sm text-muted-foreground">
                         {connection.dialect}
                       </span>
-                      <Button
-                        onClick={() => onConnect(connection)}
-                        variant="ghost"
-                        size="sm"
-                        disabled={state.loading}
-                      >
-                        <Switch>
-                          <Match
-                            when={state.loading && state.id === connection.id}
-                          >
-                            <Loader size="md" />
-                          </Match>
-                          <Match when={state.id !== connection.id}>
-                            <TbPlugConnected class="size-5" />
-                          </Match>
-                        </Switch>
-                      </Button>
+                      <div class="flex gap-2">
+                        <Button
+                          onClick={() => props.onEditClick(connection)}
+                          variant="ghost"
+                          size="sm"
+                          disabled={state.loading}
+                        >
+                          <Switch>
+                            <Match
+                              when={state.loading && state.id === connection.id}
+                            >
+                              <Loader size="md" />
+                            </Match>
+                            <Match when={state.id !== connection.id}>
+                              <FiEdit class="size-5" />
+                            </Match>
+                          </Switch>
+                        </Button>
+                        <Button
+                          onClick={() => onConnect(connection)}
+                          variant="ghost"
+                          size="sm"
+                          disabled={state.loading}
+                        >
+                          <Switch>
+                            <Match
+                              when={state.loading && state.id === connection.id}
+                            >
+                              <Loader size="md" />
+                            </Match>
+                            <Match when={state.id !== connection.id}>
+                              <TbPlugConnected class="size-5" />
+                            </Match>
+                          </Switch>
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -4,6 +4,7 @@
     "connecting": "Connecting",
     "add_connection_form": {
       "title": "Add New Connection",
+      "update": "Update Connection",
       "refresh_connections": "Refresh connections list",
       "test": "Test",
       "success": "Successfully connected to {{name}}",

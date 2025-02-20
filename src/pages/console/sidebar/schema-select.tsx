@@ -39,7 +39,7 @@ export const SchemaSelect = () => {
   const {
     connections: {
       getConnection,
-      updateConnection,
+      updateConnectionTab,
       addContentTab,
       fetchSchemaEntities,
       updateSchemaDefinition,
@@ -64,7 +64,7 @@ export const SchemaSelect = () => {
       tables,
       views,
     });
-    updateConnection('schemas', schemas);
+    updateConnectionTab('schemas', schemas);
   });
 
   const showProcessList = async () => {
@@ -110,7 +110,7 @@ export const SchemaSelect = () => {
         query,
       });
       if (selectedSchema === schema) {
-        updateConnection('selectedSchema', getConnection().schemas[0] ?? '');
+        updateConnectionTab('selectedSchema', getConnection().schemas[0] ?? '');
       }
       await refreshEntities();
     } catch (error) {
@@ -126,7 +126,7 @@ export const SchemaSelect = () => {
         class="w-full overflow-hidden"
         options={conn.schemas}
         onChange={(schema) => {
-          if (schema) updateConnection('selectedSchema', schema);
+          if (schema) updateConnectionTab('selectedSchema', schema);
         }}
         value={conn.selectedSchema}
         itemComponent={(props) => (

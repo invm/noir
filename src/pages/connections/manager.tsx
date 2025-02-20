@@ -5,11 +5,34 @@ import { createSignal, Show } from 'solid-js';
 import { VsSettings } from 'solid-icons/vs';
 
 import { ConnectionGrid } from './connections/grid';
-import { AddConnectionForm } from 'pages/connections/connections/form';
+import {
+  AddConnectionForm,
+  EditState,
+} from 'pages/connections/connections/form';
 import { A } from '@solidjs/router';
+import { ConnectionConfig } from 'interfaces';
+import { createStore } from 'solid-js/store';
 
 export function ConnectionManager() {
-  const [showNewConnection, setShowNewConnection] = createSignal(false);
+  const [showForm, setShowForm] = createSignal(false);
+  const [editConnection, setEditConnection] = createStore<EditState>({});
+
+  const toggle = () => {
+    if (showForm()) {
+      setEditConnection('connection', undefined);
+    }
+    setShowForm(!showForm());
+  };
+
+  const onEditClick = (connection: ConnectionConfig) => {
+    setEditConnection('connection', { ...connection });
+    setShowForm(true);
+  };
+
+  const onReset = () => {
+    setEditConnection({ connection: undefined });
+    setShowForm(false);
+  };
 
   return (
     <div class="mx-auto container h-[100vh] w-[100vw] overflow-hidden pt-10">
@@ -22,7 +45,7 @@ export function ConnectionManager() {
           <Button href="/settings" as={A}>
             <VsSettings />
           </Button>
-          <Button onClick={() => setShowNewConnection(!showNewConnection())}>
+          <Button onClick={toggle}>
             <Plus class="mr-2 h-4 w-4" />
             New Connection
           </Button>
@@ -32,19 +55,28 @@ export function ConnectionManager() {
       <div class="flex space-x-4 h-full">
         <div class={'flex-1 min-h-0 overflow-auto pb-32 no-scrollbar'}>
           <ConnectionGrid
-            class={showNewConnection() ? 'grid-cols-1' : 'grid-cols-2'}
+            onEditClick={onEditClick}
+            class={showForm() ? 'grid-cols-1' : 'grid-cols-2'}
           />
         </div>
 
-        <Show when={showNewConnection()}>
-          <Motion.div
-            class="flex-1"
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-          >
-            <AddConnectionForm onClose={() => setShowNewConnection(false)} />
-          </Motion.div>
+        <Show when={showForm()}>
+          <Show when={editConnection.connection?.id || '1'} keyed>
+            <Motion.div
+              class="flex-1"
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 300 }}
+            >
+              <AddConnectionForm
+                values={editConnection}
+                onClose={() => {
+                  setEditConnection({ connection: undefined });
+                }}
+                onReset={onReset}
+              />
+            </Motion.div>
+          </Show>
         </Show>
       </div>
     </div>

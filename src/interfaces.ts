@@ -63,6 +63,10 @@ export const sslModes = [
   SslMode.require,
 ] as const;
 
+export type Metadata = {
+  sensitive: boolean;
+};
+
 export type Credentials = Record<string, string | number>;
 
 export type ConnectionConfig = {
@@ -71,6 +75,7 @@ export type ConnectionConfig = {
   mode: ModeType;
   credentials: Credentials;
   schema: string;
+  metadata: Metadata;
   name: string;
   color: ConnectionColor;
 };

@@ -81,6 +81,11 @@ impl FromSql for Mode {
 
 pub type Credentials = HashMap<String, String>;
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Default)]
+pub struct Metadata {
+    pub sensitive: bool,
+}
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub struct ConnectionConfig {
     pub id: Uuid,
@@ -90,6 +95,7 @@ pub struct ConnectionConfig {
     pub schema: String,
     pub name: String,
     pub color: String,
+    pub metadata: Metadata,
 }
 
 impl ConnectionConfig {
@@ -99,6 +105,7 @@ impl ConnectionConfig {
         mut credentials: Credentials,
         name: &str,
         color: &str,
+        metadata: Metadata,
     ) -> Result<Self> {
         if name.is_empty() {
             return Err(anyhow::anyhow!("Connection name cannot be empty"));
@@ -149,6 +156,7 @@ impl ConnectionConfig {
                     name: name.to_string(),
                     color: color.to_string(),
                     schema,
+                    metadata,
                 })
             }
             Dialect::Postgresql => {
@@ -184,6 +192,7 @@ impl ConnectionConfig {
                     name: name.to_string(),
                     color: color.to_string(),
                     schema: "public".to_string(),
+                    metadata,
                 })
             }
             Dialect::Sqlite => {
@@ -198,6 +207,7 @@ impl ConnectionConfig {
                     name: name.to_string(),
                     color: color.to_string(),
                     schema,
+                    metadata,
                 })
             }
         }

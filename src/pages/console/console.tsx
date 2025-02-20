@@ -59,7 +59,7 @@ export const Console = () => {
       <CommandPaletteContextWrapper actions={editorActions}>
         <SidebarProvider>
           <DbSidebar />
-          <SidebarInset class="bg-background">
+          <SidebarInset class="bg-background h-screen w-screen">
             <Main />
           </SidebarInset>
         </SidebarProvider>

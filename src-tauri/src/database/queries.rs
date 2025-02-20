@@ -4,7 +4,7 @@ use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection};
 use rusqlite::params;
 use uuid::Uuid;
 
-use crate::engine::types::config::{ConnectionConfig, Credentials, Dialect, Mode};
+use crate::engine::types::config::{ConnectionConfig, Credentials, Dialect, Metadata, Mode};
 
 pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()> {
     let mut statement = db.prepare(
@@ -41,6 +41,38 @@ pub fn add_connection(db: &AppConnection, conn: &ConnectionConfig) -> Result<()>
     Ok(())
 }
 
+pub fn update_connection(db: &AppConnection, id: String, conn: &ConnectionConfig) -> Result<()> {
+    let mut statement = db.prepare(
+        "UPDATE connections
+        SET
+            dialect = :dialect,
+            mode = :mode,
+            credentials = :credentials,
+            schema = :schema,
+            name = :name,
+            color = :color,
+            metadata = :metadata
+        WHERE
+            id = :id;",
+    )?;
+
+    let credentials = serde_json::to_string(&conn.credentials)?;
+    let metadata = serde_json::to_string(&conn.metadata)?;
+    let credentials = encrypt_data(&credentials, &get_app_key()?);
+    statement.execute(named_params! {
+        ":id": id.to_string(),
+        ":dialect": conn.dialect.to_string(),
+        ":mode": conn.mode.to_string(),
+        ":credentials": credentials,
+        ":schema": conn.schema,
+        ":name": conn.name,
+        ":color": conn.color,
+        ":metadata": metadata,
+    })?;
+
+    Ok(())
+}
+
 pub fn delete_connection(db: &AppConnection, id: &Uuid) -> Result<()> {
     let mut statement = db.prepare("DELETE FROM connections where id = :id")?;
     statement.execute(named_params! {":id": id.to_string()})?;
@@ -62,6 +94,8 @@ pub fn get_all_connections(db: &AppConnection) -> Result<Vec<ConnectionConfig>> 
         let credentials: String = row.get("credentials")?;
         let data = decrypt_data(&credentials, &key)?;
         let credentials: Credentials = serde_json::from_str(&data)?;
+        let metadata: String = row.get("metadata")?;
+        let metadata: Metadata = serde_json::from_str(&metadata).unwrap_or_default();
         let dialect: Dialect = row.get("dialect")?;
         let mode: Mode = row.get("mode")?;
         let schema: String = row.get("schema")?;
@@ -74,6 +108,7 @@ pub fn get_all_connections(db: &AppConnection) -> Result<Vec<ConnectionConfig>> 
             dialect,
             mode,
             credentials,
+            metadata,
             schema,
         });
     }
@@ -90,6 +125,8 @@ pub fn get_connection(db: &AppConnection, id: &str) -> Result<ConnectionConfig> 
         let credentials: String = row.get("credentials")?;
         let data = decrypt_data(&credentials, &key)?;
         let credentials: Credentials = serde_json::from_str(&data)?;
+        let metadata: String = row.get("metadata")?;
+        let metadata: Metadata = serde_json::from_str(&metadata).unwrap_or_default();
         let dialect: Dialect = row.get("dialect")?;
         let mode: Mode = row.get("mode")?;
         let schema: String = row.get("schema")?;
@@ -103,6 +140,7 @@ pub fn get_connection(db: &AppConnection, id: &str) -> Result<ConnectionConfig> 
             mode,
             credentials,
             schema,
+            metadata,
         });
     }
     if items.is_empty() {

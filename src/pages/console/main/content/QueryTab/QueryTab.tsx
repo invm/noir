@@ -22,18 +22,7 @@ export const QueryTab = () => {
         collapsedSize={0.2}
         class="flex items-center justify-center overflow-hidden"
       >
-        <Tabs value={conn.idx.toString()} class="flex-1 flex h-full">
-          <For each={conn.tabs}>
-            {(_tab, idx) => (
-              <TabsContent
-                value={idx().toString()}
-                class="h-full flex-col flex-1 border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
-              >
-                <QueryEditor />
-              </TabsContent>
-            )}
-          </For>
-        </Tabs>
+        <QueryEditor />
       </Resizable.Panel>
       <Resizable.Handle
         aria-label="Resize Handle"

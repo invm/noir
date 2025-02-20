@@ -45,6 +45,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             connections::test_connection,
             connections::add_connection,
+            connections::update_connection,
             connections::delete_connection,
             connections::get_connections,
             connections::init_connection,

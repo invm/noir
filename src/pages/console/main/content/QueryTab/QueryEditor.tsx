@@ -21,13 +21,10 @@ import { CommandPaletteContextWrapper } from 'services/palette/wrapper';
 import { ActionGroup, useCommandPalette } from 'services/palette/context';
 import { ToggleButton } from 'components/ui/toggle';
 import { TooltipTriggerProps } from '@kobalte/core/tooltip';
+import { Kbd } from 'components/ui/kbd';
+import { createShortcut } from '@solid-primitives/keyboard';
 
-interface EditorProps {
-  readOnly?: boolean;
-  value?: string;
-}
-
-export const QueryEditor = (props: EditorProps) => {
+export const QueryEditor = () => {
   const {
     connections: {
       store,
@@ -42,12 +39,13 @@ export const QueryEditor = (props: EditorProps) => {
     app: {
       vimModeOn,
       appStore,
+      cmdOrCtrl,
       // toggleVimModeOn
     },
     backend: { cancelTask },
   } = useAppSelector();
   const idx = () => store.connections[store.idx].idx;
-  const [code, setCode] = createSignal(props.value ?? '');
+  const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
@@ -131,6 +129,7 @@ export const QueryEditor = (props: EditorProps) => {
 
   createEffect(
     on(idx, () => {
+      // TODO: save and restore view state
       const _schema = getSchemaEntity('tables').reduce(
         (acc, table) => ({
           ...acc,
@@ -145,6 +144,16 @@ export const QueryEditor = (props: EditorProps) => {
     })
   );
 
+  const focusEditor = () => {
+    editor()?.setPosition({ lineNumber: 1, column: 1 });
+    window.requestAnimationFrame(() => {
+      editor()?.focus();
+    });
+  };
+
+  createShortcut([cmdOrCtrl(), 'L'], focusEditor);
+  createShortcut([cmdOrCtrl(), 'Enter'], onExecute);
+
   const commandPaletteGroup: ActionGroup[] = [
     {
       id: 'editor',
@@ -153,22 +162,20 @@ export const QueryEditor = (props: EditorProps) => {
         {
           id: 'editor-focus',
           label: 'Focus on editor',
-          callback: () => {
-            editor()?.setPosition({ lineNumber: 1, column: 1 });
-            window.requestAnimationFrame(() => {
-              editor()?.focus();
-            });
-          },
+          callback: focusEditor,
+          shortcut: <Kbd key="L" />,
         },
         {
           id: 'editor-execute-query',
           label: 'Execute query',
           callback: onExecute,
+          shortcut: <Kbd key="Enter" />,
         },
         {
           id: 'editor-format-query',
           label: 'Format',
           callback: onFormat,
+          shortcut: <Kbd key="Enter" />,
         },
       ],
     },
@@ -230,57 +237,61 @@ export const QueryEditor = (props: EditorProps) => {
             {/* </div> */}
           </div>
 
-          <Tooltip>
-            <TooltipTrigger
-              as={(props: TooltipTriggerProps) => (
-                <Button
-                  size="sm"
-                  class="flex gap-1"
-                  variant={tabFocusMode() ? 'default' : 'outline'}
-                  {...props}
-                >
-                  <CgInfo class="size-4" />
-                  Tab Moves Focus
-                </Button>
-              )}
-            />
-            <TooltipContent>
-              <p>
-                Controls whether the editor receives tabs or defers them to the
-                app for navigation.
-                <br />
-                Toggle this option when focused on the editor with{' '}
-                {appStore.osType === 'Darwin' ? 'Ctrl+Shift+M' : 'Ctrl+M'}.
-              </p>
-            </TooltipContent>
-          </Tooltip>
-          <Show when={getContentData('Query').result_sets[queryIdx()]?.loading}>
+          <div class="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger
-                size="xs"
-                variant="destructive"
-                onClick={async () => {
-                  const ids = (
-                    getContent().data as QueryContentTabData
-                  ).result_sets
-                    .map((t) => t?.id ?? '')
-                    .filter(Boolean);
-                  if (ids.length) {
-                    await cancelTask(ids);
-                    ids.forEach((_, i) => {
-                      updateResultSet(store.idx, i, { loading: false });
-                    });
-                  }
-                }}
-                as={Button}
-              >
-                {t('console.actions.cancel')}
-              </TooltipTrigger>
+                as={(props: TooltipTriggerProps) => (
+                  <Button
+                    size="sm"
+                    class="flex gap-1"
+                    variant={tabFocusMode() ? 'default' : 'outline'}
+                    {...props}
+                  >
+                    <CgInfo class="size-4" />
+                    Tab Moves Focus
+                  </Button>
+                )}
+              />
               <TooltipContent>
-                {t('console.actions.cancel_all_queries')}
+                <p>
+                  Controls whether the editor receives tabs or defers them to
+                  the app for navigation.
+                  <br />
+                  Toggle this option when focused on the editor with{' '}
+                  {appStore.osType === 'Darwin' ? 'Ctrl+Shift+M' : 'Ctrl+M'}.
+                </p>
               </TooltipContent>
             </Tooltip>
-          </Show>
+            <Show
+              when={getContentData('Query').result_sets[queryIdx()]?.loading}
+            >
+              <Tooltip>
+                <TooltipTrigger
+                  size="sm"
+                  variant="destructive"
+                  onClick={async () => {
+                    const ids = (
+                      getContent().data as QueryContentTabData
+                    ).result_sets
+                      .map((t) => t?.id ?? '')
+                      .filter(Boolean);
+                    if (ids.length) {
+                      await cancelTask(ids);
+                      ids.forEach((_, i) => {
+                        updateResultSet(store.idx, i, { loading: false });
+                      });
+                    }
+                  }}
+                  as={Button}
+                >
+                  {t('console.actions.cancel')}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t('console.actions.cancel_all_queries')}
+                </TooltipContent>
+              </Tooltip>
+            </Show>
+          </div>
         </div>
         <div class="flex-1">
           <Editor
@@ -296,7 +307,7 @@ export const QueryEditor = (props: EditorProps) => {
               });
 
               e.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL, () =>
-                editor()?.focus()
+                focusEditor()
               );
 
               e.addAction({

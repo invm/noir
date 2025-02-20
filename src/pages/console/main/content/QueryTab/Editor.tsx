@@ -113,6 +113,7 @@ export const Editor = (props: EditorProps) => {
         wordWrap: 'on',
         readOnly: props.readOnly,
         automaticLayout: true,
+        autoSurround: 'languageDefined',
       }}
       onMount={props.onMount}
       language={props.language}

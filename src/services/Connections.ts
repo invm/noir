@@ -73,6 +73,7 @@ export type QueryContentTabData = {
   cursor: number;
   result_sets: ResultSet[];
   auto_limit?: boolean;
+  viewState: any; // TODO: save viewstate when leaving editor and showing again.
 };
 
 export type TableStructureContentTabData = {
@@ -220,6 +221,11 @@ export const ConnectionsService = () => {
     setConnections(res as ConnectionConfig[]);
   };
 
+  const updateConnection = async (conn: ConnectionConfig) => {
+    await invoke('update_connection', conn);
+    await refreshConnections();
+  };
+
   const addConnection = async (conn: {
     dialect: DialectType;
     mode: ModeType;
@@ -344,7 +350,7 @@ export const ConnectionsService = () => {
     );
   };
 
-  const updateConnection = <T extends keyof ConnectionTab>(
+  const updateConnectionTab = <T extends keyof ConnectionTab>(
     key: T,
     data: ConnectionTab[T],
     idx?: number
@@ -374,15 +380,15 @@ export const ConnectionsService = () => {
 
   const updateContentTab = <T extends 'data'>(
     key: T,
-    data: ContentTabType[T],
-    idx?: number
+    data: ContentTabType[T]
   ) => {
     const tab = getContent();
     if (!tab) return;
-    const tabIdx = idx ?? getConnection().idx;
-    setStore('connections', store.idx, 'tabs', (tabs) =>
-      tabs.map((t, i) => {
-        return i === tabIdx ? { ...t, [key]: { ...t[key], ...data } } : t;
+    setStore(
+      produce((s) => {
+        const idx = s.connections[s.idx]['idx'];
+        const elem = s.connections[s.idx]['tabs'][idx];
+        s.connections[s.idx]['tabs'][idx][key] = { ...elem[key], ...data };
       })
     );
     updateStore();
@@ -467,7 +473,7 @@ export const ConnectionsService = () => {
     await invoke('init_connection', { config });
     const { triggers, routines, tables, schemas, columns, views } =
       await fetchSchemaEntities(config.id, config.dialect);
-    updateConnection('schemas', schemas);
+    updateConnectionTab('schemas', schemas);
     updateSchemaDefinition(config.id, {
       triggers,
       routines,
@@ -494,6 +500,7 @@ export const ConnectionsService = () => {
     updateContentTab,
     removeContentTab,
     updateConnection,
+    updateConnectionTab,
     selectPrevQuery,
     selectNextQuery,
     queryIdx,
