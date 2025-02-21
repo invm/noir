@@ -1,5 +1,3 @@
-use std::{fs::read_to_string, path::PathBuf};
-
 use crate::{
     database::QueryType,
     query::{Events, QueryTask, QueryTaskEnqueueResult, QueryTaskResult, QueryTaskStatus},
@@ -17,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
+use std::{fs::read_to_string, path::PathBuf};
 use tauri::{command, AppHandle, Manager, State};
 use tokio_util::sync::CancellationToken;
 

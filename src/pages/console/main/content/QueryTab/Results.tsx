@@ -113,14 +113,12 @@ export const Results = (props: {
     () =>
       [
         page(),
-        queryIdx(),
         pageSize(),
-        getContentData('Query')?.result_sets,
+        getContentData('Query')?.result_sets[queryIdx()],
       ] as const,
-    async ([pageVal, queryIdxVal, pageSizeVal, result_sets]) => {
+    async ([pageVal, pageSizeVal, result_set]) => {
       try {
         // Reruns when either signal updates
-        const result_set = result_sets[queryIdxVal];
         const columns = result_set?.columns ?? [];
         const foreign_keys = result_set?.foreign_keys ?? [];
         const primary_key = result_set?.primary_key ?? [];

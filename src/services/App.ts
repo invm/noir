@@ -19,7 +19,6 @@ export const GRID_THEMES = [
 ];
 
 type AppStore = {
-  vimModeOn: boolean;
   gridTheme: string;
   osType: OsType;
   enableDevTools: boolean;
@@ -39,7 +38,6 @@ const getSavedData = async (key: string) => {
 
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
-    vimModeOn: false,
     gridTheme: 'alpine-dark',
     osType: 'Linux',
     enableDevTools: false,
@@ -51,17 +49,11 @@ export const AppService = () => {
     await store.save();
   }, INTERVAL);
 
-  const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
 
   const cmdOrCtrl = (short = false) => {
     if (appStore.osType === 'Darwin') return short ? '⌘' : 'Meta';
     return short ? '^' : 'Control';
-  };
-
-  const toggleVimModeOn = () => {
-    setAppStore('vimModeOn', !appStore.vimModeOn);
-    updateStore();
   };
 
   const updateTheme = (theme: (typeof GRID_THEMES)[number]) => {
@@ -83,8 +75,6 @@ export const AppService = () => {
   return {
     appStore,
     setAppStore,
-    vimModeOn,
-    toggleVimModeOn,
     restoreAppStore,
     screen,
     gridTheme,

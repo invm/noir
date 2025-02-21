@@ -1,5 +1,8 @@
 import { Dialect, DialectType, Row, Table } from 'interfaces';
 
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 export const randomId = () => {
   const length = 36;
   const chars =

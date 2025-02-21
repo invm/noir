@@ -48,7 +48,6 @@
       "actions": {
         "format": "Format (Ctrl + Shift + F)",
         "execute": "Execute (Ctrl + Enter or Ctrl + E)",
-        "vim_mode_on": "Vim mode on",
         "copy_query": "Copy query to clipboard",
         "limit": "LIMIT 1000",
         "auto_limit": "Apply limit if query does not have one",

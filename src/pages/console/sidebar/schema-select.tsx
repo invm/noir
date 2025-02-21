@@ -57,7 +57,7 @@ export const SchemaSelect = () => {
     });
     const { triggers, routines, tables, schemas, columns, views } =
       await fetchSchemaEntities(conn.id, conn.connection.dialect);
-    updateSchemaDefinition(conn.id, {
+    updateSchemaDefinition({
       triggers,
       routines,
       columns,
@@ -79,7 +79,13 @@ export const SchemaSelect = () => {
         connId: getConnection().id,
         query,
       });
-      const data = { query, result_sets: [res], cursor: 0, auto_limit: false };
+      const data = {
+        query,
+        result_sets: [res],
+        cursor: 0,
+        auto_limit: false,
+        viewState: null,
+      };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
     } catch (error) {
       toast.error('Could not show process list', {

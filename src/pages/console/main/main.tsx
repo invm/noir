@@ -48,7 +48,6 @@ export function Main() {
           <Tabs
             value={`${conn.idx}`}
             class="rounded-md overflow-auto no-scrollbar w-full "
-            onChange={(i) => setContentIdx(+i)}
           >
             <TabsList class="h-10 gap-1 rounded-none p-0 px-2 bg-background">
               <For each={conn.tabs}>
@@ -56,6 +55,9 @@ export function Main() {
                   <TabsTrigger
                     value={idx().toString()}
                     class="gap-2 text-sm text-muted-foreground max-w-[100px]"
+                    onClick={() => {
+                      setContentIdx(idx());
+                    }}
                   >
                     <div class="flex group items-center rounded-lg h-8 border px-4 gap-2 border-transparent ">
                       <span

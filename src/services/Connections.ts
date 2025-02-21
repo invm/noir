@@ -1,4 +1,5 @@
 import { createStore, produce } from 'solid-js/store';
+import { editor } from 'monaco-editor';
 import {
   ConnectionConfig,
   Credentials,
@@ -73,7 +74,7 @@ export type QueryContentTabData = {
   cursor: number;
   result_sets: ResultSet[];
   auto_limit?: boolean;
-  viewState: any; // TODO: save viewstate when leaving editor and showing again.
+  viewState: editor.ICodeEditorViewState | null | undefined;
 };
 
 export type TableStructureContentTabData = {
@@ -261,13 +262,12 @@ export const ConnectionsService = () => {
   };
 
   const getContentData = <T extends keyof ContentTabData>(_key: T) => {
-    const conn = getConnection();
-    return conn.tabs[conn.idx].data as ContentTabData[T];
+    return getContent().data as ContentTabData[T];
   };
 
   const addContentTab = (tab?: ContentTabType) => {
     const conn = getConnection();
-    if (conn.tabs.length === 10) return;
+    if (!conn.tabs?.length || conn.tabs.length === 10) return;
     setStore(
       produce((s) => {
         s.connections[s.idx].tabs = [
@@ -295,7 +295,7 @@ export const ConnectionsService = () => {
 
   const removeContentTab = (idx?: number) => {
     const conn = getConnection();
-    if (conn.tabs.length === 1) return;
+    if (!conn.tabs?.length || conn.tabs.length === 1 || conn.idx === 0) return;
     setStore(
       produce((s) => {
         s.connections[s.idx].tabs.splice(idx ?? s.connections[s.idx].idx, 1);
@@ -320,6 +320,7 @@ export const ConnectionsService = () => {
 
   const setContentIdx = (i: number) => {
     const conn = getConnection();
+    if (!conn.tabs?.length) return;
     if (i < conn.tabs.length) {
       setStore(
         produce((s) => {
@@ -331,6 +332,7 @@ export const ConnectionsService = () => {
   };
 
   const setNextContentIdx = () => {
+    if (!store.connections.length) return;
     setStore(
       produce((s) => {
         s.connections[s.idx].idx =
@@ -340,6 +342,7 @@ export const ConnectionsService = () => {
   };
 
   const setPrevContentIdx = () => {
+    if (!store.connections.length) return;
     setStore(
       produce((s) => {
         const idx = s.connections[s.idx].idx;
@@ -361,18 +364,13 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const updateSchemaDefinition = (conn_id: string, data: Schema) => {
-    const tab = getConnection();
-    const schema = tab.selectedSchema;
-    if (!tab) return;
+  const updateSchemaDefinition = (data: Schema) => {
+    const conn = getConnection();
+    const schema = conn.selectedSchema;
+    if (!conn) return;
     setStore(
       produce((s) => {
-        s.connections = s.connections.map((t) => {
-          if (conn_id === t.id) {
-            t.definition[schema] = { ...t.definition[schema], ...data };
-          }
-          return t;
-        });
+        s.connections[s.idx].definition[schema] = data;
       })
     );
     updateStore();
@@ -420,12 +418,15 @@ export const ConnectionsService = () => {
   ) => {
     setStore(
       produce((s) => {
-        const curr = s.connections[s.idx].tabs[tabIdx]['data'];
-        s.connections[s.idx].tabs[tabIdx]['data'] = {
-          ...curr,
-          result_sets: (curr as QueryContentTabData).result_sets.map((r, i) =>
-            i === query_idx ? { ...r, ...data, loading: false } : r
-          ),
+        const currResultSet = (
+          s.connections[s.idx].tabs[tabIdx]['data'] as QueryContentTabData
+        ).result_sets[query_idx];
+        (
+          s.connections[s.idx].tabs[tabIdx]['data'] as QueryContentTabData
+        ).result_sets[query_idx] = {
+          ...currResultSet,
+          ...data,
+          loading: false,
         };
       })
     );
@@ -474,7 +475,7 @@ export const ConnectionsService = () => {
     const { triggers, routines, tables, schemas, columns, views } =
       await fetchSchemaEntities(config.id, config.dialect);
     updateConnectionTab('schemas', schemas);
-    updateSchemaDefinition(config.id, {
+    updateSchemaDefinition({
       triggers,
       routines,
       columns,

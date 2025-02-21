@@ -23,7 +23,7 @@ import { ToggleButton } from 'components/ui/toggle';
 import { TooltipTriggerProps } from '@kobalte/core/tooltip';
 import { Kbd } from 'components/ui/kbd';
 import { createShortcut } from '@solid-primitives/keyboard';
-import { intersection } from 'utils/utils';
+import { debounce, intersection } from 'utils/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,46 +47,42 @@ export const QueryEditor = () => {
       queryIdx,
       updateResultSet,
     },
-    app: {
-      vimModeOn,
-      appStore,
-      cmdOrCtrl,
-      // toggleVimModeOn
-    },
+    app: { appStore, cmdOrCtrl },
     backend: { cancelTask },
   } = useAppSelector();
-  const idx = () => store.connections[store.idx].idx;
+  const tabIdx = () => getConnection().idx;
   const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
   const [autoLimit, setAutoLimit] = createSignal(true);
   const [tabFocusMode, setTabFocusMode] = createSignal(false);
   const [alertDialogOpen, setAlertDialogOpen] = createSignal(false);
-  // const [vimMode, setVimMode] = createSignal<any>(null);
   const [editor, setEditor] =
     createSignal<monaco.editor.IStandaloneCodeEditor>();
 
   const { setOpen } = useCommandPalette();
 
-  // TODO: this was to persist the cursor position, should be implemented for monaco
-  // const updateQuery = debounce(() => {
-  //   updateContentTab('data', {
-  //     query: code(),
-  //     cursor: 0,
-  //     // cursor: editorView()?.state.selection.ranges[0].from ?? 0,
-  //   });
-  // }, 300);
+  // @ts-ignore
+  const updateQuery = debounce((query: string) => {
+    const cursor = editor()
+      ?.getModel()
+      ?.getOffsetAt(editor()?.getPosition() || { lineNumber: 0, column: 0 });
+    // FIXME: this could update a different tab if done too fast
+    updateContentTab('data', {
+      query,
+      cursor,
+      // viewState: editor()?.saveViewState(),
+    });
+  }, 200);
 
   const updateQueryText = (query: string) => {
     if (code() === query) return;
     setCode(query);
-    // updateQuery();
+    updateQuery(query);
   };
 
   const onFormat = () => {
-    const formatted = format(code());
-    setCode(formatted);
-    updateQueryText(formatted);
+    updateQueryText(format(code()));
   };
 
   const getSelection = () => {
@@ -98,20 +94,11 @@ export const QueryEditor = () => {
     try {
       const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
-        {
-          connId,
-          sql,
-          autoLimit: autoLimit(),
-          tabIdx,
-        }
+        { connId, sql, autoLimit: autoLimit(), tabIdx }
       );
       updateContentTab('data', {
         query: code(),
-        cursor: editor()!.getPosition()?.column,
-        result_sets: result_sets.map((id) => ({
-          loading: true,
-          id,
-        })),
+        result_sets: result_sets.map((id) => ({ loading: true, id })),
       });
     } catch (error) {
       toast.error('Could not enqueue query', {
@@ -149,29 +136,19 @@ export const QueryEditor = () => {
     navigator.clipboard.writeText(String(code()));
   };
 
-  createEffect(() => {
-    if (vimModeOn() && editor()) {
-      // const vimm = initVimMode(editor());
-    } else {
-      // vimMode()?.dispose();
-      // setVimMode(null);
-    }
-  });
-
   createEffect(
-    on(idx, () => {
-      // TODO: save and restore view state
-      const _schema = getSchemaEntity('tables').reduce(
-        (acc, table) => ({
-          ...acc,
-          [table.name]: table.columns.map(({ name }) => name),
-        }),
+    on(tabIdx, () => {
+      const schema = getSchemaEntity('tables').reduce(
+        (acc, t) => ({ ...acc, [t.name]: t.columns.map(({ name }) => name) }),
         {}
       );
-      setSchema(_schema);
+      setSchema(schema);
       const data = getContentData('Query');
       setCode(data.query ?? '');
       setAutoLimit(data.auto_limit ?? true);
+      if (data.viewState) {
+        editor()?.restoreViewState(data.viewState);
+      }
     })
   );
 
@@ -248,25 +225,6 @@ export const QueryEditor = () => {
               </TooltipTrigger>
               <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
             </Tooltip>
-            {/* <div */}
-            {/*   class="tooltip tooltip-primary tooltip-bottom" */}
-            {/*   data-tip={t('console.actions.vim_mode_on')} */}
-            {/* > */}
-            {/*   <div class="flex items-center mx-2"> */}
-            {/*     <span class="mr-2"> */}
-            {/*       <VimIcon /> */}
-            {/*     </span> */}
-            {/*     <input */}
-            {/*       type="checkbox" */}
-            {/*       class="toggle toggle-sm" */}
-            {/*       classList={{ */}
-            {/*         'toggle-primary': vimModeOn(), */}
-            {/*       }} */}
-            {/*       checked={vimModeOn()} */}
-            {/*       onChange={() => toggleVimModeOn()} */}
-            {/*     /> */}
-            {/*   </div> */}
-            {/* </div> */}
           </div>
 
           <div class="flex items-center gap-2">
