@@ -93,7 +93,7 @@ type SearchProps = {
 
 export const Search = (props: SearchProps) => {
   const {
-    connections: { updateContentTab, getConnection },
+    connections: { updateDataContentTab, getConnection },
   } = useAppSelector();
 
   const [loading, setLoading] = createSignal(false);
@@ -131,7 +131,7 @@ export const Search = (props: SearchProps) => {
         columns: props.columns,
         table: props.table,
       }));
-      updateContentTab('data', { result_sets });
+      updateDataContentTab('result_sets', result_sets);
     } catch (error) {
       toast.error('Could not enqueue query', {
         description: (error as Error).message || (error as string),

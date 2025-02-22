@@ -83,7 +83,7 @@ export const SchemaSelect = () => {
         query,
         result_sets: [res],
         cursor: 0,
-        auto_limit: false,
+        autoLimit: false,
         viewState: null,
       };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));

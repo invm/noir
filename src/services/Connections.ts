@@ -12,12 +12,12 @@ import {
   TableEntity,
 } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { columnsToTables, debounce } from 'utils/utils';
+import { columnsToTables } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { createSignal } from 'solid-js';
 
 const cache = new Store('.connections.dat');
-const INTERVAL = 1000;
+// const INTERVAL = 1000;
 
 export const ContentTab = {
   Query: 'Query',
@@ -42,7 +42,11 @@ export const newContentTab = <T extends ContentComponentKeys>(
     case ContentTab.Query:
       return {
         label,
-        data: data ?? { query: '', result_sets: [] },
+        data: data ?? {
+          query: '',
+          result_sets: [],
+          autoLimit: true,
+        },
         key,
       };
     case ContentTab.Data:
@@ -70,11 +74,12 @@ export const newContentTab = <T extends ContentComponentKeys>(
 };
 
 export type QueryContentTabData = {
-  query: string;
   cursor: number;
   result_sets: ResultSet[];
-  auto_limit?: boolean;
-  viewState: editor.ICodeEditorViewState | null | undefined;
+  autoLimit: boolean;
+  query: string;
+  viewState: editor.ICodeEditorViewState | null;
+  model: editor.ITextModel;
 };
 
 export type TableStructureContentTabData = {
@@ -124,9 +129,10 @@ export type ConnectionTab = {
   connection: ConnectionConfig;
   tabs: ContentTabType[];
   idx: number;
+  prevIdx: number;
 };
 
-const CONNECTIONS_KEY = '_conn_tabs';
+// const CONNECTIONS_KEY = '_conn_tabs';
 
 // type StoreSavedData = {
 //   [CONNECTIONS_KEY]: ConnectionStore;
@@ -192,11 +198,14 @@ export const ConnectionsService = () => {
     // }
   };
 
-  const updateStore = debounce(async () => {
-    await cache.set(CONNECTIONS_KEY, JSON.stringify(store));
-    await cache.save();
-  }, INTERVAL);
+  const updateStore = () => {};
 
+  // FIXME: saving model and viewstate in the store can not be saved in as the json.stringinfy will not handle it
+  // const updateStore = debounce(async () => {
+  //   await cache.set(CONNECTIONS_KEY, JSON.stringify(store));
+  //   await cache.save();
+  // }, INTERVAL);
+  //
   const addConnectionTab = async (tab: ConnectionTab) => {
     if (store.connections.length === 10) return;
     if (store.connections.find((t) => t.id === tab.id)) {
@@ -324,6 +333,7 @@ export const ConnectionsService = () => {
     if (i < conn.tabs.length) {
       setStore(
         produce((s) => {
+          s.connections[s.idx].prevIdx = s.connections[s.idx].idx;
           s.connections[s.idx].idx = i;
         })
       );
@@ -378,15 +388,32 @@ export const ConnectionsService = () => {
 
   const updateContentTab = <T extends 'data'>(
     key: T,
-    data: ContentTabType[T]
+    data: ContentTabType[T],
+    idx?: number
   ) => {
     const tab = getContent();
     if (!tab) return;
     setStore(
       produce((s) => {
-        const idx = s.connections[s.idx]['idx'];
-        const elem = s.connections[s.idx]['tabs'][idx];
-        s.connections[s.idx]['tabs'][idx][key] = { ...elem[key], ...data };
+        const _idx = idx ?? s.connections[s.idx]['idx'];
+        const elem = s.connections[s.idx]['tabs'][_idx];
+        s.connections[s.idx]['tabs'][_idx][key] = { ...elem[key], ...data };
+      })
+    );
+    updateStore();
+  };
+
+  const updateDataContentTab = <T extends keyof QueryContentTabData>(
+    key: T,
+    data: QueryContentTabData[T],
+    idx?: number
+  ) => {
+    setStore(
+      produce((s) => {
+        const _idx = idx ?? s.connections[s.idx]['idx'];
+        (s.connections[s.idx]['tabs'][_idx]['data'] as QueryContentTabData)[
+          key
+        ] = data;
       })
     );
     updateStore();
@@ -521,5 +548,6 @@ export const ConnectionsService = () => {
     refreshEntities,
     selectConnection,
     removeCurrentContentTab,
+    updateDataContentTab,
   };
 };

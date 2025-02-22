@@ -45,7 +45,12 @@ export const Results = (props: {
   table?: string;
 }) => {
   const {
-    connections: { queryIdx, getConnection, updateContentTab, getContentData },
+    connections: {
+      queryIdx,
+      getConnection,
+      updateDataContentTab,
+      getContentData,
+    },
     backend: {
       getQueryResults,
       pageSize,
@@ -273,9 +278,10 @@ export const Results = (props: {
         conn.id,
         getConnection().idx
       );
-      updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id, loading: true })),
-      });
+      updateDataContentTab(
+        'result_sets',
+        result_sets.map((id) => ({ id, loading: true }))
+      );
       Object.keys(changes).forEach((key) => {
         const count = Object.keys(changes[key as keyof typeof changes]).length;
         if (count)

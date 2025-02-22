@@ -56,7 +56,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       insertColumnName,
       addContentTab,
       getConnection,
-      updateContentTab,
+      updateDataContentTab,
     },
     backend: { selectAllFrom },
   } = useAppSelector();
@@ -81,12 +81,13 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   const listData = async () => {
     try {
       const conn = getConnection();
-      const data = { result_sets: [], table };
+      const data = { result_sets: [], table, autoLimit: true };
       addContentTab(newContentTab(table, 'Data', data));
       const result_sets = await selectAllFrom(table, conn.id, conn.idx);
-      updateContentTab('data', {
-        result_sets: result_sets.map((id) => ({ id, loading: true })),
-      });
+      updateDataContentTab(
+        'result_sets',
+        result_sets.map((id) => ({ id, loading: true }))
+      );
     } catch (error) {
       toast.error('Could not list data', {
         description: (error as Error).message || (error as string),

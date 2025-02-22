@@ -11,6 +11,7 @@ type EditorProps = {
   value: string;
   schema?: Record<string, string[]>;
   language?: string;
+  model?: monaco.editor.ITextModel;
 };
 
 type Column = {
@@ -114,6 +115,7 @@ export const Editor = (props: EditorProps) => {
         readOnly: props.readOnly,
         automaticLayout: true,
         autoSurround: 'languageDefined',
+        minimap: { enabled: false },
       }}
       onMount={props.onMount}
       language={props.language}

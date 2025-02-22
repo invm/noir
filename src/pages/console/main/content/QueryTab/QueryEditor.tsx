@@ -23,7 +23,7 @@ import { ToggleButton } from 'components/ui/toggle';
 import { TooltipTriggerProps } from '@kobalte/core/tooltip';
 import { Kbd } from 'components/ui/kbd';
 import { createShortcut } from '@solid-primitives/keyboard';
-import { debounce, intersection } from 'utils/utils';
+import { intersection } from 'utils/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,50 +39,37 @@ export const QueryEditor = () => {
   const {
     connections: {
       store,
-      updateContentTab,
       getConnection,
       getContentData,
       getSchemaEntity,
       getContent,
       queryIdx,
       updateResultSet,
+      updateDataContentTab,
+      // updateContentTab,
     },
     app: { appStore, cmdOrCtrl },
     backend: { cancelTask },
   } = useAppSelector();
-  const tabIdx = () => getConnection().idx;
-  const [code, setCode] = createSignal('');
   const [schema, setSchema] = createStore({});
   const [loading, setLoading] = createSignal(false);
-  const [autoLimit, setAutoLimit] = createSignal(true);
   const [tabFocusMode, setTabFocusMode] = createSignal(false);
   const [alertDialogOpen, setAlertDialogOpen] = createSignal(false);
   const [editor, setEditor] =
     createSignal<monaco.editor.IStandaloneCodeEditor>();
 
+  const tabIdx = () => getConnection().idx;
+  const connectionChanged = () => store.idx;
+  const data = () => getContentData('Query');
   const { setOpen } = useCommandPalette();
 
-  // @ts-ignore
-  const updateQuery = debounce((query: string) => {
-    const cursor = editor()
-      ?.getModel()
-      ?.getOffsetAt(editor()?.getPosition() || { lineNumber: 0, column: 0 });
-    // FIXME: this could update a different tab if done too fast
-    updateContentTab('data', {
-      query,
-      cursor,
-      // viewState: editor()?.saveViewState(),
-    });
-  }, 200);
-
   const updateQueryText = (query: string) => {
-    if (code() === query) return;
-    setCode(query);
-    updateQuery(query);
+    if (data().query === query) return;
+    updateDataContentTab('query', query, tabIdx());
   };
 
   const onFormat = () => {
-    updateQueryText(format(code()));
+    updateDataContentTab('query', format(data().query), tabIdx());
   };
 
   const getSelection = () => {
@@ -94,12 +81,12 @@ export const QueryEditor = () => {
     try {
       const { result_sets } = await invoke<QueryTaskEnqueueResult>(
         'enqueue_query',
-        { connId, sql, autoLimit: autoLimit(), tabIdx }
+        { connId, sql, autoLimit: data().autoLimit, tabIdx }
       );
-      updateContentTab('data', {
-        query: code(),
-        result_sets: result_sets.map((id) => ({ loading: true, id })),
-      });
+      updateDataContentTab(
+        'result_sets',
+        result_sets.map((id) => ({ loading: true, id }))
+      );
     } catch (error) {
       toast.error('Could not enqueue query', {
         description: (error as Error).message || (error as string),
@@ -111,7 +98,7 @@ export const QueryEditor = () => {
   const getQuery = () => {
     const selectedText = getSelection();
     const conn = getConnection();
-    const sql = selectedText || code();
+    const sql = selectedText || data().query;
     return { sql, conn };
   };
 
@@ -133,24 +120,42 @@ export const QueryEditor = () => {
   };
 
   const copyQueryToClipboard = () => {
-    navigator.clipboard.writeText(String(code()));
+    navigator.clipboard.writeText(String(data().query));
   };
 
   createEffect(
-    on(tabIdx, () => {
+    on(connectionChanged, () => {
       const schema = getSchemaEntity('tables').reduce(
         (acc, t) => ({ ...acc, [t.name]: t.columns.map(({ name }) => name) }),
         {}
       );
       setSchema(schema);
-      const data = getContentData('Query');
-      setCode(data.query ?? '');
-      setAutoLimit(data.auto_limit ?? true);
-      if (data.viewState) {
-        editor()?.restoreViewState(data.viewState);
-      }
     })
   );
+
+  // createEffect(
+  //   on(tabIdx, (prev) => {
+  //     const current = getConnection().idx;
+  //     const prevIdx = getConnection().prevIdx;
+  //     const e = editor();
+  //
+  //     if (prev !== undefined && e) {
+  //       const model = e.getModel();
+  //       if (model) {
+  //         const query = model.getValue();
+  //         const viewState = e.saveViewState();
+  //         updateContentTab('data', { query, viewState }, prevIdx);
+  //       }
+  //     }
+  //
+  //     // Load new tab's content and state
+  //     if (editor()) {
+  //       loadEditorState(current);
+  //     }
+  //
+  //     return current;
+  //   })
+  // );
 
   const focusEditor = () => {
     editor()?.setPosition({ lineNumber: 1, column: 1 });
@@ -190,6 +195,31 @@ export const QueryEditor = () => {
     },
   ];
 
+  // const loadEditorState = (index: number) => {
+  //   const state = data();
+  //   if (!state || !editor()) return;
+  //
+  //   // Get or create model
+  //   // let model = state.model;
+  //   // if (!model) {
+  //   //   model = monaco.editor.createModel(
+  //   //     state.query,
+  //   //     'sql',
+  //   //     monaco.Uri.parse(`file:///tab-${index}`)
+  //   //   );
+  //   // }
+  //
+  //   // editor()?.setModel(model);
+  //   if (state.viewState) {
+  //     editor()?.restoreViewState(state.viewState);
+  //   }
+  // };
+
+  // onCleanup(() => {
+  // editor()?.dispose();
+  // (getContent().data as QueryContentTabData)?.model?.dispose();
+  // });
+
   return (
     <CommandPaletteContextWrapper groups={commandPaletteGroup}>
       <div class="flex-1 flex flex-col h-full">
@@ -212,14 +242,14 @@ export const QueryEditor = () => {
               onClick={copyQueryToClipboard}
               icon={<Copy class="size-5" />}
             />
-
             <Tooltip>
               <TooltipTrigger
                 as={ToggleButton}
-                class="rounded-md border-accent h-8 data-[pressed]:bg-primary"
-                checked={autoLimit()}
-                onChange={(e: boolean) => setAutoLimit(e)}
-                size="sm"
+                class="rounded-md border-accent h-6 px-2 data-[pressed]:bg-primary"
+                pressed={data().autoLimit}
+                onChange={(e: boolean) =>
+                  updateDataContentTab('autoLimit', e, tabIdx())
+                }
               >
                 {t('console.actions.limit')}
               </TooltipTrigger>
@@ -309,6 +339,22 @@ export const QueryEditor = () => {
                 keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
               });
 
+              // e.onDidChangeCursorPosition((e) => {
+              //             updateDataContentTab('cursor', e.position);
+              //
+              // const cursor = editor()
+              //   ?.getModel()
+              //   ?.getOffsetAt(editor()?.getPosition() || { lineNumber: 0, column: 0 });
+              // });
+
+              // e.getModel()?.onDidChangeContent((m) => {
+              //
+              // })
+
+              e.onDidChangeModelContent(() => {
+                updateDataContentTab('viewState', e.saveViewState());
+              });
+
               e.onKeyDown((e) => {
                 if (
                   e.shiftKey &&
@@ -320,7 +366,7 @@ export const QueryEditor = () => {
               });
             }}
             onChange={updateQueryText}
-            value={code()}
+            value={data().query}
             schema={schema}
           />
         </div>
