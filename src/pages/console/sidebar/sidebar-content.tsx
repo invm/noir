@@ -6,7 +6,7 @@ import { BsShare as ShareNodes } from 'solid-icons/bs';
 import { invoke } from '@tauri-apps/api';
 import { ResultSet, Row, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
-import { getAnyCase } from 'utils/utils';
+import { getAnyCase, randomId } from 'utils/utils';
 // @ts-ignore
 import { VList } from 'virtua/solid';
 import { createStore } from 'solid-js/store';
@@ -67,7 +67,7 @@ export const DbSidebarContent = () => {
         connId: getConnection().id,
         query,
       });
-      const data = { query, result_sets: [res], cursor: 0 };
+      const data = { query, result_sets: [res], id: randomId() };
       addContentTab(newContentTab(routine, 'Query', data));
     } catch (error) {
       toast.error('Could not show routine', {
@@ -77,7 +77,7 @@ export const DbSidebarContent = () => {
   };
 
   const showCreateStatement = (name: string, stmt: string) => {
-    const data = { query: stmt, result_sets: [], cursor: 0 };
+    const data = { query: stmt, result_sets: [], id: randomId() };
     addContentTab(newContentTab(name, 'Query', data));
   };
 
@@ -89,7 +89,7 @@ export const DbSidebarContent = () => {
         connId: getConnection().id,
         query,
       });
-      const data = { query, result_sets: [res], cursor: 0 };
+      const data = { query, result_sets: [res], id: randomId() };
       addContentTab(newContentTab(trigger, 'Query', data));
     } catch (error) {
       toast.error('Could not show trigger', {

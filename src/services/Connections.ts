@@ -1,5 +1,5 @@
 import { createStore, produce } from 'solid-js/store';
-import { editor } from 'monaco-editor';
+import { editor, Position } from 'monaco-editor';
 import {
   ConnectionConfig,
   Credentials,
@@ -12,7 +12,7 @@ import {
   TableEntity,
 } from '../interfaces';
 import { Store } from 'tauri-plugin-store-api';
-import { columnsToTables } from 'utils/utils';
+import { columnsToTables, randomId } from 'utils/utils';
 import { invoke } from '@tauri-apps/api';
 import { createSignal } from 'solid-js';
 
@@ -43,6 +43,7 @@ export const newContentTab = <T extends ContentComponentKeys>(
       return {
         label,
         data: data ?? {
+          id: randomId(),
           query: '',
           result_sets: [],
           autoLimit: true,
@@ -74,12 +75,13 @@ export const newContentTab = <T extends ContentComponentKeys>(
 };
 
 export type QueryContentTabData = {
-  cursor: number;
+  cursor?: Position | null | undefined;
   result_sets: ResultSet[];
-  autoLimit: boolean;
+  autoLimit?: boolean;
   query: string;
-  viewState: editor.ICodeEditorViewState | null;
-  model: editor.ITextModel;
+  viewState?: editor.ICodeEditorViewState | null;
+  model?: editor.ITextModel;
+  id: string;
 };
 
 export type TableStructureContentTabData = {
@@ -265,9 +267,9 @@ export const ConnectionsService = () => {
     return store.connections?.[store.idx] ?? {};
   };
 
-  const getContent = () => {
+  const getContent = (idx?: number) => {
     const conn = getConnection();
-    return conn.tabs?.[conn.idx] ?? {};
+    return conn.tabs?.[idx || conn.idx] ?? {};
   };
 
   const getContentData = <T extends keyof ContentTabData>(_key: T) => {
@@ -397,7 +399,8 @@ export const ConnectionsService = () => {
       produce((s) => {
         const _idx = idx ?? s.connections[s.idx]['idx'];
         const elem = s.connections[s.idx]['tabs'][_idx];
-        s.connections[s.idx]['tabs'][_idx][key] = { ...elem[key], ...data };
+        if (!elem) return;
+        s.connections[s.idx]['tabs'][_idx][key] = { ...elem?.[key], ...data };
       })
     );
     updateStore();
@@ -419,23 +422,24 @@ export const ConnectionsService = () => {
     updateStore();
   };
 
-  const insertColumnName = (column: string) => {
-    const { query, cursor } = getContentData('Query');
-    if (query) {
-      const _query =
-        query.slice(0, cursor) + column + ', ' + query.slice(cursor);
-      setStore(
-        produce((s) => {
-          const tabIdx = s.connections[s.idx].idx;
-          const data = s.connections[s.idx].tabs[tabIdx]['data'];
-          s.connections[s.idx].tabs[tabIdx]['data'] = {
-            ...data,
-            query: _query,
-            cursor: cursor + column.length + 2,
-          }; // 2 for ', '
-        })
-      );
-    }
+  const insertColumnName = (_column: string) => {
+    // TODO:
+    // const { query, cursor } = getContentData('Query');
+    // if (query) {
+    //   const _query =
+    //     query.slice(0, cursor) + column + ', ' + query.slice(cursor);
+    //   setStore(
+    //     produce((s) => {
+    //       const tabIdx = s.connections[s.idx].idx;
+    //       const data = s.connections[s.idx].tabs[tabIdx]['data'];
+    //       s.connections[s.idx].tabs[tabIdx]['data'] = {
+    //         ...data,
+    //         query: _query,
+    //         cursor: cursor + column.length + 2,
+    //       }; // 2 for ', '
+    //     })
+    //   );
+    // }
   };
 
   const updateResultSet = (

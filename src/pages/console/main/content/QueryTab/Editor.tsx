@@ -3,15 +3,16 @@ import * as monaco from 'monaco-editor';
 import { onMount } from 'solid-js';
 import { useColorMode } from '@kobalte/core/color-mode';
 import { DEFAULT_SQL_KEYWORDS } from 'interfaces';
+import { Loader } from 'components/ui/loader';
 
 type EditorProps = {
   readOnly?: boolean;
   onMount?: (m: typeof monaco, e: monaco.editor.IStandaloneCodeEditor) => void;
   onChange?: (s: string) => void;
-  value: string;
   schema?: Record<string, string[]>;
   language?: string;
   model?: monaco.editor.ITextModel;
+  path: string;
 };
 
 type Column = {
@@ -120,7 +121,8 @@ export const Editor = (props: EditorProps) => {
       onMount={props.onMount}
       language={props.language}
       onChange={props.onChange}
-      value={props.value}
+      loadingState={<Loader size="lg" />}
+      path={props.path}
     />
   );
 };

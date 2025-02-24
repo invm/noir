@@ -30,8 +30,9 @@ import { createShortcut } from '@solid-primitives/keyboard';
 import TriggerCommandPalette from 'pages/settings/trigger-command-palette';
 import { DrawerState } from './Table/PopupCellRenderer';
 import { Dialog, DialogContent } from 'components/ui/dialog';
-import { Editor } from './Editor';
 import { toast } from 'solid-sonner';
+import { useColorMode } from '@kobalte/core/color-mode';
+import { MonacoEditor } from 'solid-monaco';
 
 const defaultChanges: Changes = { update: {}, delete: {}, add: {} };
 
@@ -61,6 +62,7 @@ export const Results = (props: {
     app: { cmdOrCtrl },
   } = useAppSelector();
   const [open, setOpen] = createSignal(false);
+  const { colorMode } = useColorMode();
 
   const [drawerOpen, setDrawerOpen] = createStore<DrawerState>({
     mode: 'add' as 'add' | 'edit',
@@ -426,7 +428,24 @@ export const Results = (props: {
       <Dialog open={open()} onOpenChange={(isOpen) => setOpen(isOpen)}>
         <DialogContent class="min-w-[1000px]">
           <div class="modal-box pt-10 max-h-full min-h-[80vh] h-[80%]">
-            <Editor language="json" readOnly value={code()} />
+            <MonacoEditor
+              options={{
+                glyphMargin: false,
+                tabSize: 2,
+                lineNumbers: 'on',
+                fontSize: 14,
+                folding: true,
+                theme: 'vs-' + colorMode(),
+                language: 'json',
+                wordWrap: 'on',
+                readOnly: true,
+                automaticLayout: true,
+                autoSurround: 'languageDefined',
+                minimap: { enabled: false },
+              }}
+              language={'json'}
+              value={code()}
+            />
           </div>
         </DialogContent>
       </Dialog>

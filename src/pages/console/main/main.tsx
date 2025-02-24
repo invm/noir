@@ -49,22 +49,22 @@ export function Main() {
             value={`${conn.idx}`}
             class="rounded-md overflow-auto no-scrollbar w-full "
           >
-            <TabsList class="h-10 gap-1 rounded-none p-0 px-2 bg-background">
+            <TabsList class="h-10 gap-2 rounded-none p-0 px-2 bg-background">
               <For each={conn.tabs}>
                 {(tab, idx) => (
                   <TabsTrigger
                     value={idx().toString()}
-                    class="gap-2 text-sm text-muted-foreground max-w-[100px]"
+                    class="gap-2 text-sm px-2 text-muted-foreground w-fit max-w-[200px]"
                     onClick={() => {
                       setContentIdx(idx());
                     }}
                   >
-                    <div class="flex group items-center rounded-lg h-8 border px-4 gap-2 border-transparent ">
+                    <div class="flex group items-center rounded-lg h-8 border px-0 gap-2 border-transparent ">
                       <span
                         classList={{
-                          'text-primary font-semibold': conn.idx === idx(),
+                          'text-primary': conn.idx === idx(),
                         }}
-                        class="group-hover:text-primary transition-all"
+                        class="group-hover:text-primary transition-all max-w-[20ch] px-2 overflow-ellipsis truncate"
                       >
                         {tab.label}
                       </span>

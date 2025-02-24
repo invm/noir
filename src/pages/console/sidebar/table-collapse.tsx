@@ -176,7 +176,7 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
                             </span>
                           </div>
                         </PopoverTrigger>
-                        <PopoverContent class="min-w-fit">
+                        <PopoverContent class="min-w-fit select-auto">
                           <div class="flex overflow-auto w-full pt-6 justify-between items-center border-b">
                             <span class="text-xs font-semibold">
                               {column.name}

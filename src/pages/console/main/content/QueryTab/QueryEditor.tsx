@@ -46,7 +46,6 @@ export const QueryEditor = () => {
       queryIdx,
       updateResultSet,
       updateDataContentTab,
-      // updateContentTab,
     },
     app: { appStore, cmdOrCtrl },
     backend: { cancelTask },
@@ -59,6 +58,7 @@ export const QueryEditor = () => {
     createSignal<monaco.editor.IStandaloneCodeEditor>();
 
   const tabIdx = () => getConnection().idx;
+  const tabId = () => getContentData('Query').id;
   const connectionChanged = () => store.idx;
   const data = () => getContentData('Query');
   const { setOpen } = useCommandPalette();
@@ -133,32 +133,7 @@ export const QueryEditor = () => {
     })
   );
 
-  // createEffect(
-  //   on(tabIdx, (prev) => {
-  //     const current = getConnection().idx;
-  //     const prevIdx = getConnection().prevIdx;
-  //     const e = editor();
-  //
-  //     if (prev !== undefined && e) {
-  //       const model = e.getModel();
-  //       if (model) {
-  //         const query = model.getValue();
-  //         const viewState = e.saveViewState();
-  //         updateContentTab('data', { query, viewState }, prevIdx);
-  //       }
-  //     }
-  //
-  //     // Load new tab's content and state
-  //     if (editor()) {
-  //       loadEditorState(current);
-  //     }
-  //
-  //     return current;
-  //   })
-  // );
-
   const focusEditor = () => {
-    editor()?.setPosition({ lineNumber: 1, column: 1 });
     window.requestAnimationFrame(() => {
       editor()?.focus();
     });
@@ -195,30 +170,40 @@ export const QueryEditor = () => {
     },
   ];
 
-  // const loadEditorState = (index: number) => {
-  //   const state = data();
-  //   if (!state || !editor()) return;
-  //
-  //   // Get or create model
-  //   // let model = state.model;
-  //   // if (!model) {
-  //   //   model = monaco.editor.createModel(
-  //   //     state.query,
-  //   //     'sql',
-  //   //     monaco.Uri.parse(`file:///tab-${index}`)
-  //   //   );
-  //   // }
-  //
-  //   // editor()?.setModel(model);
-  //   if (state.viewState) {
-  //     editor()?.restoreViewState(state.viewState);
+  // createEffect((prev: number | undefined) => {
+  //   if (!editor()) return;
+  //   const current = tabIdx();
+  //   if (prev !== current && editor()) {
+  //     const model = editor()?.getModel();
+  //     const viewState = editor()?.saveViewState();
+  //     const cursor = editor()?.getPosition();
+  //     updateContentTab('data', { model: model!, viewState, cursor }, prev ?? 0);
+  //     const saved = getContent(current).data as QueryContentTabData;
+  //     if (saved?.model && !saved?.model.isDisposed()) {
+  //       console.log('restoring model', saved.model?.getValue());
+  //       editor()?.setModel(saved.model);
+  //       if (saved.viewState) {
+  //         editor()?.restoreViewState(saved.viewState);
+  //       }
+  //       editor()?.setPosition(saved.cursor!);
+  //     }
+  //   } else if (current === 0 && prev === undefined) {
+  //     const model = editor()?.getModel();
+  //     const viewState = editor()?.saveViewState();
+  //     const cursor = editor()?.getPosition();
+  //     updateContentTab('data', { model: model!, viewState, cursor }, prev ?? 0);
   //   }
-  // };
-
-  // onCleanup(() => {
-  // editor()?.dispose();
-  // (getContent().data as QueryContentTabData)?.model?.dispose();
+  //   return current;
   // });
+
+  // const insertTextAtCursor = (text: string) => {
+  //   const { lineNumber, column } = editor()!.getPosition()!;
+  //   const range = new monaco.Range(lineNumber, column, lineNumber, column);
+  //   editor()?.executeEdits('insert-text', [
+  //     { range, text, forceMoveMarkers: true },
+  //   ]);
+  //   editor()?.setPosition({ lineNumber, column: column + text.length });
+  // };
 
   return (
     <CommandPaletteContextWrapper groups={commandPaletteGroup}>
@@ -258,6 +243,8 @@ export const QueryEditor = () => {
           </div>
 
           <div class="flex items-center gap-2">
+            {/* TODO: check if it is possible to trigger tabFocusMode  */}
+            {/* editor()?.trigger('app', '', {}); */}
             <Tooltip>
               <TooltipTrigger
                 as={(props: TooltipTriggerProps) => (
@@ -339,22 +326,6 @@ export const QueryEditor = () => {
                 keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
               });
 
-              // e.onDidChangeCursorPosition((e) => {
-              //             updateDataContentTab('cursor', e.position);
-              //
-              // const cursor = editor()
-              //   ?.getModel()
-              //   ?.getOffsetAt(editor()?.getPosition() || { lineNumber: 0, column: 0 });
-              // });
-
-              // e.getModel()?.onDidChangeContent((m) => {
-              //
-              // })
-
-              e.onDidChangeModelContent(() => {
-                updateDataContentTab('viewState', e.saveViewState());
-              });
-
               e.onKeyDown((e) => {
                 if (
                   e.shiftKey &&
@@ -366,8 +337,8 @@ export const QueryEditor = () => {
               });
             }}
             onChange={updateQueryText}
-            value={data().query}
             schema={schema}
+            path={tabId()}
           />
         </div>
       </div>

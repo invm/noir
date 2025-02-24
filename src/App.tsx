@@ -107,7 +107,7 @@ function App() {
 
   window.addEventListener('error', (e) => {
     if (
-      ['ResizeObserver loop', 'focusableRange', 'focus'].some((elem) =>
+      ['ResizeObserver loop', '.focus'].some((elem) =>
         e?.message.includes(elem)
       )
     ) {
