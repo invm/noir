@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from 'solid-js';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { t } from 'utils/i18n';
 import { useAppSelector } from 'services/Context';
 import { TbTable as Table } from 'solid-icons/tb';

@@ -3,7 +3,7 @@ import { useAppSelector } from 'services/Context';
 import { createMemo, For, JSX, Match, Switch } from 'solid-js';
 import { RiEditorFunctions as Function } from 'solid-icons/ri';
 import { BsShare as ShareNodes } from 'solid-icons/bs';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { ResultSet, Row, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
 import { getAnyCase, randomId } from 'utils/utils';

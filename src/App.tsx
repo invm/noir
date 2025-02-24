@@ -9,11 +9,11 @@ import { onMount, createSignal, Show } from 'solid-js';
 import { useAppSelector } from 'services/Context';
 import { listen } from '@tauri-apps/api/event';
 import { Events, QueryTaskResult } from 'interfaces';
-import { checkUpdate, installUpdate } from '@tauri-apps/api/updater';
-import { relaunch } from '@tauri-apps/api/process';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 import { t } from 'utils/i18n';
 import { isDev } from 'solid-js/web';
-import { error } from 'tauri-plugin-log-api';
+import { error } from '@tauri-apps/plugin-log';
 import { Router } from 'Router';
 import {
   ColorModeProvider,
@@ -45,24 +45,23 @@ function App() {
   });
 
   const checkForUpdates = async () => {
-    const { shouldUpdate, manifest } = await checkUpdate().catch((e) => {
-      console.error(e);
-      return { shouldUpdate: false, manifest: null };
-    });
-    if (shouldUpdate) {
+    const update = await check().catch(() => null);
+    if (update?.available) {
       setShouldUpdate(true);
       setUpdateManifest(() => ({
-        version: manifest!.version,
-        date: manifest!.date,
-        body: manifest!.body,
+        version: update.version,
+        date: update.date!,
+        body: update.body!,
       }));
     }
   };
 
   const handleUpdate = async () => {
     try {
+      const update = await check().catch(() => null);
+      if (!update) return;
       setUpdating(true);
-      await installUpdate();
+      await update.downloadAndInstall((_) => {});
       await relaunch();
     } catch (error) {
       toast.error('Could not update app', {

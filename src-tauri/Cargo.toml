@@ -14,16 +14,10 @@ path = "src/bin/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.1", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "1.5.4", features = [
-  "dialog-open",
-  "os-all",
-  "updater",
-  "clipboard-all",
-  "dialog-save",
-  "shell-open",
+tauri = { version = "2", features = [
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
@@ -39,16 +33,16 @@ env_logger = "0.11.1"
 rand = "0.8.5"
 thiserror = "1.0.40"
 uuid = { version = "1.3.4", features = ["v4", "fast-rng", "serde"] }
-tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri-plugin-window-state = { version = "2" }
+tauri-plugin-single-instance = { version = "2" }
+tauri-plugin-store = "2"
 sql_lexer = "0.9.4"
 futures = "0.3.28"
 tokio = { version = "1.32.0", features = ["full"] }
 tokio-util = "^0.7.10"
-tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1", features = [
+tauri-plugin-log = { features = [
   "colored",
-] }
+] , version = "2" }
 sqlparser = "0.54.0"
 md-5 = "0.10.6"
 chrono = { version = "0.4.38", features = ["serde"] }
@@ -74,6 +68,10 @@ sqlx = { version = "0.7.4", features = [
   "json",
   "chrono",
 ] }
+tauri-plugin-os = "2"
+tauri-plugin-process = "2.2.0"
+tauri-plugin-dialog = "2.2.0"
+tauri-plugin-clipboard-manager = "2.2.1"
 [dependencies.openssl-sys]
 version = "0.9"
 features = ["vendored"]
@@ -89,3 +87,10 @@ codegen-units = 1 # Compile crates one after another so the compiler can optimiz
 lto = true        # Enables link to optimizations
 opt-level = "s"   # Optimize for binary size
 strip = true      # Remove debug symbols
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-updater = "2"
+tauri-plugin-window-state = "2"

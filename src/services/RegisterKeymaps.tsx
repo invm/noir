@@ -1,5 +1,5 @@
 import { createShortcut } from '@solid-primitives/keyboard';
-import { OsType } from '@tauri-apps/api/os';
+import { OsType } from '@tauri-apps/plugin-os';
 import { JSXElement } from 'solid-js';
 import { useAppSelector } from './Context';
 

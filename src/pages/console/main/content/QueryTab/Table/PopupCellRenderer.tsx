@@ -2,7 +2,7 @@ import { GridApi } from 'ag-grid-community';
 import { Row } from 'interfaces';
 import { For } from 'solid-js';
 import { getAnyCase, parseObjRecursive } from 'utils/utils';
-import { writeText } from '@tauri-apps/api/clipboard';
+import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { t } from 'utils/i18n';
 import { Changes } from './utils';
 import { SetStoreFunction } from 'solid-js/store';

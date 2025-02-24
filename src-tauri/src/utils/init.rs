@@ -3,20 +3,12 @@ use crate::{database::init::initialize_database, state::AppState, utils::fs::cre
 use anyhow::Result;
 use log::{LevelFilter, Record};
 use std::fmt::Arguments;
-use tauri::{App, Manager, State};
-use tauri_plugin_log::{
-    fern::{
-        colors::{Color, ColoredLevelConfig},
-        FormatCallback,
-    },
-    LogTarget,
+use tauri::{App, AppHandle, Manager, State};
+use tauri_plugin_log::fern::{
+    colors::{Color, ColoredLevelConfig},
+    FormatCallback,
 };
-
-#[cfg(debug_assertions)]
-const LOG_TARGETS: [LogTarget; 3] = [LogTarget::Stdout, LogTarget::Webview, LogTarget::LogDir];
-
-#[cfg(not(debug_assertions))]
-const LOG_TARGETS: [LogTarget; 2] = [LogTarget::Stdout, LogTarget::LogDir];
+use tauri_plugin_log::{Target, TargetKind};
 
 fn format(out: FormatCallback, message: &Arguments, record: &Record) {
     let colors = ColoredLevelConfig::default().info(Color::BrightGreen);
@@ -43,29 +35,51 @@ fn format(out: FormatCallback, message: &Arguments, record: &Record) {
 }
 
 pub fn init_logger() -> tauri_plugin_log::Builder {
+    let log = Target::new(TargetKind::LogDir {
+        file_name: Some("rust".to_string()),
+    });
+    #[cfg(debug_assertions)]
+    let log_targets: [Target; 3] = [
+        Target::new(TargetKind::Stdout),
+        Target::new(TargetKind::Webview),
+        log,
+    ];
+
+    #[cfg(not(debug_assertions))]
+    let log_targets: [Target; 2] = [Target::new(TargetKind::Stdout), log];
+
     tauri_plugin_log::Builder::default()
         .format(format)
         .level(LevelFilter::Info)
-        .targets(LOG_TARGETS)
+        .targets(log_targets)
 }
 
 pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
-    let _window = app.get_window("main").unwrap();
+    #[cfg(desktop)]
+    let _ = app
+        .handle()
+        .plugin(tauri_plugin_updater::Builder::new().build());
 
-    init_app()?;
+    #[cfg(desktop)]
+    let _ = app
+        .handle()
+        .plugin(tauri_plugin_window_state::Builder::default().build());
+
+    let _window = app.get_webview_window("main").unwrap();
+    init_app(app.handle())?;
     let handle = app.handle();
 
     let app_state: State<AppState> = handle.state();
-    let db = initialize_database().expect("Database initialize should succeed");
+    let db = initialize_database(app.handle().clone()).expect("Database initialize should succeed");
     *app_state.db.lock().expect("Failed to lock db") = Some(db);
 
     Ok(())
 }
 
-fn init_app() -> Result<()> {
-    if !is_appdir_populated() {
-        create_app_dir()?;
-        create_app_key()?;
+fn init_app(app: &AppHandle) -> Result<()> {
+    if !is_appdir_populated(app.clone()) {
+        create_app_dir(app.clone())?;
+        create_app_key(app.clone())?;
     }
     Ok(())
 }

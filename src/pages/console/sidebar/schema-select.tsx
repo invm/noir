@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { Button } from 'components/ui/button';
 import { BsTerminalFill as Terminal } from 'solid-icons/bs';
 import { IoRefresh as Refresh } from 'solid-icons/io';
@@ -34,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from 'components/ui/alert-dialog';
 import { toast } from 'solid-sonner';
+import { randomId } from 'utils/utils';
 
 export const SchemaSelect = () => {
   const {
@@ -82,9 +83,9 @@ export const SchemaSelect = () => {
       const data = {
         query,
         result_sets: [res],
-        cursor: 0,
         autoLimit: false,
         viewState: null,
+        id: randomId()
       };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
     } catch (error) {

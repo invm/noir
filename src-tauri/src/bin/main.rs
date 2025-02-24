@@ -1,17 +1,16 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use log::error;
 use noir::utils::init::{app_setup, init_logger};
 use state::AppState;
 use std::path::PathBuf;
 use std::{fs, panic};
-use tauri::Manager;
-use log::error;
+use tauri::Emitter;
 
 use noir::{
     handlers::{connections, queries, task},
     state::{self},
-    utils::fs::get_app_path,
 };
 
 #[derive(Clone, serde::Serialize)]
@@ -23,9 +22,8 @@ struct Payload {
 fn main() {
     panic::set_hook(Box::new(|info| {
         error!("Panicked: {:?}", info);
-        let path = get_app_path();
         let ts = chrono::offset::Utc::now();
-        let dest = format!("{}/error.log", path.to_str().expect("Failed to get path"));
+        let dest = format!("/tmp/noir.error.log",);
         fs::write(PathBuf::from(dest), format!("{} - {:?}", ts, info))
             .expect("Failed to write error log");
     }));
@@ -33,12 +31,16 @@ fn main() {
     tauri::Builder::default()
         .plugin(init_logger().build())
         .manage(AppState::default())
+        .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             println!("{}, {argv:?}, {cwd}", app.package_info().name);
 
-            app.emit_all("single-instance", Payload { args: argv, cwd })
+            app.emit("single-instance", Payload { args: argv, cwd })
                 .expect("failed to emit");
         }))
         .setup(app_setup)
