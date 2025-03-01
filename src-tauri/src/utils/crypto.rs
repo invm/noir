@@ -1,6 +1,7 @@
 use anyhow::Result;
 use magic_crypt::{new_magic_crypt, MagicCrypt256, MagicCryptTrait};
 use md5::{Digest, Md5};
+use tauri::AppHandle;
 
 use super::fs::read_key;
 
@@ -12,8 +13,8 @@ pub fn decrypt_data(data: &str, key: &MagicCrypt256) -> Result<String> {
     key.decrypt_base64_to_string(data).map_err(|e| e.into())
 }
 
-pub fn get_app_key() -> Result<MagicCrypt256> {
-    let key = read_key()?;
+pub fn get_app_key(app: AppHandle) -> Result<MagicCrypt256> {
+    let key = read_key(app)?;
     let key = String::from_utf8_lossy(&key).to_string();
     Ok(new_magic_crypt!(key, 256))
 }

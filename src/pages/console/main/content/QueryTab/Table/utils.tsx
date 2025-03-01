@@ -9,6 +9,8 @@ import { ColDef } from 'ag-grid-community';
 import { IoKey as Key } from 'solid-icons/io';
 import { t } from 'utils/i18n';
 import { SetStoreFunction } from 'solid-js/store';
+import { Tooltip } from '@kobalte/core/tooltip';
+import { TooltipTrigger, TooltipContent } from 'components/ui/tooltip';
 
 export type UpdageChange = {
   [rowIndex: string]: {
@@ -52,23 +54,23 @@ const headerComponent = (
     <div>
       <span class="mr-2 text-sm">{name}</span>
       <Show when={visible_type}>
-        <span class="text-xs text-base-content">{visible_type}</span>
+        <span class="text-xs">{visible_type}</span>
       </Show>
     </div>
     <Show when={pk || fk}>
-      <div
-        class={`tooltip tooltip-${pk ? 'success' : 'warning'} tooltip-left px-3 text-xs font-light`}
-        data-tip={
-          pk
+      <Tooltip>
+        <TooltipTrigger>
+          <Key class={pk ? 'text-emerald-500' : 'text-yellow-500'} />
+        </TooltipTrigger>
+        <TooltipContent>
+          {pk
             ? t('console.table.primary_key')
             : t('console.table.foreign_key', {
                 table: fk?.table,
                 column: fk?.column,
-              })
-        }
-      >
-        <Key class={pk ? 'text-emerald-500' : 'text-yellow-500'} />
-      </div>
+              })}
+        </TooltipContent>
+      </Tooltip>
     </Show>
   </div>
 );

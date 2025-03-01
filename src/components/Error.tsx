@@ -1,6 +1,6 @@
 import { ConnectionsService } from 'services/Connections';
 import { t } from 'utils/i18n';
-import { info } from 'tauri-plugin-log-api';
+import { info } from '@tauri-apps/plugin-log';
 import { Button } from './ui/button';
 
 const Error = (props: { err: Record<'message' | 'stack', string> }) => {

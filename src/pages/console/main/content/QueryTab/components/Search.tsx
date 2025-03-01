@@ -3,7 +3,7 @@ import { useAppSelector } from 'services/Context';
 import { VsChromeClose as Close } from 'solid-icons/vs';
 import { createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import sql from 'sql-bricks';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { QueryTaskEnqueueResult, Row } from 'interfaces';
 import { t } from 'utils/i18n';
 import { getAnyCase } from 'utils/utils';

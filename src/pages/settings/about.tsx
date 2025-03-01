@@ -3,6 +3,7 @@ import { t } from 'utils/i18n';
 
 import { version } from '../../../package.json';
 import { Button } from 'components/ui/button';
+import { checkForUpdates } from 'utils/utils';
 
 export const About = () => {
   const {
@@ -36,6 +37,8 @@ export const About = () => {
         >
           Request a feature?
         </Button>
+
+        <Button onClick={checkForUpdates}>Check for updates</Button>
       </div>
       <p class="text-center max-w-xl">
         Noir was built using amazing open source tools like Tauri, SolidJS,
@@ -62,12 +65,7 @@ export const About = () => {
           Version: {version}
         </span>
         <div class="flex gap-4 py-4">
-          <Button
-            size="sm"
-            variant="outline"
-            class="btn btn-xs btn-accent"
-            onClick={clearStore}
-          >
+          <Button size="sm" variant="outline" onClick={clearStore}>
             {t('settings.clear_cache')}
           </Button>
         </div>

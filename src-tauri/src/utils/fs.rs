@@ -1,35 +1,35 @@
 use crate::{database::QueryType, engine::types::result::ResultSet};
 use anyhow::Result;
 use fs::metadata;
+use log::error;
 use serde_json::json;
 use std::{fs, path::PathBuf};
-use tauri::api::{dir::with_temp_dir, path::app_config_dir};
-use log::error;
+use tauri::{AppHandle, Manager};
 
 use rand::{distributions::Alphanumeric, Rng};
 
-pub fn get_db_path() -> PathBuf {
-    let app_path = get_app_path();
+pub fn get_db_path(app: AppHandle) -> PathBuf {
+    let app_path = get_app_path(app);
     PathBuf::from(format!(
         "{}/.app.db",
         app_path.to_str().expect("Failed to get app path")
     ))
 }
 
-fn get_key_path() -> PathBuf {
+fn get_key_path(app: AppHandle) -> PathBuf {
     PathBuf::from(format!(
         "{}/._",
-        get_app_path().to_str().expect("Failed to get app path")
+        get_app_path(app).to_str().expect("Failed to get app path")
     ))
 }
 
-pub fn read_key() -> Result<Vec<u8>> {
-    let key_path = get_key_path();
+pub fn read_key(app: AppHandle) -> Result<Vec<u8>> {
+    let key_path = get_key_path(app);
     Ok(fs::read(key_path)?)
 }
 
-pub fn create_app_key() -> Result<()> {
-    let key_path = get_key_path();
+pub fn create_app_key(app: AppHandle) -> Result<()> {
+    let key_path = get_key_path(app);
     let key: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(32)
@@ -38,11 +38,8 @@ pub fn create_app_key() -> Result<()> {
     Ok(fs::write(key_path, key)?)
 }
 
-pub fn get_tmp_dir() -> Result<String> {
-    let mut temp_dir = PathBuf::from("");
-    with_temp_dir(|dir| {
-        temp_dir = PathBuf::from(dir.path());
-    })?;
+pub fn get_tmp_dir(app: AppHandle) -> Result<String> {
+    let temp_dir = app.path().temp_dir()?;
     let res = fs::create_dir(temp_dir.clone());
     if let Err(res) = res {
         error!("Error: {:?}", res);
@@ -50,21 +47,20 @@ pub fn get_tmp_dir() -> Result<String> {
     return Ok(temp_dir.to_str().unwrap_or("").to_string());
 }
 
-pub fn get_app_path() -> PathBuf {
-    let config = tauri::Config::default();
-    let config_dir = app_config_dir(&config).expect("Failed to get app config dir");
-    let path = PathBuf::from(config_dir.to_str().expect("Failed to get dir").to_string() + "noir");
-    path
+pub fn get_app_path(app: AppHandle) -> PathBuf {
+    app.path()
+        .app_config_dir()
+        .expect("Failed to get app config dir")
 }
 
-pub fn is_appdir_populated() -> bool {
-    let key_path = get_key_path();
-    let db_path = get_db_path();
+pub fn is_appdir_populated(app: AppHandle) -> bool {
+    let key_path = get_key_path(app.clone());
+    let db_path = get_db_path(app);
     metadata(key_path).is_ok() && metadata(db_path).is_ok()
 }
 
-pub fn create_app_dir() -> Result<()> {
-    let dir = get_app_path();
+pub fn create_app_dir(app: AppHandle) -> Result<()> {
+    let dir = get_app_path(app);
     Ok(fs::create_dir_all(dir)?)
 }
 
@@ -87,7 +83,12 @@ pub fn write_file(path: &PathBuf, content: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn write_query(id: &str, result_set: &ResultSet, query_type: QueryType) -> Result<String> {
+pub fn write_query(
+    id: &str,
+    result_set: &ResultSet,
+    query_type: QueryType,
+    tmp_dir: PathBuf,
+) -> Result<String> {
     let mut rows = String::from("");
     result_set.rows.iter().for_each(|row| {
         rows += &(row.to_string() + "\n");
@@ -104,12 +105,16 @@ pub fn write_query(id: &str, result_set: &ResultSet, query_type: QueryType) -> R
         "columns": result_set.table.columns,
     })
     .to_string();
-    let tmp_dir = get_tmp_dir()?;
-    let path = tmp_dir.clone() + "/" + id;
-    let metadata_path = tmp_dir + "/" + id + ".metadata";
-    write_file(&PathBuf::from(&path), &rows)?;
-    write_file(&PathBuf::from(&metadata_path), &metadata)?;
-    Ok(path)
+    let mut data_path = tmp_dir.clone();
+    data_path.push(id);
+    let mut metadata_path = tmp_dir;
+    metadata_path.push(id.to_string() + ".metadata");
+    write_file(&data_path, &rows)?;
+    write_file(&metadata_path, &metadata)?;
+    let path = data_path
+        .to_str()
+        .expect("Could not convert data_path to path string");
+    Ok(path.to_string())
 }
 
 pub fn copy_file(src: &str, dest: &str) -> Result<()> {

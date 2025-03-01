@@ -1,5 +1,5 @@
 import { useHead } from 'utils/use-head';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { SidebarInset, SidebarProvider } from 'components/ui/sidebar';
 import { Main } from './main/main';
 import { DbSidebar } from 'pages/console/sidebar/db-sidebar';

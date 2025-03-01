@@ -13,7 +13,7 @@ import {
 import { For, Match, Switch } from 'solid-js';
 import { cn } from 'utils/cn';
 import { useAppSelector } from 'services/Context';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import {
   ContextMenu,
   ContextMenuContent,

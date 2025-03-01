@@ -1,9 +1,9 @@
 import { createStore } from 'solid-js/store';
-import { Store } from 'tauri-plugin-store-api';
+import { LazyStore } from '@tauri-apps/plugin-store';
 import { debounce } from 'utils/utils';
+import { OsType } from '@tauri-apps/plugin-os';
 
-type OsType = 'Linux' | 'Darwin' | 'Windows_NT';
-const store = new Store('.app.dat');
+const store = new LazyStore('.app.dat');
 const INTERVAL = 2000;
 
 const APP_KEY = '__app__';
@@ -21,7 +21,6 @@ export const GRID_THEMES = [
 type AppStore = {
   gridTheme: string;
   osType: OsType;
-  enableDevTools: boolean;
   sensitiveQueries: string[];
 };
 
@@ -39,8 +38,7 @@ const getSavedData = async (key: string) => {
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
     gridTheme: 'alpine-dark',
-    osType: 'Linux',
-    enableDevTools: false,
+    osType: 'linux',
     sensitiveQueries: ['Delete', 'Drop', 'Alter', 'Update', 'Truncate'],
   });
 
@@ -52,7 +50,7 @@ export const AppService = () => {
   const gridTheme = () => appStore.gridTheme;
 
   const cmdOrCtrl = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? '⌘' : 'Meta';
+    if (appStore.osType === 'macos') return short ? '⌘' : 'Meta';
     return short ? '^' : 'Control';
   };
 

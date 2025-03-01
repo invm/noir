@@ -1,6 +1,6 @@
 import { Show, createEffect, createSignal, on } from 'solid-js';
 import { format } from 'sql-formatter';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { HiSolidPlay as Play } from 'solid-icons/hi';
 import { IoCopyOutline as Copy } from 'solid-icons/io';
 import { CgFormatIndentIncrease as EditIcon } from 'solid-icons/cg';
@@ -265,7 +265,7 @@ export const QueryEditor = () => {
                   the app for navigation.
                   <br />
                   Toggle this option when focused on the editor with{' '}
-                  {appStore.osType === 'Darwin' ? 'Ctrl+Shift+M' : 'Ctrl+M'}.
+                  {appStore.osType === 'macos' ? 'Ctrl+Shift+M' : 'Ctrl+M'}.
                 </p>
               </TooltipContent>
             </Tooltip>

@@ -1,12 +1,5 @@
-import {
-  createContext,
-  createSignal,
-  onMount,
-  ParentComponent,
-  Show,
-  useContext,
-} from 'solid-js';
-import { OsType, type } from '@tauri-apps/api/os';
+import { createContext, ParentComponent, useContext } from 'solid-js';
+import { type } from '@tauri-apps/plugin-os';
 import { ConnectionsService } from './Connections';
 import { AppService } from './App';
 import { BackendService } from './Backend';
@@ -29,19 +22,9 @@ const StoreContext = createContext<RootState>();
 export const useAppSelector = () => useContext(StoreContext)!;
 
 export const StoreProvider: ParentComponent = (props) => {
-  const [loaded, setLoaded] = createSignal(false);
-  const [osType, setOsType] = createSignal<OsType>('Linux');
-
-  onMount(async () => {
-    setOsType(await type());
-    setLoaded(true);
-  });
-
   return (
     <StoreContext.Provider value={rootState}>
-      <Show when={loaded()}>
-        <RegisterKeymaps osType={osType()}>{props.children}</RegisterKeymaps>
-      </Show>
+      <RegisterKeymaps osType={type()}>{props.children}</RegisterKeymaps>
     </StoreContext.Provider>
   );
 };

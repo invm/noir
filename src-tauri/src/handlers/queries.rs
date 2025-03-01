@@ -16,7 +16,7 @@ use serde_json::{json, Value};
 use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
 use std::{fs::read_to_string, path::PathBuf};
-use tauri::{command, AppHandle, Manager, State};
+use tauri::{command, AppHandle, Emitter, Manager, State};
 use tokio_util::sync::CancellationToken;
 
 fn get_query_type(s: Statement) -> QueryType {
@@ -73,7 +73,7 @@ fn get_query_type(s: Statement) -> QueryType {
 
 // TODO: use this dialect when the fix for mysql is merged in sqlparser
 #[command]
-pub async fn sql_to_statements(dialect: String, sql: &str) -> CommandResult<Vec<QueryType>> {
+pub async fn sql_to_statements(_dialect: String, sql: &str) -> CommandResult<Vec<QueryType>> {
     let statements = Parser::parse_sql(
         dialect_from_str("generic")
             .expect("Failed to get dialect")
@@ -128,6 +128,10 @@ pub async fn enqueue_query(
         .collect();
     let mut binding = state.cancel_tokens.lock().await;
     for (idx, stmt) in statements.iter().enumerate() {
+        let temp_dir = app_handle
+            .path()
+            .temp_dir()
+            .expect("failed to get home dir");
         let token = CancellationToken::new();
         let task = QueryTask::new(
             conn.clone(),
@@ -148,21 +152,21 @@ pub async fn enqueue_query(
                             if let Some(table) = task.table.clone() {
                                 result_set.table = task.conn.get_table_metadata(&table).await.unwrap_or_default();
                             }
-                            match write_query(&task.id, &result_set, task.query_type) {
+                            match write_query(&task.id, &result_set, task.query_type, temp_dir) {
                                 Ok(path) => {
                                     handle
-                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
+                                        .emit(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
                                         .expect("Failed to emit query_finished event");
                                 },
                                 Err(e) =>
                                 handle
-                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                        .emit(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
                                         .expect("Failed to emit query_finished event"),
                             }
                         }
                         Err(e) =>
                             handle
-                                .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                .emit(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
                                 .expect("Failed to emit query_finished event"),
                     }
                 }

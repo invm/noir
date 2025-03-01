@@ -11,12 +11,12 @@ import {
   Table,
   TableEntity,
 } from '../interfaces';
-import { Store } from 'tauri-plugin-store-api';
 import { columnsToTables, randomId } from 'utils/utils';
-import { invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api/core';
 import { createSignal } from 'solid-js';
+import { LazyStore } from '@tauri-apps/plugin-store';
 
-const cache = new Store('.connections.dat');
+const cache = new LazyStore('.connections.dat', { autoSave: false });
 // const INTERVAL = 1000;
 
 export const ContentTab = {
@@ -131,7 +131,7 @@ export type ConnectionTab = {
   connection: ConnectionConfig;
   tabs: ContentTabType[];
   idx: number;
-  prevIdx: number;
+  prevIdx?: number;
 };
 
 // const CONNECTIONS_KEY = '_conn_tabs';
