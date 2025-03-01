@@ -20,6 +20,7 @@ import { restoreTheme } from 'pages/settings/themes/ui';
 import { toast } from 'solid-sonner';
 import { CommandPaletteProviderComponent } from 'services/palette/provider';
 import { checkForUpdates } from 'utils/utils';
+import { isDev } from 'solid-js/web';
 
 function App() {
   const {
@@ -87,7 +88,9 @@ function App() {
   };
 
   onMount(async () => {
-    disableMenu();
+    if (!isDev) {
+      disableMenu();
+    }
     restoreTheme();
     await restoreAppStore();
     await restoreConnectionStore();

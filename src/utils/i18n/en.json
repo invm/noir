@@ -81,9 +81,6 @@
         "foreign_key": "Foreign key -> {{table}}.{{column}}",
         "edit": "Editing {{table}}",
         "add": "Adding to {{table}}",
-        "successfull_add": "Successfully added {{count}} row/s",
-        "successfull_delete": "Successfully deleted {{count}} row/s",
-        "successfull_update": "Successfully updated {{count}} row/s",
         "csv": "Export to CSV",
         "json": "Export to JSON",
         "total_rows": "Total rows: "
@@ -98,8 +95,6 @@
       "view_data": "View data",
       "truncate_table": "Truncate table",
       "drop_table": "Drop table",
-      "confirm_truncate": "Are you sure you want to truncate table {{table}}?",
-      "confirm_drop": "Are you sure you want to drop table {{table}}?",
       "yes": "Yes",
       "cancel": "Cancel",
       "tooltips": {

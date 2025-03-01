@@ -37,7 +37,7 @@
 
 ## About The Project
 
-<img src="public/app-showcase.png" alt="noir app showcase" width="500">
+<img src="public/app-showcase.png" alt="noir app showcase" width="100%">
 
 Empower your database management experience with our keyboard-driven client! Free and open source, cross-platform, and designed for power developers.
 

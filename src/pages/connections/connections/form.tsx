@@ -177,7 +177,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
       setTesting(true);
       const values = data();
       await invoke('test_connection', normalize(values));
-      toast.success(t('add_connection_form.success'));
+      toast.success(t('add_connection_form.success', { name: values.name }));
       setError('');
     } catch (error) {
       setError(String(error));
