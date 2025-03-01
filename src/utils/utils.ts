@@ -1,4 +1,10 @@
 import { Dialect, DialectType, Row, Table } from 'interfaces';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { toast } from 'solid-sonner';
+
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 export const randomId = () => {
   const length = 36;
@@ -58,7 +64,7 @@ export const columnsToTables = (
 
     return Object.keys(schema).reduce(
       (acc, name) => {
-        const columns = Object.values(schema[name]).map((props) => {
+        const columns = Object.values(schema[name] as object).map((props) => {
           const name = getAnyCase(props, 'column_name');
           return { name, props };
         });
@@ -101,5 +107,39 @@ export const parseObjRecursive = (
     } catch (e) {
       return obj;
     }
+  }
+};
+
+export const intersection = (arr: string[], arr2: string[]) => {
+  return arr.filter((value) => arr2.includes(value));
+};
+
+export const checkForUpdates = async () => {
+  const update = await check().catch(() => null);
+  if (update?.available) {
+    toast(`Version ${update.version} is available`, {
+      description: update.body,
+      position: 'bottom-right',
+      classes: {
+        actionButton: '!bg-primary !text-primary-foreground',
+        closeButton: '!bg-background !text-foreground',
+      },
+      closeButton: true,
+      action: {
+        label: 'Update',
+        onClick: async () => {
+          try {
+            const update = await check().catch(() => null);
+            if (!update) return;
+            await update.downloadAndInstall((_) => {});
+            await relaunch();
+          } catch (error) {
+            toast.error('Could not update app', {
+              description: (error as Error).message || (error as string),
+            });
+          }
+        },
+      },
+    });
   }
 };

@@ -2,11 +2,14 @@ use crate::{
     database::queries,
     engine::{
         init::init_conn,
-        types::config::{ConnectionConfig, Credentials, Dialect, Mode},
+        types::config::{ConnectionConfig, Credentials, Dialect, Metadata, Mode},
     },
     handlers::task::cancel_task_token,
     state::ServiceAccess,
-    utils::error::{CommandResult, Error},
+    utils::{
+        crypto::get_app_key,
+        error::{CommandResult, Error},
+    },
 };
 use anyhow::anyhow;
 use log::info;
@@ -20,11 +23,32 @@ pub fn add_connection(
     credentials: Credentials,
     name: &str,
     color: &str,
+    metadata: Metadata,
 ) -> CommandResult<()> {
     info!("Add connection: {name}, {dialect}, {mode}, {color}");
-    let conn = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    let conn = ConnectionConfig::new(dialect, mode, credentials, name, color, metadata)?;
+    let key = get_app_key(app_handle.clone())?;
     app_handle
-        .db(|db| queries::add_connection(db, &conn))
+        .db(|db| queries::add_connection(db, &conn, key))
+        .map_err(Error::from)
+}
+
+#[command]
+pub fn update_connection(
+    app_handle: AppHandle,
+    id: String,
+    dialect: Dialect,
+    mode: Mode,
+    credentials: Credentials,
+    name: &str,
+    color: &str,
+    metadata: Metadata,
+) -> CommandResult<()> {
+    info!("Update connection: {name}, {dialect}, {mode}, {color}");
+    let conn = ConnectionConfig::new(dialect, mode, credentials, name, color, metadata)?;
+    let key = get_app_key(app_handle.clone())?;
+    app_handle
+        .db(|db| queries::update_connection(db, id, &conn, key))
         .map_err(Error::from)
 }
 
@@ -36,9 +60,10 @@ pub async fn test_connection(
     credentials: Credentials,
     name: &str,
     color: &str,
+    metadata: Metadata,
 ) -> CommandResult<()> {
     info!("Test connection: {name}, {dialect}, {mode}, {color}");
-    let config = ConnectionConfig::new(dialect, mode, credentials, name, color)?;
+    let config = ConnectionConfig::new(dialect, mode, credentials, name, color, metadata)?;
     let conn = init_conn(config, app_handle.clone()).await?;
     app_handle.connect(&conn.clone())?;
     let id = conn.config.id.clone().to_string();
@@ -58,8 +83,9 @@ pub fn delete_connection(app_handle: AppHandle, id: String) -> CommandResult<()>
 
 #[command]
 pub fn get_connections(app_handle: AppHandle) -> CommandResult<Vec<ConnectionConfig>> {
+    let key = get_app_key(app_handle.clone())?;
     app_handle
-        .db(queries::get_all_connections)
+        .db(|db| queries::get_all_connections(db, key))
         .map_err(Error::from)
 }
 
@@ -72,7 +98,8 @@ pub async fn init_connection(
     let dialect = config.dialect.clone();
     let mode = config.mode.clone();
     info!("Init connection: {name}, {dialect}, {mode}");
-    app_handle.db(|db| queries::get_connection(db, &config.id.to_string()))?;
+    let key = get_app_key(app_handle.clone())?;
+    app_handle.db(|db| queries::get_connection(db, &config.id.to_string(), &key))?;
     let conn = init_conn(config.clone(), app_handle.clone()).await;
     match conn {
         Ok(c) => match app_handle.connect(&c) {

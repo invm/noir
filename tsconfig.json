@@ -6,29 +6,26 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": [
-      "vite/client"
-    ],
-    "sourceMap": false,
+    "types": ["vite/client", "node"],
     "noEmit": true,
     "isolatedModules": true,
+    "sourceMap": false,
     "resolveJsonModule": true,
     "baseUrl": "./src",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
     "paths": {
-      "components": [
-        "src/components"
-      ],
-      "services": [
-        "src/services"
-      ],
-      "utils": [
-        "src/utils"
-      ],
-      "src/*": [
-        "src/*"
-      ]
+      "src": ["src"],
+      "components": ["components"],
+      "services": ["services"],
+      "utils": ["utils"]
     }
   }
 }
+

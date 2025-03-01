@@ -1,30 +1,27 @@
-import { editorThemes } from 'components/Screens/Console/Content/QueryTab/components/EditorThemes';
-import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Store } from 'tauri-plugin-store-api';
+import { LazyStore } from '@tauri-apps/plugin-store';
 import { debounce } from 'utils/utils';
+import { OsType } from '@tauri-apps/plugin-os';
 
-type OsType = 'Linux' | 'Darwin' | 'Windows_NT';
-const store = new Store('.app.dat');
+const store = new LazyStore('.app.dat');
 const INTERVAL = 2000;
 
 const APP_KEY = '__app__';
 
-export const THEMES = {
-  ui: ['retro', 'forest', 'autumn', 'garden', 'business', 'synthwave', 'dracula', 'dark', 'night', 'cupcake'],
-  editor: Object.keys(editorThemes) as EditorTheme[],
-  grid: ['alpine', 'alpine-dark', 'balham', 'balham-dark', 'material', 'quartz', 'quartz-dark'],
-} as const;
-
-export type EditorTheme = keyof typeof editorThemes;
-export type ThemeCategory = keyof typeof THEMES;
+export const GRID_THEMES = [
+  'alpine',
+  'alpine-dark',
+  'balham',
+  'balham-dark',
+  'material',
+  'quartz',
+  'quartz-dark',
+];
 
 type AppStore = {
-  vimModeOn: boolean;
   gridTheme: string;
-  editorTheme: EditorTheme;
   osType: OsType;
-  enableDevTools: boolean;
+  sensitiveQueries: string[];
 };
 
 const getSavedData = async (key: string) => {
@@ -38,63 +35,27 @@ const getSavedData = async (key: string) => {
   }
 };
 
-type Screen = 'console' | 'settings' | 'keymaps' | 'home';
-
 export const AppService = () => {
   const [appStore, setAppStore] = createStore<AppStore>({
-    vimModeOn: false,
     gridTheme: 'alpine-dark',
-    editorTheme: 'Dracula',
-    osType: 'Linux',
-    enableDevTools: false,
+    osType: 'linux',
+    sensitiveQueries: ['Delete', 'Drop', 'Alter', 'Update', 'Truncate'],
   });
-
-  const [screen, setScreen] = createSignal<Screen>('console');
-  const [lastScreen, setLastScreen] = createSignal<Screen>('console');
 
   const updateStore = debounce(async () => {
     await store.set(APP_KEY, JSON.stringify(appStore));
     await store.save();
   }, INTERVAL);
 
-  const vimModeOn = () => appStore.vimModeOn;
   const gridTheme = () => appStore.gridTheme;
-  const editorTheme = () => appStore.editorTheme;
 
-  const toggleScreen = (s: Screen) => {
-    if (screen() === s) {
-      const last = lastScreen();
-      setLastScreen(screen());
-      setScreen(last);
-      return;
-    }
-    setLastScreen(screen());
-    setScreen(s);
-  };
-
-  const altOrMeta = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
-    return 'Alt';
-  };
   const cmdOrCtrl = (short = false) => {
-    if (appStore.osType === 'Darwin') return short ? 'Cmd' : 'Meta';
-    return short ? 'Ctrl' : 'Control';
+    if (appStore.osType === 'macos') return short ? '⌘' : 'Meta';
+    return short ? '^' : 'Control';
   };
 
-  const toggleVimModeOn = () => {
-    setAppStore('vimModeOn', !appStore.vimModeOn);
-    updateStore();
-  };
-
-  const updateTheme = <T extends ThemeCategory>(t: T, theme: (typeof THEMES)[T][number]) => {
-    if (t === 'ui') {
-      document.documentElement.dataset.theme = theme;
-      localStorage.setItem('theme', theme);
-    } else if (t === 'editor') {
-      setAppStore('editorTheme', theme as EditorTheme);
-    } else if (t === 'grid') {
-      setAppStore('gridTheme', theme);
-    }
+  const updateTheme = (theme: (typeof GRID_THEMES)[number]) => {
+    setAppStore('gridTheme', theme);
     updateStore();
   };
 
@@ -104,19 +65,19 @@ export const AppService = () => {
     setAppStore(() => app_store);
   };
 
+  const updateSensitiveQueries = (options: string[]) => {
+    setAppStore('sensitiveQueries', options);
+    updateStore();
+  };
+
   return {
     appStore,
     setAppStore,
-    vimModeOn,
-    toggleVimModeOn,
     restoreAppStore,
     screen,
-    setScreen,
-    toggleScreen,
     gridTheme,
-    editorTheme,
     updateTheme,
     cmdOrCtrl,
-    altOrMeta,
+    updateSensitiveQueries,
   };
 };

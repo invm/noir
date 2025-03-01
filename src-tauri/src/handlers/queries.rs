@@ -1,5 +1,3 @@
-use std::{fs::read_to_string, path::PathBuf};
-
 use crate::{
     database::QueryType,
     query::{Events, QueryTask, QueryTaskEnqueueResult, QueryTaskResult, QueryTaskStatus},
@@ -17,27 +15,76 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlparser::{ast::Statement, dialect::dialect_from_str, parser::Parser};
 use std::str;
-use tauri::{command, AppHandle, Manager, State};
+use std::{fs::read_to_string, path::PathBuf};
+use tauri::{command, AppHandle, Emitter, Manager, State};
 use tokio_util::sync::CancellationToken;
 
 fn get_query_type(s: Statement) -> QueryType {
     match s {
-        Statement::Query(_)
-        | Statement::Explain { .. }
+        Statement::AlterIndex { .. } => QueryType::Alter,
+        Statement::AlterPolicy { .. } => QueryType::Alter,
+        Statement::AlterRole { .. } => QueryType::Alter,
+        Statement::AlterTable { .. } => QueryType::Alter,
+        Statement::AlterView { .. } => QueryType::Alter,
+        Statement::CreateDatabase { .. } => QueryType::Create,
+        Statement::CreateExtension { .. } => QueryType::Create,
+        Statement::CreateFunction { .. } => QueryType::Create,
+        Statement::CreateIndex { .. } => QueryType::Create,
+        Statement::CreateMacro { .. } => QueryType::Create,
+        Statement::CreatePolicy { .. } => QueryType::Create,
+        Statement::CreateProcedure { .. } => QueryType::Create,
+        Statement::CreateRole { .. } => QueryType::Create,
+        Statement::CreateSchema { .. } => QueryType::Create,
+        Statement::CreateSecret { .. } => QueryType::Create,
+        Statement::CreateSequence { .. } => QueryType::Create,
+        Statement::CreateStage { .. } => QueryType::Create,
+        Statement::CreateTable { .. } => QueryType::Create,
+        Statement::CreateTrigger { .. } => QueryType::Create,
+        Statement::CreateType { .. } => QueryType::Create,
+        Statement::CreateView { .. } => QueryType::Create,
+        Statement::CreateVirtualTable { .. } => QueryType::Create,
+        Statement::Delete { .. } => QueryType::Delete,
+        Statement::Drop { .. } => QueryType::Drop,
+        Statement::DropExtension { .. } => QueryType::Drop,
+        Statement::DropFunction { .. } => QueryType::Drop,
+        Statement::DropProcedure { .. } => QueryType::Drop,
+        Statement::DropSecret { .. } => QueryType::Drop,
+        Statement::DropTrigger { .. } => QueryType::Drop,
+        Statement::Insert { .. } => QueryType::Insert,
+        Statement::Query(_) => QueryType::Select,
+        Statement::Truncate { .. } => QueryType::Truncate,
+        Statement::Update { .. } => QueryType::Update,
+        Statement::Explain { .. }
         | Statement::Analyze { .. }
-        | Statement::ShowVariables { .. }
-        | Statement::ShowCreate { .. }
-        | Statement::ShowFunctions { .. }
         | Statement::ShowCollation { .. }
-        | Statement::ShowVariable { .. }
         | Statement::ShowColumns { .. }
+        | Statement::ShowCreate { .. }
+        | Statement::ShowDatabases { .. }
+        | Statement::ShowFunctions { .. }
+        | Statement::ShowSchemas { .. }
         | Statement::ShowStatus { .. }
-        | Statement::ShowTables { .. } => QueryType::Select,
-        //Statement::Insert { .. } => QueryType::Insert,
-        //Statement::Update { .. } => QueryType::Update,
-        //Statement::Delete { .. } => QueryType::Delete,
+        | Statement::ShowTables { .. }
+        | Statement::ShowVariable { .. }
+        | Statement::ShowVariables { .. }
+        | Statement::ShowViews { .. } => QueryType::Show,
         _ => QueryType::Other,
     }
+}
+
+// TODO: use this dialect when the fix for mysql is merged in sqlparser
+#[command]
+pub async fn sql_to_statements(_dialect: String, sql: &str) -> CommandResult<Vec<QueryType>> {
+    let statements = Parser::parse_sql(
+        dialect_from_str("generic")
+            .expect("Failed to get dialect")
+            .as_ref(),
+        sql,
+    )
+    .unwrap_or_default();
+    if statements.is_empty() {
+        return Err(Error::from(anyhow!("No valid statements found")));
+    }
+    Ok(statements.into_iter().map(|s| get_query_type(s)).collect())
 }
 
 #[command]
@@ -81,6 +128,10 @@ pub async fn enqueue_query(
         .collect();
     let mut binding = state.cancel_tokens.lock().await;
     for (idx, stmt) in statements.iter().enumerate() {
+        let temp_dir = app_handle
+            .path()
+            .temp_dir()
+            .expect("failed to get home dir");
         let token = CancellationToken::new();
         let task = QueryTask::new(
             conn.clone(),
@@ -101,21 +152,21 @@ pub async fn enqueue_query(
                             if let Some(table) = task.table.clone() {
                                 result_set.table = task.conn.get_table_metadata(&table).await.unwrap_or_default();
                             }
-                            match write_query(&task.id, &result_set, task.query_type) {
+                            match write_query(&task.id, &result_set, task.query_type, temp_dir) {
                                 Ok(path) => {
                                     handle
-                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
+                                        .emit(Events::QueryFinished.as_str(), QueryTaskResult::success(task, result_set, path))
                                         .expect("Failed to emit query_finished event");
                                 },
                                 Err(e) =>
                                 handle
-                                        .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                        .emit(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
                                         .expect("Failed to emit query_finished event"),
                             }
                         }
                         Err(e) =>
                             handle
-                                .emit_all(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
+                                .emit(Events::QueryFinished.as_str(), QueryTaskResult::error(task, e))
                                 .expect("Failed to emit query_finished event"),
                     }
                 }
@@ -155,6 +206,9 @@ pub async fn execute_tx(
     conn_id: String,
     queries: Vec<&str>,
 ) -> CommandResult<()> {
+    for query in &queries {
+        info!("Execute tx on {}, sql:{query}", conn_id.clone());
+    }
     let connection = app_handle.acquire_connection(conn_id);
     connection.execute_tx(queries).await?;
     Ok(())

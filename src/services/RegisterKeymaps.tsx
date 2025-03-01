@@ -1,31 +1,24 @@
 import { createShortcut } from '@solid-primitives/keyboard';
-import { OsType } from '@tauri-apps/api/os';
+import { OsType } from '@tauri-apps/plugin-os';
 import { JSXElement } from 'solid-js';
 import { useAppSelector } from './Context';
 
-export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType }) => {
+export const RegisterKeymaps = (props: {
+  children: JSXElement;
+  osType: OsType;
+}) => {
   const {
     connections: {
       addContentTab,
       removeContentTab,
-      setContentIdx,
       setNextContentIdx,
       setPrevContentIdx,
       setConnectionIdx,
+      setContentIdx,
     },
-    app: { setScreen, toggleScreen, setAppStore, cmdOrCtrl, altOrMeta },
+    app: { setAppStore, cmdOrCtrl },
   } = useAppSelector();
   setAppStore({ osType: props.osType });
-
-  for (let i = 1; i <= 9; i++) {
-    createShortcut([altOrMeta(), String(i)], () => {
-      setContentIdx(i - 1);
-    });
-  }
-
-  createShortcut(['F1'], () => {
-    toggleScreen('keymaps');
-  });
 
   createShortcut([cmdOrCtrl(), 't'], () => {
     addContentTab();
@@ -43,13 +36,14 @@ export const RegisterKeymaps = (props: { children: JSXElement; osType: OsType })
     setPrevContentIdx();
   });
 
-  createShortcut(['Control', '`'], () => {
-    setScreen('home');
-  });
+  for (let i = 1; i <= 9; i++) {
+    createShortcut([cmdOrCtrl(), String(i)], () => {
+      setContentIdx(i - 1);
+    });
+  }
 
   for (let i = 1; i <= 9; i++) {
-    createShortcut(['Control', String(i)], () => {
-      setScreen('console');
+    createShortcut([cmdOrCtrl(), 'Shift', String(i)], () => {
       setConnectionIdx(i - 1);
     });
   }

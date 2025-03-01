@@ -2,11 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+
+    --radius: 0.5rem;
+  }
+
+  [data-kb-theme='dark'] {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
+  font-weight: 500;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -16,11 +87,7 @@
 
 html,
 body {
-  margin: 0;
-  overflow: hidden;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  @apply m-0 overflow-hidden select-none;
 }
 
 html {
@@ -28,117 +95,29 @@ html {
   height: 100vh;
 }
 
-body {
-  width: 100%;
-  height: 100%;
-}
-
+body,
 #root {
-  width: 100%;
-  height: 100%;
+  @apply w-full h-full;
 }
 
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-[contenteditable] {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-/* Firefox */
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #000;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-.cm-editor {
-  height: 100%;
-}
-
-.cm-button {
-  @apply !rounded-full !text-xs !text-info;
-}
-
-*:focus {
-  outline-style: auto !important;
-}
-
-.tab-active:not(.tab-disabled):not([disabled]) {
-  border-width: 0px;
-  @apply bg-base-200;
-}
-
-.tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
-  @apply bg-base-content text-base-300;
-}
-
-dialog {
-  color: inherit;
-}
-
-.gutter-vertical:hover {
-  @apply bg-neutral-content rounded-lg;
-  cursor: row-resize;
-}
-
-.gutter-horizontal:hover {
-  @apply bg-neutral-content rounded-lg;
-  cursor: col-resize;
-}
-
-::-moz-selection { /* Code for Firefox */
-  @apply bg-primary text-primary-content;
-}
-
-::selection {
-  @apply bg-primary text-primary-content;
-}
-
-.solid-contextmenu__item__content {
-  padding: 0 1rem;
-}
-
-.solid-contextmenu {
-  box-shadow: none;
-}
-
-.loading-xl {
-  width: 6rem;
-}
-
-.tooltip::before {
-  @apply z-50;
-}
-
-/* ag-grid */
 div[class*='ag-theme'] {
   --ag-grid-size: 4px;
   --ag-list-item-height: 16px;
   --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
 }
 
-.tabs-lifted > .tab.tab-active:not(.tab-disabled):not([disabled]), .tabs-lifted > .tab:is(input:checked) {
-  border-width: 0;
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+.info-table td {
+  padding: 0 10px; /* Adjust the value as needed */
 }
