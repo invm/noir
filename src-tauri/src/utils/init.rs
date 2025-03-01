@@ -56,14 +56,8 @@ pub fn init_logger() -> tauri_plugin_log::Builder {
 
 pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(desktop)]
-    let _ = app
-        .handle()
-        .plugin(tauri_plugin_updater::Builder::new().build());
-
-    #[cfg(desktop)]
-    let _ = app
-        .handle()
-        .plugin(tauri_plugin_window_state::Builder::default().build());
+    app.handle()
+        .plugin(tauri_plugin_window_state::Builder::default().build())?;
 
     let _window = app.get_webview_window("main").unwrap();
     init_app(app.handle())?;

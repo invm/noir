@@ -131,7 +131,7 @@ export const Pagination = (props: PaginationProps) => {
         </Show>
 
         <Show when={props.query.count > 0}>
-          <span class="text-xs text-base-content">
+          <span class="text-xs">
             {t('console.table.total_rows')} {props.query.count}
           </span>
         </Show>

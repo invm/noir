@@ -1,7 +1,7 @@
 use crate::{database::QueryType, engine::types::result::ResultSet};
 use anyhow::Result;
 use fs::metadata;
-use log::{error, info};
+use log::error;
 use serde_json::json;
 use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Manager};

@@ -1,14 +1,15 @@
 {
   "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
+  "platforms": ["macOS", "windows", "linux"],
+  "windows": ["main"],
   "permissions": [
+    "dialog:default",
+    "log:default",
+    "window-state:allow-filename",
+    "window-state:allow-restore-state",
+    "window-state:allow-save-window-state",
+    "process:allow-restart",
+    "clipboard-manager:allow-write-text",
     "updater:default"
   ]
 }

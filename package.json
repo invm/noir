@@ -30,7 +30,7 @@
     "@tauri-apps/plugin-os": "~2.2.0",
     "@tauri-apps/plugin-process": "^2.2.0",
     "@tauri-apps/plugin-store": "~2.2.0",
-    "@tauri-apps/plugin-updater": "~2",
+    "@tauri-apps/plugin-updater": "^2.5.1",
     "@tauri-apps/plugin-window-state": "^2.2.1",
     "ag-grid-community": "^31.1.1",
     "ag-grid-solid": "^31.1.1",

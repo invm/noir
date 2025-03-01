@@ -49,7 +49,7 @@ const Wrapper: ParentComponent = (props) => {
       <ConnectedConnectionsProvider>
         <main class="h-full w-full flex flex-col">
           <div class="flex-1">{props.children}</div>
-          <Toaster position="bottom-center" />
+          <Toaster position="bottom-center" closeButton />
           <CommandPalette />
         </main>
       </ConnectedConnectionsProvider>

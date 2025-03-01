@@ -1,7 +1,6 @@
 use crate::utils::crypto::{decrypt_data, encrypt_data};
 use anyhow::Result;
 use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection};
-use log::info;
 use magic_crypt::MagicCrypt256;
 use rusqlite::params;
 use uuid::Uuid;

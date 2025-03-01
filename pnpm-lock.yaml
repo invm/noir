@@ -59,7 +59,7 @@ importers:
         specifier: ~2.2.0
         version: 2.2.0
       '@tauri-apps/plugin-updater':
-        specifier: ~2
+        specifier: ^2.5.1
         version: 2.5.1
       '@tauri-apps/plugin-window-state':
         specifier: ^2.2.1
