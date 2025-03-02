@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/invm/noir/compare/v1.2.0...v2.0.0) (2025-03-02)
+
+
+### Bug Fixes
+
+* rename error page ([7d82d24](https://github.com/invm/noir/commit/7d82d24314119725465a4e5d7f7d6bd9a3fbd09d))
+
 ## [1.2.0](https://github.com/invm/noir/compare/v1.1.5...v1.2.0) (2024-10-12)
 
 
