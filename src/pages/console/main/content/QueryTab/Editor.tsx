@@ -1,6 +1,6 @@
 import { loader, MonacoEditor } from 'solid-monaco';
 import * as monaco from 'monaco-editor';
-import { onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 import { useColorMode } from '@kobalte/core/color-mode';
 import { DEFAULT_SQL_KEYWORDS } from 'interfaces';
 import { Loader } from 'components/ui/loader';
@@ -77,29 +77,30 @@ const getEditorAutoCompleteSuggestion = (
 
 export const Editor = (props: EditorProps) => {
   const { colorMode } = useColorMode();
+  const [provider, setProvider] = createSignal<monaco.IDisposable | null>(null);
 
   onMount(async () => {
     if (!props.schema) return;
-    loader.init().then((monaco) => {
-      const provider = monaco.languages.registerCompletionItemProvider('sql', {
-        triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
+    const monaco = await loader.init();
+    const _provider = monaco.languages.registerCompletionItemProvider('sql', {
+      triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
 
-        provideCompletionItems: (model, position) => {
-          const word = model.getWordUntilPosition(position);
-          const range = {
-            startLineNumber: position.lineNumber,
-            endLineNumber: position.lineNumber,
-            startColumn: word.startColumn,
-            endColumn: word.endColumn,
-          };
-          return getEditorAutoCompleteSuggestion(range, props.schema!);
-        },
-      });
-
-      return () => {
-        provider.dispose();
-      };
+      provideCompletionItems: (model, position) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+        return getEditorAutoCompleteSuggestion(range, props.schema!);
+      },
     });
+    setProvider(_provider);
+  });
+
+  onCleanup(() => {
+    provider()?.dispose();
   });
 
   return (
