@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/invm/noir/compare/v2.0.0...v2.0.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* monaco completion provider ([bf55ce6](https://github.com/invm/noir/commit/bf55ce667412e19700d09289066b31379d9ceb23))
+* render nested keys, some ui changes, upgrade sqlparser version ([5bdbf56](https://github.com/invm/noir/commit/5bdbf5602d9a9153d05b1aa4cd2fd6ff02bd1b67))
+
 ## [2.0.0](https://github.com/invm/noir/compare/v1.2.0...v2.0.0) (2025-03-02)
 
 
