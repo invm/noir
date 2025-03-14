@@ -2,7 +2,7 @@ use anyhow::{anyhow, Result};
 use deadpool_sqlite::Pool;
 use serde_json::Value;
 
-use crate::engine::types::result::{ResultSet, TableMetadata};
+use crate::engine::types::result::ResultSet;
 
 use super::utils::row_to_object;
 
@@ -62,7 +62,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         end_time,
         affected_rows: 0,
         rows,
-        table: TableMetadata::default(),
+        table: None,
     };
     Ok(set)
 }

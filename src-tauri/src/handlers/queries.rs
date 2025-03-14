@@ -150,7 +150,7 @@ pub async fn enqueue_query(
                     match res {
                         Ok(mut result_set) => {
                             if let Some(table) = task.table.clone() {
-                                result_set.table = task.conn.get_table_metadata(&table).await.unwrap_or_default();
+                                result_set.table = Some(task.conn.get_table_metadata(&table).await.unwrap_or_default());
                             }
                             match write_query(&task.id, &result_set, task.query_type, temp_dir) {
                                 Ok(path) => {

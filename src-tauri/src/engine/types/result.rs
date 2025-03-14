@@ -15,5 +15,5 @@ pub struct ResultSet {
     pub end_time: u64,
     pub affected_rows: u64,
     pub rows: Vec<Value>,
-    pub table: TableMetadata,
+    pub table: Option<TableMetadata>,
 }

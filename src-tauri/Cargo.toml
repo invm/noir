@@ -39,7 +39,7 @@ futures = "0.3.28"
 tokio = { version = "1.32.0", features = ["full"] }
 tokio-util = "^0.7.10"
 tauri-plugin-log = { features = ["colored"], version = "2" }
-sqlparser = "0.54.0"
+sqlparser = "0.55.0"
 md-5 = "0.10.6"
 chrono = { version = "0.4.38", features = ["serde"] }
 postgres = { version = "0.19.7", features = [

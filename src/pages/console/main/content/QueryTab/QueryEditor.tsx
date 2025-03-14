@@ -69,7 +69,14 @@ export const QueryEditor = () => {
   };
 
   const onFormat = () => {
-    updateDataContentTab('query', format(data().query), tabIdx());
+    let q = data().query;
+    try {
+      q = format(data().query);
+    } catch (error) {
+      toast.error('Could not format query');
+    }
+    editor()?.setValue(q);
+    updateDataContentTab('query', q, tabIdx());
   };
 
   const getSelection = () => {
@@ -180,7 +187,6 @@ export const QueryEditor = () => {
   //     updateContentTab('data', { model: model!, viewState, cursor }, prev ?? 0);
   //     const saved = getContent(current).data as QueryContentTabData;
   //     if (saved?.model && !saved?.model.isDisposed()) {
-  //       console.log('restoring model', saved.model?.getValue());
   //       editor()?.setModel(saved.model);
   //       if (saved.viewState) {
   //         editor()?.restoreViewState(saved.viewState);
@@ -207,7 +213,7 @@ export const QueryEditor = () => {
 
   return (
     <CommandPaletteContextWrapper groups={commandPaletteGroup}>
-      <div class="flex-1 flex flex-col h-full">
+      <div class="flex-1 flex flex-col h-full w-full">
         <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
           <div class="flex items-center gap-2 bg-background ">
             <ActionRowButton

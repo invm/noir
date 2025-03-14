@@ -1,5 +1,5 @@
 use crate::database::QueryType;
-use crate::engine::types::result::{ResultSet, TableMetadata};
+use crate::engine::types::result::ResultSet;
 use anyhow::{anyhow, Result};
 use sqlx::MySqlPool;
 
@@ -21,7 +21,7 @@ pub async fn execute_query(pool: &MySqlPool, query: &str, t: QueryType) -> Resul
                     .as_millis() as u64,
                 affected_rows: 0,
                 rows,
-                table: TableMetadata::default(),
+                table: None,
             })
         }
         _ => {
@@ -36,7 +36,7 @@ pub async fn execute_query(pool: &MySqlPool, query: &str, t: QueryType) -> Resul
                 end_time,
                 affected_rows,
                 rows: vec![],
-                table: TableMetadata::default(),
+                table: None,
             })
         }
     }

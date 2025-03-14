@@ -242,7 +242,7 @@ export type QueryMetadataResult = Omit<ResultSet, 'rows' | 'id'>;
 
 export const loadingMessages = [
   'SELECT * FROM patience WHERE exists = true',
-  "INSERT INTO brain (caffeine) VALUES ('loading')",
+  "INSERT INTO brain (caffeine) VALUES ('-1')",
   'JOIN-ing the dots...',
   'DROP TABLE boredom;',
   'Counting to infinity (twice)...',

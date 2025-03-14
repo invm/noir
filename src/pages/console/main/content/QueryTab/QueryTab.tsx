@@ -42,7 +42,7 @@ export const QueryTab = () => {
             {(_tab, idx) => (
               <TabsContent
                 value={idx().toString()}
-                class="h-full flex-col flex-1 border-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
+                class="h-full flex-col flex-1 border-0 !m-0 p-0 data-[state=active]:flex data-[state=active]:flex-col"
               >
                 <Results editable={false} gridTheme={gridTheme()} />
               </TabsContent>

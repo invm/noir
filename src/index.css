@@ -104,6 +104,7 @@ div[class*='ag-theme'] {
   --ag-grid-size: 4px;
   --ag-list-item-height: 16px;
   --ag-cell-horizontal-padding: calc(var(--ag-grid-size) * 2);
+  --ag-wrapper-border-radius: 0px;
 }
 
 @layer utilities {

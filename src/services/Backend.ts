@@ -16,12 +16,11 @@ export const BackendService = () => {
     path: string,
     page = 0,
     page_size = pageSize()
-  ) => {
-    const res = await invoke<string>('query_results', {
+  ): Promise<Row[]> => {
+    const res = await invoke<string[]>('query_results', {
       params: { path, page, page_size },
     });
-    const rows = JSON.parse('[' + res + ']') as unknown as Row[];
-    return rows;
+    return res.map((r) => JSON.parse(r));
   };
 
   const getQueryMetadata = async (path: string) => {

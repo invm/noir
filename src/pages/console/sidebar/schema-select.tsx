@@ -85,7 +85,7 @@ export const SchemaSelect = () => {
         result_sets: [res],
         autoLimit: false,
         viewState: null,
-        id: randomId()
+        id: randomId(),
       };
       addContentTab(newContentTab(t('sidebar.process_list'), 'Query', data));
     } catch (error) {
@@ -111,14 +111,17 @@ export const SchemaSelect = () => {
   const dropDatabase = async (schema: string) => {
     try {
       const selectedSchema = getConnection().selectedSchema;
+      if (selectedSchema === schema) {
+        toast.error(
+          'Cannot drop current schema, change the default schema first.'
+        );
+        return;
+      }
       const query = 'DROP SCHEMA ' + schema;
       await invoke<ResultSet>('execute_query', {
         connId: getConnection().id,
         query,
       });
-      if (selectedSchema === schema) {
-        updateConnectionTab('selectedSchema', getConnection().schemas[0] ?? '');
-      }
       await refreshEntities();
     } catch (error) {
       toast.error('Could not drop database', {

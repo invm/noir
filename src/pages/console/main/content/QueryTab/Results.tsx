@@ -111,6 +111,8 @@ export const Results = (props: {
     if (drawerOpen.open) setDrawerOpen({ open: false });
   });
 
+  const [rowIdx, setRowIdx] = createSignal(0);
+
   const openModal = (s: string) => {
     setCode(s);
     setOpen(true);
@@ -125,6 +127,7 @@ export const Results = (props: {
       ] as const,
     async ([pageVal, pageSizeVal, result_set]) => {
       try {
+        setRowIdx(0);
         // Reruns when either signal updates
         const columns = result_set?.columns ?? [];
         const foreign_keys = result_set?.foreign_keys ?? [];
@@ -403,24 +406,28 @@ export const Results = (props: {
 
   const getRowId: GetRowIdFunc<Row> = (params) => {
     const pks = table.primary_key.reduce((acc, curr) => {
-      return [...acc, params.data[curr.column_name as string] as string];
+      return [...acc, params.data[getAnyCase(curr, 'column_name')] as string];
     }, [] as string[]);
     const fks = table.foreign_keys.reduce((acc, curr) => {
-      return [...acc, params.data[curr.column_name as string] as string];
+      return [...acc, params.data[getAnyCase(curr, 'column_name')] as string];
     }, [] as string[]);
     if (pks.length || fks.length) {
       return [...pks, ...fks].join('_');
     }
 
-    return Object.entries(params.data)
-      .map(([_, value]) => {
-        if (value == null) return 'null';
-        if (typeof value === 'string' && value.length > 50) {
-          return `${value.substring(0, 50)}_${value.length}`;
-        }
-        return String(value);
-      })
-      .join('_');
+    setRowIdx((p) => p + 1);
+
+    return (
+      Object.entries(params.data)
+        .map(([_, value]) => {
+          if (value == null) return 'null';
+          if (typeof value === 'string' && value.length > 50) {
+            return `${value.substring(0, 50)}_${value.length}`;
+          }
+          return String(value);
+        })
+        .join('_') + rowIdx()
+    );
   };
 
   return (

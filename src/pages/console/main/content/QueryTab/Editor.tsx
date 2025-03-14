@@ -1,6 +1,6 @@
-import { loader, MonacoEditor } from 'solid-monaco';
+import { MonacoEditor } from 'solid-monaco';
 import * as monaco from 'monaco-editor';
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup } from 'solid-js';
 import { useColorMode } from '@kobalte/core/color-mode';
 import { DEFAULT_SQL_KEYWORDS } from 'interfaces';
 import { Loader } from 'components/ui/loader';
@@ -16,7 +16,10 @@ type EditorProps = {
 };
 
 type Column = {
-  label: string;
+  label: {
+    label: string;
+    description: string;
+  };
   kind: monaco.languages.CompletionItemKind;
   detail: string;
   insertText: string;
@@ -56,7 +59,10 @@ const getEditorAutoCompleteSuggestion = (
     return [
       ...acc,
       ...cols.map((col) => ({
-        label: `${col} [${k}]`,
+        label: {
+          label: col,
+          description: k,
+        },
         kind: monaco.languages.CompletionItemKind.Property,
         detail: 'Column',
         insertText: col,
@@ -79,26 +85,6 @@ export const Editor = (props: EditorProps) => {
   const { colorMode } = useColorMode();
   const [provider, setProvider] = createSignal<monaco.IDisposable | null>(null);
 
-  onMount(async () => {
-    if (!props.schema) return;
-    const monaco = await loader.init();
-    const _provider = monaco.languages.registerCompletionItemProvider('sql', {
-      triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
-
-      provideCompletionItems: (model, position) => {
-        const word = model.getWordUntilPosition(position);
-        const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
-        };
-        return getEditorAutoCompleteSuggestion(range, props.schema!);
-      },
-    });
-    setProvider(_provider);
-  });
-
   onCleanup(() => {
     provider()?.dispose();
   });
@@ -110,16 +96,36 @@ export const Editor = (props: EditorProps) => {
         tabSize: 2,
         lineNumbers: 'on',
         fontSize: 14,
+        cursorBlinking: 'smooth',
         folding: true,
         theme: 'vs-' + colorMode(),
         language: props.language,
+        renderWhitespace: 'all',
         wordWrap: 'on',
         readOnly: props.readOnly,
         automaticLayout: true,
         autoSurround: 'languageDefined',
         minimap: { enabled: false },
       }}
-      onMount={props.onMount}
+      onMount={(m, e) => {
+        props.onMount?.(m, e);
+        if (!props.schema) return;
+        const _provider = m.languages.registerCompletionItemProvider('sql', {
+          triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot
+
+          provideCompletionItems: (model, position) => {
+            const word = model.getWordUntilPosition(position);
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: word.startColumn,
+              endColumn: word.endColumn,
+            };
+            return getEditorAutoCompleteSuggestion(range, props.schema!);
+          },
+        });
+        setProvider(_provider);
+      }}
       language={props.language}
       onChange={props.onChange}
       loadingState={<Loader size="lg" />}

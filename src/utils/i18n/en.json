@@ -114,8 +114,7 @@
       "show_trigger": "Show trigger",
       "show_create_statement": "Show create statement",
       "show_process_list": "Show process list",
-      "process_list": "Process list",
-      "drop_database": "Drop database"
+      "process_list": "Process list"
     },
     "settings": {
       "read_docs": "Read docs",

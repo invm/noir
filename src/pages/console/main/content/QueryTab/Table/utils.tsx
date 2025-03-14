@@ -114,8 +114,14 @@ export const getColumnDefs = ({
       });
       const visible_type = getAnyCase(col, 'column_type') || '';
 
+      let cellDataType = 'text';
+      if (typeof row?.[field] === 'boolean') {
+        cellDataType = 'boolean';
+      }
+
       return {
         cellRenderer,
+        cellDataType,
         editable,
         headerComponent: () =>
           headerComponent(field, {
@@ -129,16 +135,27 @@ export const getColumnDefs = ({
               : undefined,
           }),
         field,
+        valueGetter: (r) => {
+          return r.data[field];
+        },
         headerName: field,
       };
     });
   }
   return Object.keys(row).map((field, _i) => {
+    let cellDataType = 'text';
+    if (typeof row[field] === 'boolean') {
+      cellDataType = 'boolean';
+    }
     return {
       editable,
+      cellDataType,
       cellRenderer,
       headerComponent: () => headerComponent(field, {}),
       field,
+      valueGetter: (r) => {
+        return r.data[field];
+      },
       headerName: field,
     };
   });

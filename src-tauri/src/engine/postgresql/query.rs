@@ -1,4 +1,4 @@
-use crate::engine::types::result::{ResultSet, TableMetadata};
+use crate::engine::types::result::ResultSet;
 use anyhow::Result;
 use deadpool_postgres::Pool;
 use futures::{pin_mut, TryStreamExt};
@@ -40,12 +40,7 @@ pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
         end_time,
         affected_rows,
         rows,
-        table: TableMetadata {
-            table: String::from(""),
-            foreign_keys: None,
-            primary_key: None,
-            columns: None,
-        },
+        table: None,
     };
     Ok(set)
 }

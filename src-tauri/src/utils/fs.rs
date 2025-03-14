@@ -93,16 +93,26 @@ pub fn write_query(
     result_set.rows.iter().for_each(|row| {
         rows += &(row.to_string() + "\n");
     });
+    let (table_name, foreign_keys, primary_key, columns) = match &result_set.table {
+        None => ("".to_string(), vec![], vec![], vec![]),
+        Some(t) => (
+            t.table.to_string(),
+            t.foreign_keys.clone().unwrap_or(vec![]),
+            t.primary_key.clone().unwrap_or(vec![]),
+            t.columns.clone().unwrap_or(vec![]),
+        ),
+    };
+
     let metadata = json!({
         "query_type": query_type.to_string(),
         "start_time": result_set.start_time,
         "end_time": result_set.end_time,
         "count": result_set.rows.len(),
         "affected_rows": result_set.affected_rows,
-        "table": result_set.table.table,
-        "foreign_keys": result_set.table.foreign_keys,
-        "primary_key": result_set.table.primary_key,
-        "columns": result_set.table.columns,
+        "table": table_name,
+        "foreign_keys": foreign_keys,
+        "primary_key": primary_key,
+        "columns": columns,
     })
     .to_string();
     let mut data_path = tmp_dir.clone();
