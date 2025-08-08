@@ -9,7 +9,7 @@ use tauri::{AppHandle, Manager};
 use rand::{distributions::Alphanumeric, Rng};
 
 pub fn get_db_path(app: AppHandle) -> PathBuf {
-    let app_path = get_app_path(app);
+    let app_path = get_app_path(&app);
     PathBuf::from(format!(
         "{}/.app.db",
         app_path.to_str().expect("Failed to get app path")
@@ -19,7 +19,7 @@ pub fn get_db_path(app: AppHandle) -> PathBuf {
 fn get_key_path(app: AppHandle) -> PathBuf {
     PathBuf::from(format!(
         "{}/._",
-        get_app_path(app).to_str().expect("Failed to get app path")
+        get_app_path(&app).to_str().expect("Failed to get app path")
     ))
 }
 
@@ -47,7 +47,7 @@ pub fn get_tmp_dir(app: AppHandle) -> Result<String> {
     return Ok(temp_dir.to_str().unwrap_or("").to_string());
 }
 
-pub fn get_app_path(app: AppHandle) -> PathBuf {
+pub fn get_app_path(app: &AppHandle) -> PathBuf {
     app.path()
         .app_config_dir()
         .expect("Failed to get app config dir")
@@ -60,7 +60,7 @@ pub fn is_appdir_populated(app: AppHandle) -> bool {
 }
 
 pub fn create_app_dir(app: AppHandle) -> Result<()> {
-    let dir = get_app_path(app);
+    let dir = get_app_path(&app);
     Ok(fs::create_dir_all(dir)?)
 }
 

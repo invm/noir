@@ -42,10 +42,11 @@ tauri-plugin-log = { features = ["colored"], version = "2" }
 sqlparser = "0.55.0"
 md-5 = "0.10.6"
 chrono = { version = "0.4.38", features = ["serde"] }
-postgres = { version = "0.19.7", features = [
+postgres = { version = "0.19.10", features = [
   "array-impls",
   "with-serde_json-1",
   "with-chrono-0_4",
+  "with-uuid-1",
 ] }
 deadpool-postgres = "0.12.1"
 deadpool-sqlite = "0.7.0"

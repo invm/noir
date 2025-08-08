@@ -17,13 +17,18 @@ pub fn row_to_object(row: Row) -> Result<Value> {
 
 fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
     let f64_to_json_number = |raw_val: f64| -> Result<Value> {
-        let temp =
-            serde_json::Number::from_f64(raw_val).ok_or(anyhow!("invalid json-float"))?;
+        let temp = serde_json::Number::from_f64(raw_val).ok_or(anyhow!("invalid json-float"))?;
         Ok(Value::Number(temp))
     };
     Ok(match *column.type_() {
         // for rust-postgres <> postgres type-mappings: https://docs.rs/postgres/latest/postgres/types/trait.FromSql.html#types
         // for postgres types: https://www.postgresql.org/docs/7.4/datatype.html#DATATYPE-TABLE
+        Type::UUID => get_basic(row, column, column_i, |a: uuid::Uuid| {
+            Ok(Value::String(a.to_string()))
+        })?,
+        Type::UUID_ARRAY => get_basic(row, column, column_i, |a: uuid::Uuid| {
+            Ok(Value::String(a.to_string()))
+        })?,
         Type::OID => get_basic(row, column, column_i, |a: u32| {
             Ok(Value::Number(serde_json::Number::from(a)))
         })?,
@@ -54,9 +59,12 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
         Type::JSON | Type::JSONB => get_basic(row, column, column_i, |a: Value| Ok(a))?,
         Type::FLOAT4 => get_basic(row, column, column_i, |a: f32| f64_to_json_number(a.into()))?,
         Type::FLOAT8 => get_basic(row, column, column_i, |a: f64| f64_to_json_number(a))?,
-        // these types require a custom StringCollector struct as an intermediary (see struct at bottom)
-
-        // array types
+        Type::DATE => get_basic(row, column, column_i, |a: chrono::NaiveDate| {
+            Ok(Value::String(a.to_string()))
+        })?,
+        Type::TIME => get_basic(row, column, column_i, |a: chrono::NaiveTime| {
+            Ok(Value::String(a.to_string()))
+        })?,
         Type::BOOL_ARRAY => get_array(row, column, column_i, |a: bool| Ok(Value::Bool(a)))?,
         Type::INT2_ARRAY => get_array(row, column, column_i, |a: i16| {
             Ok(Value::Number(serde_json::Number::from(a)))
@@ -80,6 +88,11 @@ fn convert_value(row: &Row, column: &Column, column_i: usize) -> Result<Value> {
             let val: Option<GenericEnum> = row.get(1);
             if let Some(_i) = val {
                 return Ok(Value::String(_i.0));
+            }
+            // try as string and not enum
+            let val: Option<String> = row.get(column_i);
+            if let Some(val) = val {
+                return Ok(Value::String(val));
             }
             Value::Null
         }

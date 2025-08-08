@@ -1,8 +1,9 @@
-use super::fs::{create_app_dir, is_appdir_populated};
+use super::fs::{create_app_dir, get_app_path, is_appdir_populated};
 use crate::{database::init::initialize_database, state::AppState, utils::fs::create_app_key};
 use anyhow::Result;
 use log::{LevelFilter, Record};
 use std::fmt::Arguments;
+use std::{fs, panic};
 use tauri::{App, AppHandle, Manager, State};
 use tauri_plugin_log::fern::{
     colors::{Color, ColoredLevelConfig},
@@ -55,6 +56,14 @@ pub fn init_logger() -> tauri_plugin_log::Builder {
 }
 
 pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
+    let dest = get_app_path(app.handle());
+    panic::set_hook(Box::new(move |info| {
+        log::error!("Panicked: {:?}", info);
+        let ts = chrono::offset::Utc::now();
+        let log_path = dest.join("error.log");
+        fs::write(log_path, format!("{} - {:?}", ts, info)).expect("Failed to write error log");
+    }));
+
     #[cfg(desktop)]
     app.handle()
         .plugin(tauri_plugin_window_state::Builder::default().build())?;

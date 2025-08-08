@@ -1,11 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use log::error;
 use noir::utils::init::{app_setup, init_logger};
 use state::AppState;
-use std::path::PathBuf;
-use std::{fs, panic};
 use tauri::Emitter;
 
 use noir::{
@@ -20,14 +17,6 @@ struct Payload {
 }
 
 fn main() {
-    panic::set_hook(Box::new(|info| {
-        error!("Panicked: {:?}", info);
-        let ts = chrono::offset::Utc::now();
-        let dest = format!("/tmp/noir.error.log",);
-        fs::write(PathBuf::from(dest), format!("{} - {:?}", ts, info))
-            .expect("Failed to write error log");
-    }));
-
     tauri::Builder::default()
         .plugin(init_logger().build())
         .manage(AppState::default())
