@@ -1,4 +1,14 @@
 /* @refresh reload */
+
+// Configure Monaco Editor environment BEFORE any imports
+// This must be done before Monaco Editor is imported
+self.MonacoEnvironment = {
+  getWorker: function (_moduleId, _label) {
+    const blob = new Blob([''], { type: 'text/json' });
+    return new Worker(URL.createObjectURL(blob));
+  }
+};
+
 import { render } from 'solid-js/web';
 import { ErrorBoundary } from 'solid-js';
 

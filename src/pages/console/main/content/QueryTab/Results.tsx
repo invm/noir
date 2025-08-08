@@ -63,6 +63,7 @@ export const Results = (props: {
   } = useAppSelector();
   const [open, setOpen] = createSignal(false);
   const { colorMode } = useColorMode();
+  let gridRef: AgGridSolidRef;
 
   const [drawerOpen, setDrawerOpen] = createStore<DrawerState>({
     mode: 'add' as 'add' | 'edit',
@@ -224,7 +225,6 @@ export const Results = (props: {
     setPage(0);
   };
 
-  let gridRef: AgGridSolidRef;
 
   const onBtnExport = async (t: 'csv' | 'json') => {
     if (!data()?.path) return;
@@ -314,14 +314,14 @@ export const Results = (props: {
 
   const undoChanges = async () => {
     if (Object.keys(changes['update']).length) {
-      gridRef.api.applyTransaction({
+      gridRef!.api.applyTransaction({
         update: Object.values(changes['update']).map((d) => d.data),
       });
     }
     if (Object.keys(changes['delete']).length) {
       // return rows to their place
       Object.values(changes['delete']).forEach((d) => {
-        gridRef.api.applyTransaction({
+        gridRef!.api.applyTransaction({
           addIndex: d.rowIndex,
           add: [d.data],
         });
