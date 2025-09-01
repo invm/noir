@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/invm/noir/compare/v2.0.1...v2.0.2) (2025-09-01)
+
+
+### Bug Fixes
+
+* bs ([63cef14](https://github.com/invm/noir/commit/63cef143aea1e89616cae538a1c0c55c9f49ddb5))
+* json modal ([bc92827](https://github.com/invm/noir/commit/bc928275398e68bfb9bde17cda5594bd58984ca2))
+* uuids in psql ([a74741f](https://github.com/invm/noir/commit/a74741fb77e9b0787ca31fa7dbb0ff126b24822d))
+
 ### [2.0.1](https://github.com/invm/noir/compare/v2.0.0...v2.0.1) (2025-03-14)
 
 
