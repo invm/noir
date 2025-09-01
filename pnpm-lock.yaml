@@ -85,6 +85,9 @@ importers:
       monaco-editor:
         specifier: ^0.48.0
         version: 0.48.0
+      monaco-vim:
+        specifier: ^0.4.2
+        version: 0.4.2(monaco-editor@0.48.0)
       solid-icons:
         specifier: ^1.1.0
         version: 1.1.0(solid-js@1.8.19)
@@ -1844,6 +1847,11 @@ packages:
 
   monaco-editor@0.48.0:
     resolution: {integrity: sha512-goSDElNqFfw7iDHMg8WDATkfcyeLTNpBHQpO8incK6p5qZt5G/1j41X0xdGzpIkGojGXM+QiRQyLjnfDVvrpwA==}
+
+  monaco-vim@0.4.2:
+    resolution: {integrity: sha512-rdbQC3O2rmpwX2Orzig/6gZjZfH7q7TIeB+uEl49sa+QyNm3jCKJOw5mwxBdFzTqbrPD+URfg6A2lEkuL5kymw==}
+    peerDependencies:
+      monaco-editor: '*'
 
   moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
@@ -4325,6 +4333,10 @@ snapshots:
   modify-values@1.0.1: {}
 
   monaco-editor@0.48.0: {}
+
+  monaco-vim@0.4.2(monaco-editor@0.48.0):
+    dependencies:
+      monaco-editor: 0.48.0
 
   moo@0.5.2: {}
 

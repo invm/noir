@@ -1,9 +1,11 @@
 import { MonacoEditor } from 'solid-monaco';
 import * as monaco from 'monaco-editor';
-import { createSignal, onCleanup } from 'solid-js';
+import { createSignal, onCleanup, createEffect } from 'solid-js';
 import { useColorMode } from '@kobalte/core/color-mode';
 import { DEFAULT_SQL_KEYWORDS } from 'interfaces';
 import { Loader } from 'components/ui/loader';
+// @ts-expect-error
+import { initVimMode } from 'monaco-vim';
 
 type EditorProps = {
   readOnly?: boolean;
@@ -13,6 +15,7 @@ type EditorProps = {
   language?: string;
   model?: monaco.editor.ITextModel;
   path: string;
+  vimModeEnabled?: boolean;
 };
 
 type Column = {
@@ -84,9 +87,38 @@ const getEditorAutoCompleteSuggestion = (
 export const Editor = (props: EditorProps) => {
   const { colorMode } = useColorMode();
   const [provider, setProvider] = createSignal<monaco.IDisposable | null>(null);
+  const [vimMode, setVimMode] = createSignal<monaco.IDisposable | null>(null);
+  const [editor, setEditor] = createSignal<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   onCleanup(() => {
     provider()?.dispose();
+    vimMode()?.dispose();
+  });
+
+  createEffect(() => {
+    const currentEditor = editor();
+    const vimModeEnabled = props.vimModeEnabled;
+
+    if (!currentEditor) return;
+
+    if (vimModeEnabled && !vimMode()) {
+      const statusBarNode = document.getElementById('vim-statusbar');
+      if (statusBarNode) {
+        try {
+          const _vimMode = initVimMode(currentEditor, statusBarNode);
+          setVimMode(_vimMode);
+        } catch (error) {
+          console.warn('Failed to initialize vim mode:', error);
+        }
+      }
+    } else if (!vimModeEnabled && vimMode()) {
+      try {
+        vimMode()?.dispose();
+        setVimMode(null);
+      } catch (error) {
+        console.warn('Failed to dispose vim mode:', error);
+      }
+    }
   });
 
   return (
@@ -109,6 +141,8 @@ export const Editor = (props: EditorProps) => {
       }}
       onMount={(m, e) => {
         props.onMount?.(m, e);
+        setEditor(e);
+
         if (!props.schema) return;
         const _provider = m.languages.registerCompletionItemProvider('sql', {
           triggerCharacters: [' ', '.'], // Trigger autocomplete on space and dot

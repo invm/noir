@@ -113,6 +113,7 @@ export const Results = (props: {
   });
 
   const [rowIdx, setRowIdx] = createSignal(0);
+  const [rowIdMap, setRowIdMap] = createSignal<Map<Row, string>>(new Map());
 
   const openModal = (s: string) => {
     setCode(s);
@@ -129,6 +130,7 @@ export const Results = (props: {
     async ([pageVal, pageSizeVal, result_set]) => {
       try {
         setRowIdx(0);
+        setRowIdMap(new Map());
         // Reruns when either signal updates
         const columns = result_set?.columns ?? [];
         const foreign_keys = result_set?.foreign_keys ?? [];
@@ -208,6 +210,8 @@ export const Results = (props: {
     on(idx, () => {
       setPage(0);
       resetChanges();
+      setRowIdMap(new Map());
+      setRowIdx(0);
     })
   );
 
@@ -415,19 +419,14 @@ export const Results = (props: {
       return [...pks, ...fks].join('_');
     }
 
-    setRowIdx((p) => p + 1);
-
-    return (
-      Object.entries(params.data)
-        .map(([_, value]) => {
-          if (value == null) return 'null';
-          if (typeof value === 'string' && value.length > 50) {
-            return `${value.substring(0, 50)}_${value.length}`;
-          }
-          return String(value);
-        })
-        .join('_') + rowIdx()
-    );
+    const currentMap = rowIdMap();
+    if (!currentMap.has(params.data)) {
+      setRowIdx((p) => p + 1);
+      const newId = `row_${rowIdx()}`;
+      setRowIdMap(new Map(currentMap.set(params.data, newId)));
+      return newId;
+    }
+    return currentMap.get(params.data)!;
   };
 
   return (

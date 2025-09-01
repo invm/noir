@@ -10,7 +10,7 @@ import { t } from 'utils/i18n';
 import { createStore } from 'solid-js/store';
 import { ActionRowButton } from './components/ActionRowButton';
 import { CgInfo } from 'solid-icons/cg';
-
+import { SiVim } from 'solid-icons/si';
 import * as monaco from 'monaco-editor';
 import { QueryContentTabData } from 'services/Connections';
 import { Editor } from './Editor';
@@ -34,6 +34,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from 'components/ui/alert-dialog';
+import {
+  Switch,
+  SwitchControl,
+  SwitchLabel,
+  SwitchThumb,
+} from 'components/ui/switch';
 
 export const QueryEditor = () => {
   const {
@@ -47,7 +53,7 @@ export const QueryEditor = () => {
       updateResultSet,
       updateDataContentTab,
     },
-    app: { appStore, cmdOrCtrl },
+    app: { appStore, cmdOrCtrl, setVimMode },
     backend: { cancelTask },
   } = useAppSelector();
   const [schema, setSchema] = createStore({});
@@ -213,7 +219,7 @@ export const QueryEditor = () => {
 
   return (
     <CommandPaletteContextWrapper groups={commandPaletteGroup}>
-      <div class="flex-1 flex flex-col h-full w-full">
+      <div class="flex-1 flex flex-col h-full w-full relative">
         <div class="w-full border-b-2 border-accent flex justify-between items-center p-1 px-2">
           <div class="flex items-center gap-2 bg-background ">
             <ActionRowButton
@@ -246,6 +252,19 @@ export const QueryEditor = () => {
               </TooltipTrigger>
               <TooltipContent>{t('console.actions.auto_limit')}</TooltipContent>
             </Tooltip>
+            <Switch
+              class="flex items-center space-x-2"
+              onChange={(e) => setVimMode(e)}
+              checked={appStore.vimModeOn}
+            >
+              <SwitchControl>
+                <SwitchThumb />
+              </SwitchControl>
+              <SwitchLabel class="text-sm font-medium flex gap-2 leading-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-70">
+                <SiVim class="text-green-700" />
+                Vim Mode
+              </SwitchLabel>
+            </Switch>
           </div>
 
           <div class="flex items-center gap-2">
@@ -309,6 +328,7 @@ export const QueryEditor = () => {
         <div class="flex-1">
           <Editor
             language="sql"
+            vimModeEnabled={appStore.vimModeOn}
             onMount={(_m, e) => {
               setEditor(e);
 
@@ -347,6 +367,9 @@ export const QueryEditor = () => {
             path={tabId()}
           />
         </div>
+        <Show when={appStore.vimModeOn}>
+          <div id="vim-statusbar" class="h-6 bg-muted absolute w-full bottom-0"></div>
+        </Show>
       </div>
       <AlertDialog open={alertDialogOpen()} onOpenChange={setAlertDialogOpen}>
         <AlertDialogContent>

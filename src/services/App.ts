@@ -22,6 +22,7 @@ type AppStore = {
   gridTheme: string;
   osType: OsType;
   sensitiveQueries: string[];
+  vimModeOn: boolean;
 };
 
 const getSavedData = async (key: string) => {
@@ -40,6 +41,7 @@ export const AppService = () => {
     gridTheme: 'alpine-dark',
     osType: 'linux',
     sensitiveQueries: ['Delete', 'Drop', 'Alter', 'Update', 'Truncate'],
+    vimModeOn: false,
   });
 
   const updateStore = debounce(async () => {
@@ -70,6 +72,11 @@ export const AppService = () => {
     updateStore();
   };
 
+  const setVimMode = (enabled: boolean) => {
+    setAppStore('vimModeOn', enabled);
+    updateStore();
+  };
+
   return {
     appStore,
     setAppStore,
@@ -79,5 +86,6 @@ export const AppService = () => {
     updateTheme,
     cmdOrCtrl,
     updateSensitiveQueries,
+    setVimMode,
   };
 };
