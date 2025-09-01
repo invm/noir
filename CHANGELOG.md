@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/invm/noir/compare/v2.0.2...v2.1.0) (2025-09-01)
+
+
+### Features
+
+* add Vim mode support to the SQL editor ([c82c066](https://github.com/invm/noir/commit/c82c06602df6f25b98d80be648b1ff253011891b))
+
 ### [2.0.2](https://github.com/invm/noir/compare/v2.0.1...v2.0.2) (2025-09-01)
 
 
