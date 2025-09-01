@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   sql-bricks@3.0.1:
-    hash: 56u4mdo3sos5jwscrtmdehi7ca
+    hash: dd8a18c765801b2486d87c3a343cea7d59bcaecfe01bb36888947e0f0b57beba
     path: patches/sql-bricks@3.0.1.patch
 
 importers:
@@ -102,7 +102,7 @@ importers:
         version: 0.2.8(solid-js@1.8.19)
       sql-bricks:
         specifier: ^3.0.1
-        version: 3.0.1(patch_hash=56u4mdo3sos5jwscrtmdehi7ca)
+        version: 3.0.1(patch_hash=dd8a18c765801b2486d87c3a343cea7d59bcaecfe01bb36888947e0f0b57beba)
       sql-formatter:
         specifier: ^15.3.2
         version: 15.3.2
@@ -4747,7 +4747,7 @@ snapshots:
     dependencies:
       through: 2.3.8
 
-  sql-bricks@3.0.1(patch_hash=56u4mdo3sos5jwscrtmdehi7ca): {}
+  sql-bricks@3.0.1(patch_hash=dd8a18c765801b2486d87c3a343cea7d59bcaecfe01bb36888947e0f0b57beba): {}
 
   sql-formatter@15.3.2:
     dependencies:
