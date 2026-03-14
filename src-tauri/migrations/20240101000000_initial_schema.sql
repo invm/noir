@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS connections (
   credentials VARCHAR(1024) NOT NULL,
   schema VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
-  color VARCHAR(255) NOT NULL
+  color VARCHAR(255) NOT NULL,
+  metadata TEXT NOT NULL DEFAULT '{}'
 );
