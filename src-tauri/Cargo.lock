@@ -2437,25 +2437,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "include_dir"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "923d117408f1e49d914f1a379a309cffe4f18c05cf4e3d12e613a15fc81bd0dd"
-dependencies = [
- "include_dir_macros",
-]
-
-[[package]]
-name = "include_dir_macros"
-version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cab85a7ed0bd5f0e76d93846e0147172bed2e2d3f859bcc33a8d9699cad1a75"
-dependencies = [
- "proc-macro2",
- "quote",
-]
-
-[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2959,8 +2940,6 @@ dependencies = [
  "deadpool-sqlite",
  "env_logger",
  "futures",
- "include_dir",
- "lazy_static",
  "log",
  "magic-crypt",
  "md-5 0.10.6",
@@ -2970,7 +2949,6 @@ dependencies = [
  "postgres-openssl",
  "rand 0.8.5",
  "rusqlite",
- "rusqlite_migration",
  "serde",
  "serde_json",
  "sql_lexer",
@@ -4407,17 +4385,6 @@ dependencies = [
  "serde_json",
  "smallvec",
  "uuid",
-]
-
-[[package]]
-name = "rusqlite_migration"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4116d1697de2912db0b72069473dfb025f6c332b4a085ed041d121e8d745aea"
-dependencies = [
- "include_dir",
- "log",
- "rusqlite",
 ]
 
 [[package]]

@@ -4,7 +4,7 @@ use anyhow::Result;
 use log::{LevelFilter, Record};
 use std::fmt::Arguments;
 use std::{fs, panic};
-use tauri::{App, AppHandle, Manager, State};
+use tauri::{App, AppHandle, Manager};
 use tauri_plugin_log::fern::{
     colors::{Color, ColoredLevelConfig},
     FormatCallback,
@@ -92,11 +92,18 @@ pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let _window = app.get_webview_window("main").unwrap();
     init_app(app.handle())?;
-    let handle = app.handle();
+    let handle = app.handle().clone();
 
-    let app_state: State<AppState> = handle.state();
-    let db = initialize_database(app.handle().clone()).expect("Database initialize should succeed");
-    *app_state.db.lock().expect("Failed to lock db") = Some(db);
+    let rt = tokio::runtime::Handle::current();
+    let pool = rt
+        .block_on(initialize_database(handle))
+        .expect("Database initialize should succeed");
+
+    let app_state = app.state::<AppState>();
+    app_state
+        .db
+        .set(pool)
+        .expect("Database pool already initialized");
 
     Ok(())
 }
