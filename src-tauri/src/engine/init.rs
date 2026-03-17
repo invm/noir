@@ -1,16 +1,10 @@
 use anyhow::{anyhow, Result};
-use std::{path::PathBuf, time::Duration};
+use std::time::Duration;
 
-use deadpool_postgres::{
-    Config as PsqlConfig, ManagerConfig as PsqlManagerConfig, Pool, RecyclingMethod, SslMode,
-};
-use deadpool_sqlite::Config as SqliteConfig;
-use openssl::ssl::{SslConnector, SslFiletype, SslMethod, SslVerifyMode};
-use postgres::NoTls;
-use postgres_openssl::MakeTlsConnector;
 use sqlx::{
     mysql::{MySqlConnectOptions, MySqlPoolOptions, MySqlSslMode},
     pool::PoolOptions,
+    postgres::{PgConnectOptions, PgPoolOptions, PgSslMode},
     Executor,
 };
 use tauri::AppHandle;
@@ -50,8 +44,7 @@ pub async fn init_conn(
         Dialect::Postgresql => {
             let _cfg = cfg.clone();
             let pool = build_psql_pool(cfg, app_handle).await?;
-            let conn = pool.get().await?;
-            conn.execute("SELECT 1", &[]).await?;
+            sqlx::query("SELECT 1").execute(&pool).await?;
             Ok(InitiatedConnection {
                 config: _cfg,
                 pool: ConnectionPool::Postgresql(pool),
@@ -67,43 +60,52 @@ pub async fn init_conn(
                 .get("path")
                 .cloned()
                 .unwrap_or("".to_string());
-            let config = SqliteConfig::new(PathBuf::from(path.clone()));
-            match config.create_pool(deadpool_sqlite::Runtime::Tokio1) {
-                Ok(pool) => match pool.get().await {
-                    Ok(_) => {
-                        let conn = pool.get().await?;
-                        let _ = conn.interact(|c| c.execute("SELECT 1", [])).await?;
-                        Ok(InitiatedConnection {
-                            config: cfg.clone(),
-                            pool: ConnectionPool::Sqlite(pool),
-                            schema: path.to_string(),
-                        })
-                    }
-                    Err(e) => Err(Error::DeadpoolSqlitePool(e)),
-                },
-                Err(e) => Err(Error::DeadpoolSqliteCreatePool(e)),
-            }
+            let options = sqlx::sqlite::SqliteConnectOptions::new()
+                .filename(&path)
+                .read_only(false)
+                .create_if_missing(false);
+            let pool = sqlx::SqlitePool::connect_with(options).await?;
+            sqlx::query("SELECT 1").execute(&pool).await?;
+            Ok(InitiatedConnection {
+                config: cfg.clone(),
+                pool: ConnectionPool::Sqlite(pool),
+                schema: path.to_string(),
+            })
         }
     }
 }
 
-fn create_psql_pool(config: PsqlConfig, cfg: ConnectionConfig) -> Result<Pool> {
-    let rt = Some(deadpool_postgres::Runtime::Tokio1);
-    let ca_cert = cfg
-        .credentials
-        .get("ca_cert")
-        .cloned()
-        .unwrap_or("".to_string());
+async fn build_psql_opts(
+    cfg: &ConnectionConfig,
+    host: &str,
+    port: u16,
+) -> Result<PgConnectOptions> {
+    let empty = String::new();
+    let mut options = PgConnectOptions::new()
+        .host(host)
+        .port(port)
+        .username(cfg.credentials.get("user").unwrap_or(&empty))
+        .password(cfg.credentials.get("password").unwrap_or(&empty))
+        .database(cfg.credentials.get("db_name").unwrap_or(&empty));
+
+    let ssl_mode = cfg.credentials.get("ssl_mode");
+    options = match ssl_mode.map(|s| s.as_str()) {
+        Some("prefer") => options.ssl_mode(PgSslMode::Prefer),
+        Some("require") => options.ssl_mode(PgSslMode::Require),
+        _ => options.ssl_mode(PgSslMode::Disable),
+    };
+
+    let ca_cert = cfg.credentials.get("ca_cert").cloned().unwrap_or_default();
     let client_cert = cfg
         .credentials
         .get("client_cert")
         .cloned()
-        .unwrap_or("".to_string());
+        .unwrap_or_default();
     let client_key = cfg
         .credentials
         .get("client_key")
         .cloned()
-        .unwrap_or("".to_string());
+        .unwrap_or_default();
 
     if (!client_cert.is_empty() && client_key.is_empty())
         || (client_cert.is_empty() && !client_key.is_empty())
@@ -112,57 +114,31 @@ fn create_psql_pool(config: PsqlConfig, cfg: ConnectionConfig) -> Result<Pool> {
             "client_cert and client_key must be set together"
         ));
     }
-    Ok(
-        if let Some(SslMode::Prefer | SslMode::Require) = config.ssl_mode {
-            if !ca_cert.is_empty() && !client_cert.is_empty() && !client_key.is_empty() {
-                let mut builder = SslConnector::builder(SslMethod::tls_client())?;
-                builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
-                builder.set_ca_file(ca_cert)?;
-                builder.set_certificate_chain_file(client_cert)?;
-                builder.set_private_key_file(client_key, SslFiletype::PEM)?;
-                config.create_pool(rt, MakeTlsConnector::new(builder.build()))?
-            } else if !ca_cert.is_empty() {
-                let mut builder = SslConnector::builder(SslMethod::tls_client())?;
-                builder.set_verify(SslVerifyMode::PEER); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
-                builder.set_ca_file(
-                    cfg.credentials
-                        .get("ca_cert")
-                        .expect("Should have a ca cert"),
-                )?;
-                config.create_pool(rt, MakeTlsConnector::new(builder.build()))?
-            } else {
-                let mut builder = SslConnector::builder(SslMethod::tls())?;
-                builder.set_verify(SslVerifyMode::NONE); // peer - veirfy ca - must add ca file, none - allow self signed or without ca
-                let connector = MakeTlsConnector::new(builder.build());
-                config.create_pool(rt, connector)?
-            }
-        } else {
-            config.create_pool(rt, NoTls)?
-        },
-    )
+
+    if !ca_cert.is_empty() {
+        options = options.ssl_root_cert(ca_cert);
+    }
+    if !client_cert.is_empty() {
+        options = options.ssl_client_cert(client_cert);
+        options = options.ssl_client_key(client_key);
+    }
+
+    Ok(options)
 }
 
-async fn build_psql_pool(cfg: ConnectionConfig, app_handle: AppHandle) -> Result<Pool> {
+async fn build_psql_pool(
+    cfg: ConnectionConfig,
+    app_handle: AppHandle,
+) -> Result<sqlx::PgPool> {
     if cfg.mode == Mode::File {
         return Err(anyhow::anyhow!("File mode is not supported for Postgresql"));
     }
-    let mut config = PsqlConfig::new();
-    config.user = cfg.credentials.get("user").cloned();
-    config.password = cfg.credentials.get("password").cloned();
-    config.dbname = cfg.credentials.get("db_name").cloned();
-    config.connect_timeout = Some(std::time::Duration::from_secs(15));
-    config.manager = Some(PsqlManagerConfig {
-        recycling_method: RecyclingMethod::Fast,
-    });
-    let ssl_mode = cfg.credentials.get("ssl_mode");
-    config.ssl_mode = match ssl_mode {
-        Some(val) => match val.as_str() {
-            "prefer" => Some(SslMode::Prefer),
-            "require" => Some(SslMode::Require),
-            _ => Some(SslMode::Disable),
-        },
-        None => Some(SslMode::Disable),
-    };
+
+    let pool_opts = PgPoolOptions::new()
+        .max_connections(10)
+        .idle_timeout(Duration::from_secs(30 * 60))
+        .max_lifetime(Duration::from_secs(60 * 60))
+        .acquire_timeout(Duration::from_secs(15));
 
     match cfg.mode {
         Mode::Ssh => {
@@ -187,19 +163,24 @@ async fn build_psql_pool(cfg: ConnectionConfig, app_handle: AppHandle) -> Result
                 ssh_cfg,
             )
             .await?;
-            config.host = Some("127.0.0.1".to_string());
-            config.port = Some(available_port);
-            Ok(create_psql_pool(config, cfg)?)
+            let options = build_psql_opts(&cfg, "127.0.0.1", available_port).await?;
+            Ok(pool_opts.connect_with(options).await?)
         }
         Mode::File => Err(anyhow!("Should never reach here")),
         _ => {
-            config.host = cfg.credentials.get("host").cloned();
-            config.port = cfg
+            let empty_str = String::default();
+            let host = cfg
+                .credentials
+                .get("host")
+                .unwrap_or(&empty_str);
+            let port = cfg
                 .credentials
                 .get("port")
                 .cloned()
-                .map(|p| p.parse::<u16>().expect("Port should be a valid number"));
-            Ok(create_psql_pool(config, cfg)?)
+                .map(|p| p.parse::<u16>().expect("Port should be a valid number"))
+                .unwrap_or(5432);
+            let options = build_psql_opts(&cfg, host, port).await?;
+            Ok(pool_opts.connect_with(options).await?)
         }
     }
 }
@@ -265,7 +246,7 @@ async fn build_mysql_pool_opts(
             }
             if !client_cert.is_empty() {
                 options = options.ssl_client_cert(client_cert);
-                options = options.ssl_client_cert(client_key);
+                options = options.ssl_client_key(client_key);
             }
             options
         }
@@ -302,7 +283,7 @@ async fn build_mysql_pool_opts(
             }
             if !client_cert.is_empty() {
                 options = options.ssl_client_cert(client_cert);
-                options = options.ssl_client_cert(client_key);
+                options = options.ssl_client_key(client_key);
             }
             request_port_forward(
                 app_handle.clone(),
