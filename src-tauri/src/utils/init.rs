@@ -58,10 +58,32 @@ pub fn init_logger() -> tauri_plugin_log::Builder {
 pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let dest = get_app_path(app.handle());
     panic::set_hook(Box::new(move |info| {
-        log::error!("Panicked: {:?}", info);
+        let payload = if let Some(s) = info.payload().downcast_ref::<&str>() {
+            s.to_string()
+        } else if let Some(s) = info.payload().downcast_ref::<String>() {
+            s.clone()
+        } else {
+            "unknown".to_string()
+        };
+        let location = info
+            .location()
+            .map(|l| format!("{}:{}:{}", l.file(), l.line(), l.column()))
+            .unwrap_or_else(|| "unknown location".to_string());
+        let backtrace = std::backtrace::Backtrace::force_capture();
+        let filtered_bt: String = backtrace
+            .to_string()
+            .lines()
+            .filter(|l| l.contains("noir::") || l.contains("/src/"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        log::error!("Panicked at {location}: {payload}\n{filtered_bt}");
         let ts = chrono::offset::Utc::now();
         let log_path = dest.join("error.log");
-        fs::write(log_path, format!("{} - {:?}", ts, info)).expect("Failed to write error log");
+        fs::write(
+            log_path,
+            format!("{ts} - Panicked at {location}: {payload}\n{backtrace}"),
+        )
+        .expect("Failed to write error log");
     }));
 
     #[cfg(desktop)]

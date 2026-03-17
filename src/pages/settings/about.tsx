@@ -1,9 +1,13 @@
+import { open } from '@tauri-apps/plugin-shell';
 import { useAppSelector } from 'services/Context';
 import { t } from 'utils/i18n';
 
 import { version } from '../../../package.json';
 import { Button } from 'components/ui/button';
 import { checkForUpdates } from 'utils/utils';
+
+const ISSUES_URL = 'https://github.com/invm/noir/issues/new';
+const REPO_URL = 'https://github.com/invm/noir';
 
 export const About = () => {
   const {
@@ -20,20 +24,16 @@ export const About = () => {
           </span>
         </div>
         <Button
-          as="a"
-          href="https://github.com/invm/noir/issues/new"
-          target="_blank"
           variant="outline"
           class="text-destructive"
+          onClick={() => open(ISSUES_URL).catch(() => {})}
         >
           Report a bug
         </Button>
         <Button
-          as="a"
-          href="https://github.com/invm/noir/issues/new"
-          target="_blank"
           variant="outline"
           class="text-primary"
+          onClick={() => open(ISSUES_URL).catch(() => {})}
         >
           Request a feature?
         </Button>
@@ -52,13 +52,12 @@ export const About = () => {
         <div class="flex items-center justify-center w-full py-6">
           <span class="text-sm text-gray-500 dark:text-gray-400">
             Made with 🩸 🥵 and 😭 by{' '}
-            <a
-              href="https://github.com/invm/noir"
-              target="_blank"
-              class="underline"
+            <span
+              class="underline cursor-pointer"
+              onClick={() => open(REPO_URL).catch(() => {})}
             >
               invm
-            </a>
+            </span>
           </span>
         </div>
         <span class="text-sm text-gray-500 dark:text-gray-400">

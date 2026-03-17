@@ -23,6 +23,16 @@ pub enum Dialect {
     Sqlite,
 }
 
+impl Dialect {
+    pub fn as_sqlparser_name(&self) -> &'static str {
+        match self {
+            Dialect::Mysql | Dialect::MariaDB => "mysql",
+            Dialect::Postgresql => "postgresql",
+            Dialect::Sqlite => "sqlite",
+        }
+    }
+}
+
 impl fmt::Display for Dialect {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

@@ -10,6 +10,7 @@
     "window-state:allow-save-window-state",
     "process:allow-restart",
     "clipboard-manager:allow-write-text",
-    "updater:default"
+    "updater:default",
+    "shell:allow-open"
   ]
 }

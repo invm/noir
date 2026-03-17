@@ -1,7 +1,10 @@
+import { open } from '@tauri-apps/plugin-shell';
 import { ConnectionsService } from 'services/Connections';
 import { t } from 'utils/i18n';
 import { info } from '@tauri-apps/plugin-log';
 import { Button } from './ui/button';
+
+const ISSUES_URL = 'https://github.com/invm/noir/issues/new';
 
 const Error = (props: { err: Record<'message' | 'stack', string> }) => {
   info(JSON.stringify({ error: props.err, stack: props.err?.stack }));
@@ -12,11 +15,9 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
         {t('error.something_went_wrong')}
       </h2>
       <Button
-        as="a"
-        href="https://github.com/invm/noir/issues/new"
-        target="_blank"
         variant="outline"
         class="text-destructive"
+        onClick={() => open(ISSUES_URL).catch(() => {})}
       >
         Report a bug
       </Button>
