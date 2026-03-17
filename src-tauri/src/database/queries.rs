@@ -1,122 +1,118 @@
 use crate::utils::crypto::{decrypt_data, encrypt_data};
 use anyhow::Result;
-use deadpool_sqlite::rusqlite::{named_params, Connection as AppConnection};
 use magic_crypt::MagicCrypt256;
-use rusqlite::params;
+use sqlx::sqlite::SqlitePool;
+use sqlx::Row;
 use uuid::Uuid;
 
 use crate::engine::types::config::{ConnectionConfig, Credentials, Dialect, Metadata, Mode};
 
-pub fn add_connection(
-    db: &AppConnection,
+pub async fn add_connection(
+    pool: &SqlitePool,
     conn: &ConnectionConfig,
     key: MagicCrypt256,
 ) -> Result<()> {
-    let mut statement = db.prepare(
-        "INSERT INTO connections (
-            id,
-            dialect, 
-            mode,
-            credentials,
-            schema,
-            name,
-            color
-            ) VALUES (
-                :id,
-                :dialect,
-                :mode,
-                :credentials,
-                :schema,
-                :name,
-                :color
-                )",
-    )?;
     let credentials = serde_json::to_string(&conn.credentials)?;
     let credentials = encrypt_data(&credentials, &key);
-    statement.execute(named_params! {
-        ":id": conn.id.to_string(),
-        ":dialect": conn.dialect.to_string(),
-        ":mode": conn.mode.to_string(),
-        ":credentials": credentials,
-        ":schema": conn.schema,
-        ":name": conn.name,
-        ":color": conn.color,
-    })?;
+    let id = conn.id.to_string();
+    let dialect = conn.dialect.to_string();
+    let mode = conn.mode.to_string();
+
+    sqlx::query(
+        "INSERT INTO connections (id, dialect, mode, credentials, schema, name, color)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    )
+    .bind(&id)
+    .bind(&dialect)
+    .bind(&mode)
+    .bind(&credentials)
+    .bind(&conn.schema)
+    .bind(&conn.name)
+    .bind(&conn.color)
+    .execute(pool)
+    .await?;
 
     Ok(())
 }
 
-pub fn update_connection(
-    db: &AppConnection,
+pub async fn update_connection(
+    pool: &SqlitePool,
     id: String,
     conn: &ConnectionConfig,
     key: MagicCrypt256,
 ) -> Result<()> {
-    let mut statement = db.prepare(
-        "UPDATE connections
-        SET
-            dialect = :dialect,
-            mode = :mode,
-            credentials = :credentials,
-            schema = :schema,
-            name = :name,
-            color = :color,
-            metadata = :metadata
-        WHERE
-            id = :id;",
-    )?;
-
     let credentials = serde_json::to_string(&conn.credentials)?;
     let metadata = serde_json::to_string(&conn.metadata)?;
     let credentials = encrypt_data(&credentials, &key);
-    statement.execute(named_params! {
-        ":id": id.to_string(),
-        ":dialect": conn.dialect.to_string(),
-        ":mode": conn.mode.to_string(),
-        ":credentials": credentials,
-        ":schema": conn.schema,
-        ":name": conn.name,
-        ":color": conn.color,
-        ":metadata": metadata,
-    })?;
+    let dialect = conn.dialect.to_string();
+    let mode = conn.mode.to_string();
+
+    sqlx::query(
+        "UPDATE connections
+         SET dialect = $1, mode = $2, credentials = $3, schema = $4, name = $5, color = $6, metadata = $7
+         WHERE id = $8",
+    )
+    .bind(&dialect)
+    .bind(&mode)
+    .bind(&credentials)
+    .bind(&conn.schema)
+    .bind(&conn.name)
+    .bind(&conn.color)
+    .bind(&metadata)
+    .bind(&id)
+    .execute(pool)
+    .await?;
 
     Ok(())
 }
 
-pub fn delete_connection(db: &AppConnection, id: &Uuid) -> Result<()> {
-    let mut statement = db.prepare("DELETE FROM connections where id = :id")?;
-    statement.execute(named_params! {":id": id.to_string()})?;
+pub async fn delete_connection(pool: &SqlitePool, id: &Uuid) -> Result<()> {
+    sqlx::query("DELETE FROM connections WHERE id = $1")
+        .bind(id.to_string())
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
-pub fn update_connection_schema(db: &AppConnection, id: &str, schema: &str) -> Result<()> {
-    let mut statement = db.prepare("UPDATE connections SET schema = :schema where id = :id")?;
-    statement.execute(named_params! {":schema": schema, ":id": id})?;
+pub async fn update_connection_schema(
+    pool: &SqlitePool,
+    id: &str,
+    schema: &str,
+) -> Result<()> {
+    sqlx::query("UPDATE connections SET schema = $1 WHERE id = $2")
+        .bind(schema)
+        .bind(id)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 
-pub fn get_all_connections(
-    db: &AppConnection,
+pub async fn get_all_connections(
+    pool: &SqlitePool,
     key: MagicCrypt256,
 ) -> Result<Vec<ConnectionConfig>> {
-    let mut statement = db.prepare("SELECT * FROM connections")?;
-    let mut rows = statement.query([])?;
+    let rows = sqlx::query("SELECT * FROM connections")
+        .fetch_all(pool)
+        .await?;
+
     let mut items = Vec::new();
-    while let Some(row) = rows.next()? {
-        let credentials: String = row.get("credentials")?;
+    for row in rows {
+        let credentials: String = row.get("credentials");
         let data = decrypt_data(&credentials, &key)?;
         let credentials: Credentials = serde_json::from_str(&data)?;
-        let metadata: String = row.get("metadata")?;
-        let metadata: Metadata = serde_json::from_str(&metadata).unwrap_or_default();
-        let dialect: Dialect = row.get("dialect")?;
-        let mode: Mode = row.get("mode")?;
-        let schema: String = row.get("schema")?;
-        let id: String = row.get("id")?;
+        let metadata_str: String = row.get("metadata");
+        let metadata: Metadata = serde_json::from_str(&metadata_str).unwrap_or_default();
+        let dialect_str: String = row.get("dialect");
+        let dialect: Dialect = dialect_str.parse()?;
+        let mode_str: String = row.get("mode");
+        let mode: Mode = mode_str.parse()?;
+        let schema: String = row.get("schema");
+        let id: String = row.get("id");
 
         items.push(ConnectionConfig {
             id: Uuid::parse_str(&id)?,
-            name: row.get("name")?,
-            color: row.get("color")?,
+            name: row.get("name"),
+            color: row.get("color"),
             dialect,
             mode,
             credentials,
@@ -128,39 +124,41 @@ pub fn get_all_connections(
     Ok(items)
 }
 
-pub fn get_connection(
-    db: &AppConnection,
+pub async fn get_connection(
+    pool: &SqlitePool,
     id: &str,
     key: &MagicCrypt256,
 ) -> Result<ConnectionConfig> {
-    let mut statement = db.prepare("SELECT * FROM connections where id = ?1")?;
-    let mut rows = statement.query(params![id])?;
-    let mut items = Vec::new();
-    while let Some(row) = rows.next()? {
-        let credentials: String = row.get("credentials")?;
-        let data = decrypt_data(&credentials, &key)?;
-        let credentials: Credentials = serde_json::from_str(&data)?;
-        let metadata: String = row.get("metadata")?;
-        let metadata: Metadata = serde_json::from_str(&metadata).unwrap_or_default();
-        let dialect: Dialect = row.get("dialect")?;
-        let mode: Mode = row.get("mode")?;
-        let schema: String = row.get("schema")?;
-        let id: String = row.get("id")?;
+    let rows = sqlx::query("SELECT * FROM connections WHERE id = $1")
+        .bind(id)
+        .fetch_all(pool)
+        .await?;
 
-        items.push(ConnectionConfig {
-            id: Uuid::parse_str(&id)?,
-            name: row.get("name")?,
-            color: row.get("color")?,
-            dialect,
-            mode,
-            credentials,
-            schema,
-            metadata,
-        });
-    }
-    if items.is_empty() {
+    if rows.is_empty() {
         return Err(anyhow::anyhow!("Connection not found"));
     }
 
-    Ok(items[0].clone())
+    let row = &rows[0];
+    let credentials: String = row.get("credentials");
+    let data = decrypt_data(&credentials, key)?;
+    let credentials: Credentials = serde_json::from_str(&data)?;
+    let metadata_str: String = row.get("metadata");
+    let metadata: Metadata = serde_json::from_str(&metadata_str).unwrap_or_default();
+    let dialect_str: String = row.get("dialect");
+    let dialect: Dialect = dialect_str.parse()?;
+    let mode_str: String = row.get("mode");
+    let mode: Mode = mode_str.parse()?;
+    let schema: String = row.get("schema");
+    let conn_id: String = row.get("id");
+
+    Ok(ConnectionConfig {
+        id: Uuid::parse_str(&conn_id)?,
+        name: row.get("name"),
+        color: row.get("color"),
+        dialect,
+        mode,
+        credentials,
+        schema,
+        metadata,
+    })
 }

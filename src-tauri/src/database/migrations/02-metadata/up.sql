@@ -1,2 +1,0 @@
-ALTER TABLE connections
-ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}';

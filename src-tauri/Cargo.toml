@@ -51,9 +51,6 @@ postgres = { version = "0.19.10", features = [
 deadpool-postgres = "0.12.1"
 deadpool-sqlite = "0.7.0"
 magic-crypt = "3.1.13"
-rusqlite_migration = { version = "1.1.0", features = ["from-directory"] }
-include_dir = "0.7.3"
-lazy_static = "1.4.0"
 postgres-openssl = "0.5.0"
 openssl = "0.10.63"
 sqlx = { version = "0.7.4", features = [
@@ -64,6 +61,7 @@ sqlx = { version = "0.7.4", features = [
   "sqlite",
   "json",
   "chrono",
+  "migrate",
 ] }
 tauri-plugin-os = "2"
 tauri-plugin-process = "2.2.0"

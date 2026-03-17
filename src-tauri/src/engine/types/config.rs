@@ -1,7 +1,6 @@
 use anyhow::Result;
-use deadpool_sqlite::rusqlite::types::{self, FromSql, FromSqlResult, ValueRef};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt};
+use std::{collections::HashMap, fmt, str::FromStr};
 use uuid::Uuid;
 
 use deadpool_postgres::Pool as PostgresqlPool;
@@ -44,15 +43,16 @@ impl fmt::Display for Dialect {
     }
 }
 
-impl FromSql for Dialect {
-    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-        let s: String = String::column_result(value)?;
-        match s.as_str() {
+impl FromStr for Dialect {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
             "Mysql" => Ok(Dialect::Mysql),
             "MariaDB" => Ok(Dialect::MariaDB),
             "Postgresql" => Ok(Dialect::Postgresql),
             "Sqlite" => Ok(Dialect::Sqlite),
-            _ => Err(types::FromSqlError::InvalidType),
+            _ => Err(anyhow::anyhow!("Invalid dialect: {}", s)),
         }
     }
 }
@@ -76,15 +76,16 @@ impl fmt::Display for Mode {
     }
 }
 
-impl FromSql for Mode {
-    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
-        let s: String = String::column_result(value)?;
-        match s.as_str() {
+impl FromStr for Mode {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
             "Host" => Ok(Mode::Host),
             "Socket" => Ok(Mode::Socket),
             "File" => Ok(Mode::File),
             "Ssh" => Ok(Mode::Ssh),
-            _ => Err(types::FromSqlError::InvalidType),
+            _ => Err(anyhow::anyhow!("Invalid mode: {}", s)),
         }
     }
 }

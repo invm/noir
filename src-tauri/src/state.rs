@@ -1,29 +1,33 @@
 use anyhow::Result;
-use deadpool_sqlite::rusqlite::Connection;
+use log::error;
+use sqlx::sqlite::SqlitePool;
 use std::collections::HashMap;
+use std::sync::OnceLock;
 use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 use tokio_util::sync::CancellationToken;
-use log::error;
 
 use crate::engine::types::connection::InitiatedConnection;
 
-#[derive(Default)]
 pub struct AppState {
-    pub db: std::sync::Mutex<Option<Connection>>,
+    pub db: OnceLock<SqlitePool>,
     pub connections: std::sync::Mutex<HashMap<String, InitiatedConnection>>,
     pub cancel_tokens: Mutex<HashMap<String, CancellationToken>>,
 }
 
+impl Default for AppState {
+    fn default() -> Self {
+        Self {
+            db: OnceLock::new(),
+            connections: std::sync::Mutex::new(HashMap::new()),
+            cancel_tokens: Mutex::new(HashMap::new()),
+        }
+    }
+}
+
 #[allow(async_fn_in_trait)]
 pub trait ServiceAccess {
-    fn db<F, TResult>(&self, operation: F) -> TResult
-    where
-        F: FnOnce(&Connection) -> TResult;
-
-    fn db_mut<F, TResult>(&self, operation: F) -> TResult
-    where
-        F: FnOnce(&mut Connection) -> TResult;
+    fn db(&self) -> &SqlitePool;
 
     fn acquire_connection(&self, conn_id: String) -> InitiatedConnection;
     fn update_connection(&self, conn: InitiatedConnection) -> Result<()>;
@@ -33,30 +37,13 @@ pub trait ServiceAccess {
 }
 
 impl ServiceAccess for AppHandle {
-    fn db<F, TResult>(&self, operation: F) -> TResult
-    where
-        F: FnOnce(&Connection) -> TResult,
-    {
+    fn db(&self) -> &SqlitePool {
         let app_state: State<AppState> = self.state();
-        let db_connection_guard = app_state.db.lock().expect("Failed to lock db");
-        let db = db_connection_guard
-            .as_ref()
-            .expect("Connection not initialized");
-
-        operation(db)
-    }
-
-    fn db_mut<F, TResult>(&self, operation: F) -> TResult
-    where
-        F: FnOnce(&mut Connection) -> TResult,
-    {
-        let app_state: State<AppState> = self.state();
-        let mut db_connection_guard = app_state.db.lock().expect("Failed to lock db");
-        let db = db_connection_guard
-            .as_mut()
-            .expect("Connection not initialized");
-
-        operation(db)
+        app_state
+            .inner()
+            .db
+            .get()
+            .expect("Database pool not initialized")
     }
 
     fn acquire_connection(&self, conn_id: String) -> InitiatedConnection {
