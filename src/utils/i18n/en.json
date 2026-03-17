@@ -83,7 +83,10 @@
         "add": "Adding to {{table}}",
         "csv": "Export to CSV",
         "json": "Export to JSON",
-        "total_rows": "Total rows: "
+        "total_rows": "Total rows: ",
+        "successfull_add": "{{count}} row(s) added successfully",
+        "successfull_update": "{{count}} row(s) updated successfully",
+        "successfull_delete": "{{count}} row(s) deleted successfully"
       },
       "search": {
         "placeholder": "Value to search for in {{table}}",

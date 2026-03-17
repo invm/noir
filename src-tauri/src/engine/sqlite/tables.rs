@@ -1,11 +1,11 @@
 use anyhow::Result;
-use deadpool_sqlite::Pool;
+use sqlx::SqlitePool;
 use futures::try_join;
 use serde_json::{json, Value};
 
 use super::query::raw_query;
 
-pub async fn get_table_structure(pool: &Pool, table: String) -> Result<Value> {
+pub async fn get_table_structure(pool: &SqlitePool, table: String) -> Result<Value> {
     let (columns, foreign_keys, triggers, indices, pk) = try_join!(
         get_columns(pool, Some(&table)),
         get_foreign_keys(pool, &table),
@@ -26,7 +26,7 @@ pub async fn get_table_structure(pool: &Pool, table: String) -> Result<Value> {
     Ok(result)
 }
 
-pub async fn get_columns(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>> {
+pub async fn get_columns(pool: &SqlitePool, table: Option<&str>) -> Result<Vec<Value>> {
     let mut columns: Vec<Value> = vec![];
     let query = "SELECT tbl_name FROM sqlite_master WHERE type IN ('table', 'view') AND tbl_name NOT LIKE '%sqlite%'";
     let query = match table {
@@ -44,7 +44,7 @@ pub async fn get_columns(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>>
     Ok(columns)
 }
 
-async fn get_table_columns(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+async fn get_table_columns(pool: &SqlitePool, table: &str) -> Result<Vec<Value>> {
     let query = format!("PRAGMA table_info('{}');", table);
     let columns = raw_query(pool, &query).await?;
     let mut res = vec![];
@@ -62,7 +62,7 @@ async fn get_table_columns(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     Ok(res)
 }
 
-pub async fn get_primary_key(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+pub async fn get_primary_key(pool: &SqlitePool, table: &str) -> Result<Vec<Value>> {
     let columns = get_table_columns(pool, table).await?;
     let pks = columns
         .iter()
@@ -71,7 +71,7 @@ pub async fn get_primary_key(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     Ok(pks)
 }
 
-pub async fn get_foreign_keys(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+pub async fn get_foreign_keys(pool: &SqlitePool, table: &str) -> Result<Vec<Value>> {
     let query = format!("PRAGMA foreign_key_list('{}');", table);
     let fks = raw_query(pool, &query).await?;
     let fks = fks
@@ -90,13 +90,13 @@ pub async fn get_foreign_keys(pool: &Pool, table: &str) -> Result<Vec<Value>> {
     Ok(fks)
 }
 
-pub async fn get_indices(pool: &Pool, table: &str) -> Result<Vec<Value>> {
+pub async fn get_indices(pool: &SqlitePool, table: &str) -> Result<Vec<Value>> {
     let query = "SELECT * FROM sqlite_master WHERE type = 'index'";
     let query = format!("{} and tbl_name = '{}';", query, table);
     raw_query(pool, &query).await
 }
 
-pub async fn get_triggers(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>> {
+pub async fn get_triggers(pool: &SqlitePool, table: Option<&str>) -> Result<Vec<Value>> {
     let query = "SELECT * FROM sqlite_master WHERE type='trigger'";
     let query = match table {
         Some(table) => format!("{} AND tbl_name = '{}';", query, table),
@@ -105,7 +105,7 @@ pub async fn get_triggers(pool: &Pool, table: Option<&str>) -> Result<Vec<Value>
     raw_query(pool, &query).await
 }
 
-pub async fn get_views(pool: &Pool) -> Result<Vec<Value>> {
+pub async fn get_views(pool: &SqlitePool) -> Result<Vec<Value>> {
     let query = "SELECT * FROM sqlite_master WHERE type='view'";
     raw_query(pool, query).await
 }

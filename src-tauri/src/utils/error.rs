@@ -11,22 +11,6 @@ pub enum Error {
     UUID(#[from] uuid::Error),
     #[error("{0}")]
     Sqlx(#[from] sqlx::error::Error),
-    #[error("Postgresql error: {0}")]
-    Postgresql(#[from] postgres::error::Error),
-    #[error("Sqlite error: {0}")]
-    Sqlite(#[from] rusqlite::Error),
-    #[error("{0}")]
-    DeadpoolSqliteInteract(#[from] deadpool_sqlite::InteractError),
-    #[error("{0}")]
-    DeadpoolSqlitePool(#[from] deadpool_sqlite::PoolError),
-    #[error("Create pool error: {0}")]
-    DeadpoolSqliteCreatePool(#[from] deadpool_sqlite::CreatePoolError),
-    #[error("{0}")]
-    OpenSSLError(#[from] openssl::error::ErrorStack),
-    #[error("{0}")]
-    DeadpoolPostgresqlPoolError(#[from] deadpool_postgres::PoolError),
-    #[error("Create pool error: {0}")]
-    DeadpoolPostgresqlCreatePoolError(#[from] deadpool_postgres::CreatePoolError),
     #[error("{0}")]
     SQLParse(#[from] sqlparser::parser::ParserError),
     #[error("Error: {0}")]

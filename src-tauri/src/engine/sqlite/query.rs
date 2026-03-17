@@ -1,94 +1,71 @@
 use anyhow::{anyhow, Result};
-use deadpool_sqlite::Pool;
 use serde_json::Value;
+use sqlx::SqlitePool;
 
+use crate::database::QueryType;
 use crate::engine::types::result::ResultSet;
 
-use super::utils::row_to_object;
+use super::sql_to_json::row_to_json;
 
-pub async fn raw_query(pool: &Pool, query: &str) -> Result<Vec<Value>> {
-    let conn = pool.get().await.expect("Failed to get connection");
-    let query = query.to_string();
-    let mut result: Vec<Value> = Vec::new();
-    let rows = conn
-        .interact(move |conn| {
-            let mut stmt = conn.prepare(&query).expect("Failed to prepare statement");
-            let columns_count = stmt.column_count();
-            let mut rows = stmt.query([]).expect("Failed to execute query");
-            while let Some(row) = rows.next().expect("Failed to get row") {
-                result.push(row_to_object(row, columns_count));
-            }
-            result
-        })
-        .await;
-    rows.map_err(|e| anyhow!(e.to_string()))
+pub async fn raw_query(pool: &SqlitePool, query: &str) -> Result<Vec<Value>> {
+    let rows = sqlx::query(query)
+        .map(row_to_json)
+        .fetch_all(pool)
+        .await?;
+    Ok(rows)
 }
 
-pub async fn execute_query(pool: &Pool, query: &str) -> Result<ResultSet> {
+pub async fn execute_query(pool: &SqlitePool, query: &str, t: QueryType) -> Result<ResultSet> {
     let start_time = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .expect("Time went backwards")
         .as_millis() as u64;
-    let conn = pool.get().await.expect("Failed to get connection");
-    let query = query.to_string();
-    let rows = conn
-        .interact(move |conn| {
-            let stmt = conn.prepare(&query);
-            match stmt {
-                Ok(mut stmt) => {
-                    let mut result: Vec<Value> = Vec::new();
-                    let columns_count = stmt.column_count();
-                    match stmt.query([]) {
-                        Ok(mut rows) => {
-                            while let Some(row) = rows.next().expect("Failed to get row") {
-                                result.push(row_to_object(row, columns_count));
-                            }
-                            Ok(result)
-                        }
-                        Err(e) => Err(e),
-                    }
-                }
-                Err(e) => Err(e),
-            }
-        })
-        .await;
-    let rows = rows.expect("Failed to execute query")?;
-    let end_time = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_millis() as u64;
-    let set = ResultSet {
-        start_time,
-        end_time,
-        affected_rows: 0,
-        rows,
-        table: None,
-    };
-    Ok(set)
+    match t {
+        QueryType::Select => {
+            let rows = sqlx::query(query)
+                .map(row_to_json)
+                .fetch_all(pool)
+                .await?;
+            Ok(ResultSet {
+                start_time,
+                end_time: std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .expect("Time went backwards")
+                    .as_millis() as u64,
+                affected_rows: 0,
+                rows,
+                table: None,
+            })
+        }
+        _ => {
+            let result = sqlx::query(query).execute(pool).await?;
+            let affected_rows = result.rows_affected();
+            let end_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_millis() as u64;
+            Ok(ResultSet {
+                start_time,
+                end_time,
+                affected_rows,
+                rows: vec![],
+                table: None,
+            })
+        }
+    }
 }
 
-pub async fn execute_tx(pool: &Pool, queries: Vec<&str>) -> Result<()> {
-    let conn = pool.get().await.expect("Failed to get connection");
-    let queries = queries
-        .iter()
-        .map(|q| q.to_string())
-        .collect::<Vec<String>>();
-    conn.interact(move |conn| {
-        let tx = conn.transaction()?;
-
-        for query in queries {
-            match tx.execute(&query, []) {
-                Ok(_) => continue,
-                Err(e) => {
-                    // Attempt to rollback the transaction
-                    let _ = tx.rollback();
-                    return Err(anyhow!("Query failed: {}", e));
-                }
+pub async fn execute_tx(pool: &SqlitePool, queries: Vec<&str>) -> Result<()> {
+    let mut transaction = pool.begin().await?;
+    for q in queries {
+        match sqlx::query(q).execute(&mut *transaction).await {
+            Ok(_) => continue,
+            Err(e) => {
+                let _ = transaction.rollback();
+                return Err(anyhow!("Query failed: {}", e));
             }
         }
-
-        Ok(tx.commit()?)
-    })
-    .await
-    .map_err(|e| anyhow!(e.to_string()))?
+    }
+    transaction.commit().await?;
+    Ok(())
 }

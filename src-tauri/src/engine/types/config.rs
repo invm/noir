@@ -3,14 +3,14 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt, str::FromStr};
 use uuid::Uuid;
 
-use deadpool_postgres::Pool as PostgresqlPool;
-use deadpool_sqlite::Pool as SqlitePool;
+use sqlx::PgPool;
+use sqlx::SqlitePool;
 
 #[derive(Debug, Clone)]
 pub enum ConnectionPool {
     Mysql(sqlx::MySqlPool),
     MariaDB(sqlx::MySqlPool),
-    Postgresql(PostgresqlPool),
+    Postgresql(PgPool),
     Sqlite(SqlitePool),
 }
 

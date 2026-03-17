@@ -92,8 +92,8 @@ pub async fn get_views(conn: &InitiatedConnection) -> Result<Vec<Value>> {
 pub async fn execute_query(conn: &InitiatedConnection, q: &str, t: QueryType) -> Result<ResultSet> {
     match &conn.pool {
         Mysql(pool) | MariaDB(pool) => mysql::query::execute_query(pool, q, t).await,
-        Postgresql(pool) => postgresql::query::execute_query(pool, q).await,
-        Sqlite(pool) => sqlite::query::execute_query(pool, q).await,
+        Postgresql(pool) => postgresql::query::execute_query(pool, q, t).await,
+        Sqlite(pool) => sqlite::query::execute_query(pool, q, t).await,
     }
 }
 
