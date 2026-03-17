@@ -215,6 +215,15 @@ export const Results = (props: {
     })
   );
 
+  createEffect(
+    on(() => props.table, () => {
+      gridRef?.api?.setGridOption('rowData', []);
+      gridRef?.api?.setGridOption('columnDefs', []);
+      setRowIdMap(new Map());
+      setRowIdx(0);
+    }, { defer: true })
+  );
+
   const onNextPage = async () => {
     if (data()?.exhausted) return;
     setPage(page() + 1);

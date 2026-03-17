@@ -414,7 +414,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
                     <TextFieldLabel>
                       {t('add_connection_form.labels.host')}
                     </TextFieldLabel>
-                    <TextField name="credentials.host" size="sm" class="h-8" />
+                    <TextField name="credentials.host" size="sm" class="h-8" autocapitalize="off" />
                     <TextFieldErrorMessage>
                       {errors('credentials.host')}
                     </TextFieldErrorMessage>
@@ -486,7 +486,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
                 <TextFieldLabel>
                   {t('add_connection_form.labels.user')}
                 </TextFieldLabel>
-                <TextField name="credentials.user" size="sm" class="h-8" />
+                <TextField name="credentials.user" size="sm" class="h-8" autocapitalize="off" />
                 <TextFieldErrorMessage>
                   {errors('credentials.port')}
                 </TextFieldErrorMessage>
@@ -514,7 +514,7 @@ const AddConnectionForm = (props: AddConnectionFormProps) => {
                   <TextFieldLabel>
                     {t('add_connection_form.labels.db_name')}
                   </TextFieldLabel>
-                  <TextField name="credentials.db_name" size="sm" class="h-8" />
+                  <TextField name="credentials.db_name" size="sm" class="h-8" autocapitalize="off" />
                   <TextFieldErrorMessage>
                     {errors('credentials.db_name')}
                   </TextFieldErrorMessage>

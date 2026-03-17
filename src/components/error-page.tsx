@@ -17,7 +17,7 @@ const Error = (props: { err: Record<'message' | 'stack', string> }) => {
       <Button
         variant="outline"
         class="text-destructive"
-        onClick={() => open(ISSUES_URL)}
+        onClick={() => open(ISSUES_URL).catch(() => {})}
       >
         Report a bug
       </Button>

@@ -100,7 +100,7 @@ pub async fn enqueue_query(
     info!("Enqueue query on {conn_id}, tab:{tab_idx} - sql:{sql}");
     let conn = app_handle.acquire_connection(conn_id.clone());
     let statements = Parser::parse_sql(
-        dialect_from_str(conn.config.dialect.to_string())
+        dialect_from_str(conn.config.dialect.as_sqlparser_name())
             .expect("Failed to get dialect")
             .as_ref(),
         sql,
@@ -177,7 +177,7 @@ pub async fn enqueue_query(
         conn_id,
         tab_idx,
         status: QueryTaskStatus::Progress,
-        result_sets: statements.iter().map(|s| (s.2.clone())).collect(),
+        result_sets: statements.iter().map(|s| s.2.clone() ).collect(),
     })
 }
 
@@ -223,7 +223,7 @@ pub async fn execute_query(
     let conn = app_handle.acquire_connection(conn_id);
     info!("Execute query: {query}");
     let statements = Parser::parse_sql(
-        dialect_from_str(conn.config.dialect.to_string())
+        dialect_from_str(conn.config.dialect.as_sqlparser_name())
             .expect("Failed to get dialect")
             .as_ref(),
         &query,

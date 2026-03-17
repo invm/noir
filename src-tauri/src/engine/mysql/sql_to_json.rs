@@ -41,8 +41,15 @@ pub fn sql_nonnull_to_json<'r>(
 ) -> Value {
     let raw_value = get_ref();
     match raw_value.type_info().name() {
-        "REAL" | "FLOAT" | "NUMERIC" | "DECIMAL" | "DOUBLE" | "FIXED" => {
+        "REAL" | "FLOAT" | "DOUBLE" => {
             <f64 as Decode<sqlx::MySql>>::decode(raw_value)
+                .unwrap_or(f64::NAN)
+                .into()
+        }
+        "NUMERIC" | "DECIMAL" | "FIXED" => {
+            <String as Decode<sqlx::MySql>>::decode(raw_value)
+                .ok()
+                .and_then(|s| s.parse::<f64>().ok())
                 .unwrap_or(f64::NAN)
                 .into()
         }

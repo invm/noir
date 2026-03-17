@@ -242,7 +242,7 @@ export const QueryEditor = () => {
             <Tooltip>
               <TooltipTrigger
                 as={ToggleButton}
-                class="rounded-md border-accent h-6 px-2 data-[pressed]:bg-primary"
+                class="rounded-md border-accent h-6 px-2 data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
                 pressed={data().autoLimit}
                 onChange={(e: boolean) =>
                   updateDataContentTab('autoLimit', e, tabIdx())

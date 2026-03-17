@@ -26,14 +26,14 @@ export const About = () => {
         <Button
           variant="outline"
           class="text-destructive"
-          onClick={() => open(ISSUES_URL)}
+          onClick={() => open(ISSUES_URL).catch(() => {})}
         >
           Report a bug
         </Button>
         <Button
           variant="outline"
           class="text-primary"
-          onClick={() => open(ISSUES_URL)}
+          onClick={() => open(ISSUES_URL).catch(() => {})}
         >
           Request a feature?
         </Button>
@@ -54,7 +54,7 @@ export const About = () => {
             Made with 🩸 🥵 and 😭 by{' '}
             <span
               class="underline cursor-pointer"
-              onClick={() => open(REPO_URL)}
+              onClick={() => open(REPO_URL).catch(() => {})}
             >
               invm
             </span>
