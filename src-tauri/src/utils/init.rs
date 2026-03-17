@@ -94,9 +94,7 @@ pub fn app_setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     init_app(app.handle())?;
     let handle = app.handle().clone();
 
-    let rt = tokio::runtime::Handle::current();
-    let pool = rt
-        .block_on(initialize_database(handle))
+    let pool = tauri::async_runtime::block_on(initialize_database(handle))
         .expect("Database initialize should succeed");
 
     let app_state = app.state::<AppState>();

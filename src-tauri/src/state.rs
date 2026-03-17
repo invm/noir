@@ -40,6 +40,7 @@ impl ServiceAccess for AppHandle {
     fn db(&self) -> &SqlitePool {
         let app_state: State<AppState> = self.state();
         app_state
+            .inner()
             .db
             .get()
             .expect("Database pool not initialized")

@@ -7,7 +7,7 @@ use tauri::AppHandle;
 /// and running migrations.
 pub async fn initialize_database(app: AppHandle) -> Result<SqlitePool, sqlx::Error> {
     let db_path = get_db_path(app);
-    let db_url = format!("sqlite:{}?mode=rwc", db_path);
+    let db_url = format!("sqlite:{}?mode=rwc", db_path.display());
     let pool = SqlitePool::connect(&db_url).await?;
 
     sqlx::migrate!().run(&pool).await.map_err(|e| {
