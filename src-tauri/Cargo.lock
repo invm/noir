@@ -2838,6 +2838,7 @@ dependencies = [
  "magic-crypt",
  "md-5 0.10.6",
  "rand 0.8.5",
+ "reqwest",
  "serde",
  "serde_json",
  "sql_lexer",

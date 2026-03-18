@@ -3,6 +3,7 @@ export const Dialect = {
   MariaDB: 'MariaDB',
   Postgresql: 'Postgresql',
   Sqlite: 'Sqlite',
+  ClickHouse: 'ClickHouse',
 } as const;
 
 export type DialectType = keyof typeof Dialect;
@@ -12,6 +13,7 @@ export const PORTS_MAP: Record<DialectType, number> = {
   [Dialect.MariaDB]: 3306,
   [Dialect.Postgresql]: 5432,
   [Dialect.Sqlite]: 0,
+  [Dialect.ClickHouse]: 8123,
 } as const;
 
 export const dialects = [
@@ -19,6 +21,7 @@ export const dialects = [
   Dialect.Mysql,
   Dialect.MariaDB,
   Dialect.Sqlite,
+  Dialect.ClickHouse,
 ] as const;
 
 export const Mode = {
@@ -35,6 +38,7 @@ export const SocketPathDefaults = {
   [Dialect.Mysql]: '/var/run/mysqld/mysqld.sock',
   [Dialect.Postgresql]: '/var/run/postgresql/.s.PGSQL.5432',
   [Dialect.Sqlite]: '',
+  [Dialect.ClickHouse]: '',
 } as const;
 
 export const AvailableModes = {
@@ -42,6 +46,7 @@ export const AvailableModes = {
   [Dialect.Mysql]: [Mode.Host, Mode.Socket, Mode.Ssh],
   [Dialect.Postgresql]: [Mode.Host, Mode.Socket, Mode.Ssh],
   [Dialect.Sqlite]: [Mode.File],
+  [Dialect.ClickHouse]: [Mode.Host, Mode.Ssh],
 } as const;
 
 export const SslMode = {

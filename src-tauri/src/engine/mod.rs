@@ -1,3 +1,4 @@
+pub mod clickhouse;
 pub mod exec;
 pub mod init;
 pub mod mysql;

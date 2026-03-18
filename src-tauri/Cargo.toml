@@ -52,6 +52,7 @@ tauri-plugin-process = "2.2.0"
 tauri-plugin-dialog = "2.2.0"
 tauri-plugin-clipboard-manager = "2.2.1"
 tauri-plugin-shell = "2"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
