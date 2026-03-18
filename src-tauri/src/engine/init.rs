@@ -10,9 +10,12 @@ use sqlx::{
 use tauri::AppHandle;
 
 use crate::{
-    engine::types::{
-        config::{ConnectionConfig, ConnectionPool, Dialect, Mode},
-        connection::InitiatedConnection,
+    engine::{
+        clickhouse::client::ClickHouseClient,
+        types::{
+            config::{ConnectionConfig, ConnectionPool, Dialect, Mode},
+            connection::InitiatedConnection,
+        },
     },
     state::ServiceAccess,
     utils::{
@@ -70,6 +73,72 @@ pub async fn init_conn(
                 config: cfg.clone(),
                 pool: ConnectionPool::Sqlite(pool),
                 schema: path.to_string(),
+            })
+        }
+        Dialect::ClickHouse => {
+            if cfg.mode == Mode::File || cfg.mode == Mode::Socket {
+                return Err(
+                    anyhow::anyhow!("Only Host and SSH modes are supported for ClickHouse").into(),
+                );
+            }
+            let empty = String::new();
+            let user = cfg.credentials.get("user").unwrap_or(&empty);
+            let password = cfg.credentials.get("password").unwrap_or(&empty);
+            let database = cfg
+                .credentials
+                .get("db_name")
+                .cloned()
+                .unwrap_or("default".to_string());
+
+            let (host, port) = match cfg.mode {
+                Mode::Ssh => {
+                    let ssh_keys = ["ssh_host", "ssh_port", "ssh_user", "ssh_key"];
+                    let mut ssh_cfg = cfg.credentials.clone();
+                    ssh_cfg.retain(|k, _| ssh_keys.contains(&k.as_str()));
+                    let available_port = get_available_port();
+                    let remote_host = cfg.credentials.get("host").unwrap_or(&empty).to_string();
+                    let remote_port = cfg
+                        .credentials
+                        .get("port")
+                        .cloned()
+                        .map(|p| p.parse::<u16>().expect("Port should be a valid number"))
+                        .unwrap_or(8123);
+                    request_port_forward(
+                        app_handle.clone(),
+                        cfg.id.to_string(),
+                        available_port,
+                        remote_host,
+                        remote_port.to_string(),
+                        ssh_cfg,
+                    )
+                    .await?;
+                    ("127.0.0.1".to_string(), available_port)
+                }
+                _ => {
+                    let host = cfg
+                        .credentials
+                        .get("host")
+                        .cloned()
+                        .unwrap_or("localhost".to_string());
+                    let port = cfg
+                        .credentials
+                        .get("port")
+                        .cloned()
+                        .map(|p| p.parse::<u16>().expect("Port should be a valid number"))
+                        .unwrap_or(8123);
+                    (host, port)
+                }
+            };
+
+            let client = ClickHouseClient::new(&host, port, user, password, &database)?;
+            if client.ping().await.is_err() {
+                app_handle.cancel_token(cfg.id.to_string()).await?;
+                return Err(Error::from(anyhow::anyhow!("Could not connect to ClickHouse")));
+            }
+            Ok(InitiatedConnection {
+                config: cfg.clone(),
+                pool: ConnectionPool::ClickHouse(client),
+                schema: database,
             })
         }
     }

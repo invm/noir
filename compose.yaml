@@ -2,6 +2,7 @@ volumes:
   mysql:
   psql:
   maria:
+  clickhouse:
 
 services:
   mysql:
@@ -59,3 +60,19 @@ services:
       - ./dev/certs:/etc/ssl/mysql/certs
     ports:
       - 3307:3306
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.12
+    container_name: clickhouse
+    restart: always
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password
+      CLICKHOUSE_DB: clickhouse_sample
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse:/var/lib/clickhouse
+      - ./dev/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - 8123:8123
+      - 9000:9000

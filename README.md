@@ -51,14 +51,15 @@ Unleash efficiency, tailor UI themes, and explore complex data effortlessly. Ele
 - MySQL
 - MariaDB
 - SQLite
+- ClickHouse
 
 ## Built With
 
 - Tauri
 - SolidJS
-- CodeMirror
+- Monaco Editor
 - AG-Grid
-- DaisyUI
+- Shadcn for SolidJS
 
 Full lists are available under `package.json` and `src-tauri/Cargo.toml`.
 
@@ -106,9 +107,3 @@ Contributions are what make the open source community such an amazing place to b
 Distributed under the GPLv3 license.
 See [LICENSE](LICENSE.md) for more information.
 
-## Authors
-
-* [Michael Ionov](https://github.com/invm/)
-
-
-This readme was made with [Readme generator](https://readme.shaankhan.dev/)

@@ -34,6 +34,13 @@ setup-sqlite:
 # extract all sample databases
 setup-all: setup-mysql setup-psql setup-maria setup-sqlite
 
+# start clickhouse
+clickhouse:
+    docker compose up -d clickhouse
+    @echo ""
+    @echo "ClickHouse connection:"
+    @echo "  host: localhost:8123  user: default  password: password  database: clickhouse_sample"
+
 # start mysql
 mysql:
     docker compose up -d mysql

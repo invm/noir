@@ -6,12 +6,15 @@ use uuid::Uuid;
 use sqlx::PgPool;
 use sqlx::SqlitePool;
 
+use crate::engine::clickhouse::client::ClickHouseClient;
+
 #[derive(Debug, Clone)]
 pub enum ConnectionPool {
     Mysql(sqlx::MySqlPool),
     MariaDB(sqlx::MySqlPool),
     Postgresql(PgPool),
     Sqlite(SqlitePool),
+    ClickHouse(ClickHouseClient),
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
@@ -20,6 +23,7 @@ pub enum Dialect {
     MariaDB,
     Postgresql,
     Sqlite,
+    ClickHouse,
 }
 
 impl Dialect {
@@ -28,6 +32,7 @@ impl Dialect {
             Dialect::Mysql | Dialect::MariaDB => "mysql",
             Dialect::Postgresql => "postgresql",
             Dialect::Sqlite => "sqlite",
+            Dialect::ClickHouse => "clickhouse",
         }
     }
 }
@@ -39,6 +44,7 @@ impl fmt::Display for Dialect {
             Dialect::MariaDB => write!(f, "MariaDB"),
             Dialect::Postgresql => write!(f, "Postgresql"),
             Dialect::Sqlite => write!(f, "Sqlite"),
+            Dialect::ClickHouse => write!(f, "ClickHouse"),
         }
     }
 }
@@ -52,6 +58,7 @@ impl FromStr for Dialect {
             "MariaDB" => Ok(Dialect::MariaDB),
             "Postgresql" => Ok(Dialect::Postgresql),
             "Sqlite" => Ok(Dialect::Sqlite),
+            "ClickHouse" => Ok(Dialect::ClickHouse),
             _ => Err(anyhow::anyhow!("Invalid dialect: {}", s)),
         }
     }
@@ -210,6 +217,34 @@ impl ConnectionConfig {
                 let available_keys = ["path"];
                 credentials.retain(|k, _| available_keys.contains(&k.as_str()));
                 let schema = credentials.get("path").cloned().unwrap_or("".to_string());
+                Ok(ConnectionConfig {
+                    id: Uuid::new_v4(),
+                    dialect,
+                    mode,
+                    credentials,
+                    name: name.to_string(),
+                    color: color.to_string(),
+                    schema,
+                    metadata,
+                })
+            }
+            Dialect::ClickHouse => {
+                let allowed_keys = vec![
+                    "user",
+                    "password",
+                    "host",
+                    "port",
+                    "db_name",
+                    "ssh_host",
+                    "ssh_port",
+                    "ssh_user",
+                    "ssh_key",
+                ];
+                credentials.retain(|k, _| allowed_keys.contains(&k.as_str()));
+                let schema = credentials
+                    .get("db_name")
+                    .cloned()
+                    .unwrap_or("default".to_string());
                 Ok(ConnectionConfig {
                     id: Uuid::new_v4(),
                     dialect,

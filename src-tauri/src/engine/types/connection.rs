@@ -30,6 +30,9 @@ impl InitiatedConnection {
             super::config::Dialect::Sqlite => {
                 self.config.credentials.insert("path".to_string(), schema);
             }
+            super::config::Dialect::ClickHouse => {
+                self.config.credentials.insert("db_name".to_string(), schema);
+            }
         };
         self
     }

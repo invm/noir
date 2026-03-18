@@ -49,6 +49,7 @@ export const columnsToTables = (
       Dialect.Mysql,
       Dialect.Postgresql,
       Dialect.Sqlite,
+      Dialect.ClickHouse,
     ].includes(dialect)
   ) {
     const schema = allColumns.reduce((acc, col) => {
