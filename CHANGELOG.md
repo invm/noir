@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](///compare/v2.1.0...v2.2.0) (2026-03-18)
+
+
+### Features
+
+* add ClickHouse database support ([#20](undefined/undefined/undefined/issues/20)) ([#22](undefined/undefined/undefined/issues/22)) cc8bde1
+* migrate internal app DB from rusqlite to sqlx ([#19](undefined/undefined/undefined/issues/19)) 9478dac
+* migrate psql & sqlite to sqlx ([#21](undefined/undefined/undefined/issues/21)) 7a8de49
+
+
+### Bug Fixes
+
+* use Tauri shell plugin to open external links ([#18](undefined/undefined/undefined/issues/18)) 6415581
+
 ## [2.1.0](https://github.com/invm/noir/compare/v2.0.2...v2.1.0) (2025-09-01)
 
 
