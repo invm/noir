@@ -35,6 +35,15 @@ import {
 } from 'components/ui/alert-dialog';
 import { titleCase } from 'utils/formatters';
 import { toast } from 'solid-sonner';
+import { TextField, TextFieldRoot } from 'components/ui/textfield';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from 'components/ui/dialog';
+import { Button } from 'components/ui/button';
 
 type TableColumnsCollapseProps = {
   entity: 'views' | 'tables';
@@ -50,6 +59,8 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
   const [dialogAction, setDialogAction] = createSignal<
     'drop' | 'truncate' | ''
   >('');
+  const [renameOpen, setRenameOpen] = createSignal(false);
+  const [newName, setNewName] = createSignal('');
 
   const {
     connections: {
@@ -121,6 +132,42 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
       toast.success(t('sidebar.table_was_truncated', { table }));
     } catch (error) {
       toast.error('Could not truncate table', {
+        description: (error as Error).message || (error as string),
+      });
+    }
+  };
+
+  const renameTable = async () => {
+    const name = newName().trim();
+    if (!name || name === table) return;
+    try {
+      const conn = getConnection();
+      const dialect = conn.connection.dialect;
+      const schema = conn.selectedSchema;
+      let query: string;
+      switch (dialect) {
+        case 'Postgresql':
+          query = `ALTER TABLE "${schema}"."${table}" RENAME TO "${name}"`;
+          break;
+        case 'Mysql':
+        case 'MariaDB':
+          query = `ALTER TABLE \`${schema}\`.\`${table}\` RENAME TO \`${schema}\`.\`${name}\``;
+          break;
+        case 'ClickHouse':
+          query = `RENAME TABLE ${schema}.${table} TO ${schema}.${name}`;
+          break;
+        default: // Sqlite
+          query = `ALTER TABLE "${table}" RENAME TO "${name}"`;
+      }
+      await invoke<ResultSet>('execute_query', {
+        connId: conn.id,
+        query,
+      });
+      toast.success(`Renamed ${table} to ${name}`);
+      setRenameOpen(false);
+      await props.refresh();
+    } catch (error) {
+      toast.error('Could not rename table', {
         description: (error as Error).message || (error as string),
       });
     }
@@ -206,6 +253,14 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
             <ContextMenuItem onClick={listData}>
               {t('sidebar.view_data')}
             </ContextMenuItem>
+            <ContextMenuItem
+              onSelect={() => {
+                setNewName(table);
+                setRenameOpen(true);
+              }}
+            >
+              Rename
+            </ContextMenuItem>
             <Show when={props.entity === 'tables'}>
               <AlertDialogTrigger class="w-full">
                 <ContextMenuItem onSelect={() => setDialogAction('truncate')}>
@@ -240,6 +295,43 @@ export const TableColumnsCollapse = (props: TableColumnsCollapseProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={renameOpen()} onOpenChange={setRenameOpen}>
+        <DialogContent class="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Rename {table}</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              renameTable();
+            }}
+          >
+            <div class="flex flex-col gap-3">
+              <TextFieldRoot>
+                <TextField
+                  placeholder="New table name"
+                  value={newName()}
+                  onInput={(e: InputEvent) =>
+                    setNewName((e.target as HTMLInputElement).value)
+                  }
+                  autofocus
+                />
+              </TextFieldRoot>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setRenameOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!newName().trim() || newName().trim() === table}>
+                  Rename
+                </Button>
+              </DialogFooter>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

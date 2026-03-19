@@ -54,8 +54,8 @@ fn get_query_type(s: Statement) -> QueryType {
         Statement::Query(_) => QueryType::Select,
         Statement::Truncate { .. } => QueryType::Truncate,
         Statement::Update { .. } => QueryType::Update,
-        Statement::Explain { .. }
-        | Statement::Analyze { .. }
+        Statement::Explain { .. } => QueryType::Select,
+        Statement::Analyze { .. }
         | Statement::ShowCollation { .. }
         | Statement::ShowColumns { .. }
         | Statement::ShowCreate { .. }

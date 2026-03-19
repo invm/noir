@@ -1,9 +1,9 @@
-import { BsRocketTakeoff } from 'solid-icons/bs';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from 'components/ui/sidebar';
+import { DialectIcon } from 'components/DialectIcon';
 import {
   HoverCard,
   HoverCardContent,
@@ -44,7 +44,7 @@ export function DbConnectionHeader() {
                     `bg-${conn.connection.color}-500`
                   )}
                 >
-                  <BsRocketTakeoff class="size-4" />
+                  <DialectIcon dialect={conn.connection.dialect} class="size-4" />
                 </div>
                 <div class="flex flex-col gap-0.5 leading-none">
                   <span class="font-semibold">{conn.connection.name}</span>

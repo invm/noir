@@ -27,7 +27,7 @@ pub async fn execute_query(
         .as_millis() as u64;
 
     match t {
-        QueryType::Select => {
+        QueryType::Select | QueryType::Show => {
             let resp = client.query(query).await?;
             let rows = resp
                 .get("data")

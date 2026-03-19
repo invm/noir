@@ -3,6 +3,8 @@ import { format } from 'sql-formatter';
 import { invoke } from '@tauri-apps/api/core';
 import { HiSolidPlay as Play } from 'solid-icons/hi';
 import { IoCopyOutline as Copy } from 'solid-icons/io';
+import { IoBookmarkOutline as SaveIcon } from 'solid-icons/io';
+import { IoBookmarksOutline as ListIcon } from 'solid-icons/io';
 import { CgFormatIndentIncrease as EditIcon } from 'solid-icons/cg';
 import { useAppSelector } from 'services/Context';
 import { QueryTaskEnqueueResult } from 'interfaces';
@@ -24,6 +26,7 @@ import { TooltipTriggerProps } from '@kobalte/core/tooltip';
 import { Kbd } from 'components/ui/kbd';
 import { createShortcut } from '@solid-primitives/keyboard';
 import { intersection } from 'utils/utils';
+import { SaveQueryDialog, SavedQueriesDialog } from './components/SavedQueries';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,6 +63,8 @@ export const QueryEditor = () => {
   const [loading, setLoading] = createSignal(false);
   const [tabFocusMode, setTabFocusMode] = createSignal(false);
   const [alertDialogOpen, setAlertDialogOpen] = createSignal(false);
+  const [saveDialogOpen, setSaveDialogOpen] = createSignal(false);
+  const [listDialogOpen, setListDialogOpen] = createSignal(false);
   const [editor, setEditor] =
     createSignal<monaco.editor.IStandaloneCodeEditor>();
 
@@ -239,6 +244,16 @@ export const QueryEditor = () => {
               onClick={copyQueryToClipboard}
               icon={<Copy class="size-5" />}
             />
+            <ActionRowButton
+              dataTip="Save query"
+              onClick={() => setSaveDialogOpen(true)}
+              icon={<SaveIcon class="size-5" />}
+            />
+            <ActionRowButton
+              dataTip="Saved queries"
+              onClick={() => setListDialogOpen(true)}
+              icon={<ListIcon class="size-5" />}
+            />
             <Tooltip>
               <TooltipTrigger
                 as={ToggleButton}
@@ -268,8 +283,6 @@ export const QueryEditor = () => {
           </div>
 
           <div class="flex items-center gap-2">
-            {/* TODO: check if it is possible to trigger tabFocusMode  */}
-            {/* editor()?.trigger('app', '', {}); */}
             <Tooltip>
               <TooltipTrigger
                 as={(props: TooltipTriggerProps) => (
@@ -397,6 +410,20 @@ export const QueryEditor = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <SaveQueryDialog
+        open={saveDialogOpen()}
+        onOpenChange={setSaveDialogOpen}
+        query={data().query}
+        onSaved={() => {}}
+      />
+      <SavedQueriesDialog
+        open={listDialogOpen()}
+        onOpenChange={setListDialogOpen}
+        onSelect={(query) => {
+          editor()?.setValue(query);
+          updateQueryText(query);
+        }}
+      />
     </CommandPaletteContextWrapper>
   );
 };

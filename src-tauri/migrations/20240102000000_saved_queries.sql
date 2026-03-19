@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS saved_queries (
+  id TEXT NOT NULL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL UNIQUE,
+  query TEXT NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);

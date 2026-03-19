@@ -6,7 +6,7 @@ use state::AppState;
 use tauri::Emitter;
 
 use noir::{
-    handlers::{connections, queries, task},
+    handlers::{connections, queries, saved_queries, task},
     state::{self},
 };
 
@@ -62,6 +62,9 @@ fn main() {
             queries::download_json,
             queries::download_csv,
             queries::invalidate_query,
+            saved_queries::save_query,
+            saved_queries::get_saved_queries,
+            saved_queries::delete_saved_query,
             task::cancel_task_token,
         ])
         .run(tauri::generate_context!())

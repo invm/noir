@@ -1,8 +1,9 @@
 import { TableColumnsCollapse } from './table-collapse';
 import { useAppSelector } from 'services/Context';
-import { createMemo, For, JSX, Match, Switch } from 'solid-js';
+import { createMemo, createSignal, For, JSX, Match, Show, Switch } from 'solid-js';
 import { RiEditorFunctions as Function } from 'solid-icons/ri';
 import { BsShare as ShareNodes } from 'solid-icons/bs';
+import { VsChromeClose as Close } from 'solid-icons/vs';
 import { invoke } from '@tauri-apps/api/core';
 import { ResultSet, Row, Table } from 'interfaces';
 import { newContentTab } from 'services/Connections';
@@ -24,6 +25,7 @@ import {
   ContextMenuTrigger,
 } from 'components/ui/context-menu';
 import { toast } from 'solid-sonner';
+import { TextField, TextFieldRoot } from 'components/ui/textfield';
 
 type VListCategory = {
   title: string;
@@ -55,10 +57,35 @@ export const DbSidebarContent = () => {
   const [itemCollapseState, setItemCollapseState] = createStore<
     Record<string, boolean>
   >({});
-  const tables = createMemo(() => getSchemaEntity('tables'));
-  const views = createMemo(() => getSchemaEntity('views'));
-  const routines = createMemo(() => getSchemaEntity('routines'));
-  const triggers = createMemo(() => getSchemaEntity('triggers'));
+  const [search, setSearch] = createSignal('');
+  const allTables = createMemo(() => getSchemaEntity('tables'));
+  const allViews = createMemo(() => getSchemaEntity('views'));
+  const tables = createMemo(() => {
+    const term = search().toLowerCase();
+    if (!term) return allTables();
+    return allTables().filter((t) => t.name.toLowerCase().includes(term));
+  });
+  const views = createMemo(() => {
+    const term = search().toLowerCase();
+    if (!term) return allViews();
+    return allViews().filter((v) => v.name.toLowerCase().includes(term));
+  });
+  const allRoutines = createMemo(() => getSchemaEntity('routines'));
+  const allTriggers = createMemo(() => getSchemaEntity('triggers'));
+  const routines = createMemo(() => {
+    const term = search().toLowerCase();
+    if (!term) return allRoutines();
+    return allRoutines().filter((r) =>
+      getAnyCase(r, 'routine_name').toLowerCase().includes(term)
+    );
+  });
+  const triggers = createMemo(() => {
+    const term = search().toLowerCase();
+    if (!term) return allTriggers();
+    return allTriggers().filter((t) =>
+      getAnyCase(t, 'trigger_name').toLowerCase().includes(term)
+    );
+  });
 
   const showRoutine = async (routine: string) => {
     try {
@@ -99,6 +126,28 @@ export const DbSidebarContent = () => {
   };
 
   return (
+    <>
+    <div class="px-2 py-1">
+      <div class="flex items-center gap-1">
+        <TextFieldRoot class="w-full">
+          <TextField
+            placeholder="Filter..."
+            value={search()}
+            onInput={(e: InputEvent) => setSearch((e.target as HTMLInputElement).value)}
+            size="sm"
+            class="h-7 w-full text-xs"
+          />
+        </TextFieldRoot>
+        <Show when={search()}>
+          <button
+            onClick={() => setSearch('')}
+            class="p-1 rounded-sm hover:bg-accent"
+          >
+            <Close class="size-3" />
+          </button>
+        </Show>
+      </div>
+    </div>
     <VList
       class="pb-16 no-scrollbar"
       data={[
@@ -221,5 +270,6 @@ export const DbSidebarContent = () => {
         </SidebarGroup>
       )}
     </VList>
+    </>
   );
 };
