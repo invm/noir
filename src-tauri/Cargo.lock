@@ -4758,6 +4758,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "url",
+ "uuid",
  "webpki-roots 0.25.4",
 ]
 
@@ -4840,6 +4841,7 @@ dependencies = [
  "stringprep",
  "thiserror 1.0.63",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -4879,6 +4881,7 @@ dependencies = [
  "stringprep",
  "thiserror 1.0.63",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -4904,6 +4907,7 @@ dependencies = [
  "tracing",
  "url",
  "urlencoding",
+ "uuid",
 ]
 
 [[package]]

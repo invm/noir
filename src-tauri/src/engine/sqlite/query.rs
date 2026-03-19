@@ -21,7 +21,7 @@ pub async fn execute_query(pool: &SqlitePool, query: &str, t: QueryType) -> Resu
         .expect("Time went backwards")
         .as_millis() as u64;
     match t {
-        QueryType::Select => {
+        QueryType::Select | QueryType::Show => {
             let rows = sqlx::query(query)
                 .map(row_to_json)
                 .fetch_all(pool)

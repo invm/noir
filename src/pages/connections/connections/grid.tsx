@@ -1,8 +1,8 @@
 import { Button } from 'components/ui/button';
-import { FaSolidServer as Server } from 'solid-icons/fa';
 import { TbPlugConnected } from 'solid-icons/tb';
 import { FiEdit } from 'solid-icons/fi';
 import { ConnectionConfig } from 'interfaces';
+import { DialectIcon } from 'components/DialectIcon';
 import {
   Card,
   CardContent,
@@ -101,14 +101,18 @@ export function ConnectionGrid(props: ConnectionGridProps) {
                     class={`absolute left-0 top-0 h-full w-1 bg-${connection.color}-500`}
                   />
                   <CardHeader class="pb-4 py-2">
-                    <CardTitle class="flex items-center text-lg">
+                    <CardTitle class="flex items-center text-lg gap-2">
                       <div
-                        class={`mr-2 h-2 w-2 rounded-full bg-${connection.color}-500`}
-                      />
+                        class={cn(
+                          'flex aspect-square size-8 p-1.5 items-center justify-center rounded-lg border',
+                          `bg-${connection.color}-500`
+                        )}
+                      >
+                        <DialectIcon dialect={connection.dialect} class="size-5" />
+                      </div>
                       {connection.name}
                     </CardTitle>
-                    <CardDescription class="flex items-center space-x-2">
-                      <Server class="h-3 w-3" />
+                    <CardDescription class="flex items-center space-x-2 ml-10">
                       <span>
                         {connection.dialect === 'Sqlite'
                           ? connection.credentials.path

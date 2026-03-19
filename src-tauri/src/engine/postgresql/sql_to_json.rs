@@ -75,9 +75,9 @@ fn sql_nonnull_to_json<'r>(
         }
         "JSON" | "JSONB" => <Value as Decode<sqlx::Postgres>>::decode(raw_value)
             .unwrap_or(Value::Null),
-        "UUID" => <String as Decode<sqlx::Postgres>>::decode(raw_value)
-            .unwrap_or_default()
-            .into(),
+        "UUID" => <uuid::Uuid as Decode<sqlx::Postgres>>::decode(raw_value)
+            .map(|u| Value::String(u.to_string()))
+            .unwrap_or(Value::Null),
         "TIMESTAMP" | "TIMESTAMPTZ" | "DATE" | "TIME" => {
             <String as Decode<sqlx::Postgres>>::decode(raw_value)
                 .unwrap_or_default()
@@ -105,7 +105,7 @@ fn sql_nonnull_to_json<'r>(
                 .unwrap_or(Value::Null)
         }),
         "TEXT[]" | "VARCHAR[]" => decode_array::<String>(get_ref, |v| Value::String(v)),
-        "UUID[]" => decode_array::<String>(get_ref, |v| Value::String(v)),
+        "UUID[]" => decode_array::<uuid::Uuid>(get_ref, |v| Value::String(v.to_string())),
         "JSON[]" | "JSONB[]" => decode_array::<Value>(get_ref, |v| v),
         // Default: try string decode, fallback to null
         _ => <String as Decode<sqlx::Postgres>>::decode(raw_value)
