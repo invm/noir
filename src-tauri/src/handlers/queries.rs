@@ -74,17 +74,18 @@ fn get_query_type(s: Statement) -> QueryType {
 // TODO: use this dialect when the fix for mysql is merged in sqlparser
 #[command]
 pub async fn sql_to_statements(_dialect: String, sql: &str) -> CommandResult<Vec<QueryType>> {
-    let statements = Parser::parse_sql(
-        dialect_from_str("generic")
-            .expect("Failed to get dialect")
-            .as_ref(),
-        sql,
-    )
-    .unwrap_or_default();
-    if statements.is_empty() {
+    if sql.trim().is_empty() {
         return Err(Error::from(anyhow!("No valid statements found")));
     }
-    Ok(statements.into_iter().map(|s| get_query_type(s)).collect())
+    // sqlparser does not understand every dialect-specific statement
+    // (e.g. ALTER USER, FLUSH PRIVILEGES). When parsing fails we still want
+    // the frontend to be able to send the SQL through; report it as a single
+    // Other statement instead of erroring out.
+    let dialect = dialect_from_str("generic").expect("Failed to get dialect");
+    Ok(match Parser::parse_sql(dialect.as_ref(), sql) {
+        Ok(stmts) if !stmts.is_empty() => stmts.into_iter().map(get_query_type).collect(),
+        _ => vec![QueryType::Other],
+    })
 }
 
 #[command]
@@ -99,33 +100,43 @@ pub async fn enqueue_query(
 ) -> CommandResult<QueryTaskEnqueueResult> {
     info!("Enqueue query on {conn_id}, tab:{tab_idx} - sql:{sql}");
     let conn = app_handle.acquire_connection(conn_id.clone());
-    let statements = Parser::parse_sql(
+    if sql.trim().is_empty() {
+        return Err(Error::from(anyhow!("No valid statements found")));
+    }
+    // If sqlparser cannot recognise the input (e.g. ALTER USER on MySQL —
+    // unsupported in sqlparser 0.55), fall back to running the entire string
+    // as a single Other statement so the engine can pass it through to the
+    // database via the text protocol.
+    let parsed = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.as_sqlparser_name())
             .expect("Failed to get dialect")
             .as_ref(),
         sql,
-    )
-    .unwrap_or_default();
-    if statements.is_empty() {
-        return Err(Error::from(anyhow!("No valid statements found")));
-    }
-    let statements: Vec<(String, QueryType, String)> = statements
-        .into_iter()
-        .map(|s| {
-            let query_type = get_query_type(s.clone());
-            let mut statement = s.to_string();
-            if auto_limit
-                && query_type == QueryType::Select
-                && ["show", "analyze", "explain", "limit"]
-                    .iter()
-                    .all(|k| !statement.to_lowercase().contains(k))
-            {
-                statement = format!("{} LIMIT 1000", statement);
-            }
-            let id = conn.config.id.to_string() + &tab_idx.to_string() + &statement.to_string();
-            (statement, query_type, md5_hash(&id))
-        })
-        .collect();
+    );
+    let statements: Vec<(String, QueryType, String)> = match parsed {
+        Ok(stmts) if !stmts.is_empty() => stmts
+            .into_iter()
+            .map(|s| {
+                let query_type = get_query_type(s.clone());
+                let mut statement = s.to_string();
+                if auto_limit
+                    && query_type == QueryType::Select
+                    && ["show", "analyze", "explain", "limit"]
+                        .iter()
+                        .all(|k| !statement.to_lowercase().contains(k))
+                {
+                    statement = format!("{} LIMIT 1000", statement);
+                }
+                let id = conn.config.id.to_string() + &tab_idx.to_string() + &statement;
+                (statement, query_type, md5_hash(&id))
+            })
+            .collect(),
+        _ => {
+            let statement = sql.to_string();
+            let id = conn.config.id.to_string() + &tab_idx.to_string() + &statement;
+            vec![(statement, QueryType::Other, md5_hash(&id))]
+        }
+    };
     let mut binding = state.cancel_tokens.lock().await;
     for (idx, stmt) in statements.iter().enumerate() {
         let temp_dir = app_handle
@@ -222,24 +233,26 @@ pub async fn execute_query(
 ) -> CommandResult<Value> {
     let conn = app_handle.acquire_connection(conn_id);
     info!("Execute query: {query}");
-    let statements = Parser::parse_sql(
+    if query.trim().is_empty() {
+        return Err(Error::from(anyhow!("No valid statements found")));
+    }
+    // See enqueue_query: fall back to raw execution when sqlparser can't
+    // recognise the SQL (e.g. ALTER USER on MySQL).
+    let parsed = Parser::parse_sql(
         dialect_from_str(conn.config.dialect.as_sqlparser_name())
             .expect("Failed to get dialect")
             .as_ref(),
         &query,
-    )?;
-    if statements.is_empty() {
-        return Err(Error::from(anyhow!("No valid statements found")));
-    }
-    let statements: Vec<(String, QueryType, String)> = statements
-        .into_iter()
-        .map(|s| {
-            let id = conn.config.id.to_string() + &s.to_string();
-            (s.to_string(), get_query_type(s), md5_hash(&id))
-        })
-        .collect();
-    let stmt = &statements[0];
-    let result = conn.execute_query(&stmt.0, stmt.1).await?;
+    );
+    let (sql, query_type) = match parsed {
+        Ok(mut stmts) if !stmts.is_empty() => {
+            let s = stmts.remove(0);
+            let qt = get_query_type(s.clone());
+            (s.to_string(), qt)
+        }
+        _ => (query.clone(), QueryType::Other),
+    };
+    let result = conn.execute_query(&sql, query_type).await?;
     Ok(json!(result))
 }
 

@@ -25,7 +25,10 @@ pub async fn execute_query(pool: &MySqlPool, query: &str, t: QueryType) -> Resul
             })
         }
         _ => {
-            let result = sqlx::query(query).execute(pool).await?;
+            // Use raw_sql so statements sqlparser cannot recognise
+            // (e.g. ALTER USER, FLUSH PRIVILEGES) and multi-statement input
+            // both reach MySQL via the text protocol.
+            let result = sqlx::raw_sql(query).execute(pool).await?;
             let affected_rows = result.rows_affected();
             let end_time = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
