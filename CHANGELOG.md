@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.1](///compare/v2.3.0...v2.3.1) (2026-05-08)
+
+
+### Bug Fixes
+
+* **queries:** run SQL even when sqlparser rejects it ([#25](undefined/undefined/undefined/issues/25)) a38645b, closes #24
+
 ## [2.3.0](///compare/v2.2.0...v2.3.0) (2026-03-19)
 
 
