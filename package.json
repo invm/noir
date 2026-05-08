@@ -11,7 +11,8 @@
     "tauri": "tauri",
     "update-deps": "pnpm up -Li",
     "clean": "rm -rf node_modules src-tauri/target dist",
-    "release": "standard-version"
+    "release": "standard-version",
+    "bump": "bash .github/scripts/release.sh"
   },
   "license": "MIT",
   "dependencies": {

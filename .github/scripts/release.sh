@@ -1,5 +1,5 @@
 #!/bin/bash
-# requires cargo-bump and pnpm
+# requires cargo-release and pnpm
 
 type=$1
 # valivate type is major|minor|patch or matches \d\.\d\.\d
@@ -7,7 +7,7 @@ valid=$(echo "$type" | grep -E "major|minor|patch|^[0-9]+\.[0-9]+\.[0-9]+$")
 if [ "$valid" ]; then
 	echo "Bumping $type version"
 	cd src-tauri || exit
-	cargo bump "$type"
+	cargo release version "$type" --execute --no-confirm -p noir
 	cargo check
 	cd .. || exit
 	git add .
